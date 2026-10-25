@@ -5,7 +5,7 @@ import { STAMP_LEVELS } from './Popup';
 import { importInstagram, isValidBizNumber, requestVerification, sendFollowerNews, toggleVisitorRegion, updateBrandProfile } from '@/store/actions';
 import { brandById, manwon, period, popupById, trustScore } from '@/store/logic';
 import { BrandLogo, ScreenTitle, TagPicker, ThemeTagList, TrustLine } from '@/components/common';
-import { Avatar, Button, Card, Chip, Demo, Field, GradeBadge, Icon, inputCls, Sheet, Tag, textareaCls } from '@/components/ui';
+import { Avatar, Button, Card, Chip, Demo, Empty, Field, GradeBadge, Icon, inputCls, Sheet, Stars, Tag, textareaCls } from '@/components/ui';
 import { REGIONS, type ThemeTags } from '@/types';
 import { ROLE_LABEL } from '@/config';
 import { RentalMeCard } from './Rental';
@@ -238,15 +238,33 @@ function BrandSection() {
 function VisitorSection() {
   const { db, visitor, userId } = useMe();
   const stamp = db.stamps.find((s) => s.userId === userId);
-  const myReviews = db.reviews.filter((r) => r.authorId === userId).length + db.comboReviews.filter((r) => r.authorId === userId).length;
+  const [reviewsOpen, setReviewsOpen] = useState(false);
+  const mine = [
+    ...db.reviews.filter((r) => r.authorId === userId).map((r) => ({ id: r.id, popupId: r.popupId ?? r.targetId, rating: r.scores['전체'], comment: r.comment, at: r.createdAt, about: r.kind === 'visitor_brand' ? brandById(db, r.targetId)?.name : undefined })),
+    ...db.comboReviews.filter((r) => r.authorId === userId).map((r) => ({ id: r.id, popupId: r.popupId, rating: r.rating, comment: r.comment, at: r.createdAt, about: '조합 리뷰' })),
+  ].sort((a, b) => b.at.localeCompare(a.at));
   return (
     <Card className="p-4">
       <div className="grid grid-cols-3 text-center mb-3">
         <div><div className="text-lg font-extrabold">{visitor!.following.length}</div><div className="text-[11px] text-ink-500">팔로잉</div></div>
-        <div><div className="text-lg font-extrabold">{stamp?.popupIds.length ?? 0}</div><div className="text-[11px] text-ink-500">스탬프</div></div>
-        <div><div className="text-lg font-extrabold">{myReviews}</div><div className="text-[11px] text-ink-500">작성한 리뷰</div></div>
+        <button onClick={() => navigate({ name: 'tab', tab: 'stamps' })}><div className="text-lg font-extrabold">{stamp?.popupIds.length ?? 0}</div><div className="text-[11px] text-ink-500">스탬프 ›</div></button>
+        <button onClick={() => setReviewsOpen(true)}><div className="text-lg font-extrabold">{mine.length}</div><div className="text-[11px] text-ink-500">작성한 리뷰 ›</div></button>
       </div>
-      <div className="text-[13px] font-semibold mb-1.5">새 팝업 알림 받을 동네</div>
+      <Sheet open={reviewsOpen} onClose={() => setReviewsOpen(false)} title={`내가 쓴 리뷰 ${mine.length}`}>
+        {!mine.length && <Empty icon="star">방문 인증한 팝업에서 리뷰를 남겨 보세요</Empty>}
+        <div className="space-y-2">
+          {mine.map((r) => (
+            <button key={r.id} onClick={() => { setReviewsOpen(false); navigate({ name: 'popup', id: r.popupId }); }} className="w-full text-left rounded-xl border border-ink-100 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[13px] font-semibold truncate">{popupById(db, r.popupId)?.title ?? '팝업'}{r.about && <span className="text-ink-500 font-normal"> · {r.about}</span>}</span>
+                <Stars value={r.rating} size="w-3 h-3" />
+              </div>
+              <p className="text-[13px] text-ink-700 mt-1 line-clamp-2">{r.comment}</p>
+            </button>
+          ))}
+        </div>
+      </Sheet>
+      <div className="text-[13px] font-semibold mb-1.5">새 팝업 알림 받을 동네 {!visitor!.regions?.length && <span className="text-[11px] font-normal text-ink-500">고르면 새 팝업이 열릴 때 알려 드려요</span>}</div>
       <div className="flex flex-wrap gap-1.5 mb-3">
         {REGIONS.map((r) => <Chip key={r} active={!!visitor!.regions?.includes(r)} onClick={() => toggleVisitorRegion(userId, r)}>{visitor!.regions?.includes(r) ? `🔔 ${r}` : r}</Chip>)}
       </div>
