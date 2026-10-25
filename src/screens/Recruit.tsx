@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMe, guard } from '@/store/hooks';
 import { navigate } from '@/store/store';
 import { applyRecruitment, createRecruitment, decideApplication, simulateApplicants, toggleSaveRecruit, type RecruitDraft } from '@/store/actions';
-import { brandById, manwon, period, recruitFit, recruitUrgency, slotShare, spaceById } from '@/store/logic';
+import { brandById, manwon, matchPct, matchScore, period, recruitFit, recruitUrgency, slotShare, spaceById } from '@/store/logic';
 import { BrandLogo, ScreenTitle, ThemeTagList, TrustLine } from '@/components/common';
 import { Button, Card, Chip, cx, Demo, Empty, Field, inputCls, Segmented, Sheet, StatusPill, SubHeader, Tag, textareaCls } from '@/components/ui';
 import { CATEGORIES, REGIONS, type Category, type Recruitment, type RecruitStatus, type Region, type SlotStatus } from '@/types';
@@ -154,6 +154,28 @@ export function RecruitDetail({ id }: { id: string }) {
             <span className="font-semibold">아직 미정 · 팀이 꾸려지면 함께 찾아요</span>
           )}
         </div>
+
+        {brand && !isHost && !inSlot && (() => {
+          // 이미 자리를 잡은 브랜드들과 나의 평균 궁합
+          const members = r.slots.filter((x) => x.brandId && x.brandId !== brand.id).map((x) => brandById(db, x.brandId)!).filter(Boolean);
+          if (!members.length) return null;
+          const scores = members.map((b) => ({ b, m: matchScore(db, brand, b) }));
+          const pct = matchPct(scores.reduce((sum, x) => sum + x.m.score, 0) / scores.length);
+          const fit = recruitFit(db, brand, r);
+          return (
+            <div className="mt-4 rounded-2xl bg-brand-50 p-4">
+              <div className="flex items-center justify-between">
+                <span className="text-[13px] font-bold">이 팀과 {brand.name}의 궁합</span>
+                <span className="text-[13px] font-extrabold text-brand-600">{pct}%</span>
+              </div>
+              <div className="h-2 rounded-full bg-white mt-2 overflow-hidden"><div className="h-full rounded-full bg-brand-500" style={{ width: `${pct}%` }} /></div>
+              <div className="flex flex-wrap gap-1 mt-2.5">
+                {scores.map(({ b, m }) => <span key={b.id} className="text-[11px] bg-white rounded-md px-2 py-0.5">{b.name} {matchPct(m.score)}%</span>)}
+              </div>
+              {fit.reasons.length > 0 && <div className="mt-2 space-y-0.5">{fit.reasons.slice(0, 2).map((x) => <div key={x} className="text-[12px] text-brand-700">✓ {x}</div>)}</div>}
+            </div>
+          );
+        })()}
 
         <h3 className="font-bold mt-6 mb-2">자리 구성 <span className="text-ink-500 text-sm font-normal">{r.slots.length - empties.length}/{r.slots.length}</span></h3>
         <div className={cx('grid gap-2', r.slotMode === 'hanger' ? 'grid-cols-3' : 'grid-cols-2')}>
