@@ -116,6 +116,8 @@ export interface Space {
   photoHues: number[];
   pastPopupIds: ID[];
   lastMinutePct?: number; // 2주 안에 비는 날 할인율 (%)
+  lat?: number; // 지도 좌표. 없으면 동네 중심 근처에 찍는다
+  lng?: number;
 }
 
 export interface SpaceAvailability {

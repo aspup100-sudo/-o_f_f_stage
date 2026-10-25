@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { shareLink } from '@/store/share';
 import { navigate } from '@/store/store';
 import { checkIn, claimStampReward, followAll, STAMP_GOAL, toggleWaitlist, writeComboReview, writeVisitorReview } from '@/store/actions';
-import { avg, brandById, dday, md, displayName, openNow, period, popupById, spaceById, teamById, waitCount } from '@/store/logic';
+import { avg, brandById, dday, md, displayName, openNow, period, popupById, spaceById, spaceLatLng, teamById, waitCount } from '@/store/logic';
+import { KakaoMap, kakaoMapEnabled, type MapPin } from '@/components/KakaoMap';
 import { BrandLogo, PopupBannerCard, ScreenTitle, ThemeTagList } from '@/components/common';
 import { Button, Card, Chip, cx, Demo, Empty, inputCls, Segmented, Sheet, Stars, StatusPill, SubHeader, Swatch, Tabs, Tag, textareaCls, Ic, Icon } from '@/components/ui';
 import type { DB } from '@/data/mock';
@@ -306,8 +307,15 @@ export function MapTab() {
   const { db } = useMe();
   const [view, setView] = useState<'map' | 'list'>('map');
   const [sel, setSel] = useState<string | null>(null);
-  const popups = db.popups.filter((p) => p.status !== '종료');
+  const popups = useMemo(() => db.popups.filter((p) => p.status !== '종료'), [db.popups]);
   const selected = popups.find((p) => p.id === sel) ?? popups[0];
+  const pins = useMemo<MapPin[]>(() => popups.flatMap((p) => {
+    const sp = spaceById(db, p.spaceId);
+    if (!sp) return [];
+    const [lat, lng] = spaceLatLng(sp);
+    return [{ id: p.id, lat, lng, label: p.status === '진행 중' ? p.title : `${dday(p.period.start)} · ${p.title}`, tone: selected?.id === p.id ? 'selected' : p.status === '진행 중' ? 'live' : 'soon' }];
+  }), [db, popups, selected?.id]);
+  const onSelect = useCallback((id: string) => setSel(id), []);
   return (
     <div>
       <ScreenTitle>팝업 지도</ScreenTitle>
@@ -316,7 +324,8 @@ export function MapTab() {
       </div>
       {view === 'map' && (
         <div className="px-4">
-          <div className="relative w-full aspect-square rounded-3xl overflow-hidden bg-[#eef1ea] border border-ink-100">
+          <KakaoMap pins={pins} onSelect={onSelect} className="w-full aspect-square overflow-hidden border border-ink-900" fallback={<>
+          <div className="relative w-full aspect-square overflow-hidden bg-[#eef1ea] border border-ink-900">
             <svg viewBox="0 0 100 125" className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
               <path d="M0 98 C 20 92, 35 104, 55 100 S 85 92, 100 98 L100 112 C 80 106, 60 116, 40 112 S 10 108, 0 112 Z" fill="#bfdbea" />
               <path d="M10 0 L 30 60 M 50 0 L 52 125 M 0 55 L 100 50 M 70 0 L 85 125" stroke="#ffffff" strokeWidth="1.6" fill="none" />
@@ -329,14 +338,16 @@ export function MapTab() {
             ))}
             {popups.map((p) => (
               <button key={p.id} onClick={() => setSel(p.id)} className="absolute -translate-x-1/2 -translate-y-full flex flex-col items-center" style={{ left: `${p.mapX}%`, top: `${p.mapY}%` }}>
-                <span className={cx('px-2 py-1 rounded-full text-[11px] font-bold shadow whitespace-nowrap', selected?.id === p.id ? 'bg-ink-900 text-white' : p.status === '진행 중' ? 'bg-brand-500 text-white' : 'bg-white text-ink-900 border border-ink-300')}>
-                  {p.status === '진행 중' ? '● ' : `${dday(p.period.start)} · `}{p.title}
+                <span className={cx('px-2 py-1 text-[11px] font-bold whitespace-nowrap border border-ink-900 flex items-center gap-1', selected?.id === p.id ? 'bg-ink-900 text-white' : p.status === '진행 중' ? 'bg-brand-500 text-white' : 'bg-white text-ink-900 border border-ink-300')}>
+                  {p.status === '진행 중' ? <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> : `${dday(p.period.start)} · `}{p.title}
                 </span>
-                <span className={cx('w-2 h-2 rotate-45 -mt-1', selected?.id === p.id ? 'bg-ink-900' : p.status === '진행 중' ? 'bg-brand-500' : 'bg-white')} />
+                <span className={cx('w-2 h-2 rotate-45 -mt-1 border-r border-b border-ink-900', selected?.id === p.id ? 'bg-ink-900' : p.status === '진행 중' ? 'bg-brand-500' : 'bg-white')} />
               </button>
             ))}
           </div>
-          <p className="text-[11px] text-ink-500 mt-1.5 text-center">지도 API 대신 간략한 지도로 표시해요 <Demo /></p>
+          <p className="text-[11px] text-ink-500 mt-1.5 text-center">카카오맵 연결 전이라 간략한 지도로 보여요 <Demo /></p>
+          </>} />
+          {kakaoMapEnabled && <p className="text-[11px] text-ink-500 mt-1.5 text-center">공간 위치는 예시 주소 기준이에요 <Demo /></p>}
           {selected && <div className="mt-3"><PopupBannerCard db={db} popup={selected} wide /></div>}
         </div>
       )}

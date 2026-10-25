@@ -206,37 +206,37 @@ const landlords: LandlordProfile[] = [
 
 const spaces: Space[] = [
   {
-    id: 's1', landlordId: 'l1', name: '성수 오픈룸 A', region: '성동구', address: '서울 성동구 성수이로 (예시) 12',
+    id: 's1', lat: 37.5445, lng: 127.056, landlordId: 'l1', name: '성수 오픈룸 A', region: '성동구', address: '서울 성동구 성수이로 (예시) 12',
     intro: '통창이 있는 1층 코너 공간. 행거 8개와 피팅룸 2개가 기본 구비되어 있어요.',
     areaM2: 49, dailyFee: 800000, minDays: 2, facilities: ['행거', '전신거울', '피팅룸', '조명', '전기 용량', '화장실'], electricKw: 10,
     teamRental: true, fashionOnly: true, photoHues: [30, 200, 45], pastPopupIds: [],
   },
   {
-    id: 's2', landlordId: 'l2', name: '연남 코너하우스', region: '마포구', address: '서울 마포구 연남로 (예시) 34',
+    id: 's2', lat: 37.5622, lng: 126.9235, landlordId: 'l2', name: '연남 코너하우스', region: '마포구', address: '서울 마포구 연남로 (예시) 34',
     intro: '연트럴파크에서 한 블록. 주말 유동 인구가 많은 골목 1층입니다.',
     areaM2: 33, dailyFee: 500000, minDays: 3, facilities: ['행거', '전신거울', '조명', '화장실'], electricKw: 5,
     teamRental: true, fashionOnly: true, photoHues: [10, 50, 330], pastPopupIds: ['p1'], lastMinutePct: 20,
   },
   {
-    id: 's3', landlordId: 'l3', name: '한남 화이트큐브', region: '용산구', address: '서울 용산구 한남대로 (예시) 56',
+    id: 's3', lat: 37.5345, lng: 127.001, landlordId: 'l3', name: '한남 화이트큐브', region: '용산구', address: '서울 용산구 한남대로 (예시) 56',
     intro: '층고 4.5m의 화이트 갤러리. 쇼룸·전시형 팝업에 어울려요.',
     areaM2: 99, dailyFee: 2000000, minDays: 3, facilities: ['조명', '전기 용량', '창고', '화장실', '전신거울'], electricKw: 20,
     teamRental: true, fashionOnly: false, photoHues: [0, 220, 240], pastPopupIds: [],
   },
   {
-    id: 's4', landlordId: 'l3', name: '해방촌 계단집', region: '용산구', address: '서울 용산구 신흥로 (예시) 78',
+    id: 's4', lat: 37.544, lng: 126.9855, landlordId: 'l3', name: '해방촌 계단집', region: '용산구', address: '서울 용산구 신흥로 (예시) 78',
     intro: '계단 위 작은 2층 공간. 작은 브랜드 3~4팀이 함께 쓰기 좋아요.',
     areaM2: 26, dailyFee: 300000, minDays: 2, facilities: ['행거', '전신거울', '조명'], electricKw: 3,
     teamRental: true, fashionOnly: true, photoHues: [80, 20, 160], pastPopupIds: ['p3'],
   },
   {
-    id: 's5', landlordId: 'l4', name: '서촌 한옥마루', region: '종로구', address: '서울 종로구 자하문로 (예시) 90',
+    id: 's5', lat: 37.58, lng: 126.97, landlordId: 'l4', name: '서촌 한옥마루', region: '종로구', address: '서울 종로구 자하문로 (예시) 90',
     intro: '대청마루와 작은 마당이 있는 한옥. 클래식·내추럴 무드 브랜드에게 추천해요.',
     areaM2: 59, dailyFee: 1200000, minDays: 2, facilities: ['조명', '창고', '화장실', '전신거울'], electricKw: 7,
     teamRental: true, fashionOnly: false, photoHues: [35, 100, 25], pastPopupIds: ['p4'],
   },
   {
-    id: 's6', landlordId: 'l1', name: '서울숲 유리온실', region: '성동구', address: '서울 성동구 서울숲길 (예시) 21',
+    id: 's6', lat: 37.547, lng: 127.042, landlordId: 'l1', name: '서울숲 유리온실', region: '성동구', address: '서울 성동구 서울숲길 (예시) 21',
     intro: '유리 천장 아래 자연광이 가득한 공간. 사진이 잘 나오는 곳으로 유명해요.',
     areaM2: 66, dailyFee: 1500000, minDays: 2, facilities: ['행거', '전신거울', '피팅룸', '조명', '전기 용량', '창고', '화장실'], electricKw: 15,
     teamRental: false, fashionOnly: true, photoHues: [120, 90, 180], pastPopupIds: [],

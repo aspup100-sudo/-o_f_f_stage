@@ -411,3 +411,16 @@ export function openNow(hours: string, now = new Date()): { open: boolean; text:
   const left = end - cur;
   return { open: true, text: left <= 60 ? `곧 마감 · ${left}분 남음` : `지금 영업 중 · ${m[3]}:${m[4]} 마감` };
 }
+
+// ───────── 지도 좌표 ─────────
+const REGION_CENTER: Record<string, [number, number]> = {
+  성동구: [37.5446, 127.0503], 마포구: [37.5560, 126.9220], 용산구: [37.5384, 126.9900], 종로구: [37.5780, 126.9800],
+};
+/** 공간의 지도 좌표. 좌표가 없는 공간은 동네 중심 근처에 id마다 조금씩 떨어뜨려 찍는다 */
+export function spaceLatLng(sp: { id: string; region: string; lat?: number; lng?: number }): [number, number] {
+  if (sp.lat != null && sp.lng != null) return [sp.lat, sp.lng];
+  const c = REGION_CENTER[sp.region] ?? [37.5550, 126.9900];
+  let h = 0;
+  for (const ch of sp.id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return [c[0] + ((h % 100) - 50) / 10000, c[1] + (((h >> 7) % 100) - 50) / 8000];
+}
