@@ -38,7 +38,7 @@ export function MyTeamTab() {
           return (
             <Card key={t.id} className="p-4" onClick={() => navigate({ name: 'team', id: t.id })}>
               <div className="flex items-center gap-1.5">
-                {t.stage === '준비 중' && <span className="text-[11px] font-black text-white bg-brand-500 px-2 py-0.5 rounded-full">{dday(t.period.start)}</span>}
+                {t.stage === '준비 중' && <span className="text-[11px] font-black text-white bg-brand-500 px-2 py-0.5">{dday(t.period.start)}</span>}
                 <StatusPill status={t.stage} />
                 {t.confirmed ? <Tag tone="green">팀 확정</Tag> : <Tag tone="yellow">약속서 {ag?.agreedBy.length ?? 0}/{t.members.length} 동의</Tag>}
                 {t.leaderBrandId === brand.id && <Tag>내가 팀장</Tag>}
@@ -62,7 +62,7 @@ export function MyTeamTab() {
               {t.stage === '준비 중' && (() => {
                 const next = prep.steps.find((x) => !x.done && x.mine) ?? prep.steps.find((x) => !x.done);
                 return next ? (
-                  <button onClick={(e) => { e.stopPropagation(); navigate({ name: 'team', id: t.id, sub: next.sub }); }} className="mt-3 w-full flex items-center gap-2 rounded-xl bg-brand-50 px-3 py-2.5 text-left">
+                  <button onClick={(e) => { e.stopPropagation(); navigate({ name: 'team', id: t.id, sub: next.sub }); }} className="mt-3 w-full flex items-center gap-2 rounded border border-ink-300 bg-white px-3 py-2.5 text-left">
                     <span className="text-[11px] font-bold text-brand-600 shrink-0">{next.mine ? '내 차례' : '다음 할 일'}</span>
                     <span className="text-[13px] font-semibold flex-1 truncate">{next.label}</span>
                     <span className="text-brand-600">›</span>
@@ -284,7 +284,7 @@ function AgreementTab({ team, myBrandId }: { team: Team; myBrandId: string }) {
           <div className="font-bold">동의 현황</div>
           <span className="text-sm font-bold">{ag.agreedBy.length}/{team.members.length}</span>
         </div>
-        <div className="h-2 rounded-full bg-ink-100 overflow-hidden mb-3">
+        <div className="h-1 bg-ink-100 overflow-hidden mb-3">
           <div className="h-full bg-emerald-500 transition-all" style={{ width: `${(ag.agreedBy.length / team.members.length) * 100}%` }} />
         </div>
         <div className="flex flex-wrap gap-1.5">
@@ -391,7 +391,7 @@ function CostTab({ team, myBrandId, isLeader }: { team: Team; myBrandId: string;
           <span className="text-xs text-ink-500">납부 기한 {md(split.dueDate)}</span>
         </div>
         <div className="flex items-center gap-2 mb-2">
-          <div className="flex-1 h-1.5 rounded-full bg-ink-100 overflow-hidden"><div className="h-full rounded-full bg-emerald-500" style={{ width: `${total ? (paidSum / total) * 100 : 0}%` }} /></div>
+          <div className="flex-1 h-1 bg-ink-100 overflow-hidden"><div className="h-full bg-emerald-500" style={{ width: `${total ? (paidSum / total) * 100 : 0}%` }} /></div>
           <span className="text-[11px] font-semibold text-emerald-700">{split.paid.length}/{team.members.length}곳 납부</span>
         </div>
         <Card className="divide-y divide-ink-100">
@@ -681,7 +681,7 @@ ${hashtags.join(' ')}`;
         const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         const left = daysUntil(iso);
         return (
-          <div className="mb-2 rounded-xl bg-brand-50 px-3.5 py-2.5 flex items-center justify-between">
+          <div className="mb-2 rounded border border-ink-300 bg-white px-3.5 py-2.5 flex items-center justify-between">
             <span className="text-[13px] font-semibold"><Ic n="megaphone" />게시일 {md(iso)}({'일월화수목금토'[d.getDay()]}) 오후 7시</span>
             <span className="text-[12px] font-extrabold text-brand-600">{left > 0 ? `D-${left}` : left === 0 ? '오늘' : '지남'}</span>
           </div>

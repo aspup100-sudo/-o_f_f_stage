@@ -10,8 +10,8 @@ import type { Route } from '@/types';
 
 export function ProgressBar({ pct, className }: { pct: number; className?: string }) {
   return (
-    <div className={cx('h-1.5 rounded-full bg-ink-100 overflow-hidden', className)}>
-      <div className="h-full rounded-full bg-brand-500 transition-all" style={{ width: `${pct}%` }} />
+    <div className={cx('h-1 bg-ink-100 overflow-hidden', className)}>
+      <div className="h-full bg-ink-900 transition-all" style={{ width: `${pct}%` }} />
     </div>
   );
 }
@@ -261,7 +261,7 @@ export function TodayVisitor() {
         if (!todo.length) return null;
         const p = todo[0];
         return (
-          <button onClick={() => navigate({ name: 'popup', id: p.id })} className="mt-3 w-full bg-brand-50 border border-brand-200 p-4 text-left flex items-center gap-3">
+          <button onClick={() => navigate({ name: 'popup', id: p.id })} className="mt-3 w-full bg-white border border-ink-300 p-4 text-left flex items-center gap-3">
             <Icon name="pencil" className="w-6 h-6 shrink-0 text-brand-600" />
             <span className="flex-1 min-w-0">
               <span className="block text-[14px] font-bold truncate">{p.title} 어땠나요?</span>

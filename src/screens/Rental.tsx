@@ -166,7 +166,7 @@ export function RentalPartnerScreen({ id, teamId }: { id: string; teamId?: strin
           </div>
         </div>
         <p className="text-sm text-ink-700 mt-3 leading-relaxed">{p.intro}</p>
-        <div className="mt-3 rounded-xl bg-ink-100/60 p-3 text-[13px] space-y-0.5">
+        <div className="mt-3 rounded border border-ink-300 p-3 text-[13px] space-y-0.5">
           <div><Ic n="truck" />배송 가능: {p.regions.join(', ')}</div>
           <div><Ic n="box" />왕복 배송·설치비 {won(p.deliveryFee)} · <b>{won(p.freeDeliveryOver)} 이상이면 무료</b></div>
         </div>
@@ -220,7 +220,7 @@ export function RentalPartnerScreen({ id, teamId }: { id: string; teamId?: strin
               <div className="text-[12px] font-semibold">
                 {q.partnerSum >= p.freeDeliveryOver ? <span className="text-emerald-700"><Ic n="truck" />배송·설치비 무료 적용돼요</span> : <><Ic n="truck" /><b className="text-brand-600">{won(p.freeDeliveryOver - q.partnerSum)}</b> 더 담으면 배송·설치비 {won(p.deliveryFee)} 무료</>}
               </div>
-              <div className="h-1.5 rounded-full bg-ink-100 mt-1.5 overflow-hidden"><div className={cx('h-full rounded-full', q.partnerSum >= p.freeDeliveryOver ? 'bg-emerald-500' : 'bg-brand-500')} style={{ width: `${Math.min(100, (q.partnerSum / p.freeDeliveryOver) * 100)}%` }} /></div>
+              <div className="h-1 bg-ink-100 mt-1.5 overflow-hidden"><div className={cx('h-full', q.partnerSum >= p.freeDeliveryOver ? 'bg-emerald-500' : 'bg-brand-500')} style={{ width: `${Math.min(100, (q.partnerSum / p.freeDeliveryOver) * 100)}%` }} /></div>
             </div>
           )}
           <div className="flex items-center gap-3">
@@ -500,14 +500,14 @@ export function OrdersTab() {
           return (
             <Card key={o.id} className="p-4">
               <div className="text-[13px] mb-2">
-                {o.status === 'confirmed' && <span className="text-[11px] font-black text-white bg-brand-500 px-2 py-0.5 rounded-full mr-1.5">배송 {dday(o.dates.start)}</span>}
+                {o.status === 'confirmed' && <span className="text-[11px] font-black text-white bg-brand-500 px-2 py-0.5 mr-1.5">배송 {dday(o.dates.start)}</span>}
                 <b>{team ? `팀 ${team.name}` : b.name}</b>
                 <span className="text-ink-500"> · 신청 {b.name}{team ? ` 외 ${team.members.length - 1}곳` : ''}</span>
                 {sp && <div className="text-[12px] text-ink-500"><Ic n="pin" />{sp.name} ({sp.region})</div>}
               </div>
               <OrderSummary db={db} o={o} />
               {o.status === 'requested' && (
-                <div className="mt-2 rounded-xl bg-ink-100/70 px-3 py-2 space-y-0.5">
+                <div className="mt-2 rounded border border-ink-300 px-3 py-2 space-y-0.5">
                   {o.lines.map((l) => {
                     // 같은 기간에 이미 나가 있는 수량을 빼고 남는 재고
                     const it = db.rentalItems.find((x) => x.id === l.itemId);

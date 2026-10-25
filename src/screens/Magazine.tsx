@@ -33,7 +33,7 @@ function CardFace({ post, card, index, total }: { post: Pick<MagazinePost, 'hue'
   return (
     <div
       className="relative aspect-square w-full rounded overflow-hidden p-6 flex flex-col"
-      style={{ background: cover ? `linear-gradient(160deg, hsl(${post.hue} 55% 42%), hsl(${(post.hue + 30) % 360} 50% 22%))` : `hsl(${post.hue} 40% 96%)`, color: cover ? '#fff' : `hsl(${post.hue} 45% 18%)` }}
+      style={{ background: cover ? `hsl(${post.hue} 35% 28%)` : `hsl(${post.hue} 40% 96%)`, color: cover ? '#fff' : `hsl(${post.hue} 45% 18%)` }}
     >
       <div className="flex items-center justify-between text-[11px] font-bold opacity-80">
         <span>{post.category}</span>
@@ -58,7 +58,7 @@ export function MagazineThumb({ post, wide }: { post: MagazinePost; wide?: boole
       {/* 목록용 작은 표지: 제목만 크게 */}
       <div
         className="aspect-[4/5] rounded overflow-hidden p-3.5 flex flex-col text-white"
-        style={{ background: `linear-gradient(160deg, hsl(${post.hue} 55% 42%), hsl(${(post.hue + 30) % 360} 50% 22%))` }}
+        style={{ background: `hsl(${post.hue} 35% 28%)` }}
       >
         <div className="flex items-center justify-between text-[10px] font-bold opacity-80">
           <span className="flex items-center gap-1">{fresh && <span className="bg-white text-ink-900 rounded px-1 py-px text-[9px] font-black">NEW</span>}{post.category}</span>

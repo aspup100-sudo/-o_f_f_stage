@@ -186,7 +186,7 @@ export function RecruitDetail({ id }: { id: string }) {
                 <span className="text-[13px] font-bold">이 팀과 {brand.name}의 궁합</span>
                 <span className="text-[13px] font-extrabold text-brand-600">{pct}%</span>
               </div>
-              <div className="h-2 rounded-full bg-white mt-2 overflow-hidden"><div className="h-full rounded-full bg-brand-500" style={{ width: `${pct}%` }} /></div>
+              <div className="h-2 rounded-full bg-white mt-2 overflow-hidden"><div className="h-full bg-brand-500" style={{ width: `${pct}%` }} /></div>
               <div className="flex flex-wrap gap-1 mt-2.5">
                 {scores.map(({ b, m }) => <span key={b.id} className="text-[11px] bg-white rounded-md px-2 py-0.5">{b.name} {matchPct(m.score)}%</span>)}
               </div>
@@ -319,7 +319,7 @@ export function RecruitDetail({ id }: { id: string }) {
 
 function Info({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div className="rounded-xl bg-ink-100/60 p-3">
+    <div className="rounded border border-ink-300 p-3">
       <div className="text-[11px] text-ink-500">{label}</div>
       <div className={cx('font-bold mt-0.5', accent && 'text-brand-600')}>{value}</div>
     </div>

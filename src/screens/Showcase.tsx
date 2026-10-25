@@ -124,7 +124,7 @@ export function ShowcaseNew({ teamId }: { teamId: string }) {
     <div className="bg-white min-h-screen">
       <SubHeader title="팝업자랑 쓰기" />
       <div className="p-4">
-        <div className="rounded-xl bg-ink-100/60 p-3 text-sm mb-4">
+        <div className="rounded border border-ink-300 p-3 text-sm mb-4">
           <b>{team.name}</b> · {period(pop.period)} · {spaceById(db, pop.spaceId)?.name}
           <div className="flex flex-wrap gap-1 mt-1.5">{team.members.map((m) => <Tag key={m.brandId}>@{brandById(db, m.brandId)!.name}</Tag>)}</div>
         </div>

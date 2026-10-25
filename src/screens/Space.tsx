@@ -268,7 +268,7 @@ export function SpaceDetail({ id }: { id: string }) {
         </div>
 
         {RENTAL_ON && role === 'brand' && s.facilities.length < FACILITIES.length && (
-          <button onClick={() => navigate({ name: 'rentals' })} className="mt-2 w-full text-left text-[13px] rounded-xl bg-brand-50 text-brand-700 px-3 py-2.5 font-semibold">
+          <button onClick={() => navigate({ name: 'rentals' })} className="mt-2 w-full text-left text-[13px] rounded border border-ink-300 bg-white text-brand-700 px-3 py-2.5 font-semibold">
             <Ic n="box" />없는 설비는 렌탈 제휴가로 빌릴 수 있어요 ›
           </button>
         )}
@@ -407,7 +407,7 @@ function ApplySheet({ open, onClose, space, brandId }: { open: boolean; onClose:
                 </div>
               </Field>
               {days > 0 && (
-                <div className="rounded-xl bg-ink-100/70 p-3 mb-4">
+                <div className="rounded border border-ink-300 p-3 mb-4">
                   <div className="grid grid-cols-3 text-center gap-1">
                     <div><div className="text-[11px] text-ink-500">기간</div><div className="font-bold">{days}일</div></div>
                     <div><div className="text-[11px] text-ink-500">비어 있는 날</div><div className={cx('font-bold', openCount < days && 'text-amber-600')}>{openCount}일</div></div>

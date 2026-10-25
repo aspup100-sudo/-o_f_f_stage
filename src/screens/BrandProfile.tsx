@@ -248,7 +248,7 @@ function MatchCard({ me, other }: { me: import('@/types').BrandProfile; other: i
         <span className="text-[13px] font-bold">{josa(me.name, '과', '와')}의 궁합</span>
         <span className="text-[13px] font-extrabold text-brand-600">{pct}% · {word}</span>
       </div>
-      <div className="h-2 rounded-full bg-white mt-2 overflow-hidden"><div className="h-full rounded-full bg-brand-500" style={{ width: `${pct}%` }} /></div>
+      <div className="h-2 rounded-full bg-white mt-2 overflow-hidden"><div className="h-full bg-brand-500" style={{ width: `${pct}%` }} /></div>
       {m.reasons.length > 0 && (
         <div className="mt-2.5 space-y-0.5">
           {m.reasons.slice(0, 3).map((r) => <div key={r} className="text-[12px] text-brand-700 flex"><Ic n="check" />{r}</div>)}

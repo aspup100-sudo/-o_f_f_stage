@@ -35,7 +35,7 @@ export function MySpacesTab() {
                 <span className="text-2xl font-extrabold">{pct}%</span>
                 <span className="text-[12px] text-ink-500 mb-1">예약됨 · 비는 날 {open}일</span>
               </div>
-              <div className="h-1.5 rounded-full bg-ink-100 mt-2 overflow-hidden"><div className="h-full bg-brand-400 rounded-full" style={{ width: `${pct}%` }} /></div>
+              <div className="h-1 bg-ink-100 mt-2 overflow-hidden"><div className="h-full bg-ink-900" style={{ width: `${pct}%` }} /></div>
               <div className="flex gap-2 mt-3 text-[12px]">
                 <span className="rounded-full border border-ink-300 px-2.5 py-1"><Ic n="heart" />찜한 브랜드 {savers}곳</span>
                 {open > 0 && <button onClick={() => navigate({ name: 'tab', tab: 'inbox', filter: 'offer' })} className="rounded-full bg-brand-500 text-white px-2.5 py-1 font-semibold">빈 날 채우러 팀에게 제안 ›</button>}
@@ -224,7 +224,7 @@ function AppCard({ appId, onOpen }: { appId: string; onOpen: () => void }) {
       </div>
       <p className="text-sm text-ink-700 mt-2">"{a.message}"</p>
       {a.status === 'pending' && (
-        <div className="mt-3 rounded-xl bg-brand-50 px-3 py-2.5 flex items-center justify-between">
+        <div className="mt-3 rounded border border-ink-300 bg-white px-3 py-2.5 flex items-center justify-between">
           <span className="text-[12px] text-ink-500">수락하면 예상 대관료 ({days}일)</span>
           <span className="font-extrabold text-brand-600">{manwon(sp.dailyFee * days)}</span>
         </div>
@@ -242,7 +242,7 @@ function AppDetail({ appId, onDone }: { appId: string; onDone: () => void }) {
   const days = Math.round((new Date(a.dates.end).getTime() - new Date(a.dates.start).getTime()) / 86400000) + 1;
   return (
     <div>
-      <div className="rounded-xl bg-ink-100/60 p-3 text-sm mb-3">
+      <div className="rounded border border-ink-300 p-3 text-sm mb-3">
         <b>{sp.name}</b> · {period(a.dates)} ({days}일) · 예상 대관료 {manwon(sp.dailyFee * days)}
       </div>
       <h4 className="font-bold text-sm mb-1.5">팀원 등급</h4>

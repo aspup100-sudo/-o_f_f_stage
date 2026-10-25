@@ -116,7 +116,7 @@ export function Chip({ children, active, onClick, className }: { children: React
 export function Tag({ children, tone = 'gray' }: { children: ReactNode; tone?: 'gray' | 'orange' | 'green' | 'blue' | 'purple' | 'red' | 'yellow' }) {
   const t = {
     gray: 'border-ink-300 text-ink-700', orange: 'border-brand-500 text-brand-600', green: 'border-emerald-600 text-emerald-700',
-    blue: 'border-sky-600 text-sky-700', purple: 'border-violet-500 text-violet-700', red: 'border-red-500 text-red-600', yellow: 'border-amber-500 text-amber-700',
+    blue: 'border-ink-900 text-ink-900', purple: 'border-ink-900 text-ink-900', red: 'border-red-500 text-red-600', yellow: 'border-amber-500 text-amber-700',
   }[tone];
   return <span className={cx('inline-flex items-center px-1.5 h-[22px] border bg-white text-[11px] font-semibold whitespace-nowrap', t)}>{children}</span>;
 }
@@ -134,7 +134,7 @@ const gradeStyle: Record<Grade, { cls: string; icon: string }> = {
 export function GradeBadge({ grade, small }: { grade: Grade; small?: boolean }) {
   const g = gradeStyle[grade];
   return (
-    <span className={cx('inline-flex items-center gap-0.5 border rounded-full font-semibold whitespace-nowrap', g.cls, small ? 'px-1.5 h-5 text-[10px]' : 'px-2 h-6 text-xs')}>
+    <span className={cx('inline-flex items-center gap-0.5 border font-semibold whitespace-nowrap', g.cls, small ? 'px-1.5 h-5 text-[10px]' : 'px-2 h-6 text-xs')}>
       <Icon name={g.icon} className={small ? 'w-3 h-3' : 'w-3.5 h-3.5'} />
       {grade}
     </span>
@@ -147,7 +147,7 @@ export function Swatch({ hue, pattern = 'solid', label, className, rounded = 'ro
   const c2 = `hsl(${hue} 40% 68%)`;
   const c3 = `hsl(${hue} 35% 38%)`;
   const bg: Record<string, string> = {
-    solid: `linear-gradient(160deg, ${c1}, ${c2})`,
+    solid: c1,
     stripe: `repeating-linear-gradient(45deg, ${c1} 0 10px, ${c2} 10px 20px)`,
     dot: `radial-gradient(${c2} 20%, transparent 21%) 0 0/14px 14px, ${c1}`,
     grid: `linear-gradient(${c2} 1px, transparent 1px) 0 0/16px 16px, linear-gradient(90deg, ${c2} 1px, ${c1} 1px) 0 0/16px 16px`,

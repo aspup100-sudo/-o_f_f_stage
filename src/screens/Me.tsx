@@ -50,9 +50,9 @@ export default function MeScreen() {
                   pct = Math.max(5, Math.round(((t.score - 50) / (at - 50)) * 100));
                 }
                 return (
-                  <button onClick={() => setRulesOpen(true)} className="mt-2.5 w-full text-left rounded-xl bg-ink-100/70 px-3 py-2.5">
+                  <button onClick={() => setRulesOpen(true)} className="mt-2.5 w-full text-left rounded border border-ink-300 px-3 py-2.5">
                     <div className="text-[12px] text-ink-700">{msg} <span className="text-ink-500">›</span></div>
-                    <div className="h-1.5 rounded-full bg-white mt-2 overflow-hidden"><div className="h-full bg-brand-500 rounded-full" style={{ width: `${pct}%` }} /></div>
+                    <div className="h-1 bg-ink-300 mt-2 overflow-hidden"><div className="h-full bg-ink-900" style={{ width: `${pct}%` }} /></div>
                   </button>
                 );
               })()}
@@ -77,7 +77,7 @@ export default function MeScreen() {
               }, 0);
               const saves = db.brands.filter((b) => b.savedSpaces?.some((id) => landlord.spaceIds.includes(id))).length;
               return (
-                <div className="grid grid-cols-3 text-center rounded-xl bg-ink-100/70 py-2.5 mb-3">
+                <div className="grid grid-cols-3 text-center rounded border border-ink-300 py-2.5 mb-3">
                   <div><div className="font-extrabold">{acc.length}팀</div><div className="text-[11px] text-ink-500">받은 팀</div></div>
                   <div className="border-x border-ink-300/60"><div className="font-extrabold">{manwon(income)}</div><div className="text-[11px] text-ink-500">대관 매출</div></div>
                   <div><div className="font-extrabold">{saves}</div><div className="text-[11px] text-ink-500">공간 찜</div></div>
@@ -203,7 +203,7 @@ function BrandSection() {
           </button>
         </div>
         {b.followers.length > 0 ? (
-          <button onClick={() => setNewsOpen(true)} className="mt-3 w-full rounded-xl bg-brand-50 px-3.5 py-3 text-left flex items-center gap-3">
+          <button onClick={() => setNewsOpen(true)} className="mt-3 w-full rounded border border-ink-300 bg-white px-3.5 py-3 text-left flex items-center gap-3">
             <Icon name="megaphone" className="w-6 h-6 shrink-0 text-brand-600" />
             <span className="flex-1">
               <span className="block text-sm font-bold">팔로워 {b.followers.length}명에게 소식 보내기</span>
@@ -212,7 +212,7 @@ function BrandSection() {
             <span className="text-ink-300">›</span>
           </button>
         ) : (
-          <div className="mt-3 rounded-xl bg-ink-100/70 px-3.5 py-3 flex items-center gap-3">
+          <div className="mt-3 rounded border border-ink-300 px-3.5 py-3 flex items-center gap-3">
             <Icon name="leaf" className="w-6 h-6 shrink-0 text-ink-500" />
             <span className="flex-1">
               <span className="block text-sm font-bold">아직 팔로워가 없어요</span>
@@ -307,7 +307,7 @@ function VisitorSection() {
         const cur = [...STAMP_LEVELS].reverse().find((l) => n >= l.at);
         const next = STAMP_LEVELS.find((l) => n < l.at);
         return (
-          <button className="mt-3 w-full rounded-xl bg-brand-50 px-3 py-2.5 flex items-center gap-2.5 text-left" onClick={() => navigate({ name: 'tab', tab: 'stamps' })}>
+          <button className="mt-3 w-full rounded border border-ink-300 bg-white px-3 py-2.5 flex items-center gap-2.5 text-left" onClick={() => navigate({ name: 'tab', tab: 'stamps' })}>
             <Icon name={cur?.emoji ?? 'compass'} className="w-6 h-6 shrink-0 text-brand-600" />
             <span className="flex-1 min-w-0">
               <span className="block text-[13px] font-bold">{cur?.name ?? '탐험 준비 중'}</span>

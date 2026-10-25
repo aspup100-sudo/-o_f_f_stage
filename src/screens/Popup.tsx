@@ -468,7 +468,7 @@ function StampLevels({ n }: { n: number }) {
       {next && (() => {
         const prev = STAMP_LEVELS[STAMP_LEVELS.indexOf(next) - 1]?.at ?? 0;
         return (
-          <div className="mt-3 h-2 rounded-full bg-ink-100 overflow-hidden">
+          <div className="mt-3 h-1 bg-ink-100 overflow-hidden">
             <div className="h-full bg-brand-500 rounded-full" style={{ width: `${Math.round(((n - prev) / (next.at - prev)) * 100)}%` }} />
           </div>
         );
