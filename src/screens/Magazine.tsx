@@ -49,9 +49,20 @@ function CardFace({ post, card, index, total }: { post: Pick<MagazinePost, 'hue'
 
 export function MagazineThumb({ post, wide }: { post: MagazinePost; wide?: boolean }) {
   return (
-    <button onClick={() => navigate({ name: 'magazine', id: post.id })} className={cx('text-left shrink-0', wide ? 'w-full' : 'w-[200px]')}>
-      <div className="rounded-2xl overflow-hidden">
-        <CardFace post={post} card={post.cards[0]} index={0} total={post.cards.length} />
+    <button onClick={() => navigate({ name: 'magazine', id: post.id })} className={cx('block text-left shrink-0 self-start align-top', wide ? 'w-full' : 'w-[200px]')}>
+      {/* 목록용 작은 표지: 제목만 크게 */}
+      <div
+        className="aspect-[4/5] rounded-2xl overflow-hidden p-3.5 flex flex-col text-white"
+        style={{ background: `linear-gradient(160deg, hsl(${post.hue} 55% 42%), hsl(${(post.hue + 30) % 360} 50% 22%))` }}
+      >
+        <div className="flex items-center justify-between text-[10px] font-bold opacity-80">
+          <span>{post.category}</span>
+          <span>{post.cards.length}장</span>
+        </div>
+        <div className="flex-1 flex items-end">
+          <div className="text-[19px] font-extrabold leading-tight line-clamp-4 break-keep">{post.title}</div>
+        </div>
+        <div className="text-[9px] font-bold opacity-60 mt-2">OFF STAGE 매거진</div>
       </div>
       <div className="mt-1.5 text-[12px] text-ink-500">{post.category} · {post.createdAt.slice(5).replace('-', '/')}</div>
       <div className="text-sm font-bold leading-snug line-clamp-2">{post.title}</div>
