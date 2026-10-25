@@ -12,7 +12,7 @@ import { TeamIntroPage } from './Team';
 import { DEMO_TODAY } from '@/data/mock';
 import { RentalsBrowse } from './Rental';
 
-function SaveSpaceButton({ spaceId }: { spaceId: string }) {
+function SaveSpaceButton({ spaceId, inline }: { spaceId: string; inline?: boolean }) {
   const { brand } = useMe();
   if (!brand) return null;
   const on = !!brand.savedSpaces?.includes(spaceId);
@@ -20,7 +20,7 @@ function SaveSpaceButton({ spaceId }: { spaceId: string }) {
     <button
       aria-label={on ? '공간 찜 해제' : '공간 찜하기'}
       onClick={(e) => { e.stopPropagation(); guard(() => toggleSaveSpace(brand.id, spaceId)); }}
-      className="absolute z-10 top-2 right-2 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center"
+      className={inline ? 'w-12 h-12 shrink-0 rounded-xl border border-ink-300 flex items-center justify-center' : 'absolute z-10 top-2 right-2 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center'}
     >
       <Icon name="heart" filled={on} className={cx('w-[18px] h-[18px]', on ? 'text-red-500' : 'text-ink-700')} />
     </button>
@@ -316,7 +316,8 @@ export function SpaceDetail({ id }: { id: string }) {
         )}
       </div>
       {role === 'brand' && (
-        <div className="sticky bottom-0 bg-white border-t border-ink-100 p-3">
+        <div className="sticky bottom-0 bg-white border-t border-ink-100 p-3 flex gap-2">
+          <SaveSpaceButton spaceId={s.id} inline />
           {s.teamRental ? (
             <Button full size="lg" onClick={() => guard(() => setApplyOpen(true))}>우리 팀으로 지원하기</Button>
           ) : (
