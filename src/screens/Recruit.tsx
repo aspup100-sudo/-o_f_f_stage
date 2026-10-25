@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { shareLink } from '@/store/share';
 import { useMe, guard } from '@/store/hooks';
 import { navigate } from '@/store/store';
-import { applyRecruitment, createRecruitment, decideApplication, simulateApplicants, toggleSaveRecruit, type RecruitDraft } from '@/store/actions';
+import { applyRecruitment, createRecruitment, decideApplication, simulateApplicants, toggleRecruitAlert, toggleSaveRecruit, type RecruitDraft } from '@/store/actions';
 import { brandById, manwon, matchPct, matchScore, period, recruitFit, recruitUrgency, slotShare, spaceById } from '@/store/logic';
 import { BrandLogo, ScreenTitle, ThemeTagList, TrustLine } from '@/components/common';
 import { Button, Card, Chip, cx, Demo, Empty, Field, inputCls, Segmented, Sheet, StatusPill, SubHeader, Tag, textareaCls } from '@/components/ui';
@@ -95,6 +95,15 @@ export function RecruitsTab({ initial }: { initial?: '찜' }) {
         <span className="w-px bg-ink-300 mx-1" />
         {(['전체', ...REGIONS] as const).map((r) => <Chip key={'r' + r} active={region === r} onClick={() => setRegion(r)}>{r === '전체' ? '모든 지역' : r}</Chip>)}
       </div>
+      {brand && region !== '전체' && (() => {
+        const on = !!brand.recruitAlertRegions?.includes(region);
+        return (
+          <div className="mx-4 mb-2 mt-1 flex items-center gap-2 rounded-xl bg-white border border-ink-100 px-3 py-2.5">
+            <span className="text-[13px] flex-1">{on ? `🔔 ${region} 새 모집글 알림 받는 중` : `${region}에 새 모집글이 올라오면 알려 드릴까요?`}</span>
+            <button onClick={() => toggleRecruitAlert(brand.id, region)} className={cx('h-8 px-3 rounded-full text-[12px] font-bold shrink-0', on ? 'bg-ink-100 text-ink-700' : 'bg-brand-500 text-white')}>{on ? '끄기' : '알림 받기'}</button>
+          </div>
+        );
+      })()}
       {brand && picks.length > 0 && st === '전체' && region === '전체' && (
         <section className="mt-2 mb-4">
           <h2 className="px-4 font-bold text-[15px]"><span className="text-brand-500">{brand.name}</span>에 딱 맞는 자리</h2>

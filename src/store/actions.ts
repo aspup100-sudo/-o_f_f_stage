@@ -355,7 +355,14 @@ export function createRecruitment(hostBrandId: string, d: RecruitDraft) {
       spaceConfirmed: d.spaceConfirmed, spaceId: d.spaceConfirmed ? d.spaceId : undefined, slotMode: d.slotMode, slots, status: '모집 중', createdAt: DEMO_TODAY,
     });
   });
-  toast('모집글을 올렸어요');
+  let alerted = 0;
+  update((s) => {
+    const host = s.db.brands.find((b) => b.id === hostBrandId);
+    const fans = s.db.brands.filter((b) => b.id !== hostBrandId && b.recruitAlertRegions?.includes(d.region));
+    fans.forEach((b) => notify(s.db, b.userId, 'new_recruit', `${d.region}에 새 모집글: ${d.title}${host ? ` (${host.name})` : ''}`, { name: 'recruit', id }));
+    alerted = fans.length;
+  });
+  toast(alerted ? `모집글을 올렸어요. ${d.region} 알림을 켠 브랜드 ${alerted}곳에 바로 알렸어요` : '모집글을 올렸어요');
   navigate({ name: 'recruit', id });
 }
 
@@ -1120,6 +1127,17 @@ export function toggleSaveRecruit(brandId: string, recruitmentId: string) {
     else { list.push(recruitmentId); on = true; }
   });
   toast(on ? '찜했어요. 자리가 줄어들면 알려 드릴게요 (데모)' : '찜을 해제했어요');
+}
+
+export function toggleRecruitAlert(brandId: string, region: import('@/types').Region) {
+  let on = false;
+  update((s) => {
+    const b = s.db.brands.find((x) => x.id === brandId)!;
+    const list = b.recruitAlertRegions ?? [];
+    on = !list.includes(region);
+    b.recruitAlertRegions = on ? [...list, region] : list.filter((r) => r !== region);
+  });
+  toast(on ? `${region}에 새 모집글이 올라오면 알려 드릴게요` : `${region} 모집글 알림을 껐어요`);
 }
 
 // ───────── 다음 회차 ─────────

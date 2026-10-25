@@ -72,6 +72,7 @@ export interface BrandProfile {
   followers: ID[]; // 방문객 userId
   hearts: ID[]; // 내가 관심 표시한 brandId
   savedRecruits?: ID[]; // 찜한 모집글
+  recruitAlertRegions?: Region[]; // 새 모집글 알림 받을 지역
   savedSpaces?: ID[]; // 찜한 공간
   news?: { id: ID; text: string; at: ISODateTime }[]; // 팔로워에게 보낸 소식 (최신이 앞)
   logoHue: number;
@@ -517,6 +518,7 @@ export type NotificationType =
   | 'follow_popup'
   | 'space_application'
   | 'rental'
+  | 'new_recruit'
   | 'system';
 
 export interface Notification {

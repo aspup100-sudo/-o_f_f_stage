@@ -181,6 +181,9 @@ brands.find((b) => b.id === 'b4')!.news = [
 // 공간 찜 시드: 임대인이 막판 할인을 켜면 이 브랜드들에게 알림이 간다
 brands.find((b) => b.id === 'b5')!.savedSpaces = ['s1'];
 brands.find((b) => b.id === 'b6')!.savedSpaces = ['s1', 's3'];
+brands.find((b) => b.id === 'b5')!.recruitAlertRegions = ['성동구'];
+brands.find((b) => b.id === 'b6')!.recruitAlertRegions = ['성동구', '마포구'];
+brands.find((b) => b.id === 'b3')!.recruitAlertRegions = ['마포구'];
 // 관심(하트) 시드: b2가 이미 b1에게 하트를 눌러 둔 상태 → b1이 b2에게 하트하면 매칭
 brands.find((b) => b.id === 'b2')!.hearts = ['b1'];
 brands.find((b) => b.id === 'b4')!.followers = ['u_v1', 'u_v2'];

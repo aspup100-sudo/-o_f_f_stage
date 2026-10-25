@@ -6,7 +6,7 @@ import type { NotificationType } from '@/types';
 
 const ICON: Record<NotificationType, string> = {
   proposal: '✉️', interest_match: '💛', application_result: '📮', agreement_request: '📝', completion_request: '🤝',
-  follow_popup: '🛍️', space_application: '🏠', rental: '📦', system: '🔔',
+  follow_popup: '🛍️', space_application: '🏠', rental: '📦', new_recruit: '📣', system: '🔔',
 };
 
 export function ago(iso: string) {
@@ -20,6 +20,7 @@ export function ago(iso: string) {
 
 const GROUPS: { label: string; desc: string; types: NotificationType[] }[] = [
   { label: '제안·관심', desc: '같이 해요 제안, 서로 관심 표시', types: ['proposal', 'interest_match'] },
+  { label: '새 모집글', desc: '알림 켠 지역에 올라온 모집글', types: ['new_recruit'] },
   { label: '팀·지원', desc: '모집 지원 결과, 약속서, 공간 지원, 성사 확인', types: ['application_result', 'agreement_request', 'space_application', 'completion_request'] },
   { label: '팝업 소식', desc: '팔로우한 브랜드와 관심 동네의 새 팝업', types: ['follow_popup'] },
   { label: '장비 렌탈', desc: '렌탈 요청과 확정', types: ['rental'] },
