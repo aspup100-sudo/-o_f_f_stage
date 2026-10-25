@@ -23,7 +23,7 @@ function loadSdk(): Promise<any> {
   if (sdk) return sdk;
   sdk = new Promise((resolve, reject) => {
     const s = document.createElement('script');
-    s.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KEY}&autoload=false`;
+    s.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KEY}&libraries=services&autoload=false`;
     s.onload = () => (window.kakao?.maps ? window.kakao.maps.load(() => resolve(window.kakao)) : reject(new Error('카카오가 지도 코드를 주지 않았어요 (도메인 미등록 또는 카카오맵 사용 설정 꺼짐)')));
     s.onerror = () => reject(new Error('카카오 지도 서버에 연결하지 못했어요 (키 또는 도메인 확인 필요)'));
     document.head.appendChild(s);
@@ -105,4 +105,44 @@ export function KakaoMap({ pins, onSelect, className, fallback }: { pins: MapPin
       {state === 'loading' && <div className="absolute inset-0 flex items-center justify-center text-[12px] text-ink-500 bg-ink-100">지도를 불러오는 중…</div>}
     </div>
   );
+}
+
+/** 주소 → [위도, 경도]. 카카오맵 키가 없거나 못 찾으면 null */
+export async function geocode(address: string): Promise<[number, number] | null> {
+  if (!KEY || !address.trim()) return null;
+  try {
+    const kakao = await loadSdk();
+    return await new Promise((resolve) => {
+      new kakao.maps.services.Geocoder().addressSearch(address, (res: { x: string; y: string }[], status: string) => {
+        resolve(status === kakao.maps.services.Status.OK && res[0] ? [Number(res[0].y), Number(res[0].x)] : null);
+      });
+    });
+  } catch {
+    return null;
+  }
+}
+
+declare global {
+  interface Window { daum?: any }
+}
+let postcodeSdk: Promise<void> | null = null;
+/** 카카오(다음) 우편번호 검색 창을 el 안에 띄운다. 키 없이 무료 */
+export function openPostcode(el: HTMLElement, onPick: (r: { address: string; sigungu: string }) => void): Promise<boolean> {
+  postcodeSdk ??= new Promise<void>((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+    s.onload = () => resolve();
+    s.onerror = () => { postcodeSdk = null; reject(new Error('postcode')); };
+    document.head.appendChild(s);
+  });
+  return postcodeSdk
+    .then(() => {
+      new window.daum!.Postcode({
+        width: '100%',
+        height: '100%',
+        oncomplete: (d: { roadAddress?: string; address: string; sigungu: string }) => onPick({ address: d.roadAddress || d.address, sigungu: d.sigungu }),
+      }).embed(el);
+      return true;
+    })
+    .catch(() => false);
 }

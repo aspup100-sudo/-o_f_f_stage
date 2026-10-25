@@ -628,7 +628,7 @@ export function togglePromo(teamId: string, brandId: string) {
 // ───────── 공간 ─────────
 export interface SpaceDraft {
   name: string; region: import('@/types').Region; address: string; intro: string; areaM2: number; dailyFee: number; minDays: number;
-  facilities: import('@/types').Facility[]; electricKw?: number; teamRental: boolean; fashionOnly: boolean; photoHues: number[]; photos?: string[];
+  facilities: import('@/types').Facility[]; electricKw?: number; teamRental: boolean; fashionOnly: boolean; photoHues: number[]; photos?: string[]; lat?: number; lng?: number;
 }
 
 export function saveSpace(landlordId: string, d: SpaceDraft, id?: string) {

@@ -1,13 +1,14 @@
+import { geocode, kakaoMapEnabled, openPostcode } from '@/components/KakaoMap';
 import { pickPhotos } from '@/components/photoPick';
 import { spaceSrc } from '@/data/photos';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useMe, guard } from '@/store/hooks';
-import { back, navigate, replace } from '@/store/store';
+import { back, navigate, replace, toast } from '@/store/store';
 import { setLastMinute, decideSpaceApplication, proposeSpaceToRecruitment, proposeSpaceToTeam, saveSpace, simulateTeamApplication, type SpaceDraft } from '@/store/actions';
 import { brandById, daysUntil, manwon, period, soonOpenDays, spaceById, teamById } from '@/store/logic';
 import { ScreenTitle, TrustLine } from '@/components/common';
 import { Button, Card, Chip, cx, Demo, Empty, Field, inputCls, Segmented, Sheet, StatusPill, SubHeader, Swatch, Tag, textareaCls, Ic , Icon } from '@/components/ui';
-import { FACILITIES, REGIONS } from '@/types';
+import { FACILITIES, REGIONS, type Region } from '@/types';
 import { SpaceCard, AvailabilityCalendar } from './Space';
 import { TeamIntroPage } from './Team';
 import { RecruitCard } from './Recruit';
@@ -85,9 +86,25 @@ export function SpaceEdit({ id }: { id?: string }) {
   const ex = spaceById(db, id);
   const [d, setD] = useState<SpaceDraft>(
     ex
-      ? { name: ex.name, region: ex.region, address: ex.address, intro: ex.intro, areaM2: ex.areaM2, dailyFee: ex.dailyFee, minDays: ex.minDays, facilities: ex.facilities, electricKw: ex.electricKw, teamRental: ex.teamRental, fashionOnly: ex.fashionOnly, photoHues: ex.photoHues, photos: ex.photos }
+      ? { name: ex.name, region: ex.region, address: ex.address, intro: ex.intro, areaM2: ex.areaM2, dailyFee: ex.dailyFee, minDays: ex.minDays, facilities: ex.facilities, electricKw: ex.electricKw, teamRental: ex.teamRental, fashionOnly: ex.fashionOnly, photoHues: ex.photoHues, photos: ex.photos, lat: ex.lat, lng: ex.lng }
       : { name: '', region: '마포구', address: '', intro: '', areaM2: 33, dailyFee: 500000, minDays: 2, facilities: ['행거', '조명'], electricKw: 5, teamRental: true, fashionOnly: true, photoHues: [] },
   );
+  const [addrOpen, setAddrOpen] = useState(false);
+  const [geo, setGeo] = useState<'idle' | 'ok' | 'fail'>(ex?.lat ? 'ok' : 'idle');
+  const addrBox = useRef<HTMLDivElement>(null);
+  const locate = async (address: string) => {
+    const p = await geocode(address);
+    setGeo(p ? 'ok' : kakaoMapEnabled ? 'fail' : 'idle');
+    setD((x) => ({ ...x, lat: p?.[0], lng: p?.[1] }));
+  };
+  useEffect(() => {
+    if (!addrOpen || !addrBox.current) return;
+    openPostcode(addrBox.current, ({ address, sigungu }) => {
+      setAddrOpen(false);
+      setD((x) => ({ ...x, address, region: (REGIONS as readonly string[]).includes(sigungu) ? (sigungu as Region) : x.region }));
+      locate(address);
+    }).then((ok) => { if (!ok) { setAddrOpen(false); toast('주소 검색을 불러오지 못했어요. 직접 입력해 주세요'); } });
+  }, [addrOpen]);
   if (!landlord) return <Empty>임대인 계정에서 볼 수 있어요</Empty>;
   const ok = d.name.trim() && d.address.trim() && d.photoHues.length > 0;
   return (
@@ -114,7 +131,15 @@ export function SpaceEdit({ id }: { id?: string }) {
         <Field label="지역">
           <div className="flex flex-wrap gap-1.5">{REGIONS.map((r) => <Chip key={r} active={d.region === r} onClick={() => setD({ ...d, region: r })}>{r}</Chip>)}</div>
         </Field>
-        <Field label="주소" required><input className={inputCls} value={d.address} onChange={(e) => setD({ ...d, address: e.target.value })} placeholder="서울 ○○구 ○○로 00" /></Field>
+        <Field label="주소" required hint={geo === 'ok' ? '지도 위치를 찾았어요. 팝업 지도에 이 위치로 표시돼요' : geo === 'fail' ? '지도에서 이 주소를 못 찾았어요. 주소 검색으로 골라 주세요' : '주소 검색으로 고르면 지도 위치가 자동으로 잡혀요'}>
+          <div className="flex gap-2">
+            <input className={inputCls} value={d.address} onChange={(e) => { setD({ ...d, address: e.target.value, lat: undefined, lng: undefined }); setGeo('idle'); }} onBlur={() => !d.lat && d.address.trim() && locate(d.address)} placeholder="서울 ○○구 ○○로 00" />
+            <Button variant="dark" onClick={() => setAddrOpen(true)}>주소 검색</Button>
+          </div>
+        </Field>
+        <Sheet open={addrOpen} onClose={() => setAddrOpen(false)} title="주소 검색">
+          <div ref={addrBox} className="h-[460px] -mx-1" />
+        </Sheet>
         <Field label="소개"><textarea className={textareaCls} value={d.intro} onChange={(e) => setD({ ...d, intro: e.target.value })} /></Field>
         <div className="grid grid-cols-3 gap-2">
           <Field label="실측 면적(㎡)"><input type="number" className={inputCls} value={d.areaM2} onChange={(e) => setD({ ...d, areaM2: Number(e.target.value) })} /></Field>
