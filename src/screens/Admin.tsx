@@ -130,6 +130,24 @@ export function StatsTab() {
             {tile('모집글', db.recruitments.length, `모집 중 ${db.recruitments.filter((r) => r.status === '모집 중').length}`)}
           </div>
         </div>
+        {(() => {
+          // 다시 쓰는지: 같은 사람이 두 번째로 돌아왔는가
+          const brandTeams = db.brands.map((b) => db.teams.filter((t) => t.members.some((m) => m.brandId === b.id)).reduce((n, t) => n + t.round, 0)).filter((n) => n > 0);
+          const repeatBrands = brandTeams.filter((n) => n >= 2).length;
+          const perVisitor = db.visitors.map((v) => new Set(db.visits.filter((x) => x.userId === v.userId).map((x) => x.popupId)).size).filter((n) => n > 0);
+          const repeatVisitors = perVisitor.filter((n) => n >= 2).length;
+          const pct = (a: number, b: number) => (b ? `${Math.round((a / b) * 100)}%` : '-');
+          return (
+            <div>
+              <h3 className="font-bold mb-2 text-[15px]">다시 쓰는 비율</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {tile('공동 팝업을 두 번 이상 연 브랜드', pct(repeatBrands, brandTeams.length), `${brandTeams.length}곳 중 ${repeatBrands}곳`)}
+                {tile('두 곳 이상 방문한 방문객', pct(repeatVisitors, perVisitor.length), `${perVisitor.length}명 중 ${repeatVisitors}명`)}
+                {tile('2회차로 이어진 팀', db.teams.filter((t) => t.round >= 2).length, '같은 팀이 다시 연 팝업')}
+              </div>
+            </div>
+          );
+        })()}
         <div>
           <h3 className="font-bold mb-2 text-[15px]">렌탈 제휴</h3>
           <div className="grid grid-cols-2 gap-2">
