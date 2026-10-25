@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useMe, guard } from '@/store/hooks';
 import { navigate } from '@/store/store';
-import { applyRecruitment, createRecruitment, decideApplication, simulateApplicants, type RecruitDraft } from '@/store/actions';
-import { brandById, manwon, period, slotShare, spaceById } from '@/store/logic';
+import { applyRecruitment, createRecruitment, decideApplication, simulateApplicants, toggleSaveRecruit, type RecruitDraft } from '@/store/actions';
+import { brandById, manwon, period, recruitFit, recruitUrgency, slotShare, spaceById } from '@/store/logic';
 import { BrandLogo, ScreenTitle, ThemeTagList, TrustLine } from '@/components/common';
 import { Button, Card, Chip, cx, Demo, Empty, Field, inputCls, Segmented, Sheet, StatusPill, SubHeader, Tag, textareaCls } from '@/components/ui';
 import { CATEGORIES, REGIONS, type Category, type Recruitment, type RecruitStatus, type Region, type SlotStatus } from '@/types';
@@ -16,8 +16,24 @@ const SLOT_STYLE: Record<SlotStatus, string> = {
   '비어 있음': 'bg-white text-ink-500 border-dashed border-ink-300',
 };
 
-export function RecruitCard({ db, r }: { db: DB; r: Recruitment }) {
+export function SaveRecruitButton({ r }: { r: Recruitment }) {
+  const { brand } = useMe();
+  if (!brand || r.hostBrandId === brand.id) return null;
+  const on = !!brand.savedRecruits?.includes(r.id);
+  return (
+    <button
+      aria-label={on ? '찜 해제' : '찜하기'}
+      onClick={(e) => { e.stopPropagation(); toggleSaveRecruit(brand.id, r.id); }}
+      className={cx('w-8 h-8 -mr-1 -mt-1 rounded-full flex items-center justify-center text-lg', on ? 'text-brand-500' : 'text-ink-300')}
+    >
+      {on ? '♥' : '♡'}
+    </button>
+  );
+}
+
+export function RecruitCard({ db, r, reasons }: { db: DB; r: Recruitment; reasons?: string[] }) {
   const host = brandById(db, r.hostBrandId)!;
+  const urgent = recruitUrgency(r);
   const empty = r.slots.filter((s) => s.status === '비어 있음').length;
   const share = slotShare(r.totalBudget, r.slots, 1, r.slotMode);
   const sp = spaceById(db, r.spaceId);
@@ -27,6 +43,9 @@ export function RecruitCard({ db, r }: { db: DB; r: Recruitment }) {
         <StatusPill status={r.status} />
         <Tag>{r.slotMode === 'hanger' ? '행거 단위' : '카테고리 슬롯'}</Tag>
         {r.spaceConfirmed && <Tag tone="green">공간 확정</Tag>}
+        {urgent && <Tag tone="red">🔥 {urgent}</Tag>}
+        <span className="flex-1" />
+        <SaveRecruitButton r={r} />
       </div>
       <div className="font-bold text-[15px] leading-snug">{r.title}</div>
       <div className="text-[13px] text-ink-500 mt-1">📍 {r.region}{sp ? ` · ${sp.name}` : ''} · 📅 {period(r.period)}</div>
@@ -46,27 +65,50 @@ export function RecruitCard({ db, r }: { db: DB; r: Recruitment }) {
         </div>
       </div>
       <div className="text-[12px] text-ink-700 mt-1">남은 자리 <b>{empty}</b> / {r.slots.length}</div>
+      {reasons && reasons.length > 0 && (
+        <div className="mt-2.5 pt-2.5 border-t border-ink-100 space-y-0.5">
+          {reasons.slice(0, 3).map((x) => <div key={x} className="text-[12px] text-brand-700">✓ {x}</div>)}
+        </div>
+      )}
     </Card>
   );
 }
 
 export function RecruitsTab() {
-  const { db } = useMe();
-  const [st, setSt] = useState<RecruitStatus | '전체'>('전체');
+  const { db, brand } = useMe();
+  const [st, setSt] = useState<RecruitStatus | '전체' | '찜'>('전체');
   const [region, setRegion] = useState<Region | '전체'>('전체');
-  const list = db.recruitments.filter((r) => (st === '전체' || r.status === st) && (region === '전체' || r.region === region));
+  const saved = brand?.savedRecruits ?? [];
+  const list = db.recruitments.filter((r) => (st === '전체' || (st === '찜' ? saved.includes(r.id) : r.status === st)) && (region === '전체' || r.region === region));
+  const picks = brand
+    ? db.recruitments.map((r) => ({ r, ...recruitFit(db, brand, r) })).filter((x) => x.score >= 5).sort((a, b) => b.score - a.score).slice(0, 3)
+    : [];
   return (
     <div>
       <ScreenTitle right={<Button size="sm" onClick={() => guard(() => navigate({ name: 'recruitNew' }))}>+ 모집글 쓰기</Button>}>같이 열기</ScreenTitle>
       <p className="px-4 text-[13px] text-ink-500 -mt-1 mb-2">함께 팝업을 열 팀원을 모아요. 정원이 차면 자동으로 팀이 만들어져요.</p>
       <div className="flex gap-1.5 overflow-x-auto no-scrollbar px-4 pb-2">
-        {(['전체', '모집 중', '협의 중', '마감'] as const).map((s) => <Chip key={s} active={st === s} onClick={() => setSt(s)}>{s}</Chip>)}
+        {(['전체', ...(brand ? (['찜'] as const) : []), '모집 중', '협의 중', '마감'] as const).map((s) => (
+          <Chip key={s} active={st === s} onClick={() => setSt(s)}>{s === '찜' ? `♥ 찜 ${saved.length}` : s}</Chip>
+        ))}
         <span className="w-px bg-ink-300 mx-1" />
         {(['전체', ...REGIONS] as const).map((r) => <Chip key={'r' + r} active={region === r} onClick={() => setRegion(r)}>{r === '전체' ? '모든 지역' : r}</Chip>)}
       </div>
+      {brand && picks.length > 0 && st === '전체' && region === '전체' && (
+        <section className="mt-2 mb-4">
+          <h2 className="px-4 font-bold text-[15px]"><span className="text-brand-500">{brand.name}</span>에 딱 맞는 자리</h2>
+          <p className="px-4 text-xs text-ink-500 mt-0.5 mb-2.5">빈자리 카테고리, 팝업 가능 기간, 모집자와의 무드로 골랐어요</p>
+          <div className="flex gap-2.5 overflow-x-auto no-scrollbar px-4 pb-1">
+            {picks.map((x) => (
+              <div key={x.r.id} className="w-[300px] shrink-0"><RecruitCard db={db} r={x.r} reasons={x.reasons} /></div>
+            ))}
+          </div>
+          <h2 className="px-4 font-bold text-[15px] mt-5">전체 모집글</h2>
+        </section>
+      )}
       <div className="px-4 space-y-3 mt-2">
         {list.map((r) => <RecruitCard key={r.id} db={db} r={r} />)}
-        {!list.length && <Empty>조건에 맞는 모집글이 없어요</Empty>}
+        {!list.length && <Empty>{st === '찜' ? '찜한 모집글이 없어요. 마음에 드는 글의 ♡를 눌러 두세요' : '조건에 맞는 모집글이 없어요'}</Empty>}
       </div>
     </div>
   );
@@ -90,7 +132,7 @@ export function RecruitDetail({ id }: { id: string }) {
 
   return (
     <div className="bg-white min-h-screen">
-      <SubHeader title="모집글" />
+      <SubHeader title="모집글" right={<div className="pr-2 pt-1"><SaveRecruitButton r={r} /></div>} />
       <div className="p-4">
         <div className="flex items-center gap-1.5 mb-2">
           <StatusPill status={r.status} />

@@ -1,6 +1,6 @@
 // 화면과 무관한 계산 로직: 신뢰 지수, 추천 점수, 분담금
 import type { DB } from '@/data/mock';
-import type { BrandProfile, Grade, Review, Team, TrustEvent, TrustScore } from '@/types';
+import type { BrandProfile, Grade, Recruitment, Review, Team, TrustEvent, TrustScore } from '@/types';
 import { PRICE_RANGES } from '@/types';
 import { DEMO_TODAY } from '@/data/mock';
 
@@ -248,3 +248,36 @@ export const josa = (word: string, withBatchim: string, without: string) => {
   const has = c >= 0xac00 && c <= 0xd7a3 ? (c - 0xac00) % 28 !== 0 : false;
   return word + (has ? withBatchim : without);
 };
+
+// ───────── 모집글 맞춤 · 마감 임박 ─────────
+const overlaps = (a: { start: string; end: string }, b: { start: string; end: string }) => a.start <= b.end && b.start <= a.end;
+
+/** 내 브랜드가 이 모집글에 얼마나 잘 맞는지. 빈자리·일정·모집자와의 궁합을 본다. */
+export function recruitFit(db: DB, me: BrandProfile, r: Recruitment) {
+  const reasons: string[] = [];
+  let score = 0;
+  const empty = r.slots.filter((s) => s.status === '비어 있음');
+  if (!empty.length || r.status === '마감' || r.hostBrandId === me.id || r.slots.some((s) => s.brandId === me.id)) return { score: -1, reasons };
+  const catSlot = empty.find((s) => s.category && me.tags.categories.includes(s.category));
+  if (r.slotMode === 'hanger') { score += 2; reasons.push('행거 단위라 어떤 카테고리든 OK'); }
+  else if (catSlot) { score += 4; reasons.push(`${catSlot.label} 자리가 비어 있어요`); }
+  if (me.availability.some((a) => overlaps(a, r.period))) { score += 3; reasons.push('내 팝업 가능 기간과 겹쳐요'); }
+  const host = db.brands.find((b) => b.id === r.hostBrandId);
+  if (host) {
+    const m = matchScore(db, me, host);
+    score += m.score / 3;
+    const mood = m.reasons.find((x) => x.startsWith('무드'));
+    if (mood) reasons.push(mood.replace('무드 겹침', '모집자와 무드 겹침'));
+  }
+  return { score, reasons };
+}
+
+/** 마감 임박 이유. 없으면 undefined */
+export function recruitUrgency(r: Recruitment) {
+  if (r.status === '마감') return undefined;
+  const empty = r.slots.filter((s) => s.status === '비어 있음').length;
+  if (empty === 1) return '마지막 1자리';
+  const d = daysUntil(r.period.start);
+  if (d >= 0 && d <= 14 && empty > 0) return `오픈 ${d}일 전`;
+  return undefined;
+}

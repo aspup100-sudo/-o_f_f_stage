@@ -1,7 +1,7 @@
 // 둘러보기 맨 위 '오늘' 영역: 내 팝업까지 남은 날과 지금 해야 할 일을 모아 보여 준다.
 import { useMe } from '@/store/hooks';
 import { navigate } from '@/store/store';
-import { brandById, daysUntil, josa, manwon, dday, md, popupById, spaceById, teamById, teamPrep, teamsOfBrand, waitCount } from '@/store/logic';
+import { brandById, daysUntil, josa, manwon, recruitUrgency, dday, md, popupById, spaceById, teamById, teamPrep, teamsOfBrand, waitCount } from '@/store/logic';
 import { STAMP_GOAL, toggleWaitlist } from '@/store/actions';
 import { DEMO_TODAY } from '@/data/mock';
 import { cx, Icon } from '@/components/ui';
@@ -35,6 +35,9 @@ export function TodayBrand() {
 
   const extra: { label: string; hint?: string; route: Route }[] = [];
   if (proposals) extra.push({ label: `받은 같이 하자 제안 ${proposals}건`, hint: '답장 기다리는 중', route: { name: 'proposals' } });
+  db.recruitments
+    .filter((r) => brand.savedRecruits?.includes(r.id) && recruitUrgency(r))
+    .forEach((r) => extra.push({ label: `찜한 모집글: ${r.title}`, hint: `🔥 ${recruitUrgency(r)}`, route: { name: 'recruit', id: r.id } }));
   if (myApps) extra.push({ label: `지원한 모집글 ${myApps}건 결과 대기`, route: { name: 'tab', tab: 'recruits' } });
 
   if (!teams.length) {

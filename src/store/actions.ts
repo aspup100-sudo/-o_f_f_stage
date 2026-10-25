@@ -1048,3 +1048,14 @@ export function toggleWaitlist(popupId: string, userId: string) {
   });
   toast(on ? '오픈 알림을 신청했어요. 전날 저녁과 오픈 당일에 알려 드릴게요 (데모)' : '오픈 알림을 껐어요');
 }
+
+export function toggleSaveRecruit(brandId: string, recruitmentId: string) {
+  let on = false;
+  update((s) => {
+    const b = s.db.brands.find((x) => x.id === brandId)!;
+    const list = b.savedRecruits ?? (b.savedRecruits = []);
+    if (list.includes(recruitmentId)) b.savedRecruits = list.filter((x) => x !== recruitmentId);
+    else { list.push(recruitmentId); on = true; }
+  });
+  toast(on ? '찜했어요. 자리가 줄어들면 알려 드릴게요 (데모)' : '찜을 해제했어요');
+}

@@ -70,6 +70,7 @@ export interface BrandProfile {
   lookbook: ID[]; // LookbookImage id
   followers: ID[]; // 방문객 userId
   hearts: ID[]; // 내가 관심 표시한 brandId
+  savedRecruits?: ID[]; // 찜한 모집글
   logoHue: number;
 }
 
