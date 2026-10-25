@@ -2,18 +2,29 @@ import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { navigate, replace } from '@/store/store';
 import { createShowcase, toggleShowcaseHelpful } from '@/store/actions';
-import { brandById, displayName, period, spaceById, teamById } from '@/store/logic';
+import { brandById, displayName, period, spaceById, teamById, teamsOfBrand } from '@/store/logic';
 import { BrandLogo } from '@/components/common';
 import { Button, Card, cx, Demo, Empty, Field, Icon, inputCls, SubHeader, Swatch, Tag, textareaCls } from '@/components/ui';
 import { ComboReviewList } from './Popup';
 import { ReportButton } from './Report';
 
 export function ShowcaseList() {
-  const { db } = useMe();
+  const { db, brand } = useMe();
   const list = db.showcases.filter((s) => !s.hidden);
+  // 끝난 내 팀 중 아직 자랑글이 없는 팀
+  const untold = brand ? teamsOfBrand(db, brand.id).filter((t) => t.stage === '종료' && t.popupId && !db.showcases.some((s) => s.teamId === t.id)) : [];
   return (
     <div className="px-4 pt-4 space-y-3">
       <p className="text-[13px] text-ink-500">팀이 함께 연 팝업의 기록이에요. 운영 팁과 방문객 조합 리뷰를 같이 볼 수 있어요.</p>
+      {untold.map((t) => (
+        <div key={t.id} className="rounded-2xl border border-dashed border-brand-200 bg-brand-50 p-4 flex items-center gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="font-bold text-[14px]">{t.name} 팝업, 자랑해 볼까요?</div>
+            <p className="text-[12px] text-ink-700 mt-0.5">사진 몇 장과 운영 팁 한 줄이면 돼요. 다음 팀원을 찾을 때 신뢰가 쌓여요.</p>
+          </div>
+          <Button size="sm" onClick={() => navigate({ name: 'showcaseNew', teamId: t.id })}>쓰기</Button>
+        </div>
+      ))}
       {list.length === 0 && <Empty>아직 팝업자랑이 없어요</Empty>}
       {list.map((s) => {
         const sp = spaceById(db, s.spaceId);
