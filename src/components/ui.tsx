@@ -122,7 +122,7 @@ export function Tag({ children, tone = 'gray' }: { children: ReactNode; tone?: '
 }
 
 export function Demo({ children = '데모' }: { children?: ReactNode }) {
-  return <span className="inline-flex items-center px-1.5 h-5 rounded bg-amber-100 text-amber-800 text-[11px] font-bold align-middle">({children})</span>;
+  return <span className="inline-flex items-center px-1 h-[18px] border border-ink-300 text-ink-500 text-[10px] font-semibold align-middle tracking-wide">{children}</span>;
 }
 
 const gradeStyle: Record<Grade, { cls: string; icon: string }> = {

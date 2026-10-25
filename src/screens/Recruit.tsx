@@ -89,7 +89,6 @@ export function RecruitsTab({ initial }: { initial?: '찜' }) {
   return (
     <div>
       <ScreenTitle right={<Button size="sm" onClick={() => guard(() => navigate({ name: 'recruitNew' }))}>+ 모집글 쓰기</Button>}>같이 열기</ScreenTitle>
-      <p className="px-4 text-[13px] text-ink-500 -mt-1 mb-2">함께 팝업을 열 팀원을 모아요. 정원이 차면 자동으로 팀이 만들어져요.</p>
       <div className="flex gap-1.5 overflow-x-auto no-scrollbar px-4 pb-2">
         {(['전체', ...(brand ? (['찜'] as const) : []), '모집 중', '협의 중', '마감'] as const).map((s) => (
           <Chip key={s} active={st === s} onClick={() => setSt(s)}>{s === '찜' ? <><Ic n="heart" />찜 {saved.length}</> : s}</Chip>
@@ -109,7 +108,7 @@ export function RecruitsTab({ initial }: { initial?: '찜' }) {
       {brand && picks.length > 0 && st === '전체' && region === '전체' && (
         <section className="mt-2 mb-4">
           <h2 className="px-4 text-[17px] font-extrabold tracking-tight">내 브랜드와 맞는 모집글</h2>
-          <p className="px-4 text-xs text-ink-500 mt-0.5 mb-2.5">빈자리 카테고리, 팝업 가능 기간, 모집자와의 무드로 골랐어요</p>
+          <div className="mb-2.5" />
           <div className="flex gap-2.5 overflow-x-auto no-scrollbar px-4 pb-1">
             {picks.map((x) => (
               <div key={x.r.id} className={picks.length === 1 ? 'w-full' : 'w-[300px] shrink-0'}><RecruitCard db={db} r={x.r} reasons={x.reasons} /></div>

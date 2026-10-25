@@ -74,7 +74,6 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
             <h2 className="text-[17px] font-extrabold tracking-tight">
               궁합이 높은 브랜드
             </h2>
-            <p className="text-xs text-ink-500 mt-0.5">무드·가격대·고객층은 비슷하고, 카테고리는 다를수록 잘 맞아요</p>
           </div>
           <div className="flex gap-2.5 overflow-x-auto no-scrollbar px-4 pb-1">
             {recs.map((r) => (
