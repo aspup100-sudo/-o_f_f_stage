@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { useMe } from '@/store/hooks';
-import { navigate, replace } from '@/store/store';
+import { navigate, replace, toast } from '@/store/store';
 import { publishMagazine, toggleMagazineHidden, toggleMagazineLike } from '@/store/actions';
 import { ScreenTitle } from '@/components/common';
 import { Button, Card, Chip, cx, Empty, Field, Icon, inputCls, SubHeader, Tag, textareaCls } from '@/components/ui';
@@ -121,6 +121,7 @@ export function MagazineDetail({ id }: { id: string }) {
           <Button variant={liked ? 'secondary' : 'dark'} onClick={() => toggleMagazineLike(m.id, userId)}>
             <Icon name="heart" filled={liked} className="w-4 h-4" /> 도움이 됐어요 {m.likes.length}
           </Button>
+          <Button variant="secondary" aria-label="공유" onClick={() => shareMagazine(m)}>공유</Button>
           {m.link && <Button variant="secondary" onClick={() => navigate(m.link!)}>{m.link.name === 'tab' ? '이 지역 공간 보기' : m.link.name === 'showcase' ? '팝업자랑 원문 보기' : '관련 글 보기'} ›</Button>}
         </div>
         <div className="mt-6"><OfficialInsta /></div>
@@ -204,4 +205,20 @@ export function MagazineNew() {
       </div>
     </div>
   );
+}
+
+/** 휴대폰이면 공유 시트를, 아니면 링크 복사를 쓴다. */
+async function shareMagazine(m: MagazinePost) {
+  const url = location.href.startsWith('http') ? location.origin + location.pathname : 'https://aspup100-sudo.github.io/-o_f_f_stage/';
+  const text = `${m.title} · OFF STAGE 매거진`;
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: m.title, text, url });
+      return;
+    }
+    await navigator.clipboard.writeText(`${text}\n${url}`);
+    toast('링크를 복사했어요. 친구에게 붙여 넣어 보내 보세요');
+  } catch {
+    toast('공유를 취소했어요');
+  }
 }
