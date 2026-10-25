@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { shareLink } from '@/store/share';
 import { navigate } from '@/store/store';
-import { checkIn, claimStampReward, STAMP_GOAL, toggleWaitlist, writeComboReview, writeVisitorReview } from '@/store/actions';
+import { checkIn, claimStampReward, followAll, STAMP_GOAL, toggleWaitlist, writeComboReview, writeVisitorReview } from '@/store/actions';
 import { avg, brandById, dday, md, displayName, period, popupById, spaceById, teamById, waitCount } from '@/store/logic';
 import { BrandLogo, PopupBannerCard, ScreenTitle, ThemeTagList } from '@/components/common';
 import { Button, Card, Chip, cx, Demo, Empty, inputCls, Segmented, Sheet, Stars, StatusPill, SubHeader, Swatch, Tabs, Tag, textareaCls } from '@/components/ui';
@@ -106,6 +106,16 @@ export function PopupDetail({ id }: { id: string }) {
               <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-emerald-800">
                 <div className="font-bold">✅ 방문 인증 완료</div>
                 <div className="text-sm mt-0.5">스탬프가 적립됐어요. 이제 리뷰를 남길 수 있어요.</div>
+                {(() => {
+                  const me = db.visitors.find((v) => v.userId === userId);
+                  const rest = brands.filter((b) => !me?.following.includes(b.id));
+                  if (!me || !rest.length) return null;
+                  return (
+                    <button onClick={() => followAll(userId, rest.map((b) => b.id))} className="mt-3 w-full h-10 rounded-xl bg-emerald-600 text-white text-sm font-bold">
+                      오늘 본 브랜드 {rest.length}곳 한 번에 팔로우
+                    </button>
+                  );
+                })()}
               </div>
             ) : (
               <div className="rounded-2xl bg-ink-900 text-white p-4">

@@ -119,6 +119,20 @@ export function updateBrandProfile(brandId: string, patch: Partial<{ intro: stri
   toast('프로필을 저장했어요');
 }
 
+export function followAll(visitorUserId: string, brandIds: string[]) {
+  let n = 0;
+  update((s) => {
+    const v = s.db.visitors.find((x) => x.userId === visitorUserId)!;
+    brandIds.forEach((id) => {
+      if (v.following.includes(id)) return;
+      v.following.push(id);
+      s.db.brands.find((x) => x.id === id)?.followers.push(visitorUserId);
+      n++;
+    });
+  });
+  toast(`${n}개 브랜드를 팔로우했어요. 다음 팝업 소식을 알려 드릴게요`);
+}
+
 export function toggleFollow(visitorUserId: string, brandId: string) {
   let following = false;
   update((s) => {
