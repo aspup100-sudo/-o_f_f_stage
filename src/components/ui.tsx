@@ -199,7 +199,7 @@ export function Section({ title, right, children, className }: { title?: ReactNo
   );
 }
 
-export function Empty({ children, icon = 'sparkle', action }: { children: ReactNode; icon?: string; action?: { label: string; onClick: () => void } }) {
+export function Empty({ children, icon = 'inbox', action }: { children: ReactNode; icon?: string; action?: { label: string; onClick: () => void } }) {
   return (
     <div className="py-10 flex flex-col items-center text-ink-500 text-sm gap-2 text-center">
       <Icon name={icon} className="w-8 h-8 text-ink-300" />

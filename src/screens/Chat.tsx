@@ -85,7 +85,7 @@ export function ChatScreen({ id }: { id: string }) {
       />
       {ctx && (
         <button onClick={() => navigate(ctx)} className="mx-4 mt-3 text-left text-[13px] bg-white rounded-md px-3 py-2 border border-ink-100 flex items-center gap-2">
-          <Icon name="sparkle" className="w-4 h-4 text-brand-500" />
+          <Icon name="team" className="w-4 h-4" />
           <span className="flex-1">{prep ? `팀 공간 · 오픈 ${dday(team!.period.start)} · 준비 ${prep.done}/${prep.steps.length}` : room.context?.type === 'team' ? '팀 공간 열기' : room.context?.type === 'space' ? '공간 상세 보기' : room.context?.type === 'interest' ? '상대 브랜드 프로필 보기' : '관련 글 보기'}</span>›
         </button>
       )}

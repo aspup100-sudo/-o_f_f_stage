@@ -179,7 +179,7 @@ export function AvailabilityCalendar({ db, spaceId, editable }: { db: DB; spaceI
               onClick={() => toggleAvailability(spaceId, d)}
               className={cx(
                 'aspect-square rounded-lg text-[12px] font-semibold flex items-center justify-center',
-                past ? 'text-ink-300' : st === 'open' ? 'bg-emerald-100 text-emerald-800' : st === 'booked' ? 'bg-ink-300/60 text-ink-500 line-through' : 'bg-white border border-ink-100 text-ink-700',
+                past ? 'text-ink-300' : st === 'open' ? 'bg-white border border-ink-900 text-ink-900 font-bold' : st === 'booked' ? 'bg-ink-100 text-ink-300 line-through' : 'bg-white border border-ink-100 text-ink-700',
               )}
             >
               {Number(d.slice(8))}
@@ -188,7 +188,7 @@ export function AvailabilityCalendar({ db, spaceId, editable }: { db: DB; spaceI
         })}
       </div>
       <div className="flex gap-3 text-[11px] text-ink-500 mt-2">
-        <span><span className="inline-block w-2.5 h-2.5 rounded bg-emerald-200 mr-1" />비는 날</span>
+        <span><span className="inline-block w-2.5 h-2.5 border border-ink-900 mr-1" />비는 날</span>
         <span><span className="inline-block w-2.5 h-2.5 rounded bg-ink-300 mr-1" />예약됨</span>
         <span><span className="inline-block w-2.5 h-2.5 rounded border border-ink-300 mr-1" />미정</span>
       </div>
@@ -249,7 +249,7 @@ export function SpaceDetail({ id }: { id: string }) {
           <div className="py-2.5"><div className="text-[11px] text-ink-500">최소 대관</div><div className="font-bold">{s.minDays}일</div></div>
         </div>
         {s.fashionOnly && (
-          <div className="mt-3 rounded-md bg-violet-50 text-violet-800 text-[13px] p-3">
+          <div className="mt-3 border-l-2 border-ink-900 text-ink-700 text-[13px] pl-3 py-1">
             <Ic n="shirt" />업종 고정(패션) 공간이에요. 이전 팀의 집기·연출을 이어 쓸 수 있는지 채팅으로 확인해 보세요.
           </div>
         )}
@@ -259,7 +259,7 @@ export function SpaceDetail({ id }: { id: string }) {
           {FACILITIES.map((f) => {
             const has = s.facilities.includes(f);
             return (
-              <div key={f} className={cx('flex items-center gap-2 text-sm rounded-lg px-3 py-2', has ? 'bg-emerald-50 text-emerald-800' : 'bg-ink-100/50 text-ink-300 line-through')}>
+              <div key={f} className={cx('flex items-center gap-2 text-sm px-1 py-2 border-b border-ink-100', has ? 'text-ink-900' : 'text-ink-300 line-through')}>
                 <Icon name={has ? 'check' : 'x'} className="w-4 h-4" />
                 {f}{f === '전기 용량' && has && s.electricKw ? ` ${s.electricKw}kW` : ''}
               </div>
