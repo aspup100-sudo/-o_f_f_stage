@@ -349,7 +349,7 @@ export function SpaceDetail({ id }: { id: string }) {
         })()}
       </div>
       {role === 'brand' && (
-        <div className="sticky bottom-0 bg-white border-t border-ink-100 p-3 flex gap-2">
+        <div className="sticky bottom-0 bg-white border-t border-ink-100 p-3 pb-safe flex gap-2">
           <SaveSpaceButton spaceId={s.id} inline />
           {s.teamRental ? (
             <Button full size="lg" onClick={() => guard(() => setApplyOpen(true))}>우리 팀으로 지원하기</Button>

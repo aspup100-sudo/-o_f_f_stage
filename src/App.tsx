@@ -156,7 +156,7 @@ export default function App() {
     <div className="min-h-screen flex justify-center">
       <div className="relative w-full max-w-[430px] min-h-screen bg-ink-100/60 bg-[#fafaf9] shadow-xl">
         {isTab && <TopBar />}
-        <main className={cx(isTab && 'pb-24', !isTab && !isOnboarding && 'pb-24')}>{renderRoute(route)}</main>
+        <main className={cx((isTab || !isOnboarding) && 'main-safe')}>{renderRoute(route)}</main>
         {isTab && <BottomTabs current={route.name === 'tab' ? route.tab : undefined} />}
         <Toast />
         <VerifyGate />

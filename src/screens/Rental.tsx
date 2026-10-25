@@ -214,7 +214,7 @@ export function RentalPartnerScreen({ id, teamId }: { id: string; teamId?: strin
         )}
       </div>
       {role === 'brand' && (
-        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white border-t border-ink-100 p-3 z-30">
+        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white border-t border-ink-100 p-3 pb-safe z-30">
           {lines.length > 0 && p.freeDeliveryOver > 0 && (
             <div className="mb-2.5">
               <div className="text-[12px] font-semibold">

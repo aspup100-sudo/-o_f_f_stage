@@ -110,7 +110,7 @@ export function ChatScreen({ id }: { id: string }) {
         })}
         <div ref={endRef} />
       </div>
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white border-t border-ink-100 z-40">
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white border-t border-ink-100 z-40 pb-[env(safe-area-inset-bottom)]">
         {room.memberIds.includes(userId) && (
           <div className="flex gap-1.5 overflow-x-auto no-scrollbar px-2.5 pt-2.5">
             {quick.map((q) => (

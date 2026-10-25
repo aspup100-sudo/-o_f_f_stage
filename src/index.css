@@ -7,3 +7,7 @@ body { font-family: Pretendard, 'Apple SD Gothic Neo', 'Noto Sans KR', system-ui
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { scrollbar-width: none; }
 button { -webkit-tap-highlight-color: transparent; }
+/* 홈 화면 앱(아이폰)에서 아래 홈 바에 가리지 않게 */
+.pb-safe { padding-bottom: calc(0.75rem + env(safe-area-inset-bottom)); }
+.pb-safe-lg { padding-bottom: calc(1.5rem + env(safe-area-inset-bottom)); }
+.main-safe { padding-bottom: calc(6rem + env(safe-area-inset-bottom)); }

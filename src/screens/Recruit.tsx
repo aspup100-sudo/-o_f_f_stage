@@ -273,7 +273,7 @@ export function RecruitDetail({ id }: { id: string }) {
       </div>
 
       {role === 'brand' && !isHost && !inSlot && r.status !== '마감' && (
-        <div className="sticky bottom-0 bg-white border-t border-ink-100 p-3">
+        <div className="sticky bottom-0 bg-white border-t border-ink-100 p-3 pb-safe">
           {myApp ? (
             <Button full disabled>지원 완료 · 모집자 검토 중</Button>
           ) : (
@@ -284,7 +284,7 @@ export function RecruitDetail({ id }: { id: string }) {
         </div>
       )}
       {role === 'landlord' && r.status !== '마감' && (
-        <div className="sticky bottom-0 bg-white border-t border-ink-100 p-3">
+        <div className="sticky bottom-0 bg-white border-t border-ink-100 p-3 pb-safe">
           <ProposeSpaceButton recruitmentId={r.id} />
         </div>
       )}
