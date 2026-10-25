@@ -5,7 +5,7 @@ import {
   addCommonItem, agreeAgreement, remindPayment, autoFillShifts, cycleShift, fillAgreementExamples, removeCommonItem, renameTeam, setMemberHangers, setMemberRole,
   setMoodHeadline, simulateOthersAgree, toggleMoodPick, togglePaid, togglePromo, updateAgreementItem, updateCost,
 } from '@/store/actions';
-import { brandById, dday, manwon, md, period, spaceById, teamById, teamCost, teamPrep, teamsOfBrand, won } from '@/store/logic';
+import { brandById, daysUntil, dday, manwon, md, period, spaceById, teamById, teamCost, teamPrep, teamsOfBrand, won } from '@/store/logic';
 import { ProgressBar } from './Today';
 import { BrandLogo, LookbookGrid, ScreenTitle, ThemeTagList, TrustLine } from '@/components/common';
 import { Button, Card, cx, Demo, Empty, Icon, inputCls, Segmented, Sheet, StatusPill, SubHeader, Swatch, Tabs, Tag, textareaCls } from '@/components/ui';
@@ -553,8 +553,17 @@ ${hashtags.join(' ')}`;
   return (
     <div>
       <div className="rounded-2xl overflow-hidden border border-ink-100 mb-3">
-        <div className="flex h-20">
-          {brands.map((b) => <Swatch key={b.id} hue={b.logoHue} pattern="stripe" rounded="" className="flex-1" />)}
+        <div className="relative h-40">
+          <div className="absolute inset-0 flex">
+            {brands.map((b) => <Swatch key={b.id} hue={b.logoHue} pattern="stripe" rounded="" className="flex-1" />)}
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/10" />
+          <div className="absolute left-4 right-4 bottom-3 text-white">
+            <div className="text-[10px] font-bold tracking-[0.2em] opacity-80">OFF STAGE · 공동 팝업</div>
+            <div className="text-xl font-extrabold leading-tight mt-0.5">{team.name}</div>
+            <div className="text-[12px] opacity-90 mt-0.5">{period(team.period)} · {sp?.name ?? team.region}</div>
+            <div className="text-[11px] opacity-80 mt-0.5 truncate">{brands.map((b) => b.name).join(' × ')}</div>
+          </div>
         </div>
         <div className="p-4">
           <div className="text-[11px] text-ink-500">공통 포스터 문구 (자동 생성)</div>
@@ -564,6 +573,19 @@ ${hashtags.join(' ')}`;
       <Button full variant="dark" onClick={copy}>문구 복사하기</Button>
       <div className="mt-5 font-bold mb-1">"각자 같은 날 게시" 체크리스트</div>
       <p className="text-[12px] text-ink-500 mb-2">약속서 8번 홍보 의무: {db.agreements.find((a) => a.teamId === team.id)?.items.promo || '아직 정하지 않았어요'}</p>
+      {(() => {
+        // 기본 권장일: 오픈 3일 전
+        const d = new Date(team.period.start + 'T00:00:00');
+        d.setDate(d.getDate() - 3);
+        const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const left = daysUntil(iso);
+        return (
+          <div className="mb-2 rounded-xl bg-brand-50 px-3.5 py-2.5 flex items-center justify-between">
+            <span className="text-[13px] font-semibold">📣 게시일 {md(iso)}({'일월화수목금토'[d.getDay()]}) 오후 7시</span>
+            <span className="text-[12px] font-extrabold text-brand-600">{left > 0 ? `D-${left}` : left === 0 ? '오늘' : '지남'}</span>
+          </div>
+        );
+      })()}
       <Card className="divide-y divide-ink-100">
         {brands.map((b) => {
           const on = team.promoChecked.includes(b.id);
