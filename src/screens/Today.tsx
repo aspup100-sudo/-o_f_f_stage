@@ -315,6 +315,21 @@ export function TodayLandlord() {
           </button>
         )}
       </div>
+      {(() => {
+        const qs = db.spaceQnas.filter((q) => landlord.spaceIds.includes(q.spaceId) && !q.answer);
+        if (!qs.length) return null;
+        const q = qs[0];
+        return (
+          <button onClick={() => navigate({ name: 'space', id: q.spaceId })} className="mt-3 w-full rounded-2xl bg-white border border-ink-100 p-4 text-left flex items-center gap-3">
+            <span className="text-2xl">💬</span>
+            <span className="flex-1 min-w-0">
+              <span className="block text-[14px] font-bold">답변 기다리는 공간 질문 {qs.length}건</span>
+              <span className="block text-[12px] text-ink-500 truncate">"{q.question}" · {spaceById(db, q.spaceId)?.name}</span>
+            </span>
+            <span className="text-ink-300">›</span>
+          </button>
+        );
+      })()}
     </section>
   );
 }
