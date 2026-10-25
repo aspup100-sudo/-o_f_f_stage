@@ -3,7 +3,7 @@ import { useMe } from '@/store/hooks';
 import { guard } from '@/store/hooks';
 import { navigate } from '@/store/store';
 import { shareLink } from '@/store/share';
-import { brandById, displayName, josa, matchPct, matchScore, period, reviewAvg, spaceById, teamsOfBrand, trustEvents, trustScore, userById } from '@/store/logic';
+import { brandById, displayName, josa, learnMatchWeights, matchPct, matchScore, period, reviewAvg, spaceById, teamsOfBrand, trustEvents, trustScore, userById } from '@/store/logic';
 import { BrandLogo, LookbookGrid, ThemeTagList } from '@/components/common';
 import { Button, Card, Empty, GradeBadge, Icon, Stars, StatusPill, SubHeader, Swatch, Tabs, Tag } from '@/components/ui';
 import { BrandActions } from './BrandActions';
@@ -240,6 +240,7 @@ function MatchCard({ me, other }: { me: import('@/types').BrandProfile; other: i
   const m = matchScore(db, me, other);
   const pct = matchPct(m.score);
   const [open, setOpen] = useState(false);
+  const learned = learnMatchWeights(db);
   const word = pct >= 80 ? '찰떡 궁합' : pct >= 60 ? '잘 맞아요' : pct >= 45 ? '무난해요' : '색이 많이 달라요';
   return (
     <div className="mt-4 rounded-2xl bg-brand-50 p-4">
@@ -263,7 +264,7 @@ function MatchCard({ me, other }: { me: import('@/types').BrandProfile; other: i
             </div>
           ))}
           <div className="flex justify-between border-t border-ink-100 mt-1.5 pt-1.5 font-bold"><span>합계 {m.score}점</span><span>40 + {m.score}×4 = {pct}%</span></div>
-          <p className="text-[11px] text-ink-500 mt-1.5">가입할 때 고른 무드·카테고리·가격대·고객 연령 태그로 계산해요. 태그는 내 정보에서 바꿀 수 있어요. (데모 공식)</p>
+          <p className="text-[11px] text-ink-500 mt-1.5">가입할 때 고른 무드·카테고리·가격대·고객 연령 태그로 계산해요. 태그는 내 정보에서 바꿀 수 있어요.{learned.samples > 0 && ` 항목별 점수는 실제로 함께 팝업을 연 ${learned.samples}쌍의 후기 결과로 자동 보정돼요.`} (데모)</p>
         </div>
       )}
     </div>

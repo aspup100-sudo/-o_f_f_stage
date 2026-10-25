@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { navigate } from '@/store/store';
 import { decideVerification, resolveReport } from '@/store/actions';
-import { daysUntil, displayName, rentalQuote, won } from '@/store/logic';
+import { BASE_WEIGHTS, daysUntil, displayName, learnMatchWeights, rentalQuote, WEIGHT_LABEL, won } from '@/store/logic';
 import { ScreenTitle } from '@/components/common';
 import { Button, Card, Empty, Segmented, Tag } from '@/components/ui';
 import { ROLE_LABEL } from '@/config';
@@ -155,6 +155,38 @@ export function StatsTab() {
                 {tile('두 곳 이상 방문한 방문객', pct(repeatVisitors, perVisitor.length), `${perVisitor.length}명 중 ${repeatVisitors}명`)}
                 {tile('2회차로 이어진 팀', db.teams.filter((t) => t.round >= 2).length, '같은 팀이 다시 연 팝업')}
               </div>
+            </div>
+          );
+        })()}
+        {(() => {
+          const L = learnMatchWeights(db);
+          return (
+            <div>
+              <h3 className="font-bold mb-1 text-[15px]">궁합 공식 자동 조정</h3>
+              <p className="text-[12px] text-ink-500 mb-2">함께 팝업을 끝낸 브랜드 쌍이 서로 남긴 업무 후기와 재결합 여부를 보고, 결과가 좋았던 쌍에서 자주 보인 특징의 가중치를 올려요. 표본이 적을수록 기본값에 가깝게 둬요.</p>
+              <Card className="p-3.5">
+                <div className="flex justify-between text-[12px] text-ink-500 mb-1.5"><span>학습한 팀 결과 {L.samples}쌍</span><span>반영 비율 {Math.round(L.trust * 100)}%</span></div>
+                {(Object.keys(BASE_WEIGHTS) as (keyof typeof BASE_WEIGHTS)[]).map((k) => {
+                  const d = Math.round((L.weights[k] - BASE_WEIGHTS[k]) * 100) / 100;
+                  return (
+                    <div key={k} className="flex items-center justify-between py-1 text-[13px] border-t border-ink-100 first:border-0">
+                      <span className="text-ink-700">{WEIGHT_LABEL[k]}</span>
+                      <span className="tabular-nums">
+                        <span className="text-ink-500">{BASE_WEIGHTS[k]} → </span><b>{L.weights[k]}</b>
+                        {d !== 0 && <span className={d > 0 === BASE_WEIGHTS[k] > 0 ? 'text-emerald-600 ml-1' : 'text-rose-500 ml-1'}>{d > 0 ? '▲' : '▼'}</span>}
+                      </span>
+                    </div>
+                  );
+                })}
+                {L.pairs.length > 0 && (
+                  <details className="mt-2 text-[12px]">
+                    <summary className="text-ink-500 cursor-pointer">학습에 쓴 팀 결과 보기</summary>
+                    <div className="mt-1.5 space-y-0.5">
+                      {L.pairs.map((p) => <div key={p.a.id + p.b.id} className="flex justify-between"><span>{p.a.name} × {p.b.name}</span><span className="text-ink-500">{p.why} → {Math.round(p.y * 100)}점</span></div>)}
+                    </div>
+                  </details>
+                )}
+              </Card>
             </div>
           );
         })()}

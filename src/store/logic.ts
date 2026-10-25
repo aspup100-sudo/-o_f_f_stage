@@ -93,28 +93,97 @@ export function trustScore(db: DB, subjectId: string): TrustScore {
 const sim = (a: BrandProfile, b: BrandProfile) =>
   a.tags.moods.filter((m) => b.tags.moods.includes(m)).length + a.tags.categories.filter((c) => b.tags.categories.includes(c)).length;
 
-export function matchScore(db: DB, me: BrandProfile, other: BrandProfile) {
-  const reasons: string[] = [];
-  const parts: { label: string; pts: number }[] = []; // 항목별 점수(궁합 카드에서 펼쳐 보기)
-  let score = 0;
+// ───────── 궁합 가중치 자동 조정 ─────────
+/** 처음 정한 기본 가중치. 실제 팀 결과가 쌓이면 learnMatchWeights가 이 값을 보정한다. */
+export const BASE_WEIGHTS = { mood: 3, price: 2, age: 1.5, diffCat: 2, sameCat: -1, combo: 2 };
+export type MatchWeights = typeof BASE_WEIGHTS;
+export const WEIGHT_LABEL: Record<keyof MatchWeights, string> = {
+  mood: '무드 겹침(1개당)', price: '가격대 같음', age: '고객 연령 겹침(1개당)', diffCat: '서로 다른 카테고리(1개당)', sameCat: '같은 카테고리(1개당)', combo: '방문객이 좋아한 조합과 닮음',
+};
+
+/** 두 브랜드 태그에서 뽑은 특징값(가중치 곱하기 전) */
+function matchFeatures(me: BrandProfile, other: BrandProfile) {
   const moods = me.tags.moods.filter((m) => other.tags.moods.includes(m));
-  if (moods.length) {
-    score += moods.length * 3;
-    reasons.push(`무드 겹침: ${moods.join(', ')}`);
-  }
-  parts.push({ label: moods.length ? `무드 겹침 (${moods.join(', ')})` : '겹치는 무드 없음', pts: moods.length * 3 });
   const pd = Math.abs(PRICE_RANGES.indexOf(me.tags.price) - PRICE_RANGES.indexOf(other.tags.price));
-  if (pd === 0) { score += 2; reasons.push('가격대 같음'); } else if (pd === 1) score += 1;
-  parts.push({ label: pd === 0 ? '가격대 같음' : pd === 1 ? '가격대 한 칸 차이' : '가격대 차이 큼', pts: pd === 0 ? 2 : pd === 1 ? 1 : 0 });
   const ages = me.tags.ages.filter((a) => other.tags.ages.includes(a));
-  if (ages.length) { score += ages.length * 1.5; reasons.push(`고객층 겹침: ${ages.join(', ')}`); }
-  parts.push({ label: ages.length ? `고객 연령 겹침 (${ages.join(', ')})` : '고객 연령 다름', pts: ages.length * 1.5 });
   const diffCats = other.tags.categories.filter((c) => !me.tags.categories.includes(c));
   const sameCats = other.tags.categories.filter((c) => me.tags.categories.includes(c));
-  score += diffCats.length * 2 - sameCats.length;
-  if (diffCats.length) reasons.push(`서로 다른 카테고리: ${diffCats.join(', ')}`);
-  if (diffCats.length) parts.push({ label: `서로 다른 카테고리 (${diffCats.join(', ')})`, pts: diffCats.length * 2 });
-  if (sameCats.length) parts.push({ label: `같은 카테고리 (${sameCats.join(', ')}) · 자리 경쟁`, pts: -sameCats.length });
+  return { moods, pd, ages, diffCats, sameCats, f: { mood: moods.length, price: pd === 0 ? 1 : pd === 1 ? 0.5 : 0, age: ages.length, diffCat: diffCats.length, sameCat: sameCats.length } };
+}
+
+/** 같은 팀으로 팝업을 끝낸 브랜드 쌍과 그 결과(0~1). 서로 남긴 업무 후기와 재결합 여부로 매긴다. */
+export function teamPairOutcomes(db: DB) {
+  const out: { a: BrandProfile; b: BrandProfile; y: number; why: string }[] = [];
+  const seen = new Set<string>();
+  db.teams.filter((t) => t.stage === '종료').forEach((t) => {
+    const ids = t.members.map((m) => m.brandId);
+    ids.forEach((x, i) => ids.slice(i + 1).forEach((y) => {
+      const key = [x, y].sort().join('|');
+      if (seen.has(key)) return;
+      seen.add(key);
+      const a = db.brands.find((b) => b.id === x);
+      const b = db.brands.find((bb) => bb.id === y);
+      if (!a || !b) return;
+      const rv = db.reviews.filter((r) => r.kind === 'brand_to_brand' && ((r.authorId === a.userId && r.targetId === b.id) || (r.authorId === b.userId && r.targetId === a.id)));
+      if (!rv.length) return; // 후기가 없으면 결과를 모른다
+      const avgScore = avg(rv.map(reviewAvg));
+      const again = db.teams.filter((tt) => tt.members.some((m) => m.brandId === x) && tt.members.some((m) => m.brandId === y)).length > 1;
+      const y01 = Math.max(0, Math.min(1, (avgScore - 3) / 2 + (again ? 0.15 : 0)));
+      out.push({ a, b, y: y01, why: `후기 ${avgScore.toFixed(1)}${again ? ' · 다시 함께함' : ''}` });
+    }));
+  });
+  return out;
+}
+
+let weightCache: { sig: string; res: ReturnType<typeof computeWeights> } | null = null;
+/** 실제 팀 결과로 가중치를 보정한다. 결과가 좋은 쌍에서 자주 보인 특징은 올리고, 나쁜 쌍에서 보인 특징은 내린다.
+ *  표본이 적을 땐 기본값에 가깝게 두고(축소 추정), 한 번에 ±50% 넘게 바뀌지 않게 막는다. */
+export function learnMatchWeights(db: DB) {
+  const sig = `${db.reviews.length}|${db.teams.map((t) => t.stage).join('')}|${db.brands.length}`;
+  if (weightCache?.sig === sig) return weightCache.res;
+  const res = computeWeights(db);
+  weightCache = { sig, res };
+  return res;
+}
+
+function computeWeights(db: DB) {
+  const pairs = teamPairOutcomes(db);
+  const weights: MatchWeights = { ...BASE_WEIGHTS };
+  const n = pairs.length;
+  if (!n) return { weights, samples: 0, pairs, trust: 0 };
+  const meanY = avg(pairs.map((p) => p.y));
+  const trust = n / (n + 6); // 표본 6쌍이면 절반만 믿는다
+  (['mood', 'price', 'age', 'diffCat', 'sameCat'] as const).forEach((k) => {
+    const xs = pairs.map((p) => matchFeatures(p.a, p.b).f[k]);
+    const mx = avg(xs);
+    let cov = 0;
+    let vx = 0;
+    pairs.forEach((p, i) => { cov += (xs[i] - mx) * (p.y - meanY); vx += (xs[i] - mx) ** 2; });
+    if (vx === 0) return; // 모든 쌍이 같은 값이면 배울 게 없다
+    const slope = cov / vx; // 특징 1 늘 때 결과(0~1)가 얼마나 바뀌나
+    const lift = Math.max(-0.5, Math.min(0.5, slope * 2)) * trust;
+    const base = BASE_WEIGHTS[k];
+    weights[k] = Math.round(base * (1 + Math.sign(base) * lift) * 100) / 100;
+  });
+  return { weights, samples: n, pairs, trust };
+}
+
+export function matchScore(db: DB, me: BrandProfile, other: BrandProfile) {
+  const W = learnMatchWeights(db).weights;
+  const r1 = (x: number) => Math.round(x * 10) / 10;
+  const reasons: string[] = [];
+  const parts: { label: string; pts: number }[] = []; // 항목별 점수(궁합 카드에서 펼쳐 보기)
+  const { moods, pd, ages, diffCats, sameCats, f } = matchFeatures(me, other);
+  let score = 0;
+  const add = (label: string, pts: number) => { score += pts; parts.push({ label, pts: r1(pts) }); };
+  if (moods.length) reasons.push(`무드 겹침: ${moods.join(', ')}`);
+  add(moods.length ? `무드 겹침 (${moods.join(', ')})` : '겹치는 무드 없음', f.mood * W.mood);
+  if (pd === 0) reasons.push('가격대 같음');
+  add(pd === 0 ? '가격대 같음' : pd === 1 ? '가격대 한 칸 차이' : '가격대 차이 큼', f.price * W.price);
+  if (ages.length) reasons.push(`고객층 겹침: ${ages.join(', ')}`);
+  add(ages.length ? `고객 연령 겹침 (${ages.join(', ')})` : '고객 연령 다름', f.age * W.age);
+  if (diffCats.length) { reasons.push(`서로 다른 카테고리: ${diffCats.join(', ')}`); add(`서로 다른 카테고리 (${diffCats.join(', ')})`, f.diffCat * W.diffCat); }
+  if (sameCats.length) add(`같은 카테고리 (${sameCats.join(', ')}) · 자리 경쟁`, f.sameCat * W.sameCat);
   // 조합 리뷰 가산점: 평점 높은 조합(x,y)에서 내가 x와 비슷하고 상대가 y와 비슷하면
   let comboBonus = false;
   db.comboReviews.filter((c) => c.good && c.rating >= 4).forEach((c) =>
@@ -125,8 +194,8 @@ export function matchScore(db: DB, me: BrandProfile, other: BrandProfile) {
       if ((sim(me, bx) >= 2 && sim(other, by) >= 2) || (sim(me, by) >= 2 && sim(other, bx) >= 2)) comboBonus = true;
     }),
   );
-  if (comboBonus) { score += 2; reasons.push('방문객이 좋아한 조합과 닮았어요'); parts.push({ label: '방문객이 좋아한 조합과 닮음', pts: 2 }); }
-  return { score, reasons, parts };
+  if (comboBonus) { reasons.push('방문객이 좋아한 조합과 닮았어요'); add('방문객이 좋아한 조합과 닮음', W.combo); }
+  return { score: r1(score), reasons, parts };
 }
 
 export function recommendations(db: DB, me: BrandProfile, limit = 5) {
