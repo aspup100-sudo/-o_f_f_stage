@@ -503,9 +503,10 @@ export function RentalMeCard() {
     <Card className="p-4">
       <div className="font-bold">{rental.name}</div>
       <p className="text-sm text-ink-500 mt-1">{rental.intro}</p>
-      <div className="text-[13px] mt-2">배송 지역: {rental.regions.join(', ')}</div>
-      <div className="text-[13px]">브랜드 평점: {r.avg !== null ? `★ ${r.avg.toFixed(1)} (${r.count})` : '아직 없음'} · 반납 완료 {r.done}건</div>
-      <div className="flex gap-1 mt-2 flex-wrap">{REGIONS.map((x) => <Tag key={x} tone={rental.regions.includes(x) ? 'green' : 'gray'}>{x}</Tag>)}</div>
+      <div className="text-[13px] mt-2">브랜드 평점: {r.avg !== null ? `★ ${r.avg.toFixed(1)} (${r.count})` : '아직 없음'} · 반납 완료 {r.done}건</div>
+      <div className="text-[12px] text-ink-500 mt-2 mb-1">배송 지역</div>
+      <div className="flex gap-1 flex-wrap">{REGIONS.map((x) => <Tag key={x} tone={rental.regions.includes(x) ? 'green' : 'gray'}>{x}</Tag>)}</div>
+      <Button variant="secondary" full className="mt-3" onClick={() => navigate({ name: 'rentalPartner', id: rental.id })}>브랜드에게 보이는 내 업체 페이지</Button>
     </Card>
   );
 }
