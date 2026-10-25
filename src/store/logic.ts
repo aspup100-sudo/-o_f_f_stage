@@ -315,3 +315,11 @@ export const soonOpenDays = (db: DB, spaceId: string) =>
 
 /** 추천 점수를 사람이 읽는 궁합 %로 바꾼다 */
 export const matchPct = (score: number) => Math.max(10, Math.min(98, Math.round(40 + score * 4)));
+
+// ───────── 채팅 안 읽은 수 ─────────
+// 읽은 기록이 없으면 데모 기준일 이전 메시지는 읽은 것으로 본다
+export function chatUnread(db: DB, roomId: string, userId: string) {
+  const room = db.chatRooms.find((r) => r.id === roomId);
+  const since = room?.readAt?.[userId] ?? '2026-10-24T12:00:00';
+  return db.messages.filter((m) => m.roomId === roomId && m.senderId !== userId && m.senderId !== 'system' && m.at > since).length;
+}

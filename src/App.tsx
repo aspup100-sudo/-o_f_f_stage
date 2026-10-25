@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { Role, Route } from '@/types';
 import { useApp, navigate, switchRole, resetDemo, update } from '@/store/store';
 import { useMe } from '@/store/hooks';
-import { josa } from '@/store/logic';
+import { chatUnread, josa } from '@/store/logic';
 import { Icon, cx, Sheet, Button, Demo } from '@/components/ui';
 import { renderRoute } from '@/screens';
 import { startMatchChat } from '@/store/actions';
@@ -11,7 +11,7 @@ import { TABS, ROLE_LABEL } from '@/config';
 function TopBar() {
   const { db, userId, role } = useMe();
   const unread = db.notifications.filter((n) => n.userId === userId && !n.read).length;
-  const rooms = db.chatRooms.filter((r) => r.memberIds.includes(userId)).length;
+  const rooms = db.chatRooms.filter((r) => r.memberIds.includes(userId)).reduce((n, r) => n + chatUnread(db, r.id, userId), 0);
   return (
     <header className="sticky top-0 z-30 bg-white border-b border-ink-100 h-14 flex items-center px-4">
       <button onClick={() => navigate({ name: 'tab', tab: role === 'admin' ? 'stats' : 'explore' })} className="flex items-center gap-1.5">
@@ -23,7 +23,7 @@ function TopBar() {
       {role !== 'admin' && (
         <button onClick={() => navigate({ name: 'chatList' })} className="relative w-10 h-10 flex items-center justify-center" aria-label="채팅">
           <Icon name="chat" className="w-6 h-6" />
-          {rooms > 0 && <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand-500" />}
+          {rooms > 0 && <span className="absolute top-1 right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-brand-500 text-white text-[10px] font-bold flex items-center justify-center">{rooms}</span>}
         </button>
       )}
       <button onClick={() => navigate({ name: 'notifications' })} className="relative w-10 h-10 flex items-center justify-center" aria-label="알림">

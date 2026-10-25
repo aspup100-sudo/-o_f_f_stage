@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { navigate } from '@/store/store';
-import { sendMessage } from '@/store/actions';
-import { brandOfUser, dday, displayName, teamById, teamPrep, userById } from '@/store/logic';
+import { markRoomRead, sendMessage } from '@/store/actions';
+import { brandOfUser, chatUnread, dday, displayName, teamById, teamPrep, userById } from '@/store/logic';
 import { Avatar, Empty, Icon, SubHeader, Card } from '@/components/ui';
 import { ReportButton } from './Report';
 import { ago } from './Notifications';
@@ -23,6 +23,7 @@ export function ChatListScreen() {
           const others = r.memberIds.filter((m) => m !== userId);
           const hue = brandOfUser(db, others[0])?.logoHue ?? 200;
           const team = r.context?.type === 'team' ? teamById(db, r.context.refId) : undefined;
+          const unread = chatUnread(db, r.id, userId);
           const who = !last || last.senderId === 'system' ? '' : last.senderId === userId ? '나: ' : r.memberIds.length > 2 ? `${displayName(db, last.senderId)}: ` : '';
           return (
             <Card key={r.id} className="p-3.5 flex items-center gap-3" onClick={() => navigate({ name: 'chat', id: r.id })}>
@@ -34,7 +35,10 @@ export function ChatListScreen() {
                   {team && team.popupId && <span className="text-[10px] font-bold text-brand-600 bg-brand-50 rounded px-1.5 py-0.5 shrink-0">{dday(team.period.start)}</span>}
                   <span className="ml-auto text-[11px] text-ink-500 shrink-0">{last ? ago(last.at) : ''}</span>
                 </div>
-                <div className="text-[13px] text-ink-500 truncate">{last ? who + last.text : '대화를 시작해 보세요'}</div>
+                <div className="flex items-center gap-2">
+                  <div className={unread ? 'text-[13px] text-ink-900 font-semibold truncate flex-1' : 'text-[13px] text-ink-500 truncate flex-1'}>{last ? who + last.text : '대화를 시작해 보세요'}</div>
+                  {unread > 0 && <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-brand-500 text-white text-[10px] font-bold flex items-center justify-center shrink-0">{unread}</span>}
+                </div>
               </div>
             </Card>
           );
@@ -51,6 +55,7 @@ export function ChatScreen({ id }: { id: string }) {
   const [text, setText] = useState('');
   const endRef = useRef<HTMLDivElement>(null);
   useEffect(() => { endRef.current?.scrollIntoView?.({ block: 'end' }); }, [msgs.length]);
+  useEffect(() => { if (room) markRoomRead(id, userId); }, [id, userId, msgs.length]);
   if (!room) return <Empty>채팅방을 찾을 수 없어요</Empty>;
   const ctx: Route | undefined =
     room.context?.type === 'team' ? { name: 'team', id: room.context.refId } :

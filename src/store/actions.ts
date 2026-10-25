@@ -221,6 +221,13 @@ export function openDirectChat(otherUserId: string, title: string, context?: imp
 
 const AUTO_REPLIES = ['좋아요! 일정 한번 맞춰 봐요 🙂', '확인했어요. 자세한 건 내일 다시 얘기해요!', '네네, 저도 그렇게 생각했어요.', '사진 몇 장 더 보내 드릴게요.'];
 
+export function markRoomRead(roomId: string, userId: string) {
+  update((s) => {
+    const r = s.db.chatRooms.find((x) => x.id === roomId);
+    if (r) r.readAt = { ...(r.readAt ?? {}), [userId]: nowISO() };
+  });
+}
+
 export function sendMessage(roomId: string, text: string) {
   const s0 = getState();
   const me = s0.session.userByRole[s0.session.role];

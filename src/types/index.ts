@@ -497,6 +497,7 @@ export interface ChatRoom {
   memberIds: ID[]; // userId
   context?: { type: 'proposal' | 'interest' | 'team' | 'space' | 'recruit'; refId: ID };
   createdAt: ISODateTime;
+  readAt?: Record<ID, ISODateTime>; // userId별 마지막으로 읽은 시각
 }
 
 export interface Message {
