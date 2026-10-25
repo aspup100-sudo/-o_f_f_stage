@@ -229,8 +229,14 @@ export function MagazineNew() {
           );
         })}
         {cards.length < 8 && <button className="text-sm text-brand-600 font-semibold mb-4" onClick={() => setCards([...cards, { heading: '', body: '', stat: '' }])}>+ 카드 추가</button>}
-        <div className="text-[13px] font-semibold text-ink-700 mb-1.5">표지 미리보기</div>
-        <div className="w-48 mb-4"><CardFace post={{ hue, category, title: title || '제목' }} card={cards[0]} index={0} total={cards.length} /></div>
+        <div className="text-[13px] font-semibold text-ink-700 mb-1.5">미리보기 <span className="font-normal text-ink-500">· 옆으로 넘겨 보세요</span></div>
+        <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 mb-4">
+          {cards.map((c, i) => (
+            <div key={i} className="w-48 shrink-0">
+              <CardFace post={{ hue, category, title: title || '제목' }} card={i === 0 ? c : { ...c, heading: c.heading || '소제목', body: c.body || '본문이 여기에 들어가요' }} index={i} total={cards.length} />
+            </div>
+          ))}
+        </div>
         <Button full size="lg" disabled={!ok} onClick={() => {
           const id = publishMagazine({ category, title, subtitle, region, hue, cards: cards.map((c) => ({ ...c, stat: c.stat?.trim() || undefined })) });
           replace({ name: 'magazine', id });
