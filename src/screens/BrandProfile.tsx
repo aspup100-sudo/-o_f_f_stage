@@ -47,7 +47,7 @@ export default function BrandProfileScreen({ id }: { id: string }) {
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-3 mt-4 rounded bg-ink-100/70 py-3 text-center">
+        <div className="grid grid-cols-3 mt-4 border-y border-ink-900 py-3 text-center">
           <div>
             <div className="text-lg font-extrabold">{t.verifiedPopups}회</div>
             <div className="text-[12px] text-ink-500">인증 공동 팝업</div>
@@ -242,14 +242,14 @@ function MatchCard({ me, other }: { me: import('@/types').BrandProfile; other: i
   const pct = matchPct(m.score);
   const [open, setOpen] = useState(false);
   const learned = learnMatchWeights(db);
-  const word = pct >= 80 ? '찰떡 궁합' : pct >= 60 ? '잘 맞아요' : pct >= 45 ? '무난해요' : '색이 많이 달라요';
+  const word = pct >= 80 ? '아주 잘 맞아요' : pct >= 60 ? '잘 맞아요' : pct >= 45 ? '무난해요' : '색이 많이 달라요';
   return (
     <div className="mt-4 border border-ink-900 p-4">
       <div className="flex items-center justify-between">
         <span className="text-[13px] font-bold">{josa(me.name, '과', '와')}의 궁합</span>
         <span className="text-[13px] font-extrabold text-brand-600">{pct}% · {word}</span>
       </div>
-      <div className="h-2 rounded-full bg-white mt-2 overflow-hidden"><div className="h-full bg-brand-500" style={{ width: `${pct}%` }} /></div>
+      <div className="h-1 bg-ink-100 mt-2 overflow-hidden"><div className="h-full bg-brand-500" style={{ width: `${pct}%` }} /></div>
       {m.reasons.length > 0 && (
         <div className="mt-2.5 space-y-0.5">
           {m.reasons.slice(0, 3).map((r) => <div key={r} className="text-[12px] text-ink-700 flex"><span className="w-1 h-1 bg-ink-900 mt-[7px] mr-2 shrink-0" />{r}</div>)}
