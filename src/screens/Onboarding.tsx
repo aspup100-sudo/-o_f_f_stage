@@ -32,6 +32,10 @@ export default function Onboarding() {
 }
 
 function Login() {
+  const db = useApp((s) => s.db);
+  const recruiting = db.recruitments.filter((r) => r.status === '모집 중').length;
+  const popups = db.popups.filter((p) => p.status !== '종료').length;
+  const maxOff = Math.max(0, ...db.rentalItems.map((i) => Math.round((1 - i.partnerPrice / i.dailyPrice) * 100)));
   return (
     <div className="flex flex-col h-full pt-16">
       <img src="./logo.png" alt="OFF STAGE" className="w-16 h-16 rounded-2xl mb-6" />
@@ -40,12 +44,22 @@ function Login() {
         <br />
         <span className="text-brand-500">같이 열면</span> 가벼워져요
       </h1>
-      <p className="text-ink-500 mt-3 text-[15px] leading-relaxed">
-        작은 패션 브랜드끼리 팀을 짜고, 공간을 나눠 빌리고,
-        <br />
-        함께 연 경험을 기록하세요. 거래 수수료는 없어요.
+      <p className="text-ink-500 mt-3 text-[15px] leading-relaxed break-keep">
+        작은 패션 브랜드끼리 팀을 짜고, 공간을 나눠 빌리고, 함께 연 경험을 기록하세요. 거래 수수료는 없어요.
       </p>
-      <div className="mt-auto pt-20 space-y-2.5">
+      <div className="grid grid-cols-3 gap-2 mt-8">
+        {[
+          [`${recruiting}팀`, '지금 팀원 모집 중'],
+          [`${popups}곳`, '열렸거나 곧 열릴 팝업'],
+          [`최대 ${maxOff}%`, '제휴 장비 렌탈 할인'],
+        ].map(([v, l]) => (
+          <div key={l} className="rounded-2xl bg-brand-50 p-3">
+            <div className="text-lg font-extrabold text-brand-600">{v}</div>
+            <div className="text-[11px] text-ink-700 leading-tight mt-0.5 break-keep">{l}</div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-auto pt-12 space-y-2.5">
         <button onClick={() => socialLogin('kakao')} className="w-full h-12 rounded-xl bg-[#FEE500] text-[#191600] font-bold text-[15px]">
           카카오로 시작하기 <Demo />
         </button>
