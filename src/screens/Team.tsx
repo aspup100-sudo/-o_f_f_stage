@@ -345,7 +345,7 @@ function CostTab({ team, myBrandId, isLeader }: { team: Team; myBrandId: string;
             );
           })}
         </Card>
-        <p className="text-[12px] text-ink-500 mt-2">모인 금액 {won(paidSum)} / {won(total)} · 실제 결제는 이뤄지지 않아요. off stage는 거래 수수료를 받지 않아요.</p>
+        <p className="text-[12px] text-ink-500 mt-2">모인 금액 {won(paidSum)} / {won(total)} · 실제 결제는 이뤄지지 않아요. OFF STAGE는 거래 수수료를 받지 않아요.</p>
       </div>
     </div>
   );

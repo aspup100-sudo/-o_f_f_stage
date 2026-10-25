@@ -50,7 +50,7 @@ export default function BrandProfileScreen({ id }: { id: string }) {
             <div className="text-[11px] text-ink-500">팔로워</div>
           </div>
         </div>
-        {t.grade === '새싹' && <p className="text-[12px] text-lime-700 mt-2">🌱 off stage에서 첫 공동 팝업을 준비 중인 새싹 브랜드예요.</p>}
+        {t.grade === '새싹' && <p className="text-[12px] text-lime-700 mt-2">🌱 OFF STAGE에서 첫 공동 팝업을 준비 중인 새싹 브랜드예요.</p>}
         <p className="text-sm text-ink-700 leading-relaxed mt-4">{brand.intro}</p>
         <div className="mt-3">
           <ThemeTagList tags={brand.tags} />

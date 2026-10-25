@@ -34,10 +34,7 @@ export default function Onboarding() {
 function Login() {
   return (
     <div className="flex flex-col h-full pt-16">
-      <div className="flex items-center gap-2.5 mb-6">
-        <div className="w-14 h-14 rounded-2xl bg-brand-500 text-white flex items-center justify-center font-black text-lg tracking-tighter">OFF</div>
-        <div className="font-black text-2xl tracking-tight">off stage</div>
-      </div>
+      <img src="./logo.png" alt="OFF STAGE" className="w-16 h-16 rounded-2xl mb-6" />
       <h1 className="text-[26px] font-extrabold leading-snug">
         혼자 열기 버거운 팝업,
         <br />

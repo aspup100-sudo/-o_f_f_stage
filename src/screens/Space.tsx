@@ -350,7 +350,7 @@ function ApplySheet({ open, onClose, space, brandId }: { open: boolean; onClose:
           )}
         </>
       )}
-      <p className="text-[11px] text-ink-500 mt-3 text-center">off stage는 대관 계약 수수료를 받지 않아요. <Demo /></p>
+      <p className="text-[11px] text-ink-500 mt-3 text-center">OFF STAGE는 대관 계약 수수료를 받지 않아요. <Demo /></p>
     </Sheet>
   );
 }

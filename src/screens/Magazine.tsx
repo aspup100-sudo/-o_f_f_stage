@@ -42,7 +42,7 @@ function CardFace({ post, card, index, total }: { post: Pick<MagazinePost, 'hue'
         <div className={cx('font-extrabold leading-snug', cover ? 'text-[26px]' : 'text-xl')} style={{ textWrap: 'balance' } as React.CSSProperties}>{cover ? post.title : card.heading}</div>
         <p className={cx('mt-2 leading-relaxed', cover ? 'text-sm opacity-80' : 'text-[15px]')}>{card.body}</p>
       </div>
-      <div className="text-[11px] font-bold opacity-60">off stage 매거진 · @{OFFICIAL_INSTAGRAM}</div>
+      <div className="text-[11px] font-bold opacity-60">OFF STAGE 매거진 · @{OFFICIAL_INSTAGRAM}</div>
     </div>
   );
 }
@@ -114,7 +114,7 @@ export function MagazineDetail({ id }: { id: string }) {
         </div>
       </div>
       <div className="p-4">
-        <div className="flex items-center gap-1.5"><Tag tone="orange">{m.category}</Tag>{m.region && <Tag>{m.region}</Tag>}<span className="text-[12px] text-ink-500">{m.createdAt} · off stage 운영팀</span></div>
+        <div className="flex items-center gap-1.5"><Tag tone="orange">{m.category}</Tag>{m.region && <Tag>{m.region}</Tag>}<span className="text-[12px] text-ink-500">{m.createdAt} · OFF STAGE 운영팀</span></div>
         <h1 className="text-xl font-extrabold mt-2">{m.title}</h1>
         <p className="text-sm text-ink-500 mt-0.5">{m.subtitle}</p>
         <div className="flex gap-2 mt-4">

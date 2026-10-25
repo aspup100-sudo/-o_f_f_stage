@@ -93,7 +93,7 @@ export function finishOnboarding(input: { brand?: BrandDraft; landlord?: { name:
       u.name = input.visitor.nickname;
       u.profileId = vid;
     }
-    notify(s.db, uid, 'system', 'off stage에 오신 걸 환영해요! 둘러보기에서 마음에 드는 브랜드를 찾아보세요.');
+    notify(s.db, uid, 'system', 'OFF STAGE에 오신 걸 환영해요! 둘러보기에서 마음에 드는 브랜드를 찾아보세요.');
   });
   switchRole(role, uid);
   toast('가입이 완료됐어요');
