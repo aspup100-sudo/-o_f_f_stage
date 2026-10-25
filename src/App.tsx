@@ -19,6 +19,7 @@ function TopBar() {
         <span className="font-black text-[16px] tracking-tight whitespace-nowrap">OFF STAGE</span>
       </button>
       <div className="flex-1" />
+      <SyncDot />
       <RoleSwitcher />
       {role !== 'admin' && (
         <button onClick={() => navigate({ name: 'chatList' })} className="relative w-10 h-10 flex items-center justify-center" aria-label="채팅">
@@ -34,6 +35,14 @@ function TopBar() {
       </button>
     </header>
   );
+}
+
+/** 서버 동기화 상태. 서버를 안 쓰면 아무것도 안 보인다. */
+function SyncDot() {
+  const sync = useApp((s) => s.session.sync);
+  if (!sync || sync === 'local') return null;
+  const [cls, label] = sync === 'online' ? ['bg-emerald-500', '서버 연결됨'] : sync === 'loading' ? ['bg-amber-400 animate-pulse', '서버에서 불러오는 중'] : ['bg-red-500', '서버 연결 안 됨 · 이 기기에만 저장 중'];
+  return <span title={label} aria-label={label} className={cx('w-2 h-2 rounded-full shrink-0 ml-1', cls)} />;
 }
 
 function BottomTabs({ current }: { current?: string }) {
