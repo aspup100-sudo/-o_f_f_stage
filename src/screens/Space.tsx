@@ -100,7 +100,7 @@ export function SpacesTab({ initial }: { initial?: '찜' }) {
       <ScreenTitle>{RENTAL_ON ? '공간·장비' : '공간'}</ScreenTitle>
       {RENTAL_ON && <div className="px-4 mb-3"><Segmented items={[{ key: 'space', label: '공간 찾기' }, { key: 'rental', label: '장비 렌탈' }]} value={mode} onChange={setMode} /></div>}
       <div className="px-4 mb-3 flex gap-1.5 overflow-x-auto no-scrollbar">
-        <button onClick={() => setFilterOpen(true)} className={cx('h-8 px-3 rounded-full border text-xs font-semibold shrink-0 flex items-center gap-1', filterCount ? 'bg-ink-900 text-white border-ink-900' : 'bg-white border-ink-300')}>
+        <button onClick={() => setFilterOpen(true)} className={cx('h-8 px-3 rounded-md border text-xs font-semibold shrink-0 flex items-center gap-1', filterCount ? 'bg-ink-900 text-white border-ink-900' : 'bg-white border-ink-300')}>
           <Icon name="search" className="w-3.5 h-3.5" /> 조건{filterCount > 0 && ` ${filterCount}`}
         </button>
         {(['전체', ...(brand ? (['찜'] as const) : []), ...REGIONS] as const).map((r) => <Chip key={r} active={region === r} onClick={() => setRegion(r)}>{r === '찜' ? <><Ic n="heart" />찜 {brand?.savedSpaces?.length ?? 0}</> : r}</Chip>)}
@@ -429,7 +429,7 @@ function ApplySheet({ open, onClose, space, brandId }: { open: boolean; onClose:
                 <textarea className={textareaCls} value={msg} onChange={(e) => setMsg(e.target.value)} placeholder="우리 팀과 팝업을 소개해 주세요" />
               </Field>
               <div className="text-[13px] font-semibold text-ink-700 mb-1.5">함께 첨부되는 팀 소개 페이지</div>
-              <div className="max-h-64 overflow-y-auto rounded-2xl border border-ink-100 p-2 mb-4">
+              <div className="max-h-64 overflow-y-auto rounded border border-ink-100 p-2 mb-4">
                 <TeamIntroPage db={db} team={team} compact />
               </div>
               <Button full size="lg" disabled={!!already || days < space.minDays} onClick={() => { applySpace(team.id, space.id, { start: s0, end: e0 }, msg || `${team.name} 팀입니다. 함께하고 싶어요!`); onClose(); navigate({ name: 'team', id: team.id, sub: 'space' }); }}>

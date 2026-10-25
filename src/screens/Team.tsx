@@ -73,7 +73,7 @@ export function MyTeamTab() {
           );
         })}
         {teams.length > 0 && (
-          <div className="rounded-2xl border border-dashed border-ink-300 p-4">
+          <div className="rounded border border-dashed border-ink-300 p-4">
             <div className="font-bold text-[15px]">다음 팝업도 미리 준비해 볼까요?</div>
             <p className="text-[12px] text-ink-500 mt-0.5">팀은 여러 개 동시에 꾸릴 수 있어요. 다른 동네, 다른 조합으로도 열어 보세요.</p>
             <div className="grid grid-cols-2 gap-2 mt-3">
@@ -147,7 +147,7 @@ export function TeamScreen({ id, sub = 'members' }: { id: string; sub?: string }
         {team.stage === '준비 중' && (() => {
           const prep = teamPrep(db, team, brand!.id);
           return (
-            <button onClick={() => setPrepOpen(true)} className="w-full mt-3 rounded-2xl bg-white border border-brand-100 px-3.5 py-3 text-left">
+            <button onClick={() => setPrepOpen(true)} className="w-full mt-3 rounded bg-white border border-brand-100 px-3.5 py-3 text-left">
               <div className="flex items-center justify-between text-[13px]">
                 <span className="font-bold">오픈 {dday(team.period.start)} · 준비 {prep.done}/{prep.steps.length}</span>
                 <span className="text-brand-600 text-[12px] font-semibold">체크리스트 ›</span>
@@ -438,7 +438,7 @@ export function TeamIntroPage({ db, team, compact }: { db: DB; team: Team; compa
   const allMoods = [...new Set(team.members.flatMap((m) => brandById(db, m.brandId)!.tags.moods))];
   return (
     <div className={compact ? '' : 'p-4'}>
-      <div className="rounded-2xl overflow-hidden border border-ink-100">
+      <div className="rounded overflow-hidden border border-ink-100">
         <div className="grid grid-cols-3 gap-0.5">
           {team.members.flatMap((m) => (mb?.picks[m.brandId] ?? []).slice(0, 1)).concat(team.members.flatMap((m) => (mb?.picks[m.brandId] ?? []).slice(1, 2))).slice(0, 6).map((id) => {
             const im = db.lookbookImages.find((i) => i.id === id);
@@ -458,7 +458,7 @@ export function TeamIntroPage({ db, team, compact }: { db: DB; team: Team; compa
         {team.members.map((m) => {
           const b = brandById(db, m.brandId)!;
           return (
-            <div key={m.brandId} className="rounded-2xl border border-ink-100 p-3 bg-white">
+            <div key={m.brandId} className="rounded border border-ink-100 p-3 bg-white">
               <div className="flex items-center gap-2 mb-2">
                 <BrandLogo brand={b} size={32} />
                 <button className="flex-1 text-left" onClick={() => navigate({ name: 'brand', id: b.id })}>
@@ -477,7 +477,7 @@ export function TeamIntroPage({ db, team, compact }: { db: DB; team: Team; compa
           );
         })}
       </div>
-      <div className="mt-3 rounded-2xl bg-ink-100/60 p-3 text-sm">
+      <div className="mt-3 rounded bg-ink-100/60 p-3 text-sm">
         <div className="font-bold mb-1">팀의 공동 팝업 이력</div>
         {pastPopups.length ? pastPopups.map((p) => <div key={p.id} className="text-ink-700">· {p.title} ({period(p.period)}, {spaceById(db, p.spaceId)?.name})</div>) : <div className="text-ink-500">이번이 첫 공동 팝업이에요</div>}
       </div>
@@ -563,7 +563,7 @@ function ShiftTab({ team }: { team: Team }) {
   return (
     <div>
       {brand && (
-        <div className="mb-4 rounded-2xl bg-brand-50 p-4">
+        <div className="mb-4 rounded bg-brand-50 p-4">
           <div className="flex items-center justify-between">
             <span className="text-[13px] font-bold">내 근무 {mine.length}회</span>
             {mine.length > 0 && <button className="text-[12px] font-semibold text-brand-600" onClick={() => downloadShiftIcs(team.name, sp?.name ?? team.region, mine)}><Ic n="calendar" />내 캘린더에 넣기</button>}
@@ -652,7 +652,7 @@ ${hashtags.join(' ')}`;
   };
   return (
     <div>
-      <div className="rounded-2xl overflow-hidden border border-ink-100 mb-3">
+      <div className="rounded overflow-hidden border border-ink-100 mb-3">
         <div className="relative h-40">
           <div className="absolute inset-0 flex">
             {brands.map((b) => <Swatch key={b.id} hue={b.logoHue} pattern="stripe" rounded="" className="flex-1" />)}

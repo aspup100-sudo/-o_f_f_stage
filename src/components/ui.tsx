@@ -91,7 +91,7 @@ export function Button({
   };
   const s = { sm: 'h-8 px-3 text-xs', md: 'h-10 px-4 text-sm', lg: 'h-12 px-5 text-base' }[size];
   return (
-    <button type={type} disabled={disabled} onClick={onClick} className={cx('rounded-xl font-semibold transition-colors inline-flex items-center justify-center gap-1.5 whitespace-nowrap', v[variant], s, full && 'w-full', className)}>
+    <button type={type} disabled={disabled} onClick={onClick} className={cx('rounded-md font-semibold transition-colors inline-flex items-center justify-center gap-1.5 whitespace-nowrap', v[variant], s, full && 'w-full', className)}>
       {children}
     </button>
   );
@@ -99,7 +99,7 @@ export function Button({
 
 export function Card({ children, className, onClick }: { children: ReactNode; className?: string; onClick?: () => void }) {
   return (
-    <div onClick={onClick} className={cx('bg-white rounded-2xl border border-ink-100 shadow-[0_1px_2px_rgba(0,0,0,0.04)]', onClick && 'cursor-pointer active:bg-ink-100/40', className)}>
+    <div onClick={onClick} className={cx('bg-white rounded border border-ink-300', onClick && 'cursor-pointer active:bg-ink-100/40', className)}>
       {children}
     </div>
   );
@@ -107,7 +107,7 @@ export function Card({ children, className, onClick }: { children: ReactNode; cl
 
 export function Chip({ children, active, onClick, className }: { children: ReactNode; active?: boolean; onClick?: () => void; className?: string }) {
   return (
-    <button type="button" onClick={onClick} className={cx('px-3 h-8 rounded-full text-xs font-medium border whitespace-nowrap transition-colors', active ? 'bg-ink-900 text-white border-ink-900' : 'bg-white text-ink-700 border-ink-300', className)}>
+    <button type="button" onClick={onClick} className={cx('px-3 h-8 rounded text-xs font-medium border whitespace-nowrap transition-colors', active ? 'bg-ink-900 text-white border-ink-900' : 'bg-white text-ink-700 border-ink-300', className)}>
       {children}
     </button>
   );
@@ -115,10 +115,10 @@ export function Chip({ children, active, onClick, className }: { children: React
 
 export function Tag({ children, tone = 'gray' }: { children: ReactNode; tone?: 'gray' | 'orange' | 'green' | 'blue' | 'purple' | 'red' | 'yellow' }) {
   const t = {
-    gray: 'bg-ink-100 text-ink-700', orange: 'bg-brand-50 text-brand-700', green: 'bg-emerald-50 text-emerald-700',
-    blue: 'bg-sky-50 text-sky-700', purple: 'bg-violet-50 text-violet-700', red: 'bg-red-50 text-red-600', yellow: 'bg-amber-50 text-amber-700',
+    gray: 'border-ink-300 text-ink-700', orange: 'border-brand-500 text-brand-600', green: 'border-emerald-600 text-emerald-700',
+    blue: 'border-sky-600 text-sky-700', purple: 'border-violet-500 text-violet-700', red: 'border-red-500 text-red-600', yellow: 'border-amber-500 text-amber-700',
   }[tone];
-  return <span className={cx('inline-flex items-center px-2 h-6 rounded-md text-[11px] font-medium whitespace-nowrap', t)}>{children}</span>;
+  return <span className={cx('inline-flex items-center px-1.5 h-[22px] border bg-white text-[11px] font-semibold whitespace-nowrap', t)}>{children}</span>;
 }
 
 export function Demo({ children = '데모' }: { children?: ReactNode }) {
@@ -204,7 +204,7 @@ export function Empty({ children, icon = 'sparkle', action }: { children: ReactN
     <div className="py-10 flex flex-col items-center text-ink-500 text-sm gap-2 text-center">
       <Icon name={icon} className="w-8 h-8 text-ink-300" />
       {children}
-      {action && <button onClick={action.onClick} className="mt-1 h-9 px-4 rounded-full bg-ink-900 text-white text-[13px] font-semibold">{action.label}</button>}
+      {action && <button onClick={action.onClick} className="mt-1 h-9 px-4 rounded-md bg-ink-900 text-white text-[13px] font-semibold">{action.label}</button>}
     </div>
   );
 }
@@ -243,8 +243,8 @@ export function Field({ label, children, hint, required }: { label: ReactNode; c
   );
 }
 
-export const inputCls = 'w-full h-11 px-3 rounded-xl border border-ink-300 bg-white text-sm outline-none focus:border-ink-900';
-export const textareaCls = 'w-full min-h-[88px] p-3 rounded-xl border border-ink-300 bg-white text-sm outline-none focus:border-ink-900';
+export const inputCls = 'w-full h-11 px-3 rounded-md border border-ink-300 bg-white text-sm outline-none focus:border-ink-900';
+export const textareaCls = 'w-full min-h-[88px] p-3 rounded-md border border-ink-300 bg-white text-sm outline-none focus:border-ink-900';
 
 export function Stars({ value, onChange, size = 'w-6 h-6' }: { value: number; onChange?: (n: number) => void; size?: string }) {
   return (

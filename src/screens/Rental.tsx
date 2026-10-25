@@ -93,7 +93,7 @@ export function RentalsBrowse({ teamId, embedded }: { teamId?: string; embedded?
     <div className={embedded ? '' : 'px-4'}>
       <WinWinBanner />
       {team && missing.length > 0 && (
-        <div className="mt-3 rounded-2xl bg-brand-50 p-3.5">
+        <div className="mt-3 rounded bg-brand-50 p-3.5">
           <div className="text-[13px] font-bold text-brand-700">{team.name} 공간 · {spaceById(db, team.spaceId)?.name}에 없는 설비</div>
           <div className="flex flex-wrap gap-1.5 mt-2">
             {missing.map((m) => <Chip key={m.facility} active={cat === m.category} onClick={() => setCat(m.category)}>{m.facility} → {m.category} 빌리기</Chip>)}
@@ -280,7 +280,7 @@ function OrderSheet({ open, onClose, partnerId, lines, defaultTeamId, onDone }: 
         </label>
       )}
       <textarea className={textareaCls} value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="설치 시간, 출입 방법 등 (선택)" />
-      <div className="rounded-2xl bg-ink-100/60 p-3.5 mt-3 text-sm space-y-1 tabular-nums">
+      <div className="rounded bg-ink-100/60 p-3.5 mt-3 text-sm space-y-1 tabular-nums">
         <div className="flex justify-between text-ink-500"><span>일반 대여가 ({q.days}일)</span><span className="line-through">{won(q.list)}</span></div>
         <div className="flex justify-between"><span>OFF STAGE 제휴가</span><span>{won(q.partnerSum)}</span></div>
         <div className="flex justify-between"><span>배송·설치비</span><span>{q.deliveryFee ? won(q.deliveryFee) : '무료'}</span></div>
@@ -334,7 +334,7 @@ export function TeamRentalTab({ team }: { team: Team }) {
   return (
     <div>
       {orders.length > 0 && (
-        <div className="rounded-2xl bg-rose-50 text-rose-700 p-3.5 mb-3 text-sm">
+        <div className="rounded bg-rose-50 text-rose-700 p-3.5 mb-3 text-sm">
           우리 팀은 렌탈 제휴로 <b>{won(spent)}</b>을 아꼈어요.
         </div>
       )}
@@ -397,7 +397,7 @@ export function MyItemsTab() {
           제휴가는 일반가보다 낮지만, 창고에 있던 장비가 팝업 일정마다 다시 나가요. {r.avg !== null && `브랜드 평점 ★ ${r.avg.toFixed(1)}`}
         </p>
         {idle.length > 0 && (
-          <div className="rounded-2xl p-3.5 mb-4 border border-amber-200 bg-amber-50">
+          <div className="rounded p-3.5 mb-4 border border-amber-200 bg-amber-50">
             <div className="font-bold text-[14px] mb-0.5"><Ic n="bulb" />다가오는 예약이 없는 장비 {idle.length}개</div>
             <p className="text-[12px] text-ink-700 mb-2.5">앞으로 잡힌 팝업 일정이 없어요. 제휴가를 조금 내리면 브랜드 장바구니에 먼저 담겨요.</p>
             <div className="space-y-2">

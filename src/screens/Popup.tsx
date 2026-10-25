@@ -85,14 +85,14 @@ export function PopupDetail({ id }: { id: string }) {
         </div>
         <h1 className="text-xl font-extrabold">{p.title}</h1>
         <div className="text-[13px] text-ink-500">팀 <button className="underline underline-offset-2" onClick={() => navigate({ name: 'team', id: team.id })}>{team.name}</button> · 방문 인증 {visitorsCount}명</div>
-        <div className="mt-4 rounded-2xl border border-ink-100 divide-y divide-ink-100 text-sm">
+        <div className="mt-4 rounded border border-ink-100 divide-y divide-ink-100 text-sm">
           <div className="flex px-3.5 py-2.5"><span className="w-20 text-ink-500">일정</span><span className="font-semibold">{p.period.start} ~ {p.period.end}</span></div>
           <div className="flex px-3.5 py-2.5"><span className="w-20 text-ink-500">운영 시간</span><span className="font-semibold">{p.hours}</span>{p.status === '진행 중' && (() => { const o = openNow(p.hours); return o ? <span className={cx('ml-auto text-[12px] font-bold', o.open ? 'text-emerald-600' : 'text-ink-500')}>{o.open && '● '}{o.text}</span> : null; })()}</div>
           <button className="flex px-3.5 py-2.5 w-full text-left" onClick={() => navigate({ name: 'space', id: sp.id })}><span className="w-20 text-ink-500 shrink-0">위치</span><span className="font-semibold">{sp.name} <span className="font-normal text-ink-500">· {sp.address}</span> ›</span></button>
         </div>
 
         {p.status === '예정' && (
-          <div className="mt-4 rounded-2xl bg-brand-50 border border-brand-100 p-4 flex items-center gap-3">
+          <div className="mt-4 rounded bg-brand-50 border border-brand-100 p-4 flex items-center gap-3">
             <div className="flex-1">
               <div className="font-bold text-[15px]">오픈 {dday(p.period.start)} · <span className="text-brand-600">{waitCount(p)}명</span>이 기다려요</div>
               <div className="text-[12px] text-ink-500 mt-0.5">알림을 켜 두면 전날 저녁과 오픈 당일에 알려 드려요</div>
@@ -100,7 +100,7 @@ export function PopupDetail({ id }: { id: string }) {
             {role === 'visitor' && (() => {
               const on = !!p.waiters?.includes(userId);
               return (
-                <button onClick={() => toggleWaitlist(p.id, userId)} className={cx('h-10 px-3.5 rounded-full text-sm font-bold shrink-0', on ? 'bg-white border border-brand-200 text-brand-600' : 'bg-brand-500 text-white')}>
+                <button onClick={() => toggleWaitlist(p.id, userId)} className={cx('h-10 px-3.5 rounded-md text-sm font-bold shrink-0', on ? 'bg-white border border-brand-200 text-brand-600' : 'bg-brand-500 text-white')}>
                   <Ic n="bell" />{on ? '알림 켜짐' : '알림 받기'}
                 </button>
               );
@@ -111,7 +111,7 @@ export function PopupDetail({ id }: { id: string }) {
         {role === 'visitor' && p.status !== '예정' && (
           <div className="mt-4">
             {visited ? (
-              <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-emerald-800">
+              <div className="rounded bg-emerald-50 border border-emerald-200 p-4 text-emerald-800">
                 <div className="font-bold"><Ic n="check" />방문 인증 완료</div>
                 <div className="text-sm mt-0.5">스탬프가 적립됐어요. 이제 리뷰를 남길 수 있어요.</div>
                 {(() => {
@@ -443,7 +443,7 @@ export const STAMP_LEVELS = [
 function StampLevels({ n }: { n: number }) {
   const next = STAMP_LEVELS.find((l) => n < l.at);
   return (
-    <div className="mt-3 rounded-2xl bg-white border border-ink-100 p-4">
+    <div className="mt-3 rounded bg-white border border-ink-100 p-4">
       <div className="flex items-center justify-between">
         <span className="font-bold text-[15px]">탐험가 등급</span>
         <span className="text-[12px] text-ink-500">총 {n}곳 방문 <Demo /></span>

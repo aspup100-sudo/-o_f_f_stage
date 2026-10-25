@@ -40,7 +40,7 @@ function Login() {
   const maxOff = Math.max(0, ...db.rentalItems.map((i) => Math.round((1 - i.partnerPrice / i.dailyPrice) * 100)));
   return (
     <div className="flex flex-col h-full pt-16">
-      <img src="./logo.png" alt="OFF STAGE" className="w-16 h-16 rounded-2xl mb-6" />
+      <img src="./logo.png" alt="OFF STAGE" className="w-16 h-16 rounded mb-6" />
       <h1 className="text-[26px] font-extrabold leading-snug">
         혼자 열기 버거운 팝업,
         <br />
@@ -55,7 +55,7 @@ function Login() {
           [`${popups}곳`, '열렸거나 곧 열릴 팝업'],
           RENTAL_ON ? [`최대 ${maxOff}%`, '제휴 장비 렌탈 할인'] : ['0원', '거래 수수료'],
         ].map(([v, l]) => (
-          <div key={l} className="rounded-2xl bg-brand-50 p-3">
+          <div key={l} className="rounded bg-brand-50 p-3">
             <div className="text-lg font-extrabold text-brand-600">{v}</div>
             <div className="text-[11px] text-ink-700 leading-tight mt-0.5 break-keep">{l}</div>
           </div>
@@ -87,7 +87,7 @@ function RolePick() {
       <p className="text-ink-500 text-sm mt-1.5 mb-6">한 계정은 하나의 역할만 가질 수 있어요.</p>
       <div className="space-y-2.5">
         {options.map((o) => (
-          <button key={o.role} onClick={() => chooseRole(o.role)} className="w-full text-left p-4 rounded-2xl border border-ink-300 flex gap-3 items-center active:bg-ink-100">
+          <button key={o.role} onClick={() => chooseRole(o.role)} className="w-full text-left p-4 rounded border border-ink-300 flex gap-3 items-center active:bg-ink-100">
             <span className="w-11 h-11 rounded-xl bg-ink-100 flex items-center justify-center shrink-0"><Icon name={o.emoji} className="w-6 h-6" /></span>
             <span className="flex-1">
               <span className="block font-bold">{o.title}</span>
@@ -121,7 +121,7 @@ function BizVerify({ status, role }: { status: string; role: Role }) {
         </>
       )}
       {status === 'pending' && (
-        <div className="rounded-2xl bg-amber-50 border border-amber-200 p-5 text-center">
+        <div className="rounded bg-amber-50 border border-amber-200 p-5 text-center">
           <div className="w-10 h-10 mx-auto rounded-full border-4 border-amber-300 border-t-amber-600 animate-spin mb-3" />
           <div className="font-bold text-amber-800">인증 대기 중</div>
           <div className="text-sm text-amber-700 mt-1">국세청 정보와 대조하고 있어요 (데모: 2초 뒤 완료)</div>
@@ -129,7 +129,7 @@ function BizVerify({ status, role }: { status: string; role: Role }) {
       )}
       {status === 'verified' && (
         <>
-          <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-5 text-center mb-6">
+          <div className="rounded bg-emerald-50 border border-emerald-200 p-5 text-center mb-6">
             <div className="w-10 h-10 mx-auto rounded-full bg-emerald-500 text-white flex items-center justify-center mb-3">
               <Icon name="check" />
             </div>
@@ -156,7 +156,7 @@ function MatchPreview({ tags }: { tags: ThemeTags }) {
   const me = { id: '_new', userId: '_new', name: '나', intro: '', tags, channels: [], availability: [], lookbook: [], followers: [], hearts: [], logoHue: 0 } as BrandProfile;
   const top = db.brands.filter((b) => isListedBrand(db, b)).map((b) => ({ b, pct: matchPct(matchScore(db, me, b).score) })).sort((x, y) => y.pct - x.pct).slice(0, 3);
   return (
-    <div className="mb-5 -mt-1 rounded-2xl bg-brand-50 p-3.5">
+    <div className="mb-5 -mt-1 rounded bg-brand-50 p-3.5">
       <div className="text-[13px] font-bold text-brand-700">이 태그라면 이런 브랜드와 잘 맞아요</div>
       <div className="mt-2 space-y-1.5">
         {top.map(({ b, pct }) => (

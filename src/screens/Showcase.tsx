@@ -17,7 +17,7 @@ export function ShowcaseList() {
     <div className="px-4 pt-4 space-y-3">
       <p className="text-[13px] text-ink-500">팀이 함께 연 팝업의 기록이에요. 운영 팁과 방문객 조합 리뷰를 같이 볼 수 있어요.</p>
       {untold.map((t) => (
-        <div key={t.id} className="rounded-2xl border border-dashed border-brand-200 bg-brand-50 p-4 flex items-center gap-3">
+        <div key={t.id} className="rounded border border-dashed border-brand-200 bg-brand-50 p-4 flex items-center gap-3">
           <div className="flex-1 min-w-0">
             <div className="font-bold text-[14px]">{t.name} 팝업, 자랑해 볼까요?</div>
             <p className="text-[12px] text-ink-700 mt-0.5">사진 몇 장과 운영 팁 한 줄이면 돼요. 다음 팀원을 찾을 때 신뢰가 쌓여요.</p>
@@ -63,7 +63,7 @@ export function ShowcaseDetail({ id }: { id: string }) {
       <div className="p-4">
         <h1 className="text-xl font-extrabold">{s.title}</h1>
         <div className="text-[13px] text-ink-500 mt-1">{displayName(db, s.authorId)} · {s.createdAt}</div>
-        <div className="mt-4 rounded-2xl border border-ink-100 divide-y divide-ink-100 text-sm">
+        <div className="mt-4 rounded border border-ink-100 divide-y divide-ink-100 text-sm">
           <div className="flex px-3.5 py-2.5"><span className="w-20 text-ink-500">팀</span><span className="font-semibold">{team?.name}</span></div>
           <div className="flex px-3.5 py-2.5"><span className="w-20 text-ink-500">기간</span><span className="font-semibold">{s.period.start} ~ {s.period.end}</span></div>
           {sp && <button className="flex px-3.5 py-2.5 w-full text-left" onClick={() => navigate({ name: 'space', id: sp.id })}><span className="w-20 text-ink-500">사용 공간</span><span className="font-semibold">{sp.name} ›</span></button>}
@@ -80,20 +80,20 @@ export function ShowcaseDetail({ id }: { id: string }) {
           })}
         </div>
         <p className="text-[15px] leading-relaxed mt-5 whitespace-pre-line">{s.body}</p>
-        <div className="mt-4 rounded-2xl bg-amber-50 p-4">
+        <div className="mt-4 rounded bg-amber-50 p-4">
           <div className="font-bold text-amber-900 mb-1"><Ic n="bulb" />운영 팁</div>
           <p className="text-sm text-amber-900 leading-relaxed">{s.tips}</p>
           {(() => {
             const on = !!s.helpful?.includes(userId);
             return (
-              <button onClick={() => toggleShowcaseHelpful(s.id, userId)} className={cx('mt-3 h-9 px-3.5 rounded-full text-[13px] font-semibold flex items-center gap-1.5', on ? 'bg-amber-900 text-white' : 'bg-white text-amber-900 border border-amber-200')}>
+              <button onClick={() => toggleShowcaseHelpful(s.id, userId)} className={cx('mt-3 h-9 px-3.5 rounded-md text-[13px] font-semibold flex items-center gap-1.5', on ? 'bg-amber-900 text-white' : 'bg-white text-amber-900 border border-amber-200')}>
                 <Icon name="heart" filled={on} className="w-4 h-4" /> 팁이 도움됐어요 {s.helpful?.length ?? 0}
               </button>
             );
           })()}
         </div>
         {(s.sales || s.visitors) && (
-          <div className="mt-3 rounded-2xl border border-ink-100 p-4">
+          <div className="mt-3 rounded border border-ink-100 p-4">
             <div className="flex items-center gap-1.5 mb-2"><span className="font-bold text-sm">성과</span><Tag tone="blue">본인 공개 정보</Tag></div>
             <div className="grid grid-cols-2 gap-2 text-sm">
               {s.sales && <div><div className="text-[11px] text-ink-500">매출</div><div className="font-bold">{s.sales}</div></div>}

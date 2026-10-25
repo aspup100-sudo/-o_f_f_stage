@@ -306,7 +306,7 @@ export function TodayVisitor() {
                   <span className="block text-[14px] font-bold truncate">{p.title}</span>
                   <span className="block text-[12px] text-ink-500">{waitCount(p)}명이 기다려요</span>
                 </button>
-                <button onClick={() => toggleWaitlist(p.id, userId)} className={cx('h-8 px-3 rounded-full text-[12px] font-bold shrink-0', on ? 'bg-brand-50 text-brand-600' : 'bg-ink-900 text-white')}>
+                <button onClick={() => toggleWaitlist(p.id, userId)} className={cx('h-8 px-3 rounded-md text-[12px] font-bold shrink-0', on ? 'bg-brand-50 text-brand-600' : 'bg-ink-900 text-white')}>
                   {on ? '알림 켜짐' : '알림 받기'}
                 </button>
               </div>

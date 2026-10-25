@@ -103,7 +103,7 @@ export function ChatScreen({ id }: { id: string }) {
               {!mine && <Avatar name={displayName(db, m.senderId)} hue={brandOfUser(db, m.senderId)?.logoHue ?? 210} size={32} />}
               <div className="max-w-[75%]">
                 {!mine && <div className="text-[11px] text-ink-500 mb-0.5">{userById(db, m.senderId)?.name}</div>}
-                <div className={mine ? 'bg-brand-500 text-white rounded-2xl rounded-tr-sm px-3 py-2 text-sm' : 'bg-white rounded-2xl rounded-tl-sm px-3 py-2 text-sm'}>{m.text}</div>
+                <div className={mine ? 'bg-brand-500 text-white rounded rounded-tr-sm px-3 py-2 text-sm' : 'bg-white rounded rounded-tl-sm px-3 py-2 text-sm'}>{m.text}</div>
               </div>
             </div>
           );
@@ -114,7 +114,7 @@ export function ChatScreen({ id }: { id: string }) {
         {room.memberIds.includes(userId) && (
           <div className="flex gap-1.5 overflow-x-auto no-scrollbar px-2.5 pt-2.5">
             {quick.map((q) => (
-              <button key={q.label} onClick={() => sendMessage(id, q.text)} className="h-8 px-3 rounded-full border border-ink-300 bg-white text-[12px] font-semibold whitespace-nowrap shrink-0">{q.label}</button>
+              <button key={q.label} onClick={() => sendMessage(id, q.text)} className="h-8 px-3 rounded-md border border-ink-300 bg-white text-[12px] font-semibold whitespace-nowrap shrink-0">{q.label}</button>
             ))}
           </div>
         )}

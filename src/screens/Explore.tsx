@@ -78,7 +78,7 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
           </div>
           <div className="flex gap-2.5 overflow-x-auto no-scrollbar px-4 pb-1">
             {recs.map((r) => (
-              <div key={r.brand.id} className="w-[220px] shrink-0 rounded-2xl bg-white border border-ink-100 p-3.5 flex flex-col">
+              <div key={r.brand.id} className="w-[220px] shrink-0 rounded bg-white border border-ink-100 p-3.5 flex flex-col">
                 <button className="text-left" onClick={() => navigate({ name: 'brand', id: r.brand.id })}>
                   <div className="flex items-center justify-between">
                     <BrandLogo brand={r.brand} size={44} />
@@ -124,7 +124,7 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
         <div className="flex items-center justify-between mb-2.5">
           <div className="flex items-center gap-2">
             <h2 className="font-bold text-[15px]">브랜드 둘러보기</h2>
-            <select value={sort} onChange={(e) => setSort(e.target.value as typeof sort)} className="text-[12px] text-ink-700 bg-transparent border border-ink-300 rounded-full h-7 px-2" aria-label="정렬">
+            <select value={sort} onChange={(e) => setSort(e.target.value as typeof sort)} className="text-[12px] text-ink-700 bg-transparent border border-ink-300 rounded-md h-7 px-2" aria-label="정렬">
               <option value="base">기본순</option>
               {brand && <option value="match">궁합 높은 순</option>}
               <option value="exp">공동 팝업 많은 순</option>
@@ -148,7 +148,7 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
             {price && <Tag tone="blue">{price}</Tag>}
           </div>
         )}
-        <div className="rounded-2xl bg-white px-3.5 divide-y divide-ink-100">
+        <div className="rounded bg-white px-3.5 divide-y divide-ink-100">
           {(showAll ? list : list.slice(0, 6)).map((b) => (
             <BrandCard key={b.id} compact db={db} brand={b} right={<BrandActions brandId={b.id} />} />
           ))}

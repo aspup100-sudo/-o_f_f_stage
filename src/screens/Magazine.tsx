@@ -15,7 +15,7 @@ export function OfficialInsta({ compact }: { compact?: boolean }) {
       href={`https://www.instagram.com/${OFFICIAL_INSTAGRAM}/`}
       target="_blank"
       rel="noreferrer"
-      className={cx('flex items-center gap-2.5 rounded-2xl border border-ink-100 bg-white', compact ? 'px-3 py-2' : 'p-3.5')}
+      className={cx('flex items-center gap-2.5 rounded border border-ink-100 bg-white', compact ? 'px-3 py-2' : 'p-3.5')}
     >
       <span className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-sm" style={{ background: 'linear-gradient(135deg,#f9a03f,#e1306c 55%,#833ab4)' }}>IG</span>
       <span className="flex-1 min-w-0">
@@ -32,7 +32,7 @@ function CardFace({ post, card, index, total }: { post: Pick<MagazinePost, 'hue'
   const cover = index === 0;
   return (
     <div
-      className="relative aspect-square w-full rounded-3xl overflow-hidden p-6 flex flex-col"
+      className="relative aspect-square w-full rounded overflow-hidden p-6 flex flex-col"
       style={{ background: cover ? `linear-gradient(160deg, hsl(${post.hue} 55% 42%), hsl(${(post.hue + 30) % 360} 50% 22%))` : `hsl(${post.hue} 40% 96%)`, color: cover ? '#fff' : `hsl(${post.hue} 45% 18%)` }}
     >
       <div className="flex items-center justify-between text-[11px] font-bold opacity-80">
@@ -57,7 +57,7 @@ export function MagazineThumb({ post, wide }: { post: MagazinePost; wide?: boole
     <button onClick={() => navigate({ name: 'magazine', id: post.id })} className={cx('block text-left shrink-0 self-start align-top', wide ? 'w-full' : 'w-[200px]')}>
       {/* 목록용 작은 표지: 제목만 크게 */}
       <div
-        className="aspect-[4/5] rounded-2xl overflow-hidden p-3.5 flex flex-col text-white"
+        className="aspect-[4/5] rounded overflow-hidden p-3.5 flex flex-col text-white"
         style={{ background: `linear-gradient(160deg, hsl(${post.hue} 55% 42%), hsl(${(post.hue + 30) % 360} 50% 22%))` }}
       >
         <div className="flex items-center justify-between text-[10px] font-bold opacity-80">
@@ -221,7 +221,7 @@ export function MagazineNew() {
         {cards.slice(1).map((c, k) => {
           const i = k + 1;
           return (
-            <div key={i} className="rounded-2xl border border-ink-100 p-3 mb-3">
+            <div key={i} className="rounded border border-ink-100 p-3 mb-3">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-[13px] font-bold">카드 {i + 1}</span>
                 {cards.length > 2 && <button className="text-[12px] text-ink-500" onClick={() => setCards(cards.filter((_, j) => j !== i))}>삭제</button>}

@@ -149,7 +149,7 @@ export function PopupBannerCard({ db, popup, wide }: { db: DB; popup: Popup; wid
   const space = spaceById(db, popup.spaceId);
   const brands = team?.members.map((m) => brandById(db, m.brandId)!).filter(Boolean) ?? [];
   return (
-    <button onClick={() => navigate({ name: 'popup', id: popup.id })} className={cx('text-left shrink-0 rounded-2xl overflow-hidden bg-ink-900 text-white relative', wide ? 'w-full' : 'w-[280px]')}>
+    <button onClick={() => navigate({ name: 'popup', id: popup.id })} className={cx('text-left shrink-0 rounded overflow-hidden bg-ink-900 text-white relative', wide ? 'w-full' : 'w-[280px]')}>
       <div className="flex h-24">
         {brands.slice(0, 4).map((b) => (
           <Swatch key={b.id} hue={b.logoHue} pattern="stripe" rounded="" className="flex-1 opacity-90" />

@@ -46,7 +46,7 @@ export default function BrandProfileScreen({ id }: { id: string }) {
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-3 mt-4 rounded-2xl bg-ink-100/70 py-3 text-center">
+        <div className="grid grid-cols-3 mt-4 rounded bg-ink-100/70 py-3 text-center">
           <div>
             <div className="text-lg font-extrabold">{t.verifiedPopups}회</div>
             <div className="text-[11px] text-ink-500">인증 공동 팝업</div>
@@ -75,7 +75,7 @@ export default function BrandProfileScreen({ id }: { id: string }) {
           </div>
         )}
         {brand.news && brand.news.length > 0 && (
-          <div className="mt-4 rounded-2xl border border-ink-100 p-3.5">
+          <div className="mt-4 rounded border border-ink-100 p-3.5">
             <div className="text-[12px] font-bold text-ink-500 mb-1"><Ic n="megaphone" />최근 소식</div>
             {brand.news.slice(0, 2).map((n) => (
               <div key={n.id} className="text-sm py-1"><span className="text-ink-900">{n.text}</span> <span className="text-[11px] text-ink-500">{n.at.slice(5, 10).replace('-', '/')}</span></div>
@@ -243,7 +243,7 @@ function MatchCard({ me, other }: { me: import('@/types').BrandProfile; other: i
   const learned = learnMatchWeights(db);
   const word = pct >= 80 ? '찰떡 궁합' : pct >= 60 ? '잘 맞아요' : pct >= 45 ? '무난해요' : '색이 많이 달라요';
   return (
-    <div className="mt-4 rounded-2xl bg-brand-50 p-4">
+    <div className="mt-4 rounded bg-brand-50 p-4">
       <div className="flex items-center justify-between">
         <span className="text-[13px] font-bold">{josa(me.name, '과', '와')}의 궁합</span>
         <span className="text-[13px] font-extrabold text-brand-600">{pct}% · {word}</span>
