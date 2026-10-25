@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { navigate } from '@/store/store';
-import { confirmCompletion, setPopupStatus, simulateOthersConfirm, writeBizReview } from '@/store/actions';
-import { brandById, displayName, period, popupById, spaceById, teamById, trustScore } from '@/store/logic';
+import { confirmCompletion, setPopupStatus, simulateOthersConfirm, startNextRound, writeBizReview } from '@/store/actions';
+import { brandById, displayName, period, popupById, popupReport, spaceById, teamById, trustScore } from '@/store/logic';
 import { Button, Card, cx, Demo, Empty, Icon, Sheet, Stars, StatusPill, Tag, textareaCls, GradeBadge } from '@/components/ui';
 import { REVIEW_CRITERIA, type Team } from '@/types';
 
@@ -26,6 +26,56 @@ function ReviewForm({ kind, targetLabel, onSubmit, onClose, open }: { kind: BizK
       <textarea className={textareaCls} maxLength={100} value={comment} onChange={(e) => setComment(e.target.value)} placeholder="한 줄 후기" />
       <Button full size="lg" className="mt-3" disabled={!comment.trim()} onClick={() => { onSubmit(scores, comment); setComment(''); onClose(); }}>후기 등록</Button>
     </Sheet>
+  );
+}
+
+/** 끝난 팝업 성과 리포트 */
+export function PopupReportCard({ popupId }: { popupId: string }) {
+  const { db } = useMe();
+  const p = popupById(db, popupId);
+  if (!p) return null;
+  const r = popupReport(db, popupId);
+  const stat = (label: string, value: string) => (
+    <div className="rounded-2xl bg-white/10 p-3">
+      <div className="text-[11px] text-white/60">{label}</div>
+      <div className="text-lg font-extrabold mt-0.5">{value}</div>
+    </div>
+  );
+  return (
+    <div className="rounded-3xl bg-brand-500 text-white p-5">
+      <div className="text-[12px] text-white/70">팝업 리포트 · {period(p.period)}</div>
+      <div className="text-xl font-extrabold mt-0.5">{p.title}</div>
+      <div className="grid grid-cols-2 gap-2 mt-4">
+        {stat('방문 인증', `${r.visits}명`)}
+        {stat('방문객 평점', r.rating ? `★ ${r.rating.toFixed(1)}` : '-')}
+        {stat('방문객 리뷰', `${r.reviewCount}개`)}
+        {stat('팀 브랜드 팔로워', `${r.followers}명`)}
+      </div>
+      {r.bestPair && (
+        <div className="mt-3 rounded-2xl bg-white text-ink-900 p-3.5">
+          <div className="text-[11px] text-ink-500">방문객이 가장 좋아한 조합</div>
+          <div className="font-bold mt-0.5">💛 {brandById(db, r.bestPair[0])?.name} × {brandById(db, r.bestPair[1])?.name} <span className="text-[12px] text-ink-500 font-normal">· {r.bestPairCount}명</span></div>
+        </div>
+      )}
+      <p className="text-[11px] text-white/60 mt-3">OFF STAGE 안에서 모인 기록만 보여요. 매출은 팝업자랑에 직접 공개할 수 있어요.</p>
+    </div>
+  );
+}
+
+export function NextRoundCard({ team }: { team: Team }) {
+  const { db, brand } = useMe();
+  if (!brand) return null;
+  const next = db.teams.find((t) => t.name === team.name && t.round === team.round + 1);
+  return (
+    <div className="rounded-2xl border-2 border-dashed border-brand-200 p-4">
+      <div className="font-bold">{team.round + 1}회차도 같이 열까요?</div>
+      <p className="text-[13px] text-ink-700 mt-1">같은 멤버로 다시 열면 약속서·분담 방식·무드보드를 그대로 가져가요. 공간과 날짜만 새로 정하면 돼요.</p>
+      {next ? (
+        <Button className="mt-3" variant="secondary" onClick={() => navigate({ name: 'team', id: next.id })}>{team.round + 1}회차 팀으로 가기</Button>
+      ) : (
+        <Button className="mt-3" onClick={() => startNextRound(team.id, brand.id)}>{team.round + 1}회차 팀 만들기</Button>
+      )}
+    </div>
   );
 }
 
@@ -89,6 +139,7 @@ export function TeamWrapUp({ team }: { team: Team }) {
         )}
       </Card>
 
+      {current.status === '종료' && <PopupReportCard popupId={current.id} />}
       {current.status === '종료' && comp && <CompletionStatus popupId={current.id} />}
 
       {comp?.verified && brand && (
@@ -133,6 +184,8 @@ export function TeamWrapUp({ team }: { team: Team }) {
           </div>
         </div>
       )}
+
+      {comp?.verified && <NextRoundCard team={team} />}
 
       {popups.length > 1 && (
         <div>

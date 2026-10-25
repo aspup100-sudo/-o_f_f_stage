@@ -41,8 +41,17 @@ export function TodayBrand() {
   if (myApps) extra.push({ label: `지원한 모집글 ${myApps}건 결과 대기`, route: { name: 'tab', tab: 'recruits' } });
 
   if (!teams.length) {
+    const ended = teamsOfBrand(db, brand.id).filter((t) => t.stage === '종료').sort((a, b) => b.period.end.localeCompare(a.period.end))[0];
+    const hasNext = ended && db.teams.some((t) => t.name === ended.name && t.round === ended.round + 1);
     return (
       <section className="px-4 pt-4">
+        {ended && !hasNext && (
+          <button onClick={() => navigate({ name: 'team', id: ended.id, sub: 'wrap' })} className="w-full mb-3 rounded-3xl bg-brand-500 text-white p-5 text-left">
+            <div className="text-[13px] text-white/70">{ended.name} {ended.round}회차가 끝났어요</div>
+            <div className="text-xl font-extrabold leading-snug mt-1">팝업 리포트를 확인하고<br />{ended.round + 1}회차를 준비해 볼까요?</div>
+            <div className="mt-3 text-[13px] font-bold">리포트 보기 ›</div>
+          </button>
+        )}
         <div className="rounded-3xl bg-ink-900 text-white p-5">
           <div className="text-[13px] text-white/60">{brand.name}님, 반가워요</div>
           <div className="text-xl font-extrabold leading-snug mt-1">아직 함께할 팀이 없어요.<br />이번 달 모집글부터 볼까요?</div>

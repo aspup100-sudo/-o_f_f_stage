@@ -281,3 +281,30 @@ export function recruitUrgency(r: Recruitment) {
   if (d >= 0 && d <= 14 && empty > 0) return `오픈 ${d}일 전`;
   return undefined;
 }
+
+// ───────── 팝업 리포트 ─────────
+/** 끝난 팝업의 성과를 앱 안 데이터로 모은다 (방문 인증, 리뷰, 조합 반응). */
+export function popupReport(db: DB, popupId: string) {
+  const p = db.popups.find((x) => x.id === popupId)!;
+  const visits = db.visits.filter((v) => v.popupId === popupId).length;
+  const combos = db.comboReviews.filter((c) => c.popupId === popupId);
+  const reviews = db.reviews.filter((r) => !r.hidden && r.popupId === popupId && r.kind.startsWith('visitor'));
+  const ratings = [...combos.map((c) => c.rating), ...reviews.map((r) => reviewAvg(r))];
+  const pairCount = new Map<string, number>();
+  combos.filter((c) => c.good).forEach((c) => c.pairs.forEach(([a, b]) => {
+    const k = [a, b].sort().join('|');
+    pairCount.set(k, (pairCount.get(k) ?? 0) + 1);
+  }));
+  const best = [...pairCount.entries()].sort((a, b) => b[1] - a[1])[0];
+  const team = db.teams.find((t) => t.id === p.teamId);
+  const followers = team ? team.members.reduce((n, m) => n + (db.brands.find((b) => b.id === m.brandId)?.followers.length ?? 0), 0) : 0;
+  return {
+    visits,
+    reviewCount: combos.length + reviews.length,
+    rating: ratings.length ? avg(ratings) : 0,
+    bestPair: best ? (best[0].split('|') as [string, string]) : undefined,
+    bestPairCount: best?.[1] ?? 0,
+    waiting: waitCount(p),
+    followers,
+  };
+}

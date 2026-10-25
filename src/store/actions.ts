@@ -1059,3 +1059,49 @@ export function toggleSaveRecruit(brandId: string, recruitmentId: string) {
   });
   toast(on ? '찜했어요. 자리가 줄어들면 알려 드릴게요 (데모)' : '찜을 해제했어요');
 }
+
+// ───────── 다음 회차 ─────────
+const addDays = (iso: string, n: number) => {
+  const d = new Date(iso + 'T00:00:00');
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0, 10);
+};
+
+/** 끝난 팀을 그대로 이어 다음 회차 팀을 만든다. 약속서·분담 방식·무드보드를 복사하고 공간과 날짜는 새로 정한다. */
+export function startNextRound(teamId: string, byBrandId: string) {
+  let newTeamId = '';
+  update((s) => {
+    const db = s.db;
+    const prev = db.teams.find((t) => t.id === teamId)!;
+    if (db.teams.some((t) => t.name === prev.name && t.round === prev.round + 1)) {
+      newTeamId = db.teams.find((t) => t.name === prev.name && t.round === prev.round + 1)!.id;
+      return;
+    }
+    newTeamId = newId('t');
+    const start = addDays(DEMO_TODAY, 28);
+    const len = Math.max(0, Math.round((new Date(prev.period.end).getTime() - new Date(prev.period.start).getTime()) / 86400000));
+    const period = { start, end: addDays(start, len) };
+    db.teams.unshift({
+      ...structuredClone(prev), id: newTeamId, stage: '준비 중', period, spaceId: undefined, popupId: undefined,
+      round: prev.round + 1, promoChecked: [], confirmed: false, recruitmentId: undefined,
+    });
+    const ag = db.agreements.find((a) => a.teamId === teamId);
+    db.agreements.push({ teamId: newTeamId, items: structuredClone(ag?.items ?? ({} as never)), agreedBy: [byBrandId], locked: false, updatedAt: nowISO() });
+    const cs = db.costSplits.find((c) => c.teamId === teamId);
+    db.costSplits.push({ teamId: newTeamId, mode: cs?.mode ?? 'equal', spaceFee: cs?.spaceFee ?? 0, commonItems: [], dueDate: addDays(start, -7), paid: [] });
+    const dates: string[] = [];
+    for (let i = 0; i <= len; i++) dates.push(addDays(start, i));
+    db.shifts.push({ teamId: newTeamId, dates, timeSlots: ['12:00-16:00', '16:00-20:00'], assign: {} });
+    const mb = db.moodboards.find((m) => m.teamId === teamId);
+    if (mb) db.moodboards.push({ ...structuredClone(mb), teamId: newTeamId });
+    const users = prev.members.map((m) => brandUser(db, m.brandId));
+    const roomId = ensureRoom(db, users, `${prev.name} ${prev.round + 1}회`, { type: 'team', refId: newTeamId });
+    systemMessage(db, roomId, `${prev.round + 1}회차 팀이 만들어졌어요. 지난 약속서를 그대로 가져왔으니 바뀐 점만 고치고 동의해 주세요.`);
+    const me = brandUser(db, byBrandId);
+    users.filter((u) => u !== me).forEach((u) =>
+      notify(db, u, 'agreement_request', `"${prev.name}" ${prev.round + 1}회차를 같이 열자는 제안이 왔어요. 약속서를 확인해 주세요.`, { name: 'team', id: newTeamId, sub: 'agreement' }),
+    );
+  });
+  toast('다음 회차 팀을 만들었어요. 지난 약속서와 무드보드를 그대로 가져왔어요');
+  navigate({ name: 'team', id: newTeamId, sub: 'agreement' });
+}
