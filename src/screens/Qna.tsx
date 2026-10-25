@@ -27,10 +27,15 @@ export function QnaList() {
   const { db } = useMe();
   const [tag, setTag] = useState<QnaTag | '전체'>('전체');
   const [q, setQ] = useState('');
+  const [waiting, setWaiting] = useState(false);
+  const answers = (id: string) => db.qnaAnswers.filter((a) => a.postId === id).length;
   const list = db.qnaPosts
     .filter((p) => !p.hidden)
     .filter((p) => tag === '전체' || p.tag === tag)
-    .filter((p) => !q || (p.title + p.body).includes(q));
+    .filter((p) => !q || (p.title + p.body).includes(q))
+    .filter((p) => !waiting || answers(p.id) === 0)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const waitingCount = db.qnaPosts.filter((p) => !p.hidden && answers(p.id) === 0).length;
   return (
     <div className="pt-4">
       <div className="px-4 flex gap-2 mb-2">
@@ -41,11 +46,12 @@ export function QnaList() {
         <Button variant="dark" className="h-11" onClick={() => navigate({ name: 'qnaNew' })}>질문하기</Button>
       </div>
       <div className="flex gap-1.5 overflow-x-auto no-scrollbar px-4 pb-3">
+        {waitingCount > 0 && <Chip active={waiting} onClick={() => setWaiting(!waiting)}>🙋 답변 대기 {waitingCount}</Chip>}
         {(['전체', ...QNA_TAGS] as const).map((t) => <Chip key={t} active={tag === t} onClick={() => setTag(t)}>{t}</Chip>)}
       </div>
       <div className="px-4 space-y-2">
         {list.map((p) => {
-          const n = db.qnaAnswers.filter((a) => a.postId === p.id).length;
+          const n = answers(p.id);
           return (
             <Card key={p.id} className="p-3.5" onClick={() => navigate({ name: 'qna', id: p.id })}>
               <div className="flex items-center gap-1.5 mb-1"><Tag tone="orange">{p.tag}</Tag><span className="text-[11px] text-ink-500">{p.createdAt}</span></div>
