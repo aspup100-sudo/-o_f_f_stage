@@ -3,7 +3,7 @@ import { useSyncExternalStore } from 'react';
 import { createSeed, type DB } from '@/data/mock';
 import type { Role, Route } from '@/types';
 
-export const ROLE_HOME: Record<Role, string> = { brand: 'explore', landlord: 'explore', visitor: 'explore', admin: 'verify', rental: 'explore' };
+export const ROLE_HOME: Record<Role, string> = { brand: 'explore', landlord: 'explore', visitor: 'explore', admin: 'stats', rental: 'explore' };
 
 export interface Session {
   role: Role;

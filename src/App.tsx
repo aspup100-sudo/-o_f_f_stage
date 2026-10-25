@@ -13,7 +13,7 @@ function TopBar() {
   const rooms = db.chatRooms.filter((r) => r.memberIds.includes(userId)).length;
   return (
     <header className="sticky top-0 z-30 bg-white border-b border-ink-100 h-14 flex items-center px-4">
-      <button onClick={() => navigate({ name: 'tab', tab: role === 'admin' ? 'verify' : 'explore' })} className="flex items-center gap-1.5">
+      <button onClick={() => navigate({ name: 'tab', tab: role === 'admin' ? 'stats' : 'explore' })} className="flex items-center gap-1.5">
         <img src="./logo.png" alt="OFF STAGE 로고" className="w-7 h-7 rounded-lg object-cover" />
         <span className="font-black text-[16px] tracking-tight whitespace-nowrap">OFF STAGE</span>
       </button>

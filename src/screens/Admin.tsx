@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useMe } from '@/store/hooks';
+import { navigate } from '@/store/store';
 import { decideVerification, resolveReport } from '@/store/actions';
-import { displayName } from '@/store/logic';
+import { daysUntil, displayName, rentalQuote, won } from '@/store/logic';
 import { ScreenTitle } from '@/components/common';
 import { Button, Card, Empty, Segmented, Tag } from '@/components/ui';
 import { ROLE_LABEL } from '@/config';
@@ -79,6 +80,64 @@ export function ReportsTab() {
             )}
           </Card>
         ))}
+      </div>
+    </div>
+  );
+}
+
+/** 운영 지표: 앱 안 데이터로 바로 계산한다 (가짜 숫자 없음). */
+export function StatsTab() {
+  const { db } = useMe();
+  const newUsers = db.users.filter((u) => u.createdAt && daysUntil(u.createdAt.slice(0, 10)) >= -7).length;
+  const pending = db.users.filter((u) => u.verifyStatus === 'pending').length;
+  const openReports = db.reports.filter((r) => r.status === 'open').length;
+  const teams = { 준비: db.teams.filter((t) => t.stage === '준비 중').length, 운영: db.teams.filter((t) => t.stage === '운영 중').length, 종료: db.teams.filter((t) => t.stage === '종료').length };
+  const verified = db.completions.filter((c) => c.verified).length;
+  const rentalSum = db.rentalOrders.filter((o) => o.status !== 'requested' && o.status !== 'rejected').reduce((s, o) => s + rentalQuote(db, o.partnerId, o.lines, o.dates, o.delivery).total, 0);
+  const rentalSaved = db.rentalOrders.filter((o) => o.status !== 'requested' && o.status !== 'rejected').reduce((s, o) => s + rentalQuote(db, o.partnerId, o.lines, o.dates, o.delivery).saved, 0);
+  const waits = db.popups.reduce((s, p) => s + (p.waiters?.length ?? 0), 0);
+  const tile = (label: string, value: string | number, hint?: string) => (
+    <Card className="p-3.5">
+      <div className="text-[11px] text-ink-500">{label}</div>
+      <div className="text-xl font-extrabold mt-0.5">{value}</div>
+      {hint && <div className="text-[11px] text-ink-500 mt-0.5">{hint}</div>}
+    </Card>
+  );
+  return (
+    <div>
+      <ScreenTitle>운영 지표</ScreenTitle>
+      <div className="px-4 space-y-4 pb-6">
+        {(pending > 0 || openReports > 0) && (
+          <Card className="p-3.5 border-brand-200 bg-brand-50" onClick={() => navigate({ name: 'tab', tab: pending ? 'verify' : 'reports' })}>
+            <div className="text-sm font-bold">처리할 일: 인증 대기 {pending}건 · 신고 {openReports}건 ›</div>
+          </Card>
+        )}
+        <div>
+          <h3 className="font-bold mb-2 text-[15px]">사람</h3>
+          <div className="grid grid-cols-2 gap-2">
+            {tile('브랜드', db.brands.length, `인증 ${db.users.filter((u) => u.role === 'brand' && u.verifyStatus === 'verified').length}곳`)}
+            {tile('임대인 공간', db.spaces.length, `임대인 ${db.landlords.length}명`)}
+            {tile('방문객', db.visitors.length, `팔로우 ${db.visitors.reduce((s, v) => s + v.following.length, 0)}건`)}
+            {tile('최근 7일 가입', newUsers)}
+          </div>
+        </div>
+        <div>
+          <h3 className="font-bold mb-2 text-[15px]">공동 팝업</h3>
+          <div className="grid grid-cols-2 gap-2">
+            {tile('팀', db.teams.length, `준비 ${teams.준비} · 운영 ${teams.운영} · 종료 ${teams.종료}`)}
+            {tile('인증 공동 팝업', verified)}
+            {tile('방문 인증', db.visits.length, `오픈 알림 신청 ${waits}건`)}
+            {tile('모집글', db.recruitments.length, `모집 중 ${db.recruitments.filter((r) => r.status === '모집 중').length}`)}
+          </div>
+        </div>
+        <div>
+          <h3 className="font-bold mb-2 text-[15px]">렌탈 제휴</h3>
+          <div className="grid grid-cols-2 gap-2">
+            {tile('렌탈 거래액', won(rentalSum), `${db.rentalOrders.length}건 요청`)}
+            {tile('브랜드가 아낀 금액', won(rentalSaved), '정가 대비')}
+          </div>
+        </div>
+        <p className="text-[11px] text-ink-500">모든 수치는 데모 데이터에서 계산돼요.</p>
       </div>
     </div>
   );

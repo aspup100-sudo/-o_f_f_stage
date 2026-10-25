@@ -27,6 +27,7 @@ export const TABS: Record<Role, { key: string; label: string; icon: string }[]> 
     { key: 'me', label: '내 정보', icon: 'user' },
   ],
   admin: [
+    { key: 'stats', label: '지표', icon: 'grid' },
     { key: 'verify', label: '인증 승인', icon: 'shield' },
     { key: 'reports', label: '신고 처리', icon: 'flag' },
     { key: 'magazineAdmin', label: '매거진', icon: 'book' },

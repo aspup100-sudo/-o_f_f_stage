@@ -15,7 +15,7 @@ import { PopupDetail, MapTab, StampsTab } from './Popup';
 import { NotificationsScreen } from './Notifications';
 import { ShowcaseDetail, ShowcaseNew } from './Showcase';
 import { QnaDetail, QnaNew } from './Qna';
-import { VerifyTab, ReportsTab } from './Admin';
+import { StatsTab, VerifyTab, ReportsTab } from './Admin';
 import { MagazineAdminTab, MagazineDetail, MagazineNew } from './Magazine';
 import { MyItemsTab, OrdersTab, RentalItemEdit, RentalPartnerScreen, RentalsScreen } from './Rental';
 
@@ -29,6 +29,7 @@ function renderTab(tab: string): ReactNode {
     case 'myspaces': return <MySpacesTab />;
     case 'inbox': return <InboxTab />;
     case 'map': return <MapTab />;
+    case 'stats': return <StatsTab />;
     case 'verify': return <VerifyTab />;
     case 'reports': return <ReportsTab />;
     case 'stamps': return <StampsTab />;
