@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMe } from '@/store/hooks';
-import { isListedBrand, josa, matchPct, recommendations } from '@/store/logic';
+import { isListedBrand, josa, matchPct, matchScore, recommendations, trustScore } from '@/store/logic';
 import { navigate } from '@/store/store';
 import { BrandCard, BrandLogo, PopupBannerCard } from '@/components/common';
 import { Chip, cx, Empty, Sheet, Button, Icon, Tag } from '@/components/ui';
@@ -43,6 +43,7 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
   const [price, setPrice] = useState<PriceRange | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
   const [showAll, setShowAll] = useState(false);
+  const [sort, setSort] = useState<'base' | 'match' | 'exp'>('base');
 
   const popups = db.popups.filter((p) => p.status !== '종료');
   const recs = brand ? recommendations(db, brand, 5) : [];
@@ -50,7 +51,11 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
     .filter((b) => isListedBrand(db, b) && b.id !== brand?.id)
     .filter((b) => !moods.length || b.tags.moods.some((m) => moods.includes(m)))
     .filter((b) => !cats.length || b.tags.categories.some((c) => cats.includes(c)))
-    .filter((b) => !price || b.tags.price === price);
+    .filter((b) => !price || b.tags.price === price)
+    .sort((a, b) =>
+      sort === 'match' && brand ? matchScore(db, brand, b).score - matchScore(db, brand, a).score
+      : sort === 'exp' ? trustScore(db, b.id).verifiedPopups - trustScore(db, a.id).verifiedPopups
+      : 0);
   const filterCount = moods.length + cats.length + (price ? 1 : 0);
 
   return (
@@ -113,7 +118,14 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
 
       <section className="pt-6 px-4">
         <div className="flex items-center justify-between mb-2.5">
-          <h2 className="font-bold text-[15px]">브랜드 둘러보기</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="font-bold text-[15px]">브랜드 둘러보기</h2>
+            <select value={sort} onChange={(e) => setSort(e.target.value as typeof sort)} className="text-[12px] text-ink-700 bg-transparent border border-ink-300 rounded-full h-7 px-2" aria-label="정렬">
+              <option value="base">기본순</option>
+              {brand && <option value="match">궁합 높은 순</option>}
+              <option value="exp">공동 팝업 많은 순</option>
+            </select>
+          </div>
           <button onClick={() => setFilterOpen(true)} className="flex items-center gap-1 text-sm font-semibold">
             <Icon name="search" className="w-4 h-4" /> 필터{filterCount > 0 && <span className="text-brand-500">{filterCount}</span>}
           </button>
