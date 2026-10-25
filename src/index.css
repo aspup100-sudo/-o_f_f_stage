@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 html, body { background: #e7e5e4; }
-body { font-family: Pretendard, 'Apple SD Gothic Neo', 'Noto Sans KR', system-ui, sans-serif; color: #1c1917; -webkit-font-smoothing: antialiased; word-break: keep-all; }
+body { font-family: 'Pretendard Variable', Pretendard, 'Apple SD Gothic Neo', 'Noto Sans KR', system-ui, sans-serif; color: #1c1917; -webkit-font-smoothing: antialiased; word-break: keep-all; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { scrollbar-width: none; }
 button { -webkit-tap-highlight-color: transparent; }
