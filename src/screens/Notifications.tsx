@@ -8,6 +8,15 @@ const ICON: Record<NotificationType, string> = {
   follow_popup: '🛍️', space_application: '🏠', rental: '📦', system: '🔔',
 };
 
+function ago(iso: string) {
+  const min = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+  if (min < 1) return '방금';
+  if (min < 60) return `${min}분 전`;
+  if (min < 60 * 24) return `${Math.round(min / 60)}시간 전`;
+  if (min < 60 * 24 * 7) return `${Math.round(min / 1440)}일 전`;
+  return iso.slice(5, 10).replace('-', '/');
+}
+
 export function NotificationsScreen() {
   const { db, userId } = useMe();
   const list = db.notifications.filter((n) => n.userId === userId);
@@ -22,7 +31,7 @@ export function NotificationsScreen() {
             <span className="text-xl">{ICON[n.type]}</span>
             <span className="flex-1">
               <span className={cx('block text-sm', !n.read && 'font-semibold')}>{n.text}</span>
-              <span className="block text-[11px] text-ink-500 mt-0.5">{n.at.replace('T', ' ').slice(0, 16)}</span>
+              <span className="block text-[11px] text-ink-500 mt-0.5">{ago(n.at)}</span>
             </span>
             {!n.read && <span className="w-2 h-2 rounded-full bg-brand-500 mt-1.5" />}
           </button>

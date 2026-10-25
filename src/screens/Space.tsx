@@ -39,6 +39,7 @@ export function SpaceCard({ db, s, onClick }: { db: DB; s: Space; onClick?: () =
           <div className="text-right">
             <div className="text-[11px] text-ink-500">1일 대관료</div>
             <div className="font-extrabold text-brand-600">{manwon(s.dailyFee)}</div>
+            {s.teamRental && <div className="text-[11px] text-ink-700 mt-0.5">3곳이 나누면 <b>{manwon(s.dailyFee / 3)}</b></div>}
           </div>
         </div>
       </div>
@@ -54,6 +55,8 @@ export function SpacesTab() {
   const [date, setDate] = useState('');
   const [team, setTeam] = useState(false);
   const [fashion, setFashion] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const filterCount = (maxFee ? 1 : 0) + (minArea ? 1 : 0) + (team ? 1 : 0) + (fashion ? 1 : 0) + (date ? 1 : 0);
   const list = db.spaces
     .filter((s) => region === '전체' || s.region === region)
     .filter((s) => !maxFee || s.dailyFee <= maxFee)
@@ -74,27 +77,37 @@ export function SpacesTab() {
     <div>
       <ScreenTitle>공간·장비</ScreenTitle>
       <div className="px-4 mb-3"><Segmented items={[{ key: 'space', label: '공간 찾기' }, { key: 'rental', label: '장비 렌탈' }]} value={mode} onChange={setMode} /></div>
-      <div className="px-4 space-y-2 mb-3">
-        <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
-          {(['전체', ...REGIONS] as const).map((r) => <Chip key={r} active={region === r} onClick={() => setRegion(r)}>{r}</Chip>)}
-        </div>
-        <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
-          {[[0, '대관료 전체'], [500000, '50만원 이하'], [1000000, '100만원 이하'], [1500000, '150만원 이하']].map(([v, l]) => (
+      <div className="px-4 mb-3 flex gap-1.5 overflow-x-auto no-scrollbar">
+        <button onClick={() => setFilterOpen(true)} className={cx('h-8 px-3 rounded-full border text-xs font-semibold shrink-0 flex items-center gap-1', filterCount ? 'bg-ink-900 text-white border-ink-900' : 'bg-white border-ink-300')}>
+          <Icon name="search" className="w-3.5 h-3.5" /> 조건{filterCount > 0 && ` ${filterCount}`}
+        </button>
+        {(['전체', ...REGIONS] as const).map((r) => <Chip key={r} active={region === r} onClick={() => setRegion(r)}>{r}</Chip>)}
+      </div>
+      <Sheet open={filterOpen} onClose={() => setFilterOpen(false)} title="공간 조건">
+        <div className="text-[13px] font-semibold mb-2">1일 대관료</div>
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {[[0, '전체'], [500000, '50만원 이하'], [1000000, '100만원 이하'], [1500000, '150만원 이하']].map(([v, l]) => (
             <Chip key={l} active={maxFee === v} onClick={() => setMaxFee(v as number)}>{l}</Chip>
           ))}
-          {[[0, '면적 전체'], [30, '30㎡ 이상'], [50, '50㎡ 이상']].map(([v, l]) => (
+        </div>
+        <div className="text-[13px] font-semibold mb-2">면적</div>
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {[[0, '전체'], [30, '30㎡ 이상'], [50, '50㎡ 이상']].map(([v, l]) => (
             <Chip key={l} active={minArea === v} onClick={() => setMinArea(v as number)}>{l}</Chip>
           ))}
         </div>
-        <div className="flex gap-1.5 items-center flex-wrap">
+        <div className="text-[13px] font-semibold mb-2">조건</div>
+        <div className="flex flex-wrap gap-1.5 mb-4">
           <Chip active={team} onClick={() => setTeam(!team)}>팀 단위 대관 가능</Chip>
           <Chip active={fashion} onClick={() => setFashion(!fashion)}>업종 고정(패션)</Chip>
-          <label className={cx('h-8 px-2 rounded-full border text-xs flex items-center gap-1', date ? 'border-ink-900' : 'border-ink-300')}>
-            📅 <input type="date" value={date} min="2026-10-26" onChange={(e) => setDate(e.target.value)} className="bg-transparent outline-none text-xs w-[110px]" />
-            {date && <button onClick={() => setDate('')}>✕</button>}
-          </label>
         </div>
-      </div>
+        <div className="text-[13px] font-semibold mb-2">이 날 비어 있는 공간</div>
+        <input type="date" value={date} min="2026-10-26" onChange={(e) => setDate(e.target.value)} className={inputCls + ' mb-5'} />
+        <div className="flex gap-2">
+          <Button variant="secondary" onClick={() => { setMaxFee(0); setMinArea(0); setTeam(false); setFashion(false); setDate(''); }}>초기화</Button>
+          <Button full onClick={() => setFilterOpen(false)}>{list.length}곳 보기</Button>
+        </div>
+      </Sheet>
       <div className="px-4 space-y-3">
         {list.map((s) => <SpaceCard key={s.id} db={db} s={s} />)}
         {!list.length && <Empty icon="building">조건에 맞는 공간이 없어요</Empty>}
