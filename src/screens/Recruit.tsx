@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { shareLink } from '@/store/share';
 import { useMe, guard } from '@/store/hooks';
 import { navigate } from '@/store/store';
 import { applyRecruitment, createRecruitment, decideApplication, simulateApplicants, toggleSaveRecruit, type RecruitDraft } from '@/store/actions';
@@ -132,7 +133,15 @@ export function RecruitDetail({ id }: { id: string }) {
 
   return (
     <div className="bg-white min-h-screen">
-      <SubHeader title="모집글" right={<div className="pr-2 pt-1"><SaveRecruitButton r={r} /></div>} />
+      <SubHeader
+        title="모집글"
+        right={
+          <div className="flex items-center gap-3 pr-2 pt-1">
+            {r.status !== '마감' && <button className="text-[13px] font-semibold text-ink-700" onClick={() => shareLink(r.title, `${r.title} · 빈자리 ${empties.length}개 · OFF STAGE에서 같이 열 브랜드를 찾아요`)}>공유</button>}
+            <SaveRecruitButton r={r} />
+          </div>
+        }
+      />
       <div className="p-4">
         <div className="flex items-center gap-1.5 mb-2">
           <StatusPill status={r.status} />
