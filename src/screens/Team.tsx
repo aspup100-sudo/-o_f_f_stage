@@ -58,6 +58,16 @@ export function MyTeamTab() {
                   </div>
                 )}
               </div>
+              {t.stage === '준비 중' && (() => {
+                const next = prep.steps.find((x) => !x.done && x.mine) ?? prep.steps.find((x) => !x.done);
+                return next ? (
+                  <button onClick={(e) => { e.stopPropagation(); navigate({ name: 'team', id: t.id, sub: next.sub }); }} className="mt-3 w-full flex items-center gap-2 rounded-xl bg-brand-50 px-3 py-2.5 text-left">
+                    <span className="text-[11px] font-bold text-brand-600 shrink-0">{next.mine ? '내 차례' : '다음 할 일'}</span>
+                    <span className="text-[13px] font-semibold flex-1 truncate">{next.label}</span>
+                    <span className="text-brand-600">›</span>
+                  </button>
+                ) : null;
+              })()}
             </Card>
           );
         })}
