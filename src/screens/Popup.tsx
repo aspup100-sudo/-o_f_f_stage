@@ -326,11 +326,16 @@ export function StampsTab() {
             {Array.from({ length: STAMP_GOAL }).map((_, i) => {
               const p = popupById(db, st.popupIds[i]);
               return (
-                <div key={i} className={cx('aspect-square rounded-full border-2 flex flex-col items-center justify-center text-center p-1', p ? 'border-brand-400 bg-brand-500/20' : 'border-dashed border-white/30')}>
+                <div
+                  key={i}
+                  className={cx('aspect-square rounded-full border-2 flex flex-col items-center justify-center text-center p-1', p ? 'border-white/80' : 'border-dashed border-white/30')}
+                  style={p ? { background: `hsl(${brandById(db, teamById(db, p.teamId)?.members[0]?.brandId ?? '')?.logoHue ?? 250} 45% 45%)`, transform: `rotate(${(i % 2 ? 1 : -1) * (6 + i * 3)}deg)` } : undefined}
+                >
                   {p ? (
                     <>
-                      <span className="text-2xl">🏷️</span>
-                      <span className="text-[10px] leading-tight mt-0.5 line-clamp-2">{p.title}</span>
+                      <span className="text-[9px] font-bold tracking-widest opacity-80">OFF STAGE</span>
+                      <span className="text-[11px] font-extrabold leading-tight mt-0.5 line-clamp-2">{p.title}</span>
+                      <span className="text-[9px] opacity-80 mt-0.5">{md(p.period.start)}</span>
                     </>
                   ) : (
                     <span className="text-white/40 text-xs">{i + 1}</span>
