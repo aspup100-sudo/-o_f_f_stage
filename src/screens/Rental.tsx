@@ -398,7 +398,8 @@ export function MyItemsTab() {
                 <Swatch hue={it.hue} pattern="grid" className="w-16 h-16 shrink-0" rounded="rounded-lg" />
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-sm">{it.name}</div>
-                  <div className="text-[12px] text-ink-500">{it.category} · 재고 {it.stock}개 · {(() => { const n = orders.filter((o) => o.lines.some((l) => l.itemId === it.id)).length; return n ? <span className="text-brand-600 font-semibold">예약 {n}회</span> : <span>아직 예약 없음</span>; })()}</div>
+                  <div className="text-[12px] text-ink-500">{it.category} · 재고 {it.stock}개</div>
+                  <div className="text-[12px] mt-0.5">{(() => { const n = orders.filter((o) => o.lines.some((l) => l.itemId === it.id)).length; return n ? <span className="text-brand-600 font-semibold">예약 {n}회</span> : <span className="text-ink-500">아직 예약 없음</span>; })()}</div>
                   <div className="flex gap-2 mt-1.5">
                     <button className="text-[12px] text-brand-600 font-semibold" onClick={() => navigate({ name: 'rentalItemEdit', id: it.id })}>수정</button>
                     <button className="text-[12px] text-ink-500" onClick={() => toggleRentalItem(it.id)}>{it.active ? '노출 중지' : '다시 노출'}</button>
