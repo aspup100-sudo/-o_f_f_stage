@@ -45,6 +45,7 @@ export function BrandCard({ db, brand, right, reasons, compact }: { db: DB; bran
   if (compact) {
     // 목록용: 룩북 한 장 + 핵심 정보 한 줄씩
     const im = imgs[0];
+    const live = db.popups.find((p) => p.status === '진행 중' && teamById(db, p.teamId)?.members.some((m) => m.brandId === brand.id));
     return (
       <div className="flex gap-3 py-3">
         <button aria-label={`${brand.name} 프로필`} onClick={() => navigate({ name: 'brand', id: brand.id })} className="w-[84px] h-[104px] shrink-0 rounded-xl overflow-hidden">
@@ -58,6 +59,11 @@ export function BrandCard({ db, brand, right, reasons, compact }: { db: DB; bran
             </button>
             {right}
           </div>
+          {live && (
+            <button onClick={() => navigate({ name: 'popup', id: live.id })} className="mt-1 inline-flex items-center gap-1 text-[11px] font-bold text-brand-600">
+              <span className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse" />지금 {live.title}에서 팝업 중 ›
+            </button>
+          )}
           <p className="text-[13px] text-ink-700 mt-1 line-clamp-1">{brand.intro}</p>
           <div className="mt-1.5">
             <ThemeTagList tags={brand.tags} limit={3} />
