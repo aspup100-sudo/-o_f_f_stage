@@ -251,7 +251,7 @@ function MatchCard({ me, other }: { me: import('@/types').BrandProfile; other: i
       <div className="h-2 rounded-full bg-white mt-2 overflow-hidden"><div className="h-full bg-brand-500" style={{ width: `${pct}%` }} /></div>
       {m.reasons.length > 0 && (
         <div className="mt-2.5 space-y-0.5">
-          {m.reasons.slice(0, 3).map((r) => <div key={r} className="text-[12px] text-brand-700 flex"><Ic n="check" />{r}</div>)}
+          {m.reasons.slice(0, 3).map((r) => <div key={r} className="text-[12px] text-ink-700 flex"><span className="w-1 h-1 bg-ink-900 mt-[7px] mr-2 shrink-0" />{r}</div>)}
         </div>
       )}
       <button onClick={() => setOpen(!open)} className="mt-2 text-[12px] font-semibold text-ink-500">{open ? '접기 ▴' : '이렇게 계산했어요 ▾'}</button>

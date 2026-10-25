@@ -68,7 +68,7 @@ export function RecruitCard({ db, r, reasons }: { db: DB; r: Recruitment; reason
       <div className="text-[12px] text-ink-700 mt-1">남은 자리 <b>{empty}</b> / {r.slots.length}</div>
       {reasons && reasons.length > 0 && (
         <div className="mt-2.5 pt-2.5 border-t border-ink-100 space-y-0.5">
-          {reasons.slice(0, 3).map((x) => <div key={x} className="text-[12px] text-brand-700 flex"><Ic n="check" />{x}</div>)}
+          {reasons.slice(0, 3).map((x) => <div key={x} className="text-[12px] text-ink-700 flex"><span className="w-1 h-1 bg-ink-900 mt-[7px] mr-2 shrink-0" />{x}</div>)}
         </div>
       )}
     </Card>
@@ -190,7 +190,7 @@ export function RecruitDetail({ id }: { id: string }) {
               <div className="flex flex-wrap gap-1 mt-2.5">
                 {scores.map(({ b, m }) => <span key={b.id} className="text-[11px] bg-white rounded-md px-2 py-0.5">{b.name} {matchPct(m.score)}%</span>)}
               </div>
-              {fit.reasons.length > 0 && <div className="mt-2 space-y-0.5">{fit.reasons.slice(0, 2).map((x) => <div key={x} className="text-[12px] text-brand-700 flex"><Ic n="check" />{x}</div>)}</div>}
+              {fit.reasons.length > 0 && <div className="mt-2 space-y-0.5">{fit.reasons.slice(0, 2).map((x) => <div key={x} className="text-[12px] text-ink-700 flex"><span className="w-1 h-1 bg-ink-900 mt-[7px] mr-2 shrink-0" />{x}</div>)}</div>}
             </div>
           );
         })()}
