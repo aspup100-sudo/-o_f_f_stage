@@ -115,7 +115,7 @@ export function Chip({ children, active, onClick, className }: { children: React
 
 export function Tag({ children, tone = 'gray' }: { children: ReactNode; tone?: 'gray' | 'orange' | 'green' | 'blue' | 'purple' | 'red' | 'yellow' }) {
   const t = {
-    gray: 'border-ink-300 text-ink-700', orange: 'border-brand-500 text-brand-600', green: 'border-emerald-600 text-emerald-700',
+    gray: 'border-ink-300 text-ink-700', orange: 'border-ink-900 text-ink-900', green: 'border-emerald-600 text-emerald-700',
     blue: 'border-ink-900 text-ink-900', purple: 'border-ink-900 text-ink-900', red: 'border-red-500 text-red-600', yellow: 'border-amber-500 text-amber-700',
   }[tone];
   return <span className={cx('inline-flex items-center px-1.5 h-[22px] border bg-white text-[11px] font-semibold whitespace-nowrap', t)}>{children}</span>;

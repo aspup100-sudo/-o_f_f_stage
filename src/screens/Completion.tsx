@@ -52,7 +52,7 @@ export function PopupReportCard({ popupId }: { popupId: string }) {
         {stat('팀 브랜드 팔로워', `${r.followers}명`)}
       </div>
       {r.bestPair && (
-        <div className="mt-3 bg-brand-50 text-ink-900 p-3.5">
+        <div className="mt-3 border-t border-ink-300 pt-3">
           <div className="text-[11px] text-ink-500">방문객이 가장 좋아한 조합</div>
           <div className="font-bold mt-0.5"><Ic n="heart" className="text-rose-500" />{brandById(db, r.bestPair[0])?.name} × {brandById(db, r.bestPair[1])?.name} <span className="text-[12px] text-ink-500 font-normal">· {r.bestPairCount}명</span></div>
         </div>
@@ -195,7 +195,7 @@ export function TeamWrapUp({ team }: { team: Team }) {
               <GradeBadge grade={t.grade} />
             </div>
           )}
-          <div className="mt-4 rounded bg-brand-50 p-4">
+          <div className="mt-4 border border-ink-900 p-4">
             <div className="font-bold">팝업자랑으로 경험 남기기</div>
             <p className="text-[13px] text-ink-700 mt-1">함께 연 경험을 기록하면 다음 팀이 참고할 수 있어요. 방문객 조합 리뷰가 글 아래에 같이 보여요.</p>
             {myShowcase ? (

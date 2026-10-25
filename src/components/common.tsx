@@ -97,7 +97,7 @@ export function BrandCard({ db, brand, right, reasons, compact }: { db: DB; bran
           <ThemeTagList tags={brand.tags} limit={6} />
         </div>
         {reasons && reasons.length > 0 && (
-          <div className="mt-2.5 rounded-lg bg-brand-50 px-2.5 py-2 text-[12px] text-brand-700 space-y-0.5">
+          <div className="mt-2.5 border-l-2 border-brand-500 bg-white px-2.5 py-2 text-[12px] text-brand-700 space-y-0.5">
             {reasons.slice(0, 3).map((r) => (
               <div key={r} className="flex"><Ic n="check" />{r}</div>
             ))}

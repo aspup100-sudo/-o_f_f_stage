@@ -563,7 +563,7 @@ function ShiftTab({ team }: { team: Team }) {
   return (
     <div>
       {brand && (
-        <div className="mb-4 rounded bg-brand-50 p-4">
+        <div className="mb-4 border border-ink-900 p-4">
           <div className="flex items-center justify-between">
             <span className="text-[13px] font-bold">내 근무 {mine.length}회</span>
             {mine.length > 0 && <button className="text-[12px] font-semibold text-brand-600" onClick={() => downloadShiftIcs(team.name, sp?.name ?? team.region, mine)}><Ic n="calendar" />내 캘린더에 넣기</button>}

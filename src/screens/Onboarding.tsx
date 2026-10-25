@@ -44,7 +44,7 @@ function Login() {
       <h1 className="text-[26px] font-extrabold leading-snug">
         혼자 열기 버거운 팝업,
         <br />
-        <span className="text-brand-500">같이 열면</span> 가벼워져요
+        <span className="underline decoration-[3px] underline-offset-4 decoration-brand-500">같이 열면</span> 가벼워져요
       </h1>
       <p className="text-ink-500 mt-3 text-[15px] leading-relaxed break-keep">
         작은 패션 브랜드끼리 팀을 짜고, 공간을 나눠 빌리고, 함께 연 경험을 기록하세요. 거래 수수료는 없어요.
@@ -55,8 +55,8 @@ function Login() {
           [`${popups}곳`, '열렸거나 곧 열릴 팝업'],
           RENTAL_ON ? [`최대 ${maxOff}%`, '제휴 장비 렌탈 할인'] : ['0원', '거래 수수료'],
         ].map(([v, l]) => (
-          <div key={l} className="rounded bg-brand-50 p-3">
-            <div className="text-lg font-extrabold text-brand-600">{v}</div>
+          <div key={l} className="border-t-2 border-ink-900 pt-2.5">
+            <div className="text-2xl font-black">{v}</div>
             <div className="text-[11px] text-ink-700 leading-tight mt-0.5 break-keep">{l}</div>
           </div>
         ))}
@@ -156,7 +156,7 @@ function MatchPreview({ tags }: { tags: ThemeTags }) {
   const me = { id: '_new', userId: '_new', name: '나', intro: '', tags, channels: [], availability: [], lookbook: [], followers: [], hearts: [], logoHue: 0 } as BrandProfile;
   const top = db.brands.filter((b) => isListedBrand(db, b)).map((b) => ({ b, pct: matchPct(matchScore(db, me, b).score) })).sort((x, y) => y.pct - x.pct).slice(0, 3);
   return (
-    <div className="mb-5 -mt-1 rounded bg-brand-50 p-3.5">
+    <div className="mb-5 -mt-1 border border-ink-300 p-3.5">
       <div className="text-[13px] font-bold text-brand-700">이 태그라면 이런 브랜드와 잘 맞아요</div>
       <div className="mt-2 space-y-1.5">
         {top.map(({ b, pct }) => (

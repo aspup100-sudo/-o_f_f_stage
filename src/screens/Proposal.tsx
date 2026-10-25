@@ -87,7 +87,7 @@ export function ProposalsScreen() {
                 {brand && (() => {
                   const m = matchScore(db, brand, other);
                   const pct = matchPct(m.score);
-                  return <div className="mt-2 text-[12px] text-brand-700 bg-brand-50 rounded-lg px-2.5 py-1.5">궁합 {pct}%{m.reasons[0] ? ` · ${m.reasons[0]}` : ''}</div>;
+                  return <div className="mt-2 text-[12px] text-brand-700 border-l-2 border-brand-500 px-2.5 py-1.5">궁합 {pct}%{m.reasons[0] ? ` · ${m.reasons[0]}` : ''}</div>;
                 })()}
                 <div className="flex flex-wrap gap-1 mt-2">
                   <Tag><Ic n="calendar" />{p.period}</Tag>

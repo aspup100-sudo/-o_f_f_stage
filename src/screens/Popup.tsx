@@ -92,7 +92,7 @@ export function PopupDetail({ id }: { id: string }) {
         </div>
 
         {p.status === '예정' && (
-          <div className="mt-4 rounded bg-brand-50 border border-ink-300 p-4 flex items-center gap-3">
+          <div className="mt-4 border border-ink-900 p-4 flex items-center gap-3">
             <div className="flex-1">
               <div className="font-bold text-[15px]">오픈 {dday(p.period.start)} · <span className="text-brand-600">{waitCount(p)}명</span>이 기다려요</div>
               <div className="text-[12px] text-ink-500 mt-0.5">알림을 켜 두면 전날 저녁과 오픈 당일에 알려 드려요</div>

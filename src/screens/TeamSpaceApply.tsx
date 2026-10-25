@@ -32,7 +32,7 @@ export function TeamSpaceTab({ team }: { team: Team }) {
           <SpaceCard db={db} s={sp} />
         </div>
       ) : (
-        <div className="rounded bg-brand-50 p-4">
+        <div className="border border-ink-900 p-4">
           <div className="font-bold">아직 공간이 없어요</div>
           <p className="text-[13px] text-ink-700 mt-1">공간 찾기에서 팀 단위로 지원하면 무드보드로 만든 팀 소개 페이지가 함께 전달돼요.</p>
           <Button className="mt-3" onClick={() => navigate({ name: 'tab', tab: 'spaces' })}>공간 찾기</Button>

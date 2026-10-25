@@ -181,7 +181,7 @@ export function RecruitDetail({ id }: { id: string }) {
           const pct = matchPct(scores.reduce((sum, x) => sum + x.m.score, 0) / scores.length);
           const fit = recruitFit(db, brand, r);
           return (
-            <div className="mt-4 rounded bg-brand-50 p-4">
+            <div className="mt-4 border border-ink-900 p-4">
               <div className="flex items-center justify-between">
                 <span className="text-[13px] font-bold">이 팀과 {brand.name}의 궁합</span>
                 <span className="text-[13px] font-extrabold text-brand-600">{pct}%</span>
@@ -248,7 +248,7 @@ export function RecruitDetail({ id }: { id: string }) {
                     {(() => {
                       const m = matchScore(db, host, b);
                       return (
-                        <div className="mt-2 rounded-lg bg-brand-50 px-2.5 py-1.5 text-[12px] text-brand-700">
+                        <div className="mt-2 border-l-2 border-brand-500 bg-white px-2.5 py-1.5 text-[12px] text-brand-700">
                           <b>나와 궁합 {matchPct(m.score)}%</b>{m.reasons[0] ? ` · ${m.reasons[0]}` : ''}
                         </div>
                       );
@@ -360,7 +360,7 @@ export function RecruitNew() {
       <SubHeader title="모집글 쓰기" />
       <div className="p-4">
         {brand && (
-          <button onClick={fillDraft} className="w-full mb-4 rounded bg-brand-50 px-4 py-3 text-left flex items-center gap-3">
+          <button onClick={fillDraft} className="w-full mb-4 border border-ink-900 px-4 py-3 text-left flex items-center gap-3">
             <Icon name="pencil" className="w-6 h-6 shrink-0 text-brand-600" />
             <span className="flex-1">
               <span className="block text-sm font-bold">내 브랜드 정보로 초안 채우기</span>
@@ -452,7 +452,7 @@ export function RecruitNew() {
             </div>
           </div>
         )}
-        <div className="rounded bg-brand-50 p-4 mb-4">
+        <div className="border border-ink-900 p-4 mb-4">
           <div className="text-[13px] text-brand-700">{d.slotMode === 'hanger' ? '행거 1개' : '1자리'} 분담금 (자동 계산)</div>
           <div className="text-2xl font-extrabold text-brand-700">{manwon(share)}</div>
           <div className="text-[12px] text-brand-700/80">총 {manwon(d.totalBudget)} ÷ {slotsPreview}{d.slotMode === 'hanger' ? '개 행거' : '자리'}</div>

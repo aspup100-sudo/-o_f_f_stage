@@ -243,7 +243,7 @@ function MatchCard({ me, other }: { me: import('@/types').BrandProfile; other: i
   const learned = learnMatchWeights(db);
   const word = pct >= 80 ? '찰떡 궁합' : pct >= 60 ? '잘 맞아요' : pct >= 45 ? '무난해요' : '색이 많이 달라요';
   return (
-    <div className="mt-4 rounded bg-brand-50 p-4">
+    <div className="mt-4 border border-ink-900 p-4">
       <div className="flex items-center justify-between">
         <span className="text-[13px] font-bold">{josa(me.name, '과', '와')}의 궁합</span>
         <span className="text-[13px] font-extrabold text-brand-600">{pct}% · {word}</span>

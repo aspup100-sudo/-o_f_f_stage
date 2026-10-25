@@ -93,7 +93,7 @@ export function RentalsBrowse({ teamId, embedded }: { teamId?: string; embedded?
     <div className={embedded ? '' : 'px-4'}>
       <WinWinBanner />
       {team && missing.length > 0 && (
-        <div className="mt-3 rounded bg-brand-50 p-3.5">
+        <div className="mt-3 border border-ink-900 p-3.5">
           <div className="text-[13px] font-bold text-brand-700">{team.name} 공간 · {spaceById(db, team.spaceId)?.name}에 없는 설비</div>
           <div className="flex flex-wrap gap-1.5 mt-2">
             {missing.map((m) => <Chip key={m.facility} active={cat === m.category} onClick={() => setCat(m.category)}>{m.facility} → {m.category} 빌리기</Chip>)}
