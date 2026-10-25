@@ -58,6 +58,24 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
       {role === 'visitor' && <TodayVisitor />}
       {role === 'landlord' && <TodayLandlord />}
       {role === 'rental' && <TodayRental />}
+      {brand && recs.length > 0 && (
+        <section className="pt-6">
+          <div className="px-4 mb-2.5">
+            <h2 className="font-bold text-[15px]">
+              <span className="text-brand-500">{brand.name}</span>{josa(brand.name, '과', '와').slice(brand.name.length)} 잘 맞는 브랜드
+            </h2>
+            <p className="text-xs text-ink-500 mt-0.5">무드·가격대·고객층은 비슷하고, 카테고리는 다를수록 잘 맞아요</p>
+          </div>
+          <div className="flex gap-2.5 overflow-x-auto no-scrollbar px-4 pb-1">
+            {recs.map((r) => (
+              <div key={r.brand.id} className="w-[290px] shrink-0">
+                <BrandCard db={db} brand={r.brand} reasons={r.reasons} right={<BrandActions brandId={r.brand.id} />} />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="pt-6">
         <div className="px-4 flex items-center justify-between mb-2.5">
           <h2 className="font-bold text-[15px]">진행 중·예정 공동 팝업</h2>
@@ -79,24 +97,6 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
           {db.magazines.filter((m) => !m.hidden).slice(0, 4).map((m) => <MagazineThumb key={m.id} post={m} />)}
         </div>
       </section>
-
-      {brand && recs.length > 0 && (
-        <section className="pt-6">
-          <div className="px-4 mb-2.5">
-            <h2 className="font-bold text-[15px]">
-              <span className="text-brand-500">{brand.name}</span>{josa(brand.name, '과', '와').slice(brand.name.length)} 잘 맞는 브랜드
-            </h2>
-            <p className="text-xs text-ink-500 mt-0.5">무드·가격대·고객층은 비슷하고, 카테고리는 다를수록 잘 맞아요</p>
-          </div>
-          <div className="flex gap-2.5 overflow-x-auto no-scrollbar px-4 pb-1">
-            {recs.map((r) => (
-              <div key={r.brand.id} className="w-[290px] shrink-0">
-                <BrandCard db={db} brand={r.brand} reasons={r.reasons} right={<BrandActions brandId={r.brand.id} />} />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
 
       <section className="pt-6 px-4">
         <div className="flex items-center justify-between mb-2.5">
