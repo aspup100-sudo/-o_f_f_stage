@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useMe, guard } from '@/store/hooks';
 import { back, navigate, switchRole } from '@/store/store';
-import { advanceRental, decideRental, lowerPartnerPrice, rateRental, requestRental, saveRentalItem, toggleRentalItem } from '@/store/actions';
-import { brandById, discountPct, josa, missingForSpace, partnerRating, period, rentalDays, rentalQuote, spaceById, teamById, teamsOfBrand, won } from '@/store/logic';
+import { advanceRental, decideRental, lowerPartnerPrice, openDirectChat, rateRental, requestRental, saveRentalItem, toggleRentalItem } from '@/store/actions';
+import { brandById, dday, discountPct, josa, missingForSpace, partnerRating, period, rentalDays, rentalQuote, spaceById, teamById, teamsOfBrand, won } from '@/store/logic';
 import { ScreenTitle } from '@/components/common';
 import { Avatar, Button, Card, Chip, cx, Demo, Empty, Field, inputCls, Segmented, Sheet, Stars, SubHeader, Swatch, Tag, textareaCls } from '@/components/ui';
 import { RENTAL_CATEGORIES, REGIONS, type RentalCategory, type RentalItem, type RentalOrder, type RentalOrderStatus, type Team } from '@/types';
@@ -480,7 +480,7 @@ export function OrdersTab() {
   const all = db.rentalOrders.filter((o) => o.partnerId === rental.id);
   const groups = {
     new: all.filter((o) => o.status === 'requested'),
-    ongoing: all.filter((o) => o.status === 'confirmed' || o.status === 'delivered'),
+    ongoing: all.filter((o) => o.status === 'confirmed' || o.status === 'delivered').sort((a, b) => a.dates.start.localeCompare(b.dates.start)),
     done: all.filter((o) => o.status === 'returned' || o.status === 'rejected'),
   };
   return (
@@ -498,6 +498,7 @@ export function OrdersTab() {
           return (
             <Card key={o.id} className="p-4">
               <div className="text-[13px] mb-2">
+                {o.status === 'confirmed' && <span className="text-[11px] font-black text-white bg-brand-500 px-2 py-0.5 rounded-full mr-1.5">배송 {dday(o.dates.start)}</span>}
                 <b>{team ? `팀 ${team.name}` : b.name}</b>
                 <span className="text-ink-500"> · 신청 {b.name}{team ? ` 외 ${team.members.length - 1}곳` : ''}</span>
                 {sp && <div className="text-[12px] text-ink-500">📍 {sp.name} ({sp.region})</div>}
@@ -531,6 +532,11 @@ export function OrdersTab() {
               {o.status === 'confirmed' && <Button size="sm" full variant="dark" className="mt-3" onClick={() => advanceRental(o.id)}>배송·설치 완료로 바꾸기</Button>}
               {o.status === 'delivered' && <Button size="sm" full variant="dark" className="mt-3" onClick={() => advanceRental(o.id)}>반납 확인</Button>}
               {o.rating && <div className="mt-2 text-[12px] text-ink-700">★ {o.rating} · {o.ratingComment}</div>}
+              {o.status !== 'returned' && o.status !== 'rejected' && (
+                <button className="mt-2.5 w-full text-center text-[12px] text-ink-500" onClick={() => openDirectChat(b.userId, `${rental.name} · ${b.name}`)}>
+                  설치 시간·위치를 {b.name}에게 물어보기 ›
+                </button>
+              )}
             </Card>
           );
         })}
