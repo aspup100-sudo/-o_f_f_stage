@@ -57,6 +57,7 @@ export function TodayBrand() {
           <div className="text-xl font-extrabold leading-snug mt-1">아직 함께할 팀이 없어요.<br />이번 달 모집글부터 볼까요?</div>
           <button onClick={() => navigate({ name: 'tab', tab: 'recruits' })} className="mt-4 h-10 px-4 rounded-full bg-brand-500 font-bold text-sm">같이 열 팀 찾기</button>
         </div>
+        <ProfileProgress />
         {extra.length > 0 && <ExtraList items={extra} />}
       </section>
     );
@@ -113,6 +114,7 @@ export function TodayBrand() {
           </div>
         </div>
       )}
+      <ProfileProgress />
       {teams.length > 1 && (
         <button onClick={() => navigate({ name: 'tab', tab: 'myteam' })} className="mt-2 text-[12px] text-ink-500 flex items-center gap-1">
           <Icon name="team" className="w-3.5 h-3.5" /> 다른 팀 {teams.length - 1}곳도 준비 중이에요 ›
@@ -233,5 +235,32 @@ export function TodayLandlord() {
         )}
       </div>
     </section>
+  );
+}
+
+/** 새 브랜드용 프로필 완성도. 다 채울수록 추천에 더 잘 걸린다는 이유를 준다. */
+export function ProfileProgress() {
+  const { db, brand, user } = useMe();
+  if (!brand) return null;
+  const steps = [
+    { label: '브랜드 소개 쓰기', done: brand.intro.trim().length >= 10 },
+    { label: '무드·카테고리 태그 고르기', done: brand.tags.moods.length > 0 && brand.tags.categories.length > 0 },
+    { label: '룩북 3장 이상 올리기', done: brand.lookbook.length >= 3 },
+    { label: '인스타그램 연결', done: !!brand.instagram },
+    { label: '팝업 가능 기간 정하기', done: brand.availability.length > 0 },
+    { label: '사업자 인증', done: user?.verifyStatus === 'verified' },
+  ];
+  const done = steps.filter((x) => x.done).length;
+  if (done === steps.length) return null;
+  const next = steps.find((x) => !x.done)!;
+  return (
+    <button onClick={() => navigate({ name: 'tab', tab: 'me' })} className="mt-3 w-full rounded-2xl bg-white border border-ink-100 p-4 text-left">
+      <div className="flex items-center justify-between">
+        <span className="text-[13px] font-bold">프로필 완성도 {Math.round((done / steps.length) * 100)}%</span>
+        <span className="text-[12px] text-brand-600 font-semibold">채우러 가기 ›</span>
+      </div>
+      <ProgressBar pct={(done / steps.length) * 100} className="mt-2" />
+      <div className="text-[12px] text-ink-500 mt-2">다음: <b className="text-ink-900">{next.label}</b> · {user?.verifyStatus === 'verified' ? '태그와 룩북을 채울수록 궁합 추천이 정확해져요' : '사업자 인증이 끝나면 다른 브랜드 목록에 내 브랜드가 보여요'}</div>
+    </button>
   );
 }
