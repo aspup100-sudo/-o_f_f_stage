@@ -169,6 +169,12 @@ export function TeamScreen({ id, sub = 'members' }: { id: string; sub?: string }
 
 function MembersTab({ team, isLeader }: { team: Team; isLeader: boolean }) {
   const { db } = useMe();
+  const ag = db.agreements.find((a) => a.teamId === team.id);
+  const split = db.costSplits.find((c) => c.teamId === team.id);
+  const shift = db.shifts.find((x) => x.teamId === team.id);
+  const chip = (ok: boolean, label: string) => (
+    <span className={cx('text-[11px] px-2 h-6 inline-flex items-center rounded-md font-semibold', ok ? 'bg-emerald-50 text-emerald-700' : 'bg-ink-100 text-ink-500')}>{ok ? '✓' : '…'} {label}</span>
+  );
   return (
     <div className="space-y-2.5">
       {team.members.map((m) => {
@@ -196,6 +202,14 @@ function MembersTab({ team, isLeader }: { team: Team; isLeader: boolean }) {
                 )}
               </div>
             </div>
+            {team.stage !== '종료' && (
+              <div className="flex flex-wrap gap-1 mt-2.5">
+                {chip(!!ag?.agreedBy.includes(m.brandId), '약속서')}
+                {chip(!!split?.paid.includes(m.brandId), '분담금')}
+                {chip(!!shift && Object.values(shift.assign).includes(m.brandId), `근무 ${shift ? Object.values(shift.assign).filter((x) => x === m.brandId).length : 0}회`)}
+                {chip(team.promoChecked.includes(m.brandId), '홍보')}
+              </div>
+            )}
           </Card>
         );
       })}
