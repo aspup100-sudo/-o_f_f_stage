@@ -1119,10 +1119,24 @@ export function sendFollowerNews(brandId: string, text: string) {
 }
 
 // ───────── 막판 할인 ─────────
+export function toggleSaveSpace(brandId: string, spaceId: string) {
+  let on = false;
+  update((s) => {
+    const b = s.db.brands.find((x) => x.id === brandId)!;
+    const list = b.savedSpaces ?? (b.savedSpaces = []);
+    if (list.includes(spaceId)) b.savedSpaces = list.filter((x) => x !== spaceId);
+    else { list.push(spaceId); on = true; }
+  });
+  toast(on ? '공간을 찜했어요. 할인이 시작되면 알려 드릴게요' : '찜을 해제했어요');
+}
+
 export function setLastMinute(spaceId: string, pct: number) {
   update((s) => {
     const sp = s.db.spaces.find((x) => x.id === spaceId)!;
+    const was = sp.lastMinutePct;
     sp.lastMinutePct = pct || undefined;
+    // 이 공간을 찜한 브랜드에게 새 할인 소식을 알린다
+    if (pct && pct !== was) s.db.brands.filter((b) => b.savedSpaces?.includes(sp.id)).forEach((b) => notify(s.db, b.userId, 'system', `찜한 ${sp.name}에서 2주 안 비는 날을 ${pct}% 할인해요`, { name: 'space', id: sp.id }));
   });
   toast(pct ? `2주 안에 비는 날을 ${pct}% 할인해요. 공간 목록에 할인 표시가 붙어요` : '막판 할인을 껐어요');
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMe, guard } from '@/store/hooks';
 import { navigate } from '@/store/store';
-import { answerSpaceQuestion, applySpace, askSpaceQuestion, openDirectChat, openWeekendsOfMonth, toggleAvailability } from '@/store/actions';
+import { answerSpaceQuestion, applySpace, toggleSaveSpace, askSpaceQuestion, openDirectChat, openWeekendsOfMonth, toggleAvailability } from '@/store/actions';
 import { displayName, manwon, soonOpenDays, period, popupById, spaceById, teamById, teamsOfBrand, trustScore } from '@/store/logic';
 import { ScreenTitle, TrustLine } from '@/components/common';
 import { Avatar, Button, Card, Chip, Segmented, cx, Demo, Empty, Field, GradeBadge, Icon, inputCls, Sheet, StatusPill, SubHeader, Swatch, Tag, textareaCls } from '@/components/ui';
@@ -12,12 +12,28 @@ import { TeamIntroPage } from './Team';
 import { DEMO_TODAY } from '@/data/mock';
 import { RentalsBrowse } from './Rental';
 
+function SaveSpaceButton({ spaceId }: { spaceId: string }) {
+  const { brand } = useMe();
+  if (!brand) return null;
+  const on = !!brand.savedSpaces?.includes(spaceId);
+  return (
+    <button
+      aria-label={on ? '공간 찜 해제' : '공간 찜하기'}
+      onClick={(e) => { e.stopPropagation(); guard(() => toggleSaveSpace(brand.id, spaceId)); }}
+      className="absolute z-10 top-2 right-2 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center"
+    >
+      <Icon name="heart" filled={on} className={cx('w-[18px] h-[18px]', on ? 'text-red-500' : 'text-ink-700')} />
+    </button>
+  );
+}
+
 export function SpaceCard({ db, s, onClick }: { db: DB; s: Space; onClick?: () => void }) {
   const ll = db.landlords.find((l) => l.id === s.landlordId)!;
   const openDays = db.availability.filter((a) => a.spaceId === s.id && a.status === 'open' && a.date > DEMO_TODAY).length;
   return (
     <Card className="overflow-hidden" onClick={onClick ?? (() => navigate({ name: 'space', id: s.id }))}>
-      <div className="flex h-32 gap-0.5">
+      <div className="relative flex h-32 gap-0.5">
+        <SaveSpaceButton spaceId={s.id} />
         <Swatch hue={s.photoHues[0] ?? 30} pattern="solid" rounded="" className="flex-[2]" label={`${s.areaM2}㎡`} />
         <div className="flex-1 flex flex-col gap-0.5">
           <Swatch hue={s.photoHues[1] ?? 60} pattern="grid" rounded="" className="flex-1" />
@@ -49,8 +65,8 @@ export function SpaceCard({ db, s, onClick }: { db: DB; s: Space; onClick?: () =
 }
 
 export function SpacesTab() {
-  const { db } = useMe();
-  const [region, setRegion] = useState<Region | '전체'>('전체');
+  const { db, brand } = useMe();
+  const [region, setRegion] = useState<Region | '전체' | '찜'>('전체');
   const [maxFee, setMaxFee] = useState<number>(0);
   const [minArea, setMinArea] = useState(0);
   const [date, setDate] = useState('');
@@ -59,7 +75,7 @@ export function SpacesTab() {
   const [filterOpen, setFilterOpen] = useState(false);
   const filterCount = (maxFee ? 1 : 0) + (minArea ? 1 : 0) + (team ? 1 : 0) + (fashion ? 1 : 0) + (date ? 1 : 0);
   const list = db.spaces
-    .filter((s) => region === '전체' || s.region === region)
+    .filter((s) => region === '전체' || (region === '찜' ? !!brand?.savedSpaces?.includes(s.id) : s.region === region))
     .filter((s) => !maxFee || s.dailyFee <= maxFee)
     .filter((s) => s.areaM2 >= minArea)
     .filter((s) => !team || s.teamRental)
@@ -82,7 +98,7 @@ export function SpacesTab() {
         <button onClick={() => setFilterOpen(true)} className={cx('h-8 px-3 rounded-full border text-xs font-semibold shrink-0 flex items-center gap-1', filterCount ? 'bg-ink-900 text-white border-ink-900' : 'bg-white border-ink-300')}>
           <Icon name="search" className="w-3.5 h-3.5" /> 조건{filterCount > 0 && ` ${filterCount}`}
         </button>
-        {(['전체', ...REGIONS] as const).map((r) => <Chip key={r} active={region === r} onClick={() => setRegion(r)}>{r}</Chip>)}
+        {(['전체', ...(brand ? (['찜'] as const) : []), ...REGIONS] as const).map((r) => <Chip key={r} active={region === r} onClick={() => setRegion(r)}>{r === '찜' ? `♡ 찜 ${brand?.savedSpaces?.length ?? 0}` : r}</Chip>)}
       </div>
       <Sheet open={filterOpen} onClose={() => setFilterOpen(false)} title="공간 조건">
         <div className="text-[13px] font-semibold mb-2">1일 대관료</div>
@@ -111,7 +127,7 @@ export function SpacesTab() {
       </Sheet>
       <div className="px-4 space-y-3">
         {list.map((s) => <SpaceCard key={s.id} db={db} s={s} />)}
-        {!list.length && <Empty icon="building" action={{ label: '조건 초기화', onClick: () => { setMaxFee(0); setMinArea(0); setTeam(false); setFashion(false); setDate(''); } }}>조건에 맞는 공간이 없어요</Empty>}
+        {!list.length && <Empty icon="building" action={{ label: '조건 초기화', onClick: () => { setRegion('전체'); setMaxFee(0); setMinArea(0); setTeam(false); setFashion(false); setDate(''); } }}>{region === '찜' ? '찜한 공간이 없어요. 마음에 드는 공간의 ♡를 눌러 두세요' : '조건에 맞는 공간이 없어요'}</Empty>}
       </div>
     </div>
   );
