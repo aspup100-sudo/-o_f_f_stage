@@ -85,7 +85,11 @@ export function KakaoMap({ pins, onSelect, className, fallback }: { pins: MapPin
       o.setMap(m);
       return o;
     });
-    if (!fitted.current && pins.length) {
+    if (!fitted.current && pins.length === 1) {
+      m.setCenter(new kakao.maps.LatLng(pins[0].lat, pins[0].lng));
+      m.setLevel(4);
+      fitted.current = true;
+    } else if (!fitted.current && pins.length) {
       const b = new kakao.maps.LatLngBounds();
       pins.forEach((p) => b.extend(new kakao.maps.LatLng(p.lat, p.lng)));
       m.setBounds(b, 60, 40, 40, 40);

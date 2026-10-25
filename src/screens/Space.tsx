@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useMe, guard } from '@/store/hooks';
 import { navigate } from '@/store/store';
 import { answerSpaceQuestion, applySpace, toggleSaveSpace, askSpaceQuestion, openDirectChat, openWeekendsOfMonth, toggleAvailability } from '@/store/actions';
-import { displayName, manwon, soonOpenDays, period, popupById, spaceById, teamById, teamsOfBrand, trustScore } from '@/store/logic';
+import { displayName, manwon, soonOpenDays, period, popupById, spaceById, teamById, teamsOfBrand, spaceLatLng, trustScore } from '@/store/logic';
+import { KakaoMap } from '@/components/KakaoMap';
 import { ScreenTitle, TrustLine } from '@/components/common';
 import { Avatar, Button, Card, Chip, Segmented, cx, Demo, Empty, Field, GradeBadge, Icon, inputCls, Sheet, StatusPill, SubHeader, Swatch, Tag, textareaCls, Ic } from '@/components/ui';
 import { FACILITIES, REGIONS, type Region, type Space } from '@/types';
@@ -236,11 +237,15 @@ export function SpaceDetail({ id }: { id: string }) {
         </div>
         <h1 className="text-xl font-extrabold">{s.name}</h1>
         <div className="text-[13px] text-ink-500 mt-0.5"><Ic n="pin" />{s.address}</div>
+        {(() => {
+          const [lat, lng] = spaceLatLng(s);
+          return <KakaoMap pins={[{ id: s.id, lat, lng, label: s.name, tone: 'selected' }]} onSelect={() => {}} className="mt-3 w-full h-40 overflow-hidden border border-ink-300" fallback={null} />;
+        })()}
         <p className="text-sm text-ink-700 mt-3 leading-relaxed">{s.intro}</p>
-        <div className="grid grid-cols-3 gap-2 mt-4 text-center">
-          <div className="rounded-xl bg-ink-100/60 py-2.5"><div className="text-[11px] text-ink-500">실측 면적</div><div className="font-bold">{s.areaM2}㎡ <span className="text-[11px] text-ink-500 font-normal">({(s.areaM2 / 3.3).toFixed(0)}평)</span></div></div>
-          <div className="rounded-xl bg-ink-100/60 py-2.5"><div className="text-[11px] text-ink-500">1일 대관료</div><div className="font-bold text-brand-600">{manwon(s.dailyFee)}</div>{s.lastMinutePct && soonOpenDays(db, s.id) > 0 && <div className="text-[10px] text-red-600 font-bold">2주 안 {manwon(s.dailyFee * (1 - s.lastMinutePct / 100))}</div>}</div>
-          <div className="rounded-xl bg-ink-100/60 py-2.5"><div className="text-[11px] text-ink-500">최소 대관</div><div className="font-bold">{s.minDays}일</div></div>
+        <div className="grid grid-cols-3 mt-4 text-center border border-ink-300 divide-x divide-ink-300">
+          <div className="py-2.5"><div className="text-[11px] text-ink-500">실측 면적</div><div className="font-bold">{s.areaM2}㎡ <span className="text-[11px] text-ink-500 font-normal">({(s.areaM2 / 3.3).toFixed(0)}평)</span></div></div>
+          <div className="py-2.5"><div className="text-[11px] text-ink-500">1일 대관료</div><div className="font-bold text-brand-600">{manwon(s.dailyFee)}</div>{s.lastMinutePct && soonOpenDays(db, s.id) > 0 && <div className="text-[10px] text-red-600 font-bold">2주 안 {manwon(s.dailyFee * (1 - s.lastMinutePct / 100))}</div>}</div>
+          <div className="py-2.5"><div className="text-[11px] text-ink-500">최소 대관</div><div className="font-bold">{s.minDays}일</div></div>
         </div>
         {s.fashionOnly && (
           <div className="mt-3 rounded-xl bg-violet-50 text-violet-800 text-[13px] p-3">
