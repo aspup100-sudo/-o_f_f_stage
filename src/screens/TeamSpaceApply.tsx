@@ -2,7 +2,7 @@ import { useMe } from '@/store/hooks';
 import { navigate, replace, switchRole } from '@/store/store';
 import { decideSpaceApplication } from '@/store/actions';
 import { manwon, period, spaceById } from '@/store/logic';
-import { Button, Card, Demo, Empty, StatusPill } from '@/components/ui';
+import { Button, Card, Demo, Empty, StatusPill, Ic } from '@/components/ui';
 import type { Team } from '@/types';
 import { SpaceCard } from './Space';
 
@@ -27,7 +27,7 @@ export function TeamSpaceTab({ team }: { team: Team }) {
       {accepted && sp ? (
         <div>
           <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-3.5 mb-3 text-sm text-emerald-800">
-            ✅ <b>{sp.name}</b> 이용이 확정됐어요 · {period(accepted.dates)}
+            <Ic n="check" /><b>{sp.name}</b> 이용이 확정됐어요 · {period(accepted.dates)}
           </div>
           <SpaceCard db={db} s={sp} />
         </div>

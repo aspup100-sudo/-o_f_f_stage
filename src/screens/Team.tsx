@@ -8,7 +8,7 @@ import {
 import { brandById, daysUntil, dday, manwon, md, period, spaceById, teamById, teamCost, teamPrep, teamsOfBrand, won, josa } from '@/store/logic';
 import { ProgressBar } from './Today';
 import { BrandLogo, LookbookGrid, ScreenTitle, ThemeTagList, TrustLine } from '@/components/common';
-import { Button, Card, cx, Demo, Empty, Icon, inputCls, Segmented, Sheet, StatusPill, SubHeader, Swatch, Tabs, Tag, textareaCls } from '@/components/ui';
+import { Button, Card, cx, Demo, Empty, Icon, inputCls, Segmented, Sheet, StatusPill, SubHeader, Swatch, Tabs, Tag, textareaCls, Ic } from '@/components/ui';
 import { AGREEMENT_ITEMS, type AgreementKey, type Team } from '@/types';
 import type { DB } from '@/data/mock';
 import { TeamSpaceTab } from './TeamSpaceApply';
@@ -43,7 +43,7 @@ export function MyTeamTab() {
                 {t.leaderBrandId === brand.id && <Tag>내가 팀장</Tag>}
               </div>
               <div className="font-bold text-lg mt-1.5">{t.name}</div>
-              <div className="text-[13px] text-ink-500">📅 {period(t.period)} · 📍 {sp?.name ?? `${t.region} · 공간 미정`}</div>
+              <div className="text-[13px] text-ink-500 flex items-center flex-wrap"><Ic n="calendar" />{period(t.period)}<span className="mx-1">·</span><Ic n="pin" />{sp?.name ?? `${t.region} · 공간 미정`}</div>
               <div className="flex items-center gap-3 mt-3">
                 <div className="flex -space-x-2">
                   {t.members.map((m) => {
@@ -132,7 +132,7 @@ export function TeamScreen({ id, sub = 'members' }: { id: string; sub?: string }
           </button>
         )}
       />
-      <div className="px-4 pt-3 pb-3 bg-gradient-to-b from-brand-50 to-white">
+      <div className="px-4 pt-3 pb-3 bg-white border-b border-ink-100">
         <div className="flex items-center gap-1.5">
           <StatusPill status={team.stage} />
           {team.confirmed ? <Tag tone="green">팀 확정</Tag> : <Tag tone="yellow">약속서 {ag.agreedBy.length}/{team.members.length} 동의</Tag>}
@@ -142,7 +142,7 @@ export function TeamScreen({ id, sub = 'members' }: { id: string; sub?: string }
           <h1 className="text-xl font-extrabold">{team.name}</h1>
           {isLeader && <button onClick={() => { setName(team.name); setRenaming(true); }} className="text-ink-500"><Icon name="edit" className="w-4 h-4" /></button>}
         </div>
-        <div className="text-[13px] text-ink-700 mt-0.5">📅 {period(team.period)} · 📍 {sp ? sp.name : `${team.region} · 공간 미정`}</div>
+        <div className="text-[13px] text-ink-700 mt-0.5 flex items-center flex-wrap"><Ic n="calendar" />{period(team.period)}<span className="mx-1">·</span><Ic n="pin" />{sp ? sp.name : `${team.region} · 공간 미정`}</div>
         {team.stage === '준비 중' && (() => {
           const prep = teamPrep(db, team, brand!.id);
           return (
@@ -257,7 +257,7 @@ function MembersTab({ team, isLeader }: { team: Team; isLeader: boolean }) {
               const sent = nudged.includes(m.brandId);
               return (
                 <button disabled={sent} onClick={() => { nudgeMember(team.id, m.brandId, todo); setNudged([...nudged, m.brandId]); }} className="mt-2.5 w-full h-9 rounded-lg border border-ink-300 text-[12px] font-semibold disabled:text-ink-500 disabled:bg-ink-100/60">
-                  {sent ? '✓ 알림 보냈어요' : `🔔 ${todo.length}가지 남았다고 알려 주기`}
+                  {sent ? '✓ 알림 보냈어요' : <><Ic n="bell" />{todo.length}가지 남았다고 알려 주기</>}
                 </button>
               );
             })()}
@@ -293,7 +293,7 @@ function AgreementTab({ team, myBrandId }: { team: Team; myBrandId: string }) {
             return <Tag key={m.brandId} tone={ok ? 'green' : 'gray'}>{ok ? '✓' : '…'} {b.name}</Tag>;
           })}
         </div>
-        {ag.locked && <p className="text-sm text-emerald-700 font-semibold mt-3">🎉 전원 동의로 팀이 확정됐어요. 약속서는 이제 고칠 수 없어요.</p>}
+        {ag.locked && <p className="text-sm text-emerald-700 font-semibold mt-3">전원 동의로 팀이 확정됐어요. 약속서는 이제 고칠 수 없어요.</p>}
       </Card>
       {!ag.locked && (
         <div className="flex items-center justify-between mb-2">
@@ -378,10 +378,10 @@ function CostTab({ team, myBrandId, isLeader }: { team: Team; myBrandId: string;
         </div>
       </Card>
       {shares[myBrandId] !== undefined && total > 0 && (
-        <div className="rounded-2xl bg-ink-900 text-white p-4">
-          <div className="text-[12px] text-white/60">혼자 열었다면 {won(total)}</div>
-          <div className="text-lg font-extrabold mt-0.5">같이 열어서 내 몫은 <span className="text-brand-400">{won(shares[myBrandId])}</span></div>
-          <div className="text-[12px] text-white/70 mt-0.5">{Math.round((1 - shares[myBrandId] / total) * 100)}% 아꼈어요 · {won(total - shares[myBrandId])} 절약</div>
+        <div className="bg-white border border-ink-900 p-4">
+          <div className="text-[12px] text-ink-500">혼자 열었다면 {won(total)}</div>
+          <div className="text-lg font-extrabold mt-0.5">같이 열어서 내 몫은 <span className="text-brand-500">{won(shares[myBrandId])}</span></div>
+          <div className="text-[12px] text-ink-500 mt-0.5">{Math.round((1 - shares[myBrandId] / total) * 100)}% 아꼈어요 · {won(total - shares[myBrandId])} 절약</div>
         </div>
       )}
       <div>
@@ -422,7 +422,7 @@ function CostTab({ team, myBrandId, isLeader }: { team: Team; myBrandId: string;
           })}
         </Card>
         {isLeader && split.paid.length < team.members.length && (
-          <Button full variant="secondary" className="mt-3" onClick={() => remindPayment(team.id)}>💰 미납 {team.members.length - split.paid.length}곳에 납부 알림 보내기</Button>
+          <Button full variant="secondary" className="mt-3" onClick={() => remindPayment(team.id)}>미납 {team.members.length - split.paid.length}곳에 납부 알림 보내기</Button>
         )}
         <p className="text-[12px] text-ink-500 mt-2">모인 금액 {won(paidSum)} / {won(total)} · 실제 결제는 이뤄지지 않아요. OFF STAGE는 거래 수수료를 받지 않아요.</p>
       </div>
@@ -565,7 +565,7 @@ function ShiftTab({ team }: { team: Team }) {
         <div className="mb-4 rounded-2xl bg-brand-50 p-4">
           <div className="flex items-center justify-between">
             <span className="text-[13px] font-bold">내 근무 {mine.length}회</span>
-            {mine.length > 0 && <button className="text-[12px] font-semibold text-brand-600" onClick={() => downloadShiftIcs(team.name, sp?.name ?? team.region, mine)}>📅 내 캘린더에 넣기</button>}
+            {mine.length > 0 && <button className="text-[12px] font-semibold text-brand-600" onClick={() => downloadShiftIcs(team.name, sp?.name ?? team.region, mine)}><Ic n="calendar" />내 캘린더에 넣기</button>}
           </div>
           {mine.length ? (
             <div className="flex flex-wrap gap-1.5 mt-2">
@@ -631,8 +631,8 @@ function PromoTab({ team, myBrandId }: { team: Team; myBrandId: string }) {
   const hashtags = [`#${tagName}`, `#${tagName}${team.round}회`, '#offstage', '#공동팝업', `#${team.region}팝업`, ...brands.map((b) => `#${b.name.replace(/\s/g, '')}`)];
   const poster = `[${team.name} ${team.round}회] ${brands.length}개 브랜드가 함께 여는 팝업
 
-📅 ${period(team.period)} ${pop ? `· ${pop.hours}` : ''}
-📍 ${sp ? `${sp.name} (${sp.address})` : `${team.region} (장소 확정 후 공지)`}
+일정: ${period(team.period)} ${pop ? `· ${pop.hours}` : ''}
+장소: ${sp ? `${sp.name} (${sp.address})` : `${team.region} (장소 확정 후 공지)`}
 
 함께하는 브랜드
 ${brands.map((b) => `· ${b.name} — ${b.tags.categories.join('/')}`).join('\n')}
@@ -642,8 +642,8 @@ ${db.moodboards.find((m) => m.teamId === team.id)?.headline ?? ''}
 ${hashtags.join(' ')}`;
   const me = brands.find((b) => b.id === myBrandId);
   const others = brands.filter((b) => b.id !== myBrandId).map((b) => b.name).join(', ');
-  const story = `${period(team.period)} ${sp?.name ?? team.region}\n${me?.name ?? ''} × ${others}\n같이 열어요 🛍️\n\n${hashtags.slice(0, 3).join(' ')}`;
-  const short = `${me ? josa(me.name, '이', '가') : ''} ${others ? josa(others, '과', '와') : ''} 함께 ${period(team.period)} ${sp?.name ?? team.region}에서 공동 팝업을 열어요! 놀러 오세요 🙌 ${hashtags[0]}`;
+  const story = `${period(team.period)} ${sp?.name ?? team.region}\n${me?.name ?? ''} × ${others}\n같이 열어요\n\n${hashtags.slice(0, 3).join(' ')}`;
+  const short = `${me ? josa(me.name, '이', '가') : ''} ${others ? josa(others, '과', '와') : ''} 함께 ${period(team.period)} ${sp?.name ?? team.region}에서 공동 팝업을 열어요! 놀러 오세요! ${hashtags[0]}`;
   const [fmt, setFmt] = useState<'feed' | 'story' | 'short'>('feed');
   const text = fmt === 'feed' ? poster : fmt === 'story' ? story : short;
   const copy = async () => {
@@ -681,7 +681,7 @@ ${hashtags.join(' ')}`;
         const left = daysUntil(iso);
         return (
           <div className="mb-2 rounded-xl bg-brand-50 px-3.5 py-2.5 flex items-center justify-between">
-            <span className="text-[13px] font-semibold">📣 게시일 {md(iso)}({'일월화수목금토'[d.getDay()]}) 오후 7시</span>
+            <span className="text-[13px] font-semibold"><Ic n="megaphone" />게시일 {md(iso)}({'일월화수목금토'[d.getDay()]}) 오후 7시</span>
             <span className="text-[12px] font-extrabold text-brand-600">{left > 0 ? `D-${left}` : left === 0 ? '오늘' : '지남'}</span>
           </div>
         );

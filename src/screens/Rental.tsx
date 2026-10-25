@@ -4,7 +4,7 @@ import { back, navigate, switchRole } from '@/store/store';
 import { advanceRental, decideRental, lowerPartnerPrice, openDirectChat, rateRental, requestRental, saveRentalItem, toggleRentalItem } from '@/store/actions';
 import { brandById, dday, discountPct, josa, missingForSpace, partnerRating, period, rentalDays, rentalQuote, spaceById, teamById, teamsOfBrand, won } from '@/store/logic';
 import { ScreenTitle } from '@/components/common';
-import { Avatar, Button, Card, Chip, cx, Demo, Empty, Field, inputCls, Segmented, Sheet, Stars, SubHeader, Swatch, Tag, textareaCls } from '@/components/ui';
+import { Avatar, Button, Card, Chip, cx, Demo, Empty, Field, inputCls, Segmented, Sheet, Stars, SubHeader, Swatch, Tag, textareaCls, Ic } from '@/components/ui';
 import { RENTAL_CATEGORIES, REGIONS, type RentalCategory, type RentalItem, type RentalOrder, type RentalOrderStatus, type Team } from '@/types';
 import { DEMO_TODAY, type DB } from '@/data/mock';
 
@@ -31,20 +31,20 @@ function Price({ it, big }: { it: RentalItem; big?: boolean }) {
 
 function WinWinBanner() {
   return (
-    <div className="rounded-2xl bg-ink-900 text-white p-4">
-      <div className="text-[11px] text-white/60">렌탈 제휴</div>
+    <div className="bg-white border border-ink-900 p-4">
+      <div className="text-[11px] text-ink-500">렌탈 제휴</div>
       <div className="font-extrabold text-lg leading-snug mt-0.5">집기는 사지 말고, 제휴가로 빌려요</div>
       <div className="grid grid-cols-2 gap-2 mt-3 text-[12px]">
-        <div className="rounded-xl bg-white/10 p-2.5">
+        <div className="rounded-xl border border-ink-300 p-2.5">
           <div className="font-bold">소규모 브랜드</div>
-          <div className="text-white/70 mt-0.5">일반 대여가보다 30~40% 싸게, 팀이 나눠 내면 더 가볍게</div>
+          <div className="text-ink-500 mt-0.5">일반 대여가보다 30~40% 싸게, 팀이 나눠 내면 더 가볍게</div>
         </div>
-        <div className="rounded-xl bg-white/10 p-2.5">
+        <div className="rounded-xl border border-ink-300 p-2.5">
           <div className="font-bold">렌탈 업체</div>
-          <div className="text-white/70 mt-0.5">놀고 있는 행거·조명이 매주 팝업에서 다시 돌아가요</div>
+          <div className="text-ink-500 mt-0.5">놀고 있는 행거·조명이 매주 팝업에서 다시 돌아가요</div>
         </div>
       </div>
-      <p className="text-[11px] text-white/50 mt-2">OFF STAGE는 렌탈 거래에서도 수수료를 받지 않아요.</p>
+      <p className="text-[11px] text-ink-500 mt-2">OFF STAGE는 렌탈 거래에서도 수수료를 받지 않아요.</p>
     </div>
   );
 }
@@ -167,8 +167,8 @@ export function RentalPartnerScreen({ id, teamId }: { id: string; teamId?: strin
         </div>
         <p className="text-sm text-ink-700 mt-3 leading-relaxed">{p.intro}</p>
         <div className="mt-3 rounded-xl bg-ink-100/60 p-3 text-[13px] space-y-0.5">
-          <div>🚚 배송 가능: {p.regions.join(', ')}</div>
-          <div>📦 왕복 배송·설치비 {won(p.deliveryFee)} · <b>{won(p.freeDeliveryOver)} 이상이면 무료</b></div>
+          <div><Ic n="truck" />배송 가능: {p.regions.join(', ')}</div>
+          <div><Ic n="box" />왕복 배송·설치비 {won(p.deliveryFee)} · <b>{won(p.freeDeliveryOver)} 이상이면 무료</b></div>
         </div>
         <h3 className="font-bold mt-5 mb-2">대여 장비 {items.length}</h3>
         <div className="space-y-2">
@@ -218,7 +218,7 @@ export function RentalPartnerScreen({ id, teamId }: { id: string; teamId?: strin
           {lines.length > 0 && p.freeDeliveryOver > 0 && (
             <div className="mb-2.5">
               <div className="text-[12px] font-semibold">
-                {q.partnerSum >= p.freeDeliveryOver ? <span className="text-emerald-700">🚚 배송·설치비 무료 적용돼요</span> : <>🚚 <b className="text-brand-600">{won(p.freeDeliveryOver - q.partnerSum)}</b> 더 담으면 배송·설치비 {won(p.deliveryFee)} 무료</>}
+                {q.partnerSum >= p.freeDeliveryOver ? <span className="text-emerald-700"><Ic n="truck" />배송·설치비 무료 적용돼요</span> : <><Ic n="truck" /><b className="text-brand-600">{won(p.freeDeliveryOver - q.partnerSum)}</b> 더 담으면 배송·설치비 {won(p.deliveryFee)} 무료</>}
               </div>
               <div className="h-1.5 rounded-full bg-ink-100 mt-1.5 overflow-hidden"><div className={cx('h-full rounded-full', q.partnerSum >= p.freeDeliveryOver ? 'bg-emerald-500' : 'bg-brand-500')} style={{ width: `${Math.min(100, (q.partnerSum / p.freeDeliveryOver) * 100)}%` }} /></div>
             </div>
@@ -398,7 +398,7 @@ export function MyItemsTab() {
         </p>
         {idle.length > 0 && (
           <div className="rounded-2xl p-3.5 mb-4 border border-amber-200 bg-amber-50">
-            <div className="font-bold text-[14px] mb-0.5">💡 다가오는 예약이 없는 장비 {idle.length}개</div>
+            <div className="font-bold text-[14px] mb-0.5"><Ic n="bulb" />다가오는 예약이 없는 장비 {idle.length}개</div>
             <p className="text-[12px] text-ink-700 mb-2.5">앞으로 잡힌 팝업 일정이 없어요. 제휴가를 조금 내리면 브랜드 장바구니에 먼저 담겨요.</p>
             <div className="space-y-2">
               {idle.map((it) => {
@@ -503,7 +503,7 @@ export function OrdersTab() {
                 {o.status === 'confirmed' && <span className="text-[11px] font-black text-white bg-brand-500 px-2 py-0.5 rounded-full mr-1.5">배송 {dday(o.dates.start)}</span>}
                 <b>{team ? `팀 ${team.name}` : b.name}</b>
                 <span className="text-ink-500"> · 신청 {b.name}{team ? ` 외 ${team.members.length - 1}곳` : ''}</span>
-                {sp && <div className="text-[12px] text-ink-500">📍 {sp.name} ({sp.region})</div>}
+                {sp && <div className="text-[12px] text-ink-500"><Ic n="pin" />{sp.name} ({sp.region})</div>}
               </div>
               <OrderSummary db={db} o={o} />
               {o.status === 'requested' && (

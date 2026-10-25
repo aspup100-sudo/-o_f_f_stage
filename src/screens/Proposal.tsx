@@ -4,7 +4,7 @@ import { back, navigate } from '@/store/store';
 import { respondProposal, sendProposal } from '@/store/actions';
 import { brandById, manwon, matchPct, matchScore } from '@/store/logic';
 import { BrandCard, BrandLogo, TrustLine } from '@/components/common';
-import { Button, Card, Chip, Demo, Empty, Field, inputCls, Segmented, StatusPill, SubHeader, Tag, textareaCls } from '@/components/ui';
+import { Button, Card, Chip, Demo, Empty, Field, inputCls, Segmented, StatusPill, SubHeader, Tag, textareaCls, Ic } from '@/components/ui';
 import { REGIONS, type Region } from '@/types';
 
 const PERIODS = ['2026년 11월 중', '2026년 12월 중', '2027년 1월 중', '2027년 봄', '일정 협의'];
@@ -90,8 +90,8 @@ export function ProposalsScreen() {
                   return <div className="mt-2 text-[12px] text-brand-700 bg-brand-50 rounded-lg px-2.5 py-1.5">궁합 {pct}%{m.reasons[0] ? ` · ${m.reasons[0]}` : ''}</div>;
                 })()}
                 <div className="flex flex-wrap gap-1 mt-2">
-                  <Tag>📅 {p.period}</Tag>
-                  <Tag>📍 {p.region}</Tag>
+                  <Tag><Ic n="calendar" />{p.period}</Tag>
+                  <Tag><Ic n="pin" />{p.region}</Tag>
                   <Tag tone="blue">1인 {manwon(p.budgetPerBrand)}</Tag>
                   <Tag tone="purple">{p.teamSize}팀</Tag>
                 </div>

@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { markAllRead, openNotification, setMuted } from '@/store/actions';
-import { Button, cx, Empty, Sheet, SubHeader } from '@/components/ui';
+import { Button, cx, Empty, Sheet, SubHeader, Icon } from '@/components/ui';
 import type { NotificationType } from '@/types';
 
 const ICON: Record<NotificationType, string> = {
-  proposal: '✉️', interest_match: '💛', application_result: '📮', agreement_request: '📝', completion_request: '🤝',
-  follow_popup: '🛍️', space_application: '🏠', rental: '📦', new_recruit: '📣', system: '🔔',
+  proposal: 'mail', interest_match: 'heart', application_result: 'inbox', agreement_request: 'pencil', completion_request: 'check',
+  follow_popup: 'bag', space_application: 'building', rental: 'box', new_recruit: 'megaphone', system: 'bell',
 };
 
 export function ago(iso: string) {
@@ -77,7 +77,7 @@ export function NotificationsScreen() {
             <div className="divide-y divide-ink-100">
               {g.items.map((n) => (
                 <button key={n.id} onClick={() => openNotification(n.id)} className={cx('w-full text-left flex gap-3 px-4 py-3.5', !n.read && 'bg-brand-50/60')}>
-                  <span className="text-xl">{ICON[n.type]}</span>
+                  <span className="w-9 h-9 rounded-full bg-ink-100 text-ink-700 flex items-center justify-center shrink-0"><Icon name={ICON[n.type]} className="w-[18px] h-[18px]" /></span>
                   <span className="flex-1">
                     <span className={cx('block text-sm', !n.read && 'font-semibold')}>{n.text}</span>
                     <span className="block text-[11px] text-ink-500 mt-0.5">{ago(n.at)}</span>

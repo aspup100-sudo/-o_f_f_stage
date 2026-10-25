@@ -76,9 +76,9 @@ function Login() {
 
 function RolePick() {
   const options: { role: Role; title: string; desc: string; emoji: string }[] = [
-    { role: 'brand', title: '브랜드', desc: '다른 브랜드와 팀을 짜서 팝업을 열어요. 사업자 인증 필요', emoji: '👕' },
-    { role: 'landlord', title: '임대인 (공간 운영자)', desc: '비는 날 공간을 팀에게 빌려줘요. 사업자 인증 필요', emoji: '🏠' },
-    { role: 'visitor', title: '방문객', desc: '공동 팝업을 구경하고 스탬프를 모아요. 인증 없이 가입', emoji: '🛍️' },
+    { role: 'brand', title: '브랜드', desc: '다른 브랜드와 팀을 짜서 팝업을 열어요. 사업자 인증 필요', emoji: 'shirt' },
+    { role: 'landlord', title: '임대인 (공간 운영자)', desc: '비는 날 공간을 팀에게 빌려줘요. 사업자 인증 필요', emoji: 'building' },
+    { role: 'visitor', title: '방문객', desc: '공동 팝업을 구경하고 스탬프를 모아요. 인증 없이 가입', emoji: 'bag' },
   ];
   return (
     <div className="pt-6">
@@ -87,7 +87,7 @@ function RolePick() {
       <div className="space-y-2.5">
         {options.map((o) => (
           <button key={o.role} onClick={() => chooseRole(o.role)} className="w-full text-left p-4 rounded-2xl border border-ink-300 flex gap-3 items-center active:bg-ink-100">
-            <span className="text-3xl">{o.emoji}</span>
+            <span className="w-11 h-11 rounded-xl bg-ink-100 flex items-center justify-center shrink-0"><Icon name={o.emoji} className="w-6 h-6" /></span>
             <span className="flex-1">
               <span className="block font-bold">{o.title}</span>
               <span className="block text-[13px] text-ink-500 mt-0.5">{o.desc}</span>

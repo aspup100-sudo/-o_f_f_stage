@@ -4,7 +4,7 @@ import { navigate } from '@/store/store';
 import { answerSpaceQuestion, applySpace, toggleSaveSpace, askSpaceQuestion, openDirectChat, openWeekendsOfMonth, toggleAvailability } from '@/store/actions';
 import { displayName, manwon, soonOpenDays, period, popupById, spaceById, teamById, teamsOfBrand, trustScore } from '@/store/logic';
 import { ScreenTitle, TrustLine } from '@/components/common';
-import { Avatar, Button, Card, Chip, Segmented, cx, Demo, Empty, Field, GradeBadge, Icon, inputCls, Sheet, StatusPill, SubHeader, Swatch, Tag, textareaCls } from '@/components/ui';
+import { Avatar, Button, Card, Chip, Segmented, cx, Demo, Empty, Field, GradeBadge, Icon, inputCls, Sheet, StatusPill, SubHeader, Swatch, Tag, textareaCls, Ic } from '@/components/ui';
 import { FACILITIES, REGIONS, type Region, type Space } from '@/types';
 import type { DB } from '@/data/mock';
 import { ReviewGroup } from './BrandProfile';
@@ -45,7 +45,7 @@ export function SpaceCard({ db, s, onClick }: { db: DB; s: Space; onClick?: () =
           <Tag>{s.region}</Tag>
           {s.teamRental && <Tag tone="green">팀 단위 대관 가능</Tag>}
           {s.fashionOnly && <Tag tone="purple">업종 고정(패션)</Tag>}
-          {s.lastMinutePct && soonOpenDays(db, s.id) > 0 && <Tag tone="red">⚡ 2주 안 {s.lastMinutePct}% 할인</Tag>}
+          {s.lastMinutePct && soonOpenDays(db, s.id) > 0 && <Tag tone="red"><Ic n="bolt" />2주 안 {s.lastMinutePct}% 할인</Tag>}
         </div>
         <div className="font-bold text-[15px]">{s.name}</div>
         <div className="flex items-end justify-between mt-1">
@@ -101,7 +101,7 @@ export function SpacesTab({ initial }: { initial?: '찜' }) {
         <button onClick={() => setFilterOpen(true)} className={cx('h-8 px-3 rounded-full border text-xs font-semibold shrink-0 flex items-center gap-1', filterCount ? 'bg-ink-900 text-white border-ink-900' : 'bg-white border-ink-300')}>
           <Icon name="search" className="w-3.5 h-3.5" /> 조건{filterCount > 0 && ` ${filterCount}`}
         </button>
-        {(['전체', ...(brand ? (['찜'] as const) : []), ...REGIONS] as const).map((r) => <Chip key={r} active={region === r} onClick={() => setRegion(r)}>{r === '찜' ? `${brand?.savedSpaces?.length ? '♥' : '♡'} 찜 ${brand?.savedSpaces?.length ?? 0}` : r}</Chip>)}
+        {(['전체', ...(brand ? (['찜'] as const) : []), ...REGIONS] as const).map((r) => <Chip key={r} active={region === r} onClick={() => setRegion(r)}>{r === '찜' ? <><Ic n="heart" />찜 {brand?.savedSpaces?.length ?? 0}</> : r}</Chip>)}
       </div>
       <Sheet open={filterOpen} onClose={() => setFilterOpen(false)} title="공간 조건">
         <div className="text-[13px] font-semibold mb-2">1일 대관료</div>
@@ -139,7 +139,7 @@ export function SpacesTab({ initial }: { initial?: '찜' }) {
       </div>
       <div className="px-4 space-y-3">
         {list.map((s) => <SpaceCard key={s.id} db={db} s={s} />)}
-        {!list.length && <Empty icon="building" action={{ label: '조건 초기화', onClick: () => { setRegion('전체'); setMaxFee(0); setMinArea(0); setTeam(false); setFashion(false); setDate(''); } }}>{region === '찜' ? '찜한 공간이 없어요. 마음에 드는 공간의 ♡를 눌러 두세요' : '조건에 맞는 공간이 없어요'}</Empty>}
+        {!list.length && <Empty icon="building" action={{ label: '조건 초기화', onClick: () => { setRegion('전체'); setMaxFee(0); setMinArea(0); setTeam(false); setFashion(false); setDate(''); } }}>{region === '찜' ? '찜한 공간이 없어요. 마음에 드는 공간의 하트를 눌러 두세요' : '조건에 맞는 공간이 없어요'}</Empty>}
       </div>
     </div>
   );
@@ -235,7 +235,7 @@ export function SpaceDetail({ id }: { id: string }) {
           {s.fashionOnly && <Tag tone="purple">업종 고정(패션)</Tag>}
         </div>
         <h1 className="text-xl font-extrabold">{s.name}</h1>
-        <div className="text-[13px] text-ink-500 mt-0.5">📍 {s.address}</div>
+        <div className="text-[13px] text-ink-500 mt-0.5"><Ic n="pin" />{s.address}</div>
         <p className="text-sm text-ink-700 mt-3 leading-relaxed">{s.intro}</p>
         <div className="grid grid-cols-3 gap-2 mt-4 text-center">
           <div className="rounded-xl bg-ink-100/60 py-2.5"><div className="text-[11px] text-ink-500">실측 면적</div><div className="font-bold">{s.areaM2}㎡ <span className="text-[11px] text-ink-500 font-normal">({(s.areaM2 / 3.3).toFixed(0)}평)</span></div></div>
@@ -244,7 +244,7 @@ export function SpaceDetail({ id }: { id: string }) {
         </div>
         {s.fashionOnly && (
           <div className="mt-3 rounded-xl bg-violet-50 text-violet-800 text-[13px] p-3">
-            👗 업종 고정(패션) 공간이에요. 이전 팀의 집기·연출을 이어 쓸 수 있는지 채팅으로 확인해 보세요.
+            <Ic n="shirt" />업종 고정(패션) 공간이에요. 이전 팀의 집기·연출을 이어 쓸 수 있는지 채팅으로 확인해 보세요.
           </div>
         )}
 
@@ -263,7 +263,7 @@ export function SpaceDetail({ id }: { id: string }) {
 
         {role === 'brand' && s.facilities.length < FACILITIES.length && (
           <button onClick={() => navigate({ name: 'rentals' })} className="mt-2 w-full text-left text-[13px] rounded-xl bg-brand-50 text-brand-700 px-3 py-2.5 font-semibold">
-            📦 없는 설비는 렌탈 제휴가로 빌릴 수 있어요 ›
+            <Ic n="box" />없는 설비는 렌탈 제휴가로 빌릴 수 있어요 ›
           </button>
         )}
 
@@ -321,7 +321,7 @@ export function SpaceDetail({ id }: { id: string }) {
             </div>
             {role !== 'visitor' && (
               <button className="text-[13px] text-ink-700 underline underline-offset-2 mt-2" onClick={() => guard(() => openDirectChat(ll.userId, `${s.name} 문의`, { type: 'space', refId: s.id }))}>
-                🔒 가격 협상 등은 비공개로 묻기 (채팅)
+                <Ic n="lock" />가격 협상 등은 비공개로 묻기 (채팅)
               </button>
             )}
           </div>

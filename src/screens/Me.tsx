@@ -5,7 +5,7 @@ import { STAMP_LEVELS } from './Popup';
 import { importInstagram, isValidBizNumber, requestVerification, sendFollowerNews, toggleVisitorRegion, updateBrandProfile } from '@/store/actions';
 import { brandById, dday, manwon, period, popupById, teamsOfBrand, trustScore } from '@/store/logic';
 import { BrandLogo, ScreenTitle, TagPicker, ThemeTagList, TrustLine } from '@/components/common';
-import { Avatar, Button, Card, Chip, Demo, Empty, Field, GradeBadge, Icon, inputCls, Sheet, Stars, Tag, textareaCls } from '@/components/ui';
+import { Avatar, Button, Card, Chip, Demo, Empty, Field, GradeBadge, Icon, inputCls, Sheet, Stars, Tag, textareaCls, Ic } from '@/components/ui';
 import { REGIONS, type ThemeTags } from '@/types';
 import { ROLE_LABEL } from '@/config';
 import { RentalMeCard } from './Rental';
@@ -80,7 +80,7 @@ export default function MeScreen() {
                 <div className="grid grid-cols-3 text-center rounded-xl bg-ink-100/70 py-2.5 mb-3">
                   <div><div className="font-extrabold">{acc.length}팀</div><div className="text-[11px] text-ink-500">받은 팀</div></div>
                   <div className="border-x border-ink-300/60"><div className="font-extrabold">{manwon(income)}</div><div className="text-[11px] text-ink-500">대관 매출</div></div>
-                  <div><div className="font-extrabold">♥ {saves}</div><div className="text-[11px] text-ink-500">공간 찜</div></div>
+                  <div><div className="font-extrabold">{saves}</div><div className="text-[11px] text-ink-500">공간 찜</div></div>
                 </div>
               );
             })()}
@@ -123,7 +123,7 @@ function TrustRulesSheet() {
         <div className="flex items-center gap-1.5"><GradeBadge grade="실버" /> 55점 이상</div>
         <div className="flex items-center gap-1.5"><GradeBadge grade="골드" /> 58점 이상</div>
       </div>
-      <p className="text-xs text-lime-700 mt-4">🌱 새싹은 불이익이 아니에요. 처음 시작하는 브랜드라는 뜻이에요.</p>
+      <p className="text-xs text-lime-700 mt-4"><Ic n="leaf" />새싹은 불이익이 아니에요. 처음 시작하는 브랜드라는 뜻이에요.</p>
     </Sheet>
   );
 }
@@ -195,16 +195,16 @@ function BrandSection() {
         <div className="grid grid-cols-2 gap-2 mt-3">
           <button onClick={() => navigate({ name: 'tab', tab: 'recruits', filter: '찜' })} className="rounded-xl border border-ink-100 px-3 py-2.5 text-left">
             <span className="block text-[11px] text-ink-500">찜한 모집글</span>
-            <span className="block font-bold">♡ {b.savedRecruits?.length ?? 0}</span>
+            <span className="block font-bold">{b.savedRecruits?.length ?? 0}</span>
           </button>
           <button onClick={() => navigate({ name: 'tab', tab: 'spaces', filter: '찜' })} className="rounded-xl border border-ink-100 px-3 py-2.5 text-left">
             <span className="block text-[11px] text-ink-500">찜한 공간</span>
-            <span className="block font-bold">♡ {b.savedSpaces?.length ?? 0}</span>
+            <span className="block font-bold">{b.savedSpaces?.length ?? 0}</span>
           </button>
         </div>
         {b.followers.length > 0 ? (
           <button onClick={() => setNewsOpen(true)} className="mt-3 w-full rounded-xl bg-brand-50 px-3.5 py-3 text-left flex items-center gap-3">
-            <span className="text-xl">📣</span>
+            <Icon name="megaphone" className="w-6 h-6 shrink-0 text-brand-600" />
             <span className="flex-1">
               <span className="block text-sm font-bold">팔로워 {b.followers.length}명에게 소식 보내기</span>
               <span className="block text-[12px] text-ink-500">팝업 오픈, 신상, 현장 혜택을 알림으로 바로 전해요</span>
@@ -213,7 +213,7 @@ function BrandSection() {
           </button>
         ) : (
           <div className="mt-3 rounded-xl bg-ink-100/70 px-3.5 py-3 flex items-center gap-3">
-            <span className="text-xl">🌱</span>
+            <Icon name="leaf" className="w-6 h-6 shrink-0 text-ink-500" />
             <span className="flex-1">
               <span className="block text-sm font-bold">아직 팔로워가 없어요</span>
               <span className="block text-[12px] text-ink-500">팝업을 열면 다녀간 방문객이 팔로우할 수 있어요. 팔로워가 생기면 여기서 소식을 보내요</span>
@@ -290,7 +290,7 @@ function VisitorSection() {
       </Sheet>
       <div className="text-[13px] font-semibold mb-1.5">새 팝업 알림 받을 동네 {!visitor!.regions?.length && <span className="text-[11px] font-normal text-ink-500">고르면 새 팝업이 열릴 때 알려 드려요</span>}</div>
       <div className="flex flex-wrap gap-1.5 mb-3">
-        {REGIONS.map((r) => <Chip key={r} active={!!visitor!.regions?.includes(r)} onClick={() => toggleVisitorRegion(userId, r)}>{visitor!.regions?.includes(r) ? `🔔 ${r}` : r}</Chip>)}
+        {REGIONS.map((r) => <Chip key={r} active={!!visitor!.regions?.includes(r)} onClick={() => toggleVisitorRegion(userId, r)}>{visitor!.regions?.includes(r) ? <><Ic n="bell" />{r}</> : r}</Chip>)}
       </div>
       <div className="text-[13px] font-semibold mb-1.5">팔로우한 브랜드</div>
       <div className="flex flex-wrap gap-1.5">
@@ -308,7 +308,7 @@ function VisitorSection() {
         const next = STAMP_LEVELS.find((l) => n < l.at);
         return (
           <button className="mt-3 w-full rounded-xl bg-brand-50 px-3 py-2.5 flex items-center gap-2.5 text-left" onClick={() => navigate({ name: 'tab', tab: 'stamps' })}>
-            <span className="text-xl">{cur?.emoji ?? '🥚'}</span>
+            <Icon name={cur?.emoji ?? 'compass'} className="w-6 h-6 shrink-0 text-brand-600" />
             <span className="flex-1 min-w-0">
               <span className="block text-[13px] font-bold">{cur?.name ?? '탐험 준비 중'}</span>
               <span className="block text-[11px] text-ink-500">{next ? `${next.name}까지 ${next.at - n}곳 더 방문하면 돼요` : '최고 등급이에요'}</span>

@@ -4,7 +4,7 @@ import { navigate, replace } from '@/store/store';
 import { createShowcase, toggleShowcaseHelpful } from '@/store/actions';
 import { brandById, displayName, period, spaceById, teamById, teamsOfBrand } from '@/store/logic';
 import { BrandLogo } from '@/components/common';
-import { Button, Card, cx, Demo, Empty, Field, Icon, inputCls, SubHeader, Swatch, Tag, textareaCls } from '@/components/ui';
+import { Button, Card, cx, Demo, Empty, Field, Icon, inputCls, SubHeader, Swatch, Tag, textareaCls, Ic } from '@/components/ui';
 import { ComboReviewList } from './Popup';
 import { ReportButton } from './Report';
 
@@ -37,7 +37,7 @@ export function ShowcaseList() {
               <div className="font-bold">{s.title}</div>
               <div className="text-[12px] text-ink-500 mt-0.5">{period(s.period)} · {sp?.name} · {teamById(db, s.teamId)?.name}</div>
               <div className="flex flex-wrap gap-1 mt-2">{s.brandIds.map((b) => <Tag key={b}>@{brandById(db, b)?.name}</Tag>)}</div>
-              <p className="text-[13px] text-ink-700 mt-2 line-clamp-2">💡 {s.tips}</p>
+              <p className="text-[13px] text-ink-700 mt-2 line-clamp-2"><Ic n="bulb" className="text-amber-600" />{s.tips}</p>
               <div className="text-[12px] text-ink-500 mt-2 flex items-center gap-1"><Icon name="heart" filled={!!s.helpful?.length} className="w-3.5 h-3.5 text-brand-500" /> 팁이 도움됐어요 {s.helpful?.length ?? 0}</div>
             </div>
           </Card>
@@ -81,7 +81,7 @@ export function ShowcaseDetail({ id }: { id: string }) {
         </div>
         <p className="text-[15px] leading-relaxed mt-5 whitespace-pre-line">{s.body}</p>
         <div className="mt-4 rounded-2xl bg-amber-50 p-4">
-          <div className="font-bold text-amber-900 mb-1">💡 운영 팁</div>
+          <div className="font-bold text-amber-900 mb-1"><Ic n="bulb" />운영 팁</div>
           <p className="text-sm text-amber-900 leading-relaxed">{s.tips}</p>
           {(() => {
             const on = !!s.helpful?.includes(userId);

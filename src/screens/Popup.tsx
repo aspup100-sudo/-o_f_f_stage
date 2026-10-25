@@ -5,7 +5,7 @@ import { navigate } from '@/store/store';
 import { checkIn, claimStampReward, followAll, STAMP_GOAL, toggleWaitlist, writeComboReview, writeVisitorReview } from '@/store/actions';
 import { avg, brandById, dday, md, displayName, openNow, period, popupById, spaceById, teamById, waitCount } from '@/store/logic';
 import { BrandLogo, PopupBannerCard, ScreenTitle, ThemeTagList } from '@/components/common';
-import { Button, Card, Chip, cx, Demo, Empty, inputCls, Segmented, Sheet, Stars, StatusPill, SubHeader, Swatch, Tabs, Tag, textareaCls } from '@/components/ui';
+import { Button, Card, Chip, cx, Demo, Empty, inputCls, Segmented, Sheet, Stars, StatusPill, SubHeader, Swatch, Tabs, Tag, textareaCls, Ic, Icon } from '@/components/ui';
 import type { DB } from '@/data/mock';
 import type { Popup } from '@/types';
 import { BrandActions } from './BrandActions';
@@ -28,7 +28,7 @@ export function ComboReviewList({ db, popupIds, sort = 'new' }: { db: DB; popupI
             <Stars value={c.rating} size="w-3.5 h-3.5" />
           </div>
           <div className="mt-1.5 flex flex-wrap gap-1">
-            <Tag tone={c.good ? 'orange' : 'gray'}>{c.good ? '💛 이 조합 좋았어요' : '조금 아쉬웠어요'}</Tag>
+            <Tag tone={c.good ? 'orange' : 'gray'}>{c.good ? '이 조합 좋았어요' : '조금 아쉬웠어요'}</Tag>
             {c.pairs.map(([a, b]) => <Tag key={a + b} tone="purple">{brandById(db, a)?.name} × {brandById(db, b)?.name}</Tag>)}
           </div>
           <p className="text-sm text-ink-700 mt-1.5">{c.comment}</p>
@@ -100,7 +100,7 @@ export function PopupDetail({ id }: { id: string }) {
               const on = !!p.waiters?.includes(userId);
               return (
                 <button onClick={() => toggleWaitlist(p.id, userId)} className={cx('h-10 px-3.5 rounded-full text-sm font-bold shrink-0', on ? 'bg-white border border-brand-200 text-brand-600' : 'bg-brand-500 text-white')}>
-                  {on ? '🔔 알림 켜짐' : '🔔 알림 받기'}
+                  <Ic n="bell" />{on ? '알림 켜짐' : '알림 받기'}
                 </button>
               );
             })()}
@@ -111,7 +111,7 @@ export function PopupDetail({ id }: { id: string }) {
           <div className="mt-4">
             {visited ? (
               <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-emerald-800">
-                <div className="font-bold">✅ 방문 인증 완료</div>
+                <div className="font-bold"><Ic n="check" />방문 인증 완료</div>
                 <div className="text-sm mt-0.5">스탬프가 적립됐어요. 이제 리뷰를 남길 수 있어요.</div>
                 {(() => {
                   const me = db.visitors.find((v) => v.userId === userId);
@@ -125,14 +125,14 @@ export function PopupDetail({ id }: { id: string }) {
                 })()}
               </div>
             ) : (
-              <div className="rounded-2xl bg-ink-900 text-white p-4">
+              <div className="bg-white border border-ink-900 p-4">
                 <div className="font-bold">현장에서 방문 인증하기</div>
-                <div className="text-[13px] text-white/70 mt-0.5">QR 대신 매장에 붙은 6자리 코드를 입력해요 <Demo /></div>
+                <div className="text-[13px] text-ink-500 mt-0.5">QR 대신 매장에 붙은 6자리 코드를 입력해요 <Demo /></div>
                 <div className="flex gap-2 mt-3">
-                  <input className="flex-1 min-w-0 h-11 px-3 rounded-xl text-ink-900 text-lg tracking-[0.3em] font-bold outline-none" inputMode="numeric" maxLength={6} placeholder="000000" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} />
+                  <input className="flex-1 min-w-0 h-11 px-3 rounded-xl border border-ink-300 text-ink-900 text-lg tracking-[0.3em] font-bold outline-none" inputMode="numeric" maxLength={6} placeholder="000000" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} />
                   <Button disabled={code.length !== 6} onClick={() => checkIn(p.id, userId, code) && setCode('')}>인증</Button>
                 </div>
-                <button className="text-[12px] text-amber-300 mt-2 underline underline-offset-2" onClick={() => setCode(p.code)}>(데모) 현장 코드 {p.code} 자동 입력</button>
+                <button className="text-[12px] text-amber-700 mt-2 underline underline-offset-2" onClick={() => setCode(p.code)}>(데모) 현장 코드 {p.code} 자동 입력</button>
               </div>
             )}
           </div>
@@ -193,7 +193,7 @@ export function PopupDetail({ id }: { id: string }) {
           )}
           {role === 'visitor' && (
             <Button full variant={visited ? 'primary' : 'secondary'} disabled={!visited} className="mt-3" onClick={() => setWriting(tab)}>
-              {visited ? (tab === 'combo' ? '조합 리뷰 쓰기' : tab === 'popup' ? '팝업 리뷰 쓰기' : '브랜드 리뷰 쓰기') : '🔒 방문 인증 후 리뷰를 쓸 수 있어요'}
+              {visited ? (tab === 'combo' ? '조합 리뷰 쓰기' : tab === 'popup' ? '팝업 리뷰 쓰기' : '브랜드 리뷰 쓰기') : '방문 인증 후 리뷰를 쓸 수 있어요'}
             </Button>
           )}
         </div>
@@ -247,7 +247,7 @@ function ReviewSheet({ popup, kind, onClose }: { popup: Popup; kind: null | 'pop
       {kind === 'combo' && (
         <>
           <p className="text-[13px] text-ink-500 mb-3">브랜드들이 함께 있어서 좋았는지 알려 주세요. 조합 리뷰는 브랜드 추천에 반영돼요.</p>
-          <Segmented items={[{ key: 'good', label: '💛 이 조합 좋았어요' }, { key: 'bad', label: '조금 아쉬웠어요' }]} value={good} onChange={setGood} />
+          <Segmented items={[{ key: 'good', label: '이 조합 좋았어요' }, { key: 'bad', label: '조금 아쉬웠어요' }]} value={good} onChange={setGood} />
           <div className="text-[13px] font-semibold mt-4 mb-2">어떤 브랜드끼리 잘 어울렸나요? (여러 개 선택)</div>
           <div className="flex flex-wrap gap-1.5 mb-4">
             {pairs.map(([a, b]) => {
@@ -360,8 +360,8 @@ export function StampsTab() {
     <div>
       <ScreenTitle>스탬프</ScreenTitle>
       <div className="px-4">
-        <div className="rounded-3xl bg-ink-900 text-white p-5">
-          <div className="text-sm text-white/70">서로 다른 공동 팝업 {STAMP_GOAL}곳 방문하면 혜택 배지 <Demo /></div>
+        <div className="bg-white border border-ink-900 p-5">
+          <div className="text-sm text-ink-500">서로 다른 공동 팝업 {STAMP_GOAL}곳 방문하면 혜택 배지 <Demo /></div>
           <div className="text-3xl font-extrabold mt-1">{Math.min(n, STAMP_GOAL)} / {STAMP_GOAL}</div>
           <div className="grid grid-cols-3 gap-3 mt-4">
             {Array.from({ length: STAMP_GOAL }).map((_, i) => {
@@ -369,7 +369,7 @@ export function StampsTab() {
               return (
                 <div
                   key={i}
-                  className={cx('aspect-square rounded-full border-2 flex flex-col items-center justify-center text-center p-1', p ? 'border-white/80' : 'border-dashed border-white/30')}
+                  className={cx('aspect-square rounded-full border-2 flex flex-col items-center justify-center text-center p-1', p ? 'border-white/80 text-white' : 'border-dashed border-ink-300 text-ink-300')}
                   style={p ? { background: `hsl(${brandById(db, teamById(db, p.teamId)?.members[0]?.brandId ?? '')?.logoHue ?? 250} 45% 45%)`, transform: `rotate(${(i % 2 ? 1 : -1) * (6 + i * 3)}deg)` } : undefined}
                 >
                   {p ? (
@@ -379,7 +379,7 @@ export function StampsTab() {
                       <span className="text-[9px] opacity-80 mt-0.5">{md(p.period.start)}</span>
                     </>
                   ) : (
-                    <span className="text-white/40 text-xs">{i + 1}</span>
+                    <span className="text-ink-300 text-xs">{i + 1}</span>
                   )}
                 </div>
               );
@@ -387,7 +387,7 @@ export function StampsTab() {
           </div>
           {n >= STAMP_GOAL && (
             st.rewardClaimed ? (
-              <div className="mt-4 rounded-xl bg-amber-300 text-amber-950 p-3 text-center font-bold">🏅 공동 팝업 탐험가 배지 보유 중</div>
+              <div className="mt-4 rounded-xl bg-amber-300 text-amber-950 p-3 text-center font-bold"><Ic n="medal" />공동 팝업 탐험가 배지 보유 중</div>
             ) : (
               <Button full className="mt-4" onClick={() => claimStampReward(userId)}>혜택 배지 받기</Button>
             )
@@ -424,9 +424,9 @@ export function StampsTab() {
 
 // 방문 수에 따라 오르는 탐험가 등급. 첫 배지 이후에도 계속 모을 이유를 준다.
 export const STAMP_LEVELS = [
-  { at: 3, name: '팝업 입문자', emoji: '🌱', perk: '혜택 배지' },
-  { at: 6, name: '골목 탐험가', emoji: '🧭', perk: '오픈 하루 전 미리 알림' },
-  { at: 10, name: '팝업 마스터', emoji: '👑', perk: '프로필에 마스터 표시' },
+  { at: 3, name: '팝업 입문자', emoji: 'leaf', perk: '혜택 배지' },
+  { at: 6, name: '골목 탐험가', emoji: 'compass', perk: '오픈 하루 전 미리 알림' },
+  { at: 10, name: '팝업 마스터', emoji: 'crown', perk: '프로필에 마스터 표시' },
 ];
 
 function StampLevels({ n }: { n: number }) {
@@ -440,7 +440,7 @@ function StampLevels({ n }: { n: number }) {
       <div className="flex items-center mt-3">
         {STAMP_LEVELS.map((l, i) => (
           <div key={l.at} className="flex items-center flex-1 last:flex-none">
-            <div className={cx('w-11 h-11 rounded-full flex items-center justify-center text-xl shrink-0', n >= l.at ? 'bg-brand-500' : 'bg-ink-100 grayscale opacity-60')}>{l.emoji}</div>
+            <div className={cx('w-11 h-11 rounded-full flex items-center justify-center shrink-0', n >= l.at ? 'bg-brand-500 text-white' : 'bg-ink-100 text-ink-500')}><Icon name={l.emoji} className="w-5 h-5" /></div>
             {i < STAMP_LEVELS.length - 1 && (
               <div className="flex-1 h-1 mx-1 rounded-full bg-ink-100 overflow-hidden">
                 <div className="h-full bg-brand-500" style={{ width: `${Math.max(0, Math.min(1, (n - l.at) / (STAMP_LEVELS[i + 1].at - l.at))) * 100}%` }} />
@@ -463,7 +463,7 @@ function StampLevels({ n }: { n: number }) {
         );
       })()}
       <p className="text-[13px] text-ink-700 mt-2">
-        {next ? <>다음 등급 <b>{next.name}</b>까지 <b className="text-brand-600">{next.at - n}곳</b> 남았어요 · {next.perk}</> : '모든 등급을 달성했어요! 👑'}
+        {next ? <>다음 등급 <b>{next.name}</b>까지 <b className="text-brand-600">{next.at - n}곳</b> 남았어요 · {next.perk}</> : '모든 등급을 달성했어요!'}
       </p>
     </div>
   );

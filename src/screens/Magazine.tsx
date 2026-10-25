@@ -182,7 +182,7 @@ export function MagazineAdminTab() {
               <CardFace post={m} card={m.cards[0]} index={0} total={m.cards.length} />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-[11px] text-ink-500">{m.category} · {m.createdAt} · 카드 {m.cards.length}장 · ♥ {m.likes.length}</div>
+              <div className="text-[11px] text-ink-500">{m.category} · {m.createdAt} · 카드 {m.cards.length}장 · 좋아요 {m.likes.length}</div>
               <div className="font-semibold text-sm truncate">{m.title}</div>
             </div>
             <Button size="sm" variant="secondary" onClick={() => toggleMagazineHidden(m.id)}>{m.hidden ? '다시 공개' : '숨기기'}</Button>

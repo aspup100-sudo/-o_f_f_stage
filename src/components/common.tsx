@@ -5,7 +5,7 @@ import type { DB } from '@/data/mock';
 import { brandById, daysUntil, openNow, period, spaceById, teamById, trustScore, waitCount } from '@/store/logic';
 import { DEMO_TODAY } from '@/data/mock';
 import { navigate } from '@/store/store';
-import { Avatar, Card, Chip, cx, GradeBadge, Icon, StatusPill, Swatch, Tag } from './ui';
+import { Avatar, Card, Chip, cx, GradeBadge, Icon, StatusPill, Swatch, Tag, Ic } from './ui';
 import { toast } from '@/store/store';
 
 export function TrustLine({ db, subjectId, compact }: { db: DB; subjectId: string; compact?: boolean }) {
@@ -99,7 +99,7 @@ export function BrandCard({ db, brand, right, reasons, compact }: { db: DB; bran
         {reasons && reasons.length > 0 && (
           <div className="mt-2.5 rounded-lg bg-brand-50 px-2.5 py-2 text-[12px] text-brand-700 space-y-0.5">
             {reasons.slice(0, 3).map((r) => (
-              <div key={r}>✓ {r}</div>
+              <div key={r} className="flex"><Ic n="check" />{r}</div>
             ))}
           </div>
         )}
@@ -162,12 +162,12 @@ export function PopupBannerCard({ db, popup, wide }: { db: DB; popup: Popup; wid
         </div>
         <div className="font-bold text-[15px]">{popup.title}</div>
         <div className="text-[12px] text-white/70 mt-0.5 truncate">{brands.map((b) => b.name).join(' × ')}</div>
-        {popup.status === '예정' && waitCount(popup) > 0 && <div className="text-[11px] text-brand-200 mt-1.5 font-semibold">🔔 {waitCount(popup)}명이 오픈을 기다려요</div>}
+        {popup.status === '예정' && waitCount(popup) > 0 && <div className="text-[11px] text-brand-200 mt-1.5 font-semibold"><Ic n="bell" />{waitCount(popup)}명이 오픈을 기다려요</div>}
         {popup.status === '진행 중' && (() => {
           const n = db.visits.filter((v) => v.popupId === popup.id).length;
           const end = popup.period.end === DEMO_TODAY ? '오늘 마지막 날' : `${daysUntil(popup.period.end)}일 남음`;
           const o = openNow(popup.hours);
-          return <div className="text-[11px] text-brand-200 mt-1.5 font-semibold">{o?.open ? <span className="text-emerald-300">● 영업 중 · </span> : null}⏳ {end}{n > 0 ? ` · ${n}명 방문 인증` : ''}</div>;
+          return <div className="text-[11px] text-brand-200 mt-1.5 font-semibold">{o?.open ? <span className="text-emerald-300">● 영업 중 · </span> : null}<Ic n="clock" />{end}{n > 0 ? ` · ${n}명 방문 인증` : ''}</div>;
         })()}
       </div>
     </button>

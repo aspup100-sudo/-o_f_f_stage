@@ -3,7 +3,7 @@ import { useMe, guard } from '@/store/hooks';
 import { navigate, replace } from '@/store/store';
 import { answerQna, createQna, openDirectChat } from '@/store/actions';
 import { brandOfUser, displayName, landlordOfUser, trustScore } from '@/store/logic';
-import { Avatar, Button, Card, Chip, Empty, Field, GradeBadge, Icon, inputCls, SubHeader, Tag, textareaCls } from '@/components/ui';
+import { Avatar, Button, Card, Chip, Empty, Field, GradeBadge, Icon, inputCls, SubHeader, Tag, textareaCls, Ic } from '@/components/ui';
 import { QNA_TAGS, type QnaTag } from '@/types';
 import type { DB } from '@/data/mock';
 import { ReportButton } from './Report';
@@ -46,7 +46,7 @@ export function QnaList() {
         <Button variant="dark" className="h-11" onClick={() => navigate({ name: 'qnaNew' })}>질문하기</Button>
       </div>
       <div className="flex gap-1.5 overflow-x-auto no-scrollbar px-4 pb-3">
-        {waitingCount > 0 && <Chip active={waiting} onClick={() => setWaiting(!waiting)}>🙋 답변 대기 {waitingCount}</Chip>}
+        {waitingCount > 0 && <Chip active={waiting} onClick={() => setWaiting(!waiting)}>답변 대기 {waitingCount}</Chip>}
         {(['전체', ...QNA_TAGS] as const).map((t) => <Chip key={t} active={tag === t} onClick={() => setTag(t)}>{t}</Chip>)}
       </div>
       <div className="px-4 space-y-2">
@@ -66,7 +66,7 @@ export function QnaList() {
                     <p className="text-[13px] text-ink-700 line-clamp-2 mt-0.5">{first.body}</p>
                   </div>
                 );
-              })() : <div className="text-[12px] mt-1.5 font-semibold text-brand-600">🙋 답변을 기다려요 · 첫 답변을 남겨 주세요</div>}
+              })() : <div className="text-[12px] mt-1.5 font-semibold text-brand-600"><Ic n="question" />답변을 기다려요 · 첫 답변을 남겨 주세요</div>}
             </Card>
           );
         })}
@@ -97,7 +97,7 @@ export function QnaDetail({ id }: { id: string }) {
               <Author db={db} userId={a.authorId} />
               <p className="text-sm text-ink-700 mt-2 leading-relaxed">{a.body}</p>
               {a.authorId !== userId && role !== 'visitor' && role !== 'admin' && (
-                <button className="text-[12px] text-ink-700 underline underline-offset-2 mt-2" onClick={() => guard(() => openDirectChat(a.authorId, `Q&A: ${p.title.slice(0, 12)}…`))}>🔒 비공개로 더 묻기 (채팅)</button>
+                <button className="text-[12px] text-ink-700 underline underline-offset-2 mt-2" onClick={() => guard(() => openDirectChat(a.authorId, `Q&A: ${p.title.slice(0, 12)}…`))}><Ic n="lock" /> 비공개로 더 묻기 (채팅)</button>
               )}
             </Card>
           ))}

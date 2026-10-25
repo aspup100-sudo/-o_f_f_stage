@@ -5,7 +5,7 @@ import { navigate } from '@/store/store';
 import { shareLink } from '@/store/share';
 import { brandById, displayName, josa, learnMatchWeights, matchPct, matchScore, period, reviewAvg, spaceById, teamsOfBrand, trustEvents, trustScore, userById } from '@/store/logic';
 import { BrandLogo, LookbookGrid, ThemeTagList } from '@/components/common';
-import { Button, Card, Empty, GradeBadge, Icon, Stars, StatusPill, SubHeader, Swatch, Tabs, Tag } from '@/components/ui';
+import { Button, Card, Empty, GradeBadge, Icon, Stars, StatusPill, SubHeader, Swatch, Tabs, Tag, Ic } from '@/components/ui';
 import { BrandActions } from './BrandActions';
 import { ReportButton } from './Report';
 import type { Review } from '@/types';
@@ -60,7 +60,7 @@ export default function BrandProfileScreen({ id }: { id: string }) {
             <div className="text-[11px] text-ink-500">팔로워</div>
           </div>
         </div>
-        {t.grade === '새싹' && <p className="text-[12px] text-lime-700 mt-2">🌱 OFF STAGE에서 첫 공동 팝업을 준비 중인 새싹 브랜드예요.</p>}
+        {t.grade === '새싹' && <p className="text-[12px] text-lime-700 mt-2"><Ic n="leaf" />OFF STAGE에서 첫 공동 팝업을 준비 중인 새싹 브랜드예요.</p>}
         <p className="text-sm text-ink-700 leading-relaxed mt-4">{brand.intro}</p>
         <div className="mt-3">
           <ThemeTagList tags={brand.tags} />
@@ -76,7 +76,7 @@ export default function BrandProfileScreen({ id }: { id: string }) {
         )}
         {brand.news && brand.news.length > 0 && (
           <div className="mt-4 rounded-2xl border border-ink-100 p-3.5">
-            <div className="text-[12px] font-bold text-ink-500 mb-1">📣 최근 소식</div>
+            <div className="text-[12px] font-bold text-ink-500 mb-1"><Ic n="megaphone" />최근 소식</div>
             {brand.news.slice(0, 2).map((n) => (
               <div key={n.id} className="text-sm py-1"><span className="text-ink-900">{n.text}</span> <span className="text-[11px] text-ink-500">{n.at.slice(5, 10).replace('-', '/')}</span></div>
             ))}
@@ -112,7 +112,7 @@ export default function BrandProfileScreen({ id }: { id: string }) {
             <h3 className="font-bold text-[15px] mb-2">팝업 가능 일정</h3>
             <div className="flex flex-wrap gap-1.5">
               {brand.availability.map((a) => (
-                <Tag key={a.start} tone="green">📅 {a.start.slice(0, 4)}. {period(a)}</Tag>
+                <Tag key={a.start} tone="green"><Ic n="calendar" />{a.start.slice(0, 4)}. {period(a)}</Tag>
               ))}
             </div>
           </div>
@@ -145,7 +145,7 @@ export default function BrandProfileScreen({ id }: { id: string }) {
                     </div>
                     {posts.map((p) => (
                       <button key={p.id} onClick={() => navigate({ name: 'showcase', id: p.id })} className="mt-2 w-full text-left text-[13px] font-semibold text-brand-600">
-                        📸 팝업자랑: {p.title} ›
+                        <Ic n="camera" />팝업자랑: {p.title} ›
                       </button>
                     ))}
                   </Card>
@@ -251,7 +251,7 @@ function MatchCard({ me, other }: { me: import('@/types').BrandProfile; other: i
       <div className="h-2 rounded-full bg-white mt-2 overflow-hidden"><div className="h-full rounded-full bg-brand-500" style={{ width: `${pct}%` }} /></div>
       {m.reasons.length > 0 && (
         <div className="mt-2.5 space-y-0.5">
-          {m.reasons.slice(0, 3).map((r) => <div key={r} className="text-[12px] text-brand-700">✓ {r}</div>)}
+          {m.reasons.slice(0, 3).map((r) => <div key={r} className="text-[12px] text-brand-700 flex"><Ic n="check" />{r}</div>)}
         </div>
       )}
       <button onClick={() => setOpen(!open)} className="mt-2 text-[12px] font-semibold text-ink-500">{open ? '접기 ▴' : '이렇게 계산했어요 ▾'}</button>

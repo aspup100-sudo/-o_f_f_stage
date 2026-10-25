@@ -3,7 +3,7 @@ import { useMe } from '@/store/hooks';
 import { isListedBrand, josa, matchPct, matchScore, recommendations, trustScore } from '@/store/logic';
 import { navigate } from '@/store/store';
 import { BrandCard, BrandLogo, PopupBannerCard } from '@/components/common';
-import { Chip, cx, Empty, Sheet, Button, Icon, Tag } from '@/components/ui';
+import { Chip, cx, Empty, Sheet, Button, Icon, Tag, Ic } from '@/components/ui';
 import { CATEGORIES, MOODS, PRICE_RANGES, type Category, type Mood, type PriceRange } from '@/types';
 import { BrandActions } from './BrandActions';
 import { ShowcaseList } from './Showcase';
@@ -89,7 +89,7 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
                   </div>
                   <div className="font-bold mt-2 truncate">{r.brand.name}</div>
                   <div className="text-[12px] text-ink-500 truncate">{r.brand.tags.categories[0]} · {r.brand.tags.moods.slice(0, 2).map((t) => `#${t}`).join(' ')}</div>
-                  {r.reasons[0] && <div className="mt-2 text-[12px] text-ink-700 bg-brand-50 rounded-lg px-2 py-1.5 line-clamp-2">✓ {r.reasons[0]}</div>}
+                  {r.reasons[0] && <div className="mt-2 text-[12px] text-ink-700 bg-brand-50 rounded-lg px-2 py-1.5 line-clamp-2"><Ic n="check" />{r.reasons[0]}</div>}
                 </button>
                 <div className="mt-auto pt-2.5"><BrandActions brandId={r.brand.id} /></div>
               </div>

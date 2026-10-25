@@ -219,7 +219,7 @@ export function openDirectChat(otherUserId: string, title: string, context?: imp
   navigate({ name: 'chat', id });
 }
 
-const AUTO_REPLIES = ['좋아요! 일정 한번 맞춰 봐요 🙂', '확인했어요. 자세한 건 내일 다시 얘기해요!', '네네, 저도 그렇게 생각했어요.', '사진 몇 장 더 보내 드릴게요.'];
+const AUTO_REPLIES = ['좋아요! 일정 한번 맞춰 봐요', '확인했어요. 자세한 건 내일 다시 얘기해요!', '네네, 저도 그렇게 생각했어요.', '사진 몇 장 더 보내 드릴게요.'];
 
 export function markRoomRead(roomId: string, userId: string) {
   update((s) => {
@@ -309,7 +309,7 @@ export function startMatchChat(myBrandId: string, targetId: string) {
     const me = s.db.brands.find((b) => b.id === myBrandId)!;
     const t = s.db.brands.find((b) => b.id === targetId)!;
     roomId = ensureRoom(s.db, [me.userId, t.userId], `${me.name} × ${t.name}`, { type: 'interest', refId: targetId });
-    if (!s.db.messages.some((m) => m.roomId === roomId)) systemMessage(s.db, roomId, '서로 관심을 표시해서 채팅방이 열렸어요 💛');
+    if (!s.db.messages.some((m) => m.roomId === roomId)) systemMessage(s.db, roomId, '서로 관심을 표시해서 채팅방이 열렸어요');
     s.session.match = undefined;
   });
   navigate({ name: 'chat', id: roomId });
@@ -422,7 +422,7 @@ export function decideApplication(appId: string, accept: boolean) {
     if (r.slots.every((x) => x.status === '확정' || x.status === '모집자')) teamId = createTeamFromRecruitment(s.db, r);
   });
   if (teamId) {
-    toast('정원이 찼어요! 팀이 만들어졌어요 🎉');
+    toast('정원이 찼어요! 팀이 만들어졌어요');
     navigate({ name: 'team', id: teamId, sub: 'members' });
   } else toast(accept ? '수락했어요' : '거절했어요');
 }
@@ -520,7 +520,7 @@ function lockIfAllAgreed(db: DB, teamId: string) {
     a.locked = true;
     t.confirmed = true;
     const room = teamRoom(db, teamId);
-    if (room) systemMessage(db, room.id, '🎉 전원이 공동 약속서에 동의해서 팀이 확정됐어요! 이제 팀 단위로 공간에 지원할 수 있어요.');
+    if (room) systemMessage(db, room.id, '전원이 공동 약속서에 동의해서 팀이 확정됐어요! 이제 팀 단위로 공간에 지원할 수 있어요.');
     teamMemberUsers(db, teamId).forEach((u) => notify(db, u, 'agreement_request', `"${t.name}" 팀이 확정됐어요. 공간 지원을 시작해 보세요.`, { name: 'team', id: teamId, sub: 'space' }));
     return true;
   }
@@ -540,7 +540,7 @@ export function agreeAgreement(teamId: string, brandId: string) {
       );
     }
   });
-  toast(locked ? '전원 동의 완료! 팀이 확정됐어요 🎉' : '동의했어요. 다른 팀원에게 알림을 보냈어요');
+  toast(locked ? '전원 동의 완료! 팀이 확정됐어요' : '동의했어요. 다른 팀원에게 알림을 보냈어요');
 }
 
 export function simulateOthersAgree(teamId: string, myBrandId: string) {
@@ -551,7 +551,7 @@ export function simulateOthersAgree(teamId: string, myBrandId: string) {
     t.members.forEach((m) => { if (m.brandId !== myBrandId && !a.agreedBy.includes(m.brandId)) a.agreedBy.push(m.brandId); });
     locked = lockIfAllAgreed(s.db, teamId);
   });
-  toast(locked ? '전원 동의 완료! 팀이 확정됐어요 🎉' : '다른 팀원들이 동의했어요. 내 동의만 남았어요');
+  toast(locked ? '전원 동의 완료! 팀이 확정됐어요' : '다른 팀원들이 동의했어요. 내 동의만 남았어요');
 }
 
 export function updateCost(teamId: string, patch: Partial<import('@/types').CostSplit>) {
@@ -737,7 +737,7 @@ export function decideSpaceApplication(appId: string, accept: boolean) {
     const roomId = ensureRoom(s.db, [...members, ll.userId], `${t.name} × ${sp.name}`, { type: 'space', refId: sp.id });
     systemMessage(s.db, roomId, `${sp.name} 이용이 확정됐어요 (${a.dates.start} ~ ${a.dates.end}). 입주·철거 시간과 집기를 여기서 맞춰 보세요.`);
     if (sp.fashionOnly) systemMessage(s.db, roomId, '업종 고정 공간이에요. 이전 팀의 집기·연출을 이어 쓸 수 있는지 확인해 보세요.');
-    members.forEach((u) => notify(s.db, u, 'application_result', `🎉 ${josa(sp.name, '이', '가')} "${t.name}" 팀의 지원을 수락했어요!`, { name: 'team', id: t.id, sub: 'space' }));
+    members.forEach((u) => notify(s.db, u, 'application_result', `${josa(sp.name, '이', '가')} "${t.name}" 팀의 지원을 수락했어요!`, { name: 'team', id: t.id, sub: 'space' }));
     // 팔로워에게 새 팝업 알림
     const followers = new Set<string>();
     t.members.forEach((m) => s.db.brands.find((b) => b.id === m.brandId)!.followers.forEach((f) => followers.add(f)));
@@ -798,10 +798,10 @@ export function checkIn(popupId: string, userId: string, code: string): boolean 
     if (!st.popupIds.includes(popupId)) st.popupIds.push(popupId);
     if (st.popupIds.length === STAMP_GOAL) {
       reached = true;
-      notify(s.db, userId, 'system', `🎉 서로 다른 공동 팝업 ${STAMP_GOAL}곳을 방문했어요! 스탬프 탭에서 혜택 배지를 받아 가세요.`, { name: 'tab', tab: 'stamps' });
+      notify(s.db, userId, 'system', `서로 다른 공동 팝업 ${STAMP_GOAL}곳을 방문했어요! 스탬프 탭에서 혜택 배지를 받아 가세요.`, { name: 'tab', tab: 'stamps' });
     }
   });
-  toast(reached ? `방문 인증 완료! 스탬프 ${STAMP_GOAL}개를 모아 혜택 배지가 열렸어요 🎉` : '방문 인증 완료! 스탬프 1개를 적립했어요');
+  toast(reached ? `방문 인증 완료! 스탬프 ${STAMP_GOAL}개를 모아 혜택 배지가 열렸어요` : '방문 인증 완료! 스탬프 1개를 적립했어요');
   return true;
 }
 
@@ -1098,7 +1098,7 @@ export function publishMagazine(m: Omit<import('@/types').MagazinePost, 'id' | '
   const id = newId('mg');
   update((s) => {
     s.db.magazines.unshift({ ...m, id, likes: [], authorId: 'u_admin', createdAt: DEMO_TODAY });
-    s.db.users.filter((u) => u.role === 'brand' || u.role === 'visitor').forEach((u) => notify(s.db, u.id, 'system', `📰 새 매거진: ${m.title}`, { name: 'magazine', id }));
+    s.db.users.filter((u) => u.role === 'brand' || u.role === 'visitor').forEach((u) => notify(s.db, u.id, 'system', `새 매거진: ${m.title}`, { name: 'magazine', id }));
   });
   toast('매거진을 발행했어요. 브랜드와 방문객에게 알림을 보냈어요');
   return id;
@@ -1268,7 +1268,7 @@ export function remindPayment(teamId: string) {
     n = unpaid.length;
     unpaid.forEach((m) => notify(s.db, brandUser(s.db, m.brandId), 'system', `"${t.name}" 분담금 납부 기한이 ${split.dueDate.slice(5).replace('-', '/')}이에요. 분담금 탭에서 확인해 주세요.`, { name: 'team', id: teamId, sub: 'cost' }));
     const room = teamRoom(s.db, teamId);
-    if (room && n) systemMessage(s.db, room.id, `💰 분담금 리마인드: 아직 ${unpaid.map((m) => brandName(s.db, m.brandId)).join(', ')}의 납부가 남았어요.`);
+    if (room && n) systemMessage(s.db, room.id, `분담금 리마인드: 아직 ${unpaid.map((m) => brandName(s.db, m.brandId)).join(', ')}의 납부가 남았어요.`);
   });
   toast(n ? `${n}곳에 납부 알림을 보냈어요` : '모두 납부했어요');
 }

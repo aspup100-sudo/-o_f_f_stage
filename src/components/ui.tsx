@@ -37,10 +37,39 @@ const paths: Record<string, string> = {
   book: 'M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2zM4 5v16M8 7h7',
   box: 'M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10',
   cart: 'M3 4h2l2.5 11h11L21 7H6.5M9 20a1 1 0 100-2 1 1 0 000 2zM18 20a1 1 0 100-2 1 1 0 000 2z',
+  leaf: 'M5 19c0-8 6-14 14-14 0 8-6 14-14 14zM5 19l8-8',
+  medal: 'M8 3h8l-2.5 6h-3zM12 21a5 5 0 100-10 5 5 0 000 10z',
+  crown: 'M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z',
+  compass: 'M12 21a9 9 0 100-18 9 9 0 000 18zM15.5 8.5l-2 5-5 2 2-5z',
+  truck: 'M3 6h11v10H3zM14 9h4l3 3v4h-7M7 19a2 2 0 100-4 2 2 0 000 4zM17 19a2 2 0 100-4 2 2 0 000 4z',
+  lock: 'M6 11h12v9H6zM9 11V8a3 3 0 016 0v3',
+  bulb: 'M9 18h6M10 21h4M12 3a6 6 0 00-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0012 3z',
+  bolt: 'M13 3L5 14h6l-1 7 8-11h-6z',
+  flame: 'M12 21c-4 0-7-3-7-7 0-4 4-6 4-10 3 2 5 5 5 8 1-1 2-2 2-4 2 2 3 4 3 6 0 4-3 7-7 7z',
+  megaphone: 'M4 10v4h3l8 4V6l-8 4zM18 9a4 4 0 010 6',
+  camera: 'M4 8h4l2-3h4l2 3h4v11H4zM12 17a3.5 3.5 0 100-7 3.5 3.5 0 000 7z',
+  clock: 'M12 21a9 9 0 100-18 9 9 0 000 18zM12 7v5l3 2',
+  mail: 'M3 6h18v12H3zM3 6l9 7 9-7',
+  hand: 'M8 13V5a1.5 1.5 0 013 0v6M11 11V4a1.5 1.5 0 013 0v7M14 11V6a1.5 1.5 0 013 0v8c0 4-3 7-6.5 7S5 18 4 15l-1-3a1.5 1.5 0 012.5-1.5L8 13',
+  hanger: 'M10 7a2 2 0 112 2c-.8.4-1 .9-1 1.5V12l9 6H3l8-6',
+  download: 'M12 4v11M7 10l5 5 5-5M5 20h14',
+  chart: 'M4 20V4M4 20h16M8 16v-4M12 16V8M16 16v-6',
+  repeat: 'M4 12a7 7 0 0112-5l2 2M20 12a7 7 0 01-12 5l-2-2M18 4v5h-5M6 20v-5h5',
+  shirt: 'M8 3l-5 3 2 4 3-1v12h8V9l3 1 2-4-5-3c0 2-2 3-4 3S8 5 8 3z',
+  bag: 'M5 8h14l-1 13H6zM9 8V6a3 3 0 016 0v2',
+  phone: 'M7 3h10v18H7zM11 18h2',
+  pencil: 'M4 20l1-4L16 5l3 3L8 19zM14 7l3 3',
+  question: 'M12 21a9 9 0 100-18 9 9 0 000 18zM9.5 9.5a2.5 2.5 0 015 0c0 1.5-2.5 2-2.5 3.5M12 17h.01',
 };
-export function Icon({ name, className = 'w-5 h-5', filled }: { name: keyof typeof paths | string; className?: string; filled?: boolean }) {
+/** 글자 사이에 넣는 작은 아이콘. 글자 크기를 따라간다 */
+export function Ic({ n, className }: { n: string; className?: string }) {
+  return <Icon name={n} className={cx('inline-block w-[1.1em] h-[1.1em] align-[-0.2em] mr-[0.2em] shrink-0', className)} />;
+}
+
+export function Icon({ name, className = 'w-5 h-5', filled, tint, bold }: { name: keyof typeof paths | string; className?: string; filled?: boolean; tint?: boolean; bold?: boolean }) {
+  // tint: 선 안쪽을 같은 색으로 옅게 채운다 (선택된 탭 등)
   return (
-    <svg viewBox="0 0 24 24" className={className} fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <svg viewBox="0 0 24 24" className={className} fill={filled || tint ? 'currentColor' : 'none'} fillOpacity={tint && !filled ? 0.2 : undefined} stroke="currentColor" strokeWidth={bold ? 2.3 : 1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <path d={paths[name] ?? paths.sparkle} />
     </svg>
   );
@@ -97,16 +126,16 @@ export function Demo({ children = '데모' }: { children?: ReactNode }) {
 }
 
 const gradeStyle: Record<Grade, { cls: string; icon: string }> = {
-  새싹: { cls: 'bg-lime-50 text-lime-700 border-lime-200', icon: '🌱' },
-  브론즈: { cls: 'bg-orange-50 text-orange-800 border-orange-200', icon: '🥉' },
-  실버: { cls: 'bg-slate-50 text-slate-700 border-slate-300', icon: '🥈' },
-  골드: { cls: 'bg-yellow-50 text-yellow-800 border-yellow-300', icon: '🥇' },
+  새싹: { cls: 'bg-lime-50 text-lime-700 border-lime-200', icon: 'leaf' },
+  브론즈: { cls: 'bg-orange-50 text-orange-800 border-orange-200', icon: 'medal' },
+  실버: { cls: 'bg-slate-50 text-slate-700 border-slate-300', icon: 'medal' },
+  골드: { cls: 'bg-yellow-50 text-yellow-800 border-yellow-300', icon: 'medal' },
 };
 export function GradeBadge({ grade, small }: { grade: Grade; small?: boolean }) {
   const g = gradeStyle[grade];
   return (
     <span className={cx('inline-flex items-center gap-0.5 border rounded-full font-semibold whitespace-nowrap', g.cls, small ? 'px-1.5 h-5 text-[10px]' : 'px-2 h-6 text-xs')}>
-      <span>{g.icon}</span>
+      <Icon name={g.icon} className={small ? 'w-3 h-3' : 'w-3.5 h-3.5'} />
       {grade}
     </span>
   );

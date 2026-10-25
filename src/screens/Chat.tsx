@@ -71,11 +71,11 @@ export function ChatScreen({ id }: { id: string }) {
     ...(prep ? prep.steps.filter((x) => !x.done).slice(0, 3).map((x) => {
       const name = x.label.replace(/ \(.*\)$/, '');
       return x.mine
-        ? { label: `✋ ${name} 할게요`, text: `'${name}' 오늘 안에 할게요!` }
-        : { label: `📌 ${name}`, text: `[오픈 ${dday(team!.period.start)}] '${x.label}' 아직 남았어요! 팀 공간에서 같이 챙겨 주세요 🙏` };
+        ? { label: `${name} 할게요`, text: `'${name}' 오늘 안에 할게요!` }
+        : { label: `${name} 챙기기`, text: `[오픈 ${dday(team!.period.start)}] '${x.label}' 아직 남았어요! 팀 공간에서 같이 챙겨 주세요!` };
     }) : []),
-    { label: '🙆 확인했어요', text: '확인했어요!' },
-    { label: '👍 좋아요', text: '좋아요 👍' },
+    { label: '확인했어요', text: '확인했어요!' },
+    { label: '좋아요', text: '좋아요!' },
   ];
   return (
     <div className="min-h-screen flex flex-col bg-[#f4f3f1]">

@@ -4,7 +4,7 @@ import { back, navigate, replace } from '@/store/store';
 import { setLastMinute, decideSpaceApplication, proposeSpaceToRecruitment, proposeSpaceToTeam, saveSpace, simulateTeamApplication, type SpaceDraft } from '@/store/actions';
 import { brandById, daysUntil, manwon, period, soonOpenDays, spaceById, teamById } from '@/store/logic';
 import { ScreenTitle, TrustLine } from '@/components/common';
-import { Button, Card, Chip, cx, Demo, Empty, Field, inputCls, Segmented, Sheet, StatusPill, SubHeader, Swatch, Tag, textareaCls } from '@/components/ui';
+import { Button, Card, Chip, cx, Demo, Empty, Field, inputCls, Segmented, Sheet, StatusPill, SubHeader, Swatch, Tag, textareaCls, Ic } from '@/components/ui';
 import { FACILITIES, REGIONS } from '@/types';
 import { SpaceCard, AvailabilityCalendar } from './Space';
 import { TeamIntroPage } from './Team';
@@ -29,16 +29,16 @@ export function MySpacesTab() {
           const savers = db.brands.filter((b) => b.savedSpaces?.some((id) => landlord.spaceIds.includes(id))).length;
           const pct = booked + open ? Math.round((booked / (booked + open)) * 100) : 0;
           return (
-            <div className="rounded-2xl bg-ink-900 text-white p-4">
-              <div className="text-[12px] text-white/60">앞으로 30일 내 공간 현황</div>
+            <div className="bg-white border border-ink-900 p-4">
+              <div className="text-[12px] text-ink-500">앞으로 30일 내 공간 현황</div>
               <div className="flex items-end gap-2 mt-0.5">
                 <span className="text-2xl font-extrabold">{pct}%</span>
-                <span className="text-[12px] text-white/70 mb-1">예약됨 · 비는 날 {open}일</span>
+                <span className="text-[12px] text-ink-500 mb-1">예약됨 · 비는 날 {open}일</span>
               </div>
-              <div className="h-1.5 rounded-full bg-white/15 mt-2 overflow-hidden"><div className="h-full bg-brand-400 rounded-full" style={{ width: `${pct}%` }} /></div>
+              <div className="h-1.5 rounded-full bg-ink-100 mt-2 overflow-hidden"><div className="h-full bg-brand-400 rounded-full" style={{ width: `${pct}%` }} /></div>
               <div className="flex gap-2 mt-3 text-[12px]">
-                <span className="rounded-full bg-white/10 px-2.5 py-1">♥ 찜한 브랜드 {savers}곳</span>
-                {open > 0 && <button onClick={() => navigate({ name: 'tab', tab: 'inbox', filter: 'offer' })} className="rounded-full bg-brand-500 px-2.5 py-1 font-semibold">빈 날 채우러 팀에게 제안 ›</button>}
+                <span className="rounded-full border border-ink-300 px-2.5 py-1"><Ic n="heart" />찜한 브랜드 {savers}곳</span>
+                {open > 0 && <button onClick={() => navigate({ name: 'tab', tab: 'inbox', filter: 'offer' })} className="rounded-full bg-brand-500 text-white px-2.5 py-1 font-semibold">빈 날 채우러 팀에게 제안 ›</button>}
               </div>
             </div>
           );
@@ -58,11 +58,11 @@ export function MySpacesTab() {
           const n = soonOpenDays(db, current);
           return (
             <Card className="p-4">
-              <div className="font-bold">⚡ 막판 할인</div>
+              <div className="font-bold"><Ic n="bolt" />막판 할인</div>
               <p className="text-[12px] text-ink-500 mt-0.5 mb-3">2주 안에 아직 비어 있는 날({n}일)을 할인하면 공간 목록에 할인 표시가 붙어 팀 눈에 잘 띄어요.</p>
               {(() => {
                 const savers = db.brands.filter((b) => b.savedSpaces?.includes(current)).length;
-                return savers > 0 ? <p className="text-[12px] font-semibold text-red-600 -mt-1.5 mb-3">♥ 이 공간을 찜한 브랜드 {savers}곳에 할인 소식이 바로 가요</p> : null;
+                return savers > 0 ? <p className="text-[12px] font-semibold text-red-600 -mt-1.5 mb-3"><Ic n="heart" />이 공간을 찜한 브랜드 {savers}곳에 할인 소식이 바로 가요</p> : null;
               })()}
               <div className="flex gap-1.5">
                 {[0, 10, 20, 30].map((v) => (
@@ -218,7 +218,7 @@ function AppCard({ appId, onOpen }: { appId: string; onOpen: () => void }) {
         <span className="text-[12px] text-ink-500">{sp.name}</span>
       </div>
       <div className="font-bold text-lg mt-1">{t.name}</div>
-      <div className="text-[13px] text-ink-500">📅 {period(a.dates)} · {t.members.length}개 브랜드</div>
+      <div className="text-[13px] text-ink-500"><Ic n="calendar" />{period(a.dates)} · {t.members.length}개 브랜드</div>
       <div className="flex flex-wrap gap-1 mt-2">
         {t.members.map((m) => <Tag key={m.brandId}>{brandById(db, m.brandId)!.name}</Tag>)}
       </div>

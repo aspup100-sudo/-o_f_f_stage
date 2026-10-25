@@ -51,12 +51,16 @@ function BottomTabs({ current }: { current?: string }) {
   return (
     <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-30 bg-white border-t border-ink-100 pb-[env(safe-area-inset-bottom)]">
       <div className="flex">
-        {tabs.map((t) => (
-          <button key={t.key} onClick={() => navigate({ name: 'tab', tab: t.key })} className={cx('flex-1 h-16 flex flex-col items-center justify-center gap-1 text-[11px] font-medium', current === t.key ? 'text-ink-900' : 'text-ink-500')}>
-            <Icon name={t.icon} className="w-6 h-6" filled={false} />
-            {t.label}
-          </button>
-        ))}
+        {tabs.map((t) => {
+          const on = current === t.key;
+          return (
+            <button key={t.key} onClick={() => navigate({ name: 'tab', tab: t.key })} aria-current={on ? 'page' : undefined} className={cx('relative flex-1 h-16 flex flex-col items-center justify-center gap-1 text-[11px]', on ? 'text-brand-500 font-bold' : 'text-ink-500 font-medium')}>
+              {on && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] rounded-b bg-brand-500" />}
+              <Icon name={t.icon} className="w-6 h-6" tint={on} bold={on} />
+              {t.label}
+            </button>
+          );
+        })}
       </div>
     </nav>
   );
@@ -141,10 +145,10 @@ function MatchModal() {
   const close = () => update((s) => { s.session.match = undefined; });
   if (!t || !brand) return null;
   return (
-    <Sheet open onClose={close} title="서로 관심을 표시했어요 💛">
+    <Sheet open onClose={close} title="서로 관심을 표시했어요">
       <div className="flex items-center justify-center gap-3 py-4">
         <span className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl" style={{ background: `hsl(${brand.logoHue} 45% 55%)` }}>{brand.name[0]}</span>
-        <span className="text-2xl text-rose-500">♥</span>
+        <Icon name="heart" className="w-7 h-7 text-rose-500" filled />
         <span className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl" style={{ background: `hsl(${t.logoHue} 45% 55%)` }}>{t.name[0]}</span>
       </div>
       <p className="text-center text-sm text-ink-700 mb-5">{josa(brand.name, '과', '와')} {josa(t.name, '이', '가')} 서로에게 관심을 눌렀어요. 먼저 인사해 볼까요?</p>

@@ -5,7 +5,7 @@ import { navigate } from '@/store/store';
 import { applyRecruitment, createRecruitment, decideApplication, simulateApplicants, toggleRecruitAlert, toggleSaveRecruit, type RecruitDraft } from '@/store/actions';
 import { brandById, manwon, matchPct, matchScore, period, recruitFit, recruitUrgency, slotShare, spaceById } from '@/store/logic';
 import { BrandLogo, ScreenTitle, ThemeTagList, TrustLine } from '@/components/common';
-import { Button, Card, Chip, cx, Demo, Empty, Field, inputCls, Segmented, Sheet, StatusPill, SubHeader, Tag, textareaCls } from '@/components/ui';
+import { Button, Card, Chip, cx, Demo, Empty, Field, inputCls, Segmented, Sheet, StatusPill, SubHeader, Tag, textareaCls, Ic, Icon } from '@/components/ui';
 import { CATEGORIES, REGIONS, type Category, type Recruitment, type RecruitStatus, type Region, type SlotStatus } from '@/types';
 import type { DB } from '@/data/mock';
 import { ProposeSpaceButton } from './SpaceLandlord';
@@ -27,7 +27,7 @@ export function SaveRecruitButton({ r }: { r: Recruitment }) {
       onClick={(e) => { e.stopPropagation(); toggleSaveRecruit(brand.id, r.id); }}
       className={cx('w-8 h-8 -mr-1 -mt-1 rounded-full flex items-center justify-center text-lg', on ? 'text-brand-500' : 'text-ink-300')}
     >
-      {on ? '♥' : '♡'}
+      <Icon name="heart" className="w-5 h-5" filled={on} />
     </button>
   );
 }
@@ -44,12 +44,12 @@ export function RecruitCard({ db, r, reasons }: { db: DB; r: Recruitment; reason
         <StatusPill status={r.status} />
         <Tag>{r.slotMode === 'hanger' ? '행거 단위' : '카테고리 슬롯'}</Tag>
         {r.spaceConfirmed && <Tag tone="green">공간 확정</Tag>}
-        {urgent && <Tag tone="red">🔥 {urgent}</Tag>}
+        {urgent && <Tag tone="red"><Ic n="flame" />{urgent}</Tag>}
         <span className="flex-1" />
         <SaveRecruitButton r={r} />
       </div>
       <div className="font-bold text-[15px] leading-snug">{r.title}</div>
-      <div className="text-[13px] text-ink-500 mt-1">📍 {r.region}{sp ? ` · ${sp.name}` : ''} · 📅 {period(r.period)}</div>
+      <div className="text-[13px] text-ink-500 mt-1 flex items-center flex-wrap"><Ic n="pin" />{r.region}{sp ? ` · ${sp.name}` : ''}<span className="mx-1">·</span><Ic n="calendar" />{period(r.period)}</div>
       <div className="flex items-center gap-1 mt-2.5">
         {r.slots.map((s) => (
           <span key={s.id} className={cx('h-2 flex-1 rounded-full border', SLOT_STYLE[s.status])} />
@@ -68,7 +68,7 @@ export function RecruitCard({ db, r, reasons }: { db: DB; r: Recruitment; reason
       <div className="text-[12px] text-ink-700 mt-1">남은 자리 <b>{empty}</b> / {r.slots.length}</div>
       {reasons && reasons.length > 0 && (
         <div className="mt-2.5 pt-2.5 border-t border-ink-100 space-y-0.5">
-          {reasons.slice(0, 3).map((x) => <div key={x} className="text-[12px] text-brand-700">✓ {x}</div>)}
+          {reasons.slice(0, 3).map((x) => <div key={x} className="text-[12px] text-brand-700 flex"><Ic n="check" />{x}</div>)}
         </div>
       )}
     </Card>
@@ -90,7 +90,7 @@ export function RecruitsTab({ initial }: { initial?: '찜' }) {
       <p className="px-4 text-[13px] text-ink-500 -mt-1 mb-2">함께 팝업을 열 팀원을 모아요. 정원이 차면 자동으로 팀이 만들어져요.</p>
       <div className="flex gap-1.5 overflow-x-auto no-scrollbar px-4 pb-2">
         {(['전체', ...(brand ? (['찜'] as const) : []), '모집 중', '협의 중', '마감'] as const).map((s) => (
-          <Chip key={s} active={st === s} onClick={() => setSt(s)}>{s === '찜' ? `${saved.length ? "♥" : "♡"} 찜 ${saved.length}` : s}</Chip>
+          <Chip key={s} active={st === s} onClick={() => setSt(s)}>{s === '찜' ? <><Ic n="heart" />찜 {saved.length}</> : s}</Chip>
         ))}
         <span className="w-px bg-ink-300 mx-1" />
         {(['전체', ...REGIONS] as const).map((r) => <Chip key={'r' + r} active={region === r} onClick={() => setRegion(r)}>{r === '전체' ? '모든 지역' : r}</Chip>)}
@@ -99,7 +99,7 @@ export function RecruitsTab({ initial }: { initial?: '찜' }) {
         const on = !!brand.recruitAlertRegions?.includes(region);
         return (
           <div className="mx-4 mb-2 mt-1 flex items-center gap-2 rounded-xl bg-white border border-ink-100 px-3 py-2.5">
-            <span className="text-[13px] flex-1">{on ? `🔔 ${region} 새 모집글 알림 받는 중` : `${region}에 새 모집글이 올라오면 알려 드릴까요?`}</span>
+            <span className="text-[13px] flex-1">{on ? `${region} 새 모집글 알림 받는 중` : `${region}에 새 모집글이 올라오면 알려 드릴까요?`}</span>
             <button onClick={() => toggleRecruitAlert(brand.id, region)} className={cx('h-8 px-3 rounded-full text-[12px] font-bold shrink-0', on ? 'bg-ink-100 text-ink-700' : 'bg-brand-500 text-white')}>{on ? '끄기' : '알림 받기'}</button>
           </div>
         );
@@ -118,7 +118,7 @@ export function RecruitsTab({ initial }: { initial?: '찜' }) {
       )}
       <div className="px-4 space-y-3 mt-2">
         {list.map((r) => <RecruitCard key={r.id} db={db} r={r} />)}
-        {!list.length && <Empty action={st !== '전체' ? { label: '전체 모집글 보기', onClick: () => setSt('전체') } : undefined}>{st === '찜' ? '찜한 모집글이 없어요. 마음에 드는 글의 ♡를 눌러 두세요' : '조건에 맞는 모집글이 없어요'}</Empty>}
+        {!list.length && <Empty action={st !== '전체' ? { label: '전체 모집글 보기', onClick: () => setSt('전체') } : undefined}>{st === '찜' ? '찜한 모집글이 없어요. 마음에 드는 글의 하트를 눌러 두세요' : '조건에 맞는 모집글이 없어요'}</Empty>}
       </div>
     </div>
   );
@@ -167,7 +167,7 @@ export function RecruitDetail({ id }: { id: string }) {
         <div className="mt-3 rounded-xl border border-ink-100 p-3 text-sm">
           <div className="text-[12px] text-ink-500 mb-0.5">공간</div>
           {r.spaceConfirmed && sp ? (
-            <button className="font-semibold underline underline-offset-2" onClick={() => navigate({ name: 'space', id: sp.id })}>✅ 확정: {sp.name} ›</button>
+            <button className="font-semibold underline underline-offset-2" onClick={() => navigate({ name: 'space', id: sp.id })}><Ic n="check" />확정: {sp.name} ›</button>
           ) : (
             <span className="font-semibold">아직 미정 · 팀이 꾸려지면 함께 찾아요</span>
           )}
@@ -190,7 +190,7 @@ export function RecruitDetail({ id }: { id: string }) {
               <div className="flex flex-wrap gap-1 mt-2.5">
                 {scores.map(({ b, m }) => <span key={b.id} className="text-[11px] bg-white rounded-md px-2 py-0.5">{b.name} {matchPct(m.score)}%</span>)}
               </div>
-              {fit.reasons.length > 0 && <div className="mt-2 space-y-0.5">{fit.reasons.slice(0, 2).map((x) => <div key={x} className="text-[12px] text-brand-700">✓ {x}</div>)}</div>}
+              {fit.reasons.length > 0 && <div className="mt-2 space-y-0.5">{fit.reasons.slice(0, 2).map((x) => <div key={x} className="text-[12px] text-brand-700 flex"><Ic n="check" />{x}</div>)}</div>}
             </div>
           );
         })()}
@@ -201,7 +201,7 @@ export function RecruitDetail({ id }: { id: string }) {
             const b = brandById(db, s.brandId);
             return (
               <div key={s.id} className={cx('rounded-xl border p-2.5 min-h-[72px] flex flex-col justify-between', SLOT_STYLE[s.status])}>
-                <div className="text-[12px] font-bold">{r.slotMode === 'hanger' ? `🧥 ${s.label}` : s.label}</div>
+                <div className="text-[12px] font-bold">{r.slotMode === 'hanger' ? <><Ic n="hanger" />{s.label}</> : s.label}</div>
                 <div>
                   <div className="text-[11px] opacity-80">{s.status}</div>
                   {b && <div className="text-[12px] font-semibold truncate">{b.name}</div>}
@@ -361,7 +361,7 @@ export function RecruitNew() {
       <div className="p-4">
         {brand && (
           <button onClick={fillDraft} className="w-full mb-4 rounded-2xl bg-brand-50 px-4 py-3 text-left flex items-center gap-3">
-            <span className="text-xl">✨</span>
+            <Icon name="pencil" className="w-6 h-6 shrink-0 text-brand-600" />
             <span className="flex-1">
               <span className="block text-sm font-bold">내 브랜드 정보로 초안 채우기</span>
               <span className="block text-[12px] text-ink-500">무드·고객층 태그로 제목과 소개를 쓰고, {d.region} 평균 대관료로 예산을 잡아요</span>

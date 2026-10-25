@@ -3,7 +3,7 @@ import { useMe } from '@/store/hooks';
 import { navigate } from '@/store/store';
 import { confirmCompletion, setPopupStatus, simulateOthersConfirm, startNextRound, writeBizReview } from '@/store/actions';
 import { brandById, displayName, period, popupById, popupReport, spaceById, teamById, trustScore } from '@/store/logic';
-import { Button, Card, cx, Demo, Empty, Icon, Sheet, Stars, StatusPill, Tag, textareaCls, GradeBadge } from '@/components/ui';
+import { Button, Card, cx, Demo, Empty, Icon, Sheet, Stars, StatusPill, Tag, textareaCls, GradeBadge, Ic } from '@/components/ui';
 import { REVIEW_CRITERIA, type Team } from '@/types';
 
 type BizKind = 'brand_to_brand' | 'brand_to_space' | 'space_to_team';
@@ -36,14 +36,14 @@ export function PopupReportCard({ popupId }: { popupId: string }) {
   if (!p) return null;
   const r = popupReport(db, popupId);
   const stat = (label: string, value: string) => (
-    <div className="rounded-2xl bg-white/10 p-3">
-      <div className="text-[11px] text-white/60">{label}</div>
+    <div className="border border-ink-300 p-3">
+      <div className="text-[11px] text-ink-500">{label}</div>
       <div className="text-lg font-extrabold mt-0.5">{value}</div>
     </div>
   );
   return (
-    <div className="rounded-3xl bg-brand-500 text-white p-5">
-      <div className="text-[12px] text-white/70">팝업 리포트 · {period(p.period)}</div>
+    <div className="bg-white border border-ink-900 p-5">
+      <div className="text-[12px] text-ink-500">팝업 리포트 · {period(p.period)}</div>
       <div className="text-xl font-extrabold mt-0.5">{p.title}</div>
       <div className="grid grid-cols-2 gap-2 mt-4">
         {stat('방문 인증', `${r.visits}명`)}
@@ -52,12 +52,12 @@ export function PopupReportCard({ popupId }: { popupId: string }) {
         {stat('팀 브랜드 팔로워', `${r.followers}명`)}
       </div>
       {r.bestPair && (
-        <div className="mt-3 rounded-2xl bg-white text-ink-900 p-3.5">
+        <div className="mt-3 bg-brand-50 text-ink-900 p-3.5">
           <div className="text-[11px] text-ink-500">방문객이 가장 좋아한 조합</div>
-          <div className="font-bold mt-0.5">💛 {brandById(db, r.bestPair[0])?.name} × {brandById(db, r.bestPair[1])?.name} <span className="text-[12px] text-ink-500 font-normal">· {r.bestPairCount}명</span></div>
+          <div className="font-bold mt-0.5"><Ic n="heart" className="text-rose-500" />{brandById(db, r.bestPair[0])?.name} × {brandById(db, r.bestPair[1])?.name} <span className="text-[12px] text-ink-500 font-normal">· {r.bestPairCount}명</span></div>
         </div>
       )}
-      <p className="text-[11px] text-white/60 mt-3">OFF STAGE 안에서 모인 기록만 보여요. 매출은 팝업자랑에 직접 공개할 수 있어요.</p>
+      <p className="text-[11px] text-ink-500 mt-3">OFF STAGE 안에서 모인 기록만 보여요. 매출은 팝업자랑에 직접 공개할 수 있어요.</p>
     </div>
   );
 }
@@ -143,14 +143,14 @@ export function TeamWrapUp({ team }: { team: Team }) {
         <Card className="p-4">
           <div className="font-bold text-[15px] mb-3">팝업이 끝나면 이렇게 마무리해요</div>
           {[
-            ['🤝', '성사 확인', '참여 브랜드와 임대인이 "무사히 마쳤어요"를 눌러요. 인증 공동 팝업 횟수가 올라가요'],
-            ['⭐', '서로 후기', '함께한 브랜드와 공간에 후기를 남겨요. 신뢰 지수에 반영돼요'],
-            ['📊', '팝업 리포트', '방문 인증, 조합 리뷰, 오픈 알림 수를 한눈에 봐요'],
-            ['🔁', '다음 회차', '같은 팀으로 2회차를 바로 열 수 있어요'],
+            ['check', '성사 확인', '참여 브랜드와 임대인이 "무사히 마쳤어요"를 눌러요. 인증 공동 팝업 횟수가 올라가요'],
+            ['star', '서로 후기', '함께한 브랜드와 공간에 후기를 남겨요. 신뢰 지수에 반영돼요'],
+            ['chart', '팝업 리포트', '방문 인증, 조합 리뷰, 오픈 알림 수를 한눈에 봐요'],
+            ['repeat', '다음 회차', '같은 팀으로 2회차를 바로 열 수 있어요'],
           ].map(([e, t, d], i) => (
             <div key={t} className="flex gap-3 pb-3 last:pb-0">
               <div className="flex flex-col items-center">
-                <span className="w-8 h-8 rounded-full bg-brand-50 flex items-center justify-center">{e}</span>
+                <span className="w-8 h-8 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center"><Icon name={e} className="w-4 h-4" /></span>
                 {i < 3 && <span className="flex-1 w-px bg-ink-100 mt-1" />}
               </div>
               <div className="pb-1">
