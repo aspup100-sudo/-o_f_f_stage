@@ -169,3 +169,36 @@ export const displayName = (db: DB, userId: string) => {
   return u.name;
 };
 export const teamsOfBrand = (db: DB, brandId: string) => db.teams.filter((t) => t.members.some((m) => m.brandId === brandId));
+
+// ───────── 렌탈 ─────────
+export const rentalDays = (d: { start: string; end: string }) => Math.max(1, Math.round((new Date(d.end).getTime() - new Date(d.start).getTime()) / 86400000) + 1);
+
+export function rentalQuote(db: DB, partnerId: string, lines: { itemId: string; qty: number }[], dates: { start: string; end: string }, delivery: boolean) {
+  const days = rentalDays(dates);
+  const partner = db.rentalPartners.find((p) => p.id === partnerId);
+  let list = 0;
+  let partnerSum = 0;
+  lines.forEach((l) => {
+    const it = db.rentalItems.find((i) => i.id === l.itemId);
+    if (!it) return;
+    list += it.dailyPrice * l.qty * days;
+    partnerSum += it.partnerPrice * l.qty * days;
+  });
+  const deliveryFee = delivery && partner && partnerSum < partner.freeDeliveryOver ? partner.deliveryFee : 0;
+  return { days, list, partnerSum, deliveryFee, total: partnerSum + deliveryFee, saved: list - partnerSum };
+}
+
+export const discountPct = (it: { dailyPrice: number; partnerPrice: number }) => Math.round((1 - it.partnerPrice / it.dailyPrice) * 100);
+
+export function partnerRating(db: DB, partnerId: string) {
+  const rs = db.rentalOrders.filter((o) => o.partnerId === partnerId && o.rating).map((o) => o.rating!);
+  return { avg: rs.length ? avg(rs) : null, count: rs.length, done: db.rentalOrders.filter((o) => o.partnerId === partnerId && o.status === 'returned').length };
+}
+
+/** 공간 설비 중 빠진 것 → 렌탈 카테고리 추천 */
+export const FACILITY_TO_RENTAL: Record<string, import('@/types').RentalCategory> = { 행거: '행거', 전신거울: '전신거울', 피팅룸: '피팅룸 텐트', 조명: '조명' };
+export function missingForSpace(db: DB, spaceId?: string) {
+  const sp = db.spaces.find((s) => s.id === spaceId);
+  if (!sp) return [];
+  return Object.entries(FACILITY_TO_RENTAL).filter(([f]) => !sp.facilities.includes(f as any)).map(([f, c]) => ({ facility: f, category: c }));
+}

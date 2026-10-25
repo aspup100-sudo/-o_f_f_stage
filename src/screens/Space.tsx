@@ -4,12 +4,13 @@ import { navigate } from '@/store/store';
 import { answerSpaceQuestion, applySpace, askSpaceQuestion, openDirectChat, openWeekendsOfMonth, toggleAvailability } from '@/store/actions';
 import { displayName, manwon, period, popupById, spaceById, teamById, teamsOfBrand, trustScore } from '@/store/logic';
 import { ScreenTitle, TrustLine } from '@/components/common';
-import { Avatar, Button, Card, Chip, cx, Demo, Empty, Field, GradeBadge, Icon, inputCls, Sheet, StatusPill, SubHeader, Swatch, Tag, textareaCls } from '@/components/ui';
+import { Avatar, Button, Card, Chip, Segmented, cx, Demo, Empty, Field, GradeBadge, Icon, inputCls, Sheet, StatusPill, SubHeader, Swatch, Tag, textareaCls } from '@/components/ui';
 import { FACILITIES, REGIONS, type Region, type Space } from '@/types';
 import type { DB } from '@/data/mock';
 import { ReviewGroup } from './BrandProfile';
 import { TeamIntroPage } from './Team';
 import { DEMO_TODAY } from '@/data/mock';
+import { RentalsBrowse } from './Rental';
 
 export function SpaceCard({ db, s, onClick }: { db: DB; s: Space; onClick?: () => void }) {
   const ll = db.landlords.find((l) => l.id === s.landlordId)!;
@@ -60,9 +61,19 @@ export function SpacesTab() {
     .filter((s) => !team || s.teamRental)
     .filter((s) => !fashion || s.fashionOnly)
     .filter((s) => !date || db.availability.some((a) => a.spaceId === s.id && a.date === date && a.status === 'open'));
+  const [mode, setMode] = useState<'space' | 'rental'>('space');
+  if (mode === 'rental')
+    return (
+      <div>
+        <ScreenTitle>공간·장비</ScreenTitle>
+        <div className="px-4 mb-3"><Segmented items={[{ key: 'space', label: '공간 찾기' }, { key: 'rental', label: '장비 렌탈' }]} value={mode} onChange={setMode} /></div>
+        <RentalsBrowse />
+      </div>
+    );
   return (
     <div>
-      <ScreenTitle>공간 찾기</ScreenTitle>
+      <ScreenTitle>공간·장비</ScreenTitle>
+      <div className="px-4 mb-3"><Segmented items={[{ key: 'space', label: '공간 찾기' }, { key: 'rental', label: '장비 렌탈' }]} value={mode} onChange={setMode} /></div>
       <div className="px-4 space-y-2 mb-3">
         <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
           {(['전체', ...REGIONS] as const).map((r) => <Chip key={r} active={region === r} onClick={() => setRegion(r)}>{r}</Chip>)}
@@ -207,6 +218,12 @@ export function SpaceDetail({ id }: { id: string }) {
             );
           })}
         </div>
+
+        {role === 'brand' && s.facilities.length < FACILITIES.length && (
+          <button onClick={() => navigate({ name: 'rentals' })} className="mt-2 w-full text-left text-[13px] rounded-xl bg-brand-50 text-brand-700 px-3 py-2.5 font-semibold">
+            📦 없는 설비는 렌탈 제휴가로 빌릴 수 있어요 ›
+          </button>
+        )}
 
         <h3 className="font-bold mt-6 mb-2">비는 날</h3>
         <AvailabilityCalendar db={db} spaceId={s.id} editable={isOwner} />

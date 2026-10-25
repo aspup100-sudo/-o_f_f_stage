@@ -7,6 +7,8 @@ import { BrandLogo, ScreenTitle, TagPicker, ThemeTagList, TrustLine } from '@/co
 import { Avatar, Button, Card, Demo, Field, GradeBadge, Icon, inputCls, Sheet, Tag, textareaCls } from '@/components/ui';
 import type { ThemeTags } from '@/types';
 import { ROLE_LABEL } from '@/config';
+import { RentalMeCard } from './Rental';
+import { OfficialInsta } from './Magazine';
 
 export default function MeScreen() {
   const { db, user, role, brand, landlord, visitor } = useMe();
@@ -43,6 +45,9 @@ export default function MeScreen() {
           </Card>
         )}
         {visitor && <VisitorSection />}
+        {role === 'rental' && <RentalMeCard />}
+
+        <OfficialInsta />
 
         <Card className="divide-y divide-ink-100">
           <MenuRow icon="bell" label="알림" onClick={() => navigate({ name: 'notifications' })} />

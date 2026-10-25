@@ -53,6 +53,7 @@ function Login() {
           네이버로 시작하기 <Demo />
         </button>
         <p className="text-center text-[11px] text-ink-500 pt-1">데모에서는 버튼을 누르면 바로 로그인돼요.</p>
+        <a href="https://www.instagram.com/o_f_f_stage/" target="_blank" rel="noreferrer" className="block text-center text-[12px] text-ink-700 font-semibold pt-2">공식 인스타그램 @o_f_f_stage ↗</a>
       </div>
     </div>
   );

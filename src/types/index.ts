@@ -6,7 +6,7 @@ export type ISODate = string; // 'YYYY-MM-DD'
 export type ISODateTime = string;
 
 // ───────── 공통 / 사용자 ─────────
-export type Role = 'brand' | 'landlord' | 'visitor' | 'admin';
+export type Role = 'brand' | 'landlord' | 'visitor' | 'admin' | 'rental';
 export type VerifyStatus = 'none' | 'pending' | 'verified' | 'rejected';
 export type LoginProvider = 'kakao' | 'naver';
 
@@ -123,6 +123,54 @@ export interface SpaceQna {
   question: string;
   answer?: string;
   createdAt: ISODate;
+}
+
+// ───────── 렌탈 제휴 ─────────
+// 렌탈 업체는 비는 장비를 팝업에 빌려주고, 소규모 브랜드는 팝스팟 제휴가로 싸게 빌린다.
+export const RENTAL_CATEGORIES = ['행거', '전신거울', '마네킹', '조명', '진열대', '피팅룸 텐트', '사이니지', 'POS·결제'] as const;
+export type RentalCategory = (typeof RENTAL_CATEGORIES)[number];
+
+export interface RentalPartner {
+  id: ID;
+  userId: ID;
+  name: string;
+  intro: string;
+  regions: Region[]; // 배송 가능 지역
+  deliveryFee: number; // 왕복 배송·설치비
+  freeDeliveryOver: number; // 이 금액 이상이면 배송 무료
+  hue: number;
+}
+
+export interface RentalItem {
+  id: ID;
+  partnerId: ID;
+  name: string;
+  category: RentalCategory;
+  desc: string;
+  dailyPrice: number; // 일반 대여가 (1일)
+  partnerPrice: number; // 팝스팟 제휴가 (1일)
+  stock: number;
+  hue: number;
+  active: boolean;
+}
+
+export type RentalOrderStatus = 'requested' | 'confirmed' | 'delivered' | 'returned' | 'rejected';
+
+export interface RentalOrder {
+  id: ID;
+  partnerId: ID;
+  teamId?: ID; // 팀 단위 예약이면 팀
+  brandId: ID; // 신청한 브랜드
+  spaceId?: ID;
+  lines: { itemId: ID; qty: number }[];
+  dates: DateRange;
+  delivery: boolean;
+  addToTeamCost: boolean; // 팀 분담금 공통비로 넣기
+  memo: string;
+  status: RentalOrderStatus;
+  rating?: number; // 반납 후 브랜드가 남긴 별점
+  ratingComment?: string;
+  createdAt: ISODateTime;
 }
 
 // ───────── 제안 / 관심 ─────────
@@ -406,6 +454,33 @@ export interface QnaAnswer {
   createdAt: ISODate;
 }
 
+// ───────── 매거진 (카드뉴스) ─────────
+export const MAGAZINE_CATEGORIES = ['팝업 동향', '뜨는 지역', '운영 팁', '팀 인터뷰'] as const;
+export type MagazineCategory = (typeof MAGAZINE_CATEGORIES)[number];
+
+export interface MagazineCard {
+  heading: string;
+  body: string;
+  stat?: string; // 큰 숫자 강조 (예: '3.4팀')
+}
+
+export interface MagazinePost {
+  id: ID;
+  title: string;
+  subtitle: string;
+  category: MagazineCategory;
+  cards: MagazineCard[];
+  hue: number;
+  region?: Region;
+  link?: Route; // 관련 화면 (공간, 팝업자랑 등)
+  authorId: ID; // 운영팀
+  likes: ID[];
+  createdAt: ISODate;
+  hidden?: boolean;
+}
+
+export const OFFICIAL_INSTAGRAM = 'o_f_f_stage';
+
 // ───────── 채팅 / 알림 / 신고 ─────────
 export interface ChatRoom {
   id: ID;
@@ -431,6 +506,7 @@ export type NotificationType =
   | 'completion_request'
   | 'follow_popup'
   | 'space_application'
+  | 'rental'
   | 'system';
 
 export interface Notification {
@@ -478,4 +554,9 @@ export type Route =
   | { name: 'qnaNew' }
   | { name: 'review'; teamId: ID }
   | { name: 'onboarding' }
-  | { name: 'proposals' };
+  | { name: 'proposals' }
+  | { name: 'rentals'; teamId?: ID }
+  | { name: 'rentalPartner'; id: ID; teamId?: ID }
+  | { name: 'rentalItemEdit'; id?: ID }
+  | { name: 'magazine'; id: ID }
+  | { name: 'magazineNew' };

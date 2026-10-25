@@ -12,6 +12,7 @@ import { AGREEMENT_ITEMS, type AgreementKey, type Team } from '@/types';
 import type { DB } from '@/data/mock';
 import { TeamSpaceTab } from './TeamSpaceApply';
 import { TeamWrapUp } from './Completion';
+import { TeamRentalTab } from './Rental';
 
 export function MyTeamTab() {
   const { db, brand } = useMe();
@@ -60,6 +61,7 @@ const SUBS = [
   { key: 'cost', label: '분담금' },
   { key: 'moodboard', label: '무드보드' },
   { key: 'space', label: '공간 지원' },
+  { key: 'rental', label: '렌탈' },
   { key: 'shift', label: '근무표' },
   { key: 'promo', label: '홍보 키트' },
   { key: 'wrap', label: '마무리' },
@@ -116,6 +118,7 @@ export function TeamScreen({ id, sub = 'members' }: { id: string; sub?: string }
         {sub === 'cost' && <CostTab team={team} myBrandId={brand!.id} isLeader={isLeader} />}
         {sub === 'moodboard' && <MoodboardTab team={team} myBrandId={brand!.id} />}
         {sub === 'space' && <TeamSpaceTab team={team} />}
+        {sub === 'rental' && <TeamRentalTab team={team} />}
         {sub === 'shift' && <ShiftTab team={team} />}
         {sub === 'promo' && <PromoTab team={team} myBrandId={brand!.id} />}
         {sub === 'wrap' && <TeamWrapUp team={team} />}

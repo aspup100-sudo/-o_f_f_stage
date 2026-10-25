@@ -7,8 +7,9 @@ import { CATEGORIES, MOODS, PRICE_RANGES, type Category, type Mood, type PriceRa
 import { BrandActions } from './BrandActions';
 import { ShowcaseList } from './Showcase';
 import { QnaList } from './Qna';
+import { MagazineList, MagazineThumb } from './Magazine';
 
-type View = 'brand' | 'showcase' | 'qna';
+type View = 'brand' | 'magazine' | 'showcase' | 'qna';
 
 export default function Explore() {
   const [view, setView] = useState<View>('brand');
@@ -16,19 +17,20 @@ export default function Explore() {
     <div>
       <div className="px-4 pt-3 pb-1 bg-white">
         <Segmented<View>
-          items={[{ key: 'brand', label: '브랜드' }, { key: 'showcase', label: '팝업자랑' }, { key: 'qna', label: 'Q&A' }]}
+          items={[{ key: 'brand', label: '브랜드' }, { key: 'magazine', label: '매거진' }, { key: 'showcase', label: '팝업자랑' }, { key: 'qna', label: 'Q&A' }]}
           value={view}
           onChange={setView}
         />
       </div>
-      {view === 'brand' && <BrandFeed />}
+      {view === 'brand' && <BrandFeed onMore={() => setView('magazine')} />}
+      {view === 'magazine' && <MagazineList />}
       {view === 'showcase' && <ShowcaseList />}
       {view === 'qna' && <QnaList />}
     </div>
   );
 }
 
-function BrandFeed() {
+function BrandFeed({ onMore }: { onMore: () => void }) {
   const { db, brand, role } = useMe();
   const [moods, setMoods] = useState<Mood[]>([]);
   const [cats, setCats] = useState<Category[]>([]);
@@ -55,6 +57,16 @@ function BrandFeed() {
           {popups.map((p) => (
             <PopupBannerCard key={p.id} db={db} popup={p} />
           ))}
+        </div>
+      </section>
+
+      <section className="pt-6">
+        <div className="px-4 flex items-center justify-between mb-2.5">
+          <h2 className="font-bold text-[15px]">매거진 · 팝업 트렌드</h2>
+          <button onClick={onMore} className="text-xs text-ink-500">전체 보기 ›</button>
+        </div>
+        <div className="flex gap-3 overflow-x-auto no-scrollbar px-4 pb-1">
+          {db.magazines.filter((m) => !m.hidden).slice(0, 4).map((m) => <MagazineThumb key={m.id} post={m} />)}
         </div>
       </section>
 

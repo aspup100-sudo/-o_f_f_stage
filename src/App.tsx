@@ -64,14 +64,14 @@ function RoleSwitcher() {
       </button>
       <Sheet open={open} onClose={() => setOpen(false)} title={<>역할 전환 <Demo /></>}>
         <p className="text-xs text-ink-500 mb-3">실제 서비스에서는 한 계정이 하나의 역할만 가집니다. 데모에서는 시점을 바로 바꿔 볼 수 있어요.</p>
-        <div className="grid grid-cols-4 gap-2 mb-4">
-          {(['brand', 'landlord', 'visitor', 'admin'] as Role[]).map((r) => (
-            <button key={r} onClick={() => { switchRole(r); setOpen(false); }} className={cx('h-16 rounded-xl border text-sm font-bold', role === r ? 'bg-ink-900 text-white border-ink-900' : 'bg-white border-ink-300')}>
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          {(['brand', 'landlord', 'visitor', 'rental', 'admin'] as Role[]).map((r) => (
+            <button key={r} onClick={() => { switchRole(r); setOpen(false); }} className={cx('h-14 rounded-xl border text-sm font-bold', role === r ? 'bg-ink-900 text-white border-ink-900' : 'bg-white border-ink-300')}>
               {ROLE_LABEL[r]}
             </button>
           ))}
         </div>
-        {(role === 'brand' || role === 'landlord' || role === 'visitor') && (
+        {(role === 'brand' || role === 'landlord' || role === 'visitor' || role === 'rental') && (
           <>
             <div className="text-[13px] font-semibold mb-2">{ROLE_LABEL[role]} 계정 고르기</div>
             <div className="flex flex-wrap gap-1.5 mb-4">

@@ -5,7 +5,7 @@ import type { NotificationType } from '@/types';
 
 const ICON: Record<NotificationType, string> = {
   proposal: '✉️', interest_match: '💛', application_result: '📮', agreement_request: '📝', completion_request: '🤝',
-  follow_popup: '🛍️', space_application: '🏠', system: '🔔',
+  follow_popup: '🛍️', space_application: '🏠', rental: '📦', system: '🔔',
 };
 
 export function NotificationsScreen() {

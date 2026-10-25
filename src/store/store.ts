@@ -3,7 +3,7 @@ import { useSyncExternalStore } from 'react';
 import { createSeed, type DB } from '@/data/mock';
 import type { Role, Route } from '@/types';
 
-export const ROLE_HOME: Record<Role, string> = { brand: 'explore', landlord: 'explore', visitor: 'explore', admin: 'verify' };
+export const ROLE_HOME: Record<Role, string> = { brand: 'explore', landlord: 'explore', visitor: 'explore', admin: 'verify', rental: 'explore' };
 
 export interface Session {
   role: Role;
@@ -20,12 +20,12 @@ export interface AppState {
   session: Session;
 }
 
-const STORAGE_KEY = 'popspot-demo-v2';
+const STORAGE_KEY = 'popspot-demo-v4';
 
 function initialSession(): Session {
   return {
     role: 'brand',
-    userByRole: { brand: 'u_b1', landlord: 'u_l1', visitor: 'u_v1', admin: 'u_admin' },
+    userByRole: { brand: 'u_b1', landlord: 'u_l1', visitor: 'u_v1', admin: 'u_admin', rental: 'u_r1' },
     stack: [{ name: 'tab', tab: 'explore' }],
   };
 }

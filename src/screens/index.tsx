@@ -16,6 +16,8 @@ import { NotificationsScreen } from './Notifications';
 import { ShowcaseDetail, ShowcaseNew } from './Showcase';
 import { QnaDetail, QnaNew } from './Qna';
 import { VerifyTab, ReportsTab } from './Admin';
+import { MagazineAdminTab, MagazineDetail, MagazineNew } from './Magazine';
+import { MyItemsTab, OrdersTab, RentalItemEdit, RentalPartnerScreen, RentalsScreen } from './Rental';
 
 function renderTab(tab: string): ReactNode {
   switch (tab) {
@@ -30,6 +32,9 @@ function renderTab(tab: string): ReactNode {
     case 'verify': return <VerifyTab />;
     case 'reports': return <ReportsTab />;
     case 'stamps': return <StampsTab />;
+    case 'myitems': return <MyItemsTab />;
+    case 'magazineAdmin': return <MagazineAdminTab />;
+    case 'orders': return <OrdersTab />;
     default:
       return <Empty>화면을 찾을 수 없어요</Empty>;
   }
@@ -54,6 +59,11 @@ export function renderRoute(route: Route): ReactNode {
     case 'showcaseNew': return <ShowcaseNew teamId={route.teamId} />;
     case 'qna': return <QnaDetail key={route.id} id={route.id} />;
     case 'qnaNew': return <QnaNew />;
+    case 'magazine': return <MagazineDetail key={route.id} id={route.id} />;
+    case 'magazineNew': return <MagazineNew />;
+    case 'rentals': return <RentalsScreen teamId={route.teamId} />;
+    case 'rentalPartner': return <RentalPartnerScreen key={route.id} id={route.id} teamId={route.teamId} />;
+    case 'rentalItemEdit': return <RentalItemEdit key={route.id ?? 'new'} id={route.id} />;
     case 'team': return <TeamScreen key={route.id} id={route.id} sub={route.sub} />;
     default:
       return <Empty>화면을 찾을 수 없어요</Empty>;

@@ -12,6 +12,7 @@ export function useMe() {
     brand: role === 'brand' ? brandOfUser(db, userId) : undefined,
     landlord: role === 'landlord' ? landlordOfUser(db, userId) : undefined,
     visitor: role === 'visitor' ? db.visitors.find((v) => v.userId === userId) : undefined,
+    rental: role === 'rental' ? db.rentalPartners.find((r) => r.userId === userId) : undefined,
     verified: user?.verifyStatus === 'verified' || role === 'visitor' || role === 'admin',
   };
 }

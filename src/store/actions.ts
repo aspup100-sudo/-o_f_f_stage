@@ -938,3 +938,98 @@ export function simulateTeamApplication(spaceId: string) {
   });
   toast('데모 팀이 지원했어요');
 }
+
+// ───────── 렌탈 제휴 ─────────
+export function requestRental(o: Omit<import('@/types').RentalOrder, 'id' | 'status' | 'createdAt'>) {
+  const id = newId('ro');
+  update((s) => {
+    s.db.rentalOrders.unshift({ ...o, id, status: 'requested', createdAt: nowISO() });
+    const partner = s.db.rentalPartners.find((p) => p.id === o.partnerId)!;
+    const team = s.db.teams.find((t) => t.id === o.teamId);
+    notify(s.db, partner.userId, 'rental', `${team ? `${team.name}(${brandName(s.db, o.brandId)})` : brandName(s.db, o.brandId)}이(가) 장비 대여를 요청했어요.`, { name: 'tab', tab: 'orders' });
+    if (team) {
+      const room = teamRoom(s.db, team.id);
+      if (room) systemMessage(s.db, room.id, `${brandName(s.db, o.brandId)}님이 ${partner.name}에 장비 대여를 요청했어요 (${o.dates.start.slice(5)}~${o.dates.end.slice(5)}).`);
+    }
+  });
+  toast('대여를 요청했어요. 업체가 확인하면 알려드릴게요');
+  return id;
+}
+
+export function decideRental(id: string, accept: boolean) {
+  update((s) => {
+    const o = s.db.rentalOrders.find((x) => x.id === id)!;
+    const partner = s.db.rentalPartners.find((p) => p.id === o.partnerId)!;
+    o.status = accept ? 'confirmed' : 'rejected';
+    const targets = o.teamId ? teamMemberUsers(s.db, o.teamId) : [brandUser(s.db, o.brandId)];
+    targets.forEach((u) => notify(s.db, u, 'rental', accept ? `${partner.name}이(가) 장비 대여를 확정했어요.` : `${partner.name}: 요청하신 날짜에 재고가 없어 이번에는 어려워요.`, o.teamId ? { name: 'team', id: o.teamId, sub: 'rental' } : { name: 'rentals' }));
+    if (accept && o.addToTeamCost && o.teamId) {
+      const cost = s.db.costSplits.find((c) => c.teamId === o.teamId);
+      if (cost) {
+        const db = s.db;
+        const days = Math.max(1, Math.round((new Date(o.dates.end).getTime() - new Date(o.dates.start).getTime()) / 86400000) + 1);
+        let sum = 0;
+        o.lines.forEach((l) => { const it = db.rentalItems.find((i) => i.id === l.itemId); if (it) sum += it.partnerPrice * l.qty * days; });
+        if (o.delivery && sum < partner.freeDeliveryOver) sum += partner.deliveryFee;
+        cost.commonItems.push({ id: newId('c'), label: `렌탈: ${partner.name}`, amount: sum });
+      }
+    }
+  });
+  toast(accept ? '예약을 확정했어요' : '예약을 거절했어요');
+}
+
+export function advanceRental(id: string) {
+  update((s) => {
+    const o = s.db.rentalOrders.find((x) => x.id === id)!;
+    const partner = s.db.rentalPartners.find((p) => p.id === o.partnerId)!;
+    if (o.status === 'confirmed') o.status = 'delivered';
+    else if (o.status === 'delivered') {
+      o.status = 'returned';
+      notify(s.db, brandUser(s.db, o.brandId), 'rental', `${partner.name} 장비 반납이 확인됐어요. 별점을 남겨 주세요.`, o.teamId ? { name: 'team', id: o.teamId, sub: 'rental' } : { name: 'rentals' });
+    }
+  });
+  toast('상태를 바꿨어요');
+}
+
+export function rateRental(id: string, rating: number, comment: string) {
+  update((s) => {
+    const o = s.db.rentalOrders.find((x) => x.id === id)!;
+    o.rating = rating;
+    o.ratingComment = comment;
+  });
+  toast('별점을 남겼어요');
+}
+
+export function saveRentalItem(partnerId: string, d: Omit<import('@/types').RentalItem, 'id' | 'partnerId'>, id?: string) {
+  update((s) => {
+    if (id) Object.assign(s.db.rentalItems.find((i) => i.id === id)!, d);
+    else s.db.rentalItems.unshift({ ...d, id: newId('ri'), partnerId });
+  });
+  toast(id ? '장비 정보를 저장했어요' : '장비를 등록했어요. 브랜드들에게 바로 보여요');
+}
+
+export function toggleRentalItem(id: string) {
+  update((s) => { const it = s.db.rentalItems.find((i) => i.id === id)!; it.active = !it.active; });
+}
+
+// ───────── 매거진 ─────────
+export function toggleMagazineLike(id: string, userId: string) {
+  update((s) => {
+    const m = s.db.magazines.find((x) => x.id === id)!;
+    m.likes = m.likes.includes(userId) ? m.likes.filter((x) => x !== userId) : [...m.likes, userId];
+  });
+}
+
+export function publishMagazine(m: Omit<import('@/types').MagazinePost, 'id' | 'likes' | 'createdAt' | 'authorId'>) {
+  const id = newId('mg');
+  update((s) => {
+    s.db.magazines.unshift({ ...m, id, likes: [], authorId: 'u_admin', createdAt: DEMO_TODAY });
+    s.db.users.filter((u) => u.role === 'brand' || u.role === 'visitor').forEach((u) => notify(s.db, u.id, 'system', `📰 새 매거진: ${m.title}`, { name: 'magazine', id }));
+  });
+  toast('매거진을 발행했어요. 브랜드와 방문객에게 알림을 보냈어요');
+  return id;
+}
+
+export function toggleMagazineHidden(id: string) {
+  update((s) => { const m = s.db.magazines.find((x) => x.id === id)!; m.hidden = !m.hidden; });
+}

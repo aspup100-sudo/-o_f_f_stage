@@ -33,6 +33,10 @@ import type {
   VisitorProfile,
   Proposal,
   Interest,
+  RentalItem,
+  RentalOrder,
+  RentalPartner,
+  MagazinePost,
 } from '@/types';
 
 export const DEMO_TODAY = '2026-10-25';
@@ -567,12 +571,92 @@ const reports: Report[] = [
   { id: 'rp3', reporterId: 'u_b5', targetType: 'post', targetId: 'q6', targetLabel: 'Q&A: 같은 날 동시 공지, 효과 있나요?', reason: '스팸·광고', detail: '', status: 'dismissed', at: '2026-10-15T10:00:00' },
 ];
 
+// ───────── 렌탈 제휴 업체 (지어낸 예시) ─────────
+const rentalPartners: RentalPartner[] = [
+  { id: 'rp1', userId: 'u_r1', name: '행거앤코 렌탈', intro: '매장 집기 전문 렌탈. 팝업 철수한 행거·진열대를 놀리지 않고 다시 빌려드려요.', regions: ['성동구', '마포구', '용산구', '종로구'], deliveryFee: 60000, freeDeliveryOver: 300000, hue: 25 },
+  { id: 'rp2', userId: 'u_r2', name: '빛나는조명', intro: '전시·촬영용 조명과 사이니지를 빌려드려요. 설치까지 해 드립니다.', regions: ['성동구', '용산구', '종로구'], deliveryFee: 80000, freeDeliveryOver: 400000, hue: 48 },
+  { id: 'rp3', userId: 'u_r3', name: '팝업키트 서울', intro: '피팅룸 텐트, 거울, 카드 단말기까지 팝업에 필요한 것을 한 번에.', regions: ['마포구', '성동구'], deliveryFee: 50000, freeDeliveryOver: 250000, hue: 200 },
+];
+
+const ri = (id: string, partnerId: string, name: string, category: RentalItem['category'], desc: string, dailyPrice: number, partnerPrice: number, stock: number, hue: number): RentalItem => ({ id, partnerId, name, category, desc, dailyPrice, partnerPrice, stock, hue, active: true });
+
+const rentalItems: RentalItem[] = [
+  ri('ri1', 'rp1', '스테인리스 일자 행거 (120cm)', '행거', '바퀴 달린 기본 행거. 옷 20~25벌', 15000, 9000, 20, 25),
+  ri('ri2', 'rp1', '원목 행거 (150cm)', '행거', '내추럴·빈티지 무드에 어울리는 원목 행거', 25000, 16000, 10, 35),
+  ri('ri3', 'rp1', '3단 원목 진열대', '진열대', '주얼리·잡화 진열용. 폭 90cm', 20000, 12000, 8, 40),
+  ri('ri4', 'rp1', '전신 마네킹 (여성/남성)', '마네킹', '대표 룩을 보여 주기 좋아요', 30000, 18000, 6, 15),
+  ri('ri5', 'rp1', '아크릴 주얼리 진열장', '진열대', '잠금 가능한 유리 진열장', 35000, 22000, 4, 190),
+  ri('ri6', 'rp2', 'LED 트랙 조명 세트 (4구)', '조명', '레일 없이 세우는 스탠드형. 색온도 조절', 40000, 26000, 8, 48),
+  ri('ri7', 'rp2', '촬영용 소프트박스 2개', '조명', '룩북·라이브 방송용', 30000, 19000, 6, 55),
+  ri('ri8', 'rp2', '네온 사이니지 (문구 맞춤)', '사이니지', '팀 이름 네온. 3일 전 주문', 60000, 39000, 3, 320),
+  ri('ri9', 'rp2', 'A형 입간판', '사이니지', '분필·마커 겸용 입간판', 15000, 9000, 10, 30),
+  ri('ri10', 'rp3', '접이식 피팅룸 텐트', '피팅룸 텐트', '10분 설치, 커튼·거울 포함', 35000, 21000, 6, 200),
+  ri('ri11', 'rp3', '대형 전신거울 (180cm)', '전신거울', '받침대 포함', 20000, 12000, 10, 210),
+  ri('ri12', 'rp3', '카드 단말기 + 영수증 프린터', 'POS·결제', '브랜드별 매출 분리 정산 메뉴 지원', 25000, 15000, 5, 230),
+];
+
+const rentalOrders: RentalOrder[] = [
+  { id: 'ro1', partnerId: 'rp1', teamId: 't2', brandId: 'b4', spaceId: 's2', lines: [{ itemId: 'ri1', qty: 2 }, { itemId: 'ri4', qty: 1 }], dates: { start: '2026-10-22', end: '2026-10-28' }, delivery: true, addToTeamCost: true, memo: '오픈 전날 저녁 7시 설치 부탁드려요', status: 'delivered', createdAt: '2026-10-10T10:00:00' },
+  { id: 'ro2', partnerId: 'rp3', teamId: 't2', brandId: 'b9', spaceId: 's2', lines: [{ itemId: 'ri10', qty: 1 }], dates: { start: '2026-10-22', end: '2026-10-28' }, delivery: true, addToTeamCost: true, memo: '', status: 'delivered', createdAt: '2026-10-11T10:00:00' },
+  { id: 'ro3', partnerId: 'rp1', teamId: 't3', brandId: 'b8', spaceId: 's4', lines: [{ itemId: 'ri2', qty: 2 }, { itemId: 'ri3', qty: 1 }], dates: { start: '2026-10-10', end: '2026-10-13' }, delivery: true, addToTeamCost: true, memo: '', status: 'returned', rating: 5, ratingComment: '원목 행거가 공간이랑 너무 잘 어울렸어요', createdAt: '2026-09-25T10:00:00' },
+  { id: 'ro4', partnerId: 'rp2', teamId: 't3', brandId: 'b12', spaceId: 's4', lines: [{ itemId: 'ri6', qty: 1 }, { itemId: 'ri9', qty: 1 }], dates: { start: '2026-10-10', end: '2026-10-13' }, delivery: true, addToTeamCost: true, memo: '', status: 'returned', rating: 4, ratingComment: '조명 덕분에 사진이 잘 나왔어요. 설치가 조금 늦었어요', createdAt: '2026-09-26T10:00:00' },
+  { id: 'ro5', partnerId: 'rp1', teamId: 't1', brandId: 'b2', spaceId: 's1', lines: [{ itemId: 'ri5', qty: 1 }], dates: { start: '2026-11-07', end: '2026-11-09' }, delivery: true, addToTeamCost: false, memo: '주얼리용 진열장 하나 부탁드려요', status: 'requested', createdAt: '2026-10-24T10:00:00' },
+];
+
+users.push(
+  ...rentalPartners.map<User>((r, i) => ({ id: r.userId, name: r.name, role: 'rental', provider: 'kakao', bizNumber: `41${i}-88-1234${i}`, verifyStatus: 'verified', createdAt: '2025-06-01', profileId: r.id })),
+);
+notifications.push({ id: 'n6', userId: 'u_r1', type: 'rental', text: '가을 산책단(소금상점)이 아크릴 주얼리 진열장 대여를 요청했어요.', link: { name: 'tab', tab: 'orders' }, read: false, at: '2026-10-24T10:00:00' });
+
+// ───────── 매거진 카드뉴스 (수치는 데모용 예시) ─────────
+const magazines: MagazinePost[] = [
+  {
+    id: 'mg1', category: '팝업 동향', title: '10월 팝업 동향: 혼자보다 팀으로', subtitle: '공동 팝업이 늘어난 이유를 숫자로 봤어요', hue: 18, authorId: 'u_admin', likes: ['u_v1', 'u_b2'], createdAt: '2026-10-24',
+    cards: [
+      { heading: '10월 팝업 동향', body: '팝스팟에 올라온 팝업을 정리했어요. (데모 데이터)' },
+      { heading: '공동 팝업 비중', stat: '62%', body: '이번 달 열린 팝업 10곳 중 6곳은 2개 이상 브랜드가 함께 열었어요.' },
+      { heading: '평균 팀 규모', stat: '3.4팀', body: '3~4개 브랜드가 한 공간을 나눠 쓰는 구성이 가장 많았어요. 카테고리가 겹치지 않는 조합이 대부분이에요.' },
+      { heading: '1자리 평균 분담금', stat: '72만원', body: '혼자 빌렸다면 평균 240만원. 대관료를 나누면 부담이 3분의 1로 줄어요.' },
+      { heading: '기간은 짧게', stat: '3.2일', body: '금·토·일 3일 팝업이 가장 많았어요. 짧게 열고 자주 여는 흐름이에요.' },
+    ],
+  },
+  {
+    id: 'mg2', category: '뜨는 지역', title: '지금 뜨는 팝업 지역 TOP 4', subtitle: '성수만 있는 게 아니에요', hue: 150, authorId: 'u_admin', likes: ['u_b1'], createdAt: '2026-10-20', region: '용산구', link: { name: 'tab', tab: 'spaces' },
+    cards: [
+      { heading: '지금 뜨는 팝업 지역', body: '팝스팟 공간 지원 수와 방문 인증 수로 골랐어요. (데모 데이터)' },
+      { heading: '1. 해방촌 계단길 (용산구)', stat: '+48%', body: '지원 수가 한 달 새 크게 늘었어요. 1일 30만원대 작은 공간이 많아 3~4팀 공동 팝업에 딱이에요.' },
+      { heading: '2. 서울숲 뒤편 (성동구)', stat: '+31%', body: '성수 메인 거리보다 대관료가 낮고, 주말 산책 인파가 그대로 들어와요.' },
+      { heading: '3. 연남 골목 (마포구)', stat: '+22%', body: '10대·20대 초반 고객층 브랜드에게 인기. 입간판 하나가 유입을 크게 바꿔요.' },
+      { heading: '4. 서촌 한옥 (종로구)', stat: '+15%', body: '클래식·내추럴 무드 브랜드에게 추천. 사진이 잘 나와서 홍보 효과가 좋아요.' },
+    ],
+  },
+  {
+    id: 'mg3', category: '운영 팁', title: '원상복구, 10분 만에 끝내는 법', subtitle: 'Q&A에서 가장 많이 나온 질문 정리', hue: 220, authorId: 'u_admin', likes: [], createdAt: '2026-10-15', link: { name: 'qna', id: 'q1' },
+    cards: [
+      { heading: '원상복구 10분 컷', body: '실무 Q&A에서 가장 많이 나온 질문을 모았어요.' },
+      { heading: '입주 전 사진 찍기', body: '바닥, 벽, 조명을 같은 각도로 찍어 두면 분쟁이 없어요. 팀 채팅방에 올려 두세요.' },
+      { heading: '양면테이프 대신', body: '마스킹테이프와 케이블타이 조합이면 자국이 남지 않아요.' },
+      { heading: '약속서 5번 항목', body: '철거 시간과 비용 분담을 미리 적어 두면 마지막 날이 편해요.' },
+    ],
+  },
+  {
+    id: 'mg4', category: '팀 인터뷰', title: '"서로의 손님이 서로의 손님이 됐어요"', subtitle: '오래된 것들의 시간 팀 인터뷰', hue: 75, authorId: 'u_admin', likes: ['u_v2', 'u_v3'], createdAt: '2026-10-16', link: { name: 'showcase', id: 'sc1' },
+    cards: [
+      { heading: '오래된 것들의 시간', body: '두 번의 공동 팝업을 연 세 브랜드를 만났어요.' },
+      { heading: '왜 팀이었나요?', body: '"혼자서는 엄두가 안 나던 한옥 대관을 셋이 나누니 가능했어요." — 오래된정원' },
+      { heading: '가장 좋았던 순간', body: '"니트를 사러 온 손님이 가죽 지갑까지 사 갔을 때요." — 모래시계' },
+      { heading: '다음 팀에게', body: '"교차 판매 정산 방식을 꼭 약속서에 적으세요. 마감 10분이면 끝나요." — 플로라룸' },
+    ],
+  },
+];
+
 export function createSeed() {
   return structuredClone({
     users, brands, landlords, visitors, lookbookImages, spaces, availability, spaceQnas,
     proposals, interests, recruitments, recruitApplications, teams, agreements, costSplits, shifts, moodboards,
     spaceApplications, popups, visits, stamps, completions, reviews, comboReviews, trustEvents: trustSeedEvents,
     showcases, qnaPosts, qnaAnswers, chatRooms, messages, notifications, reports,
+    rentalPartners, rentalItems, rentalOrders, magazines,
   });
 }
 export type DB = ReturnType<typeof createSeed>;
