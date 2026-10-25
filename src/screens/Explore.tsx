@@ -8,7 +8,7 @@ import { BrandActions } from './BrandActions';
 import { ShowcaseList } from './Showcase';
 import { QnaList } from './Qna';
 import { MagazineList, MagazineThumb } from './Magazine';
-import { TodayBrand, TodayLandlord, TodayVisitor } from './Today';
+import { TodayBrand, TodayLandlord, TodayRental, TodayVisitor } from './Today';
 
 type View = 'brand' | 'magazine' | 'showcase' | 'qna';
 
@@ -57,6 +57,7 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
       {role === 'brand' && <TodayBrand />}
       {role === 'visitor' && <TodayVisitor />}
       {role === 'landlord' && <TodayLandlord />}
+      {role === 'rental' && <TodayRental />}
       <section className="pt-6">
         <div className="px-4 flex items-center justify-between mb-2.5">
           <h2 className="font-bold text-[15px]">진행 중·예정 공동 팝업</h2>

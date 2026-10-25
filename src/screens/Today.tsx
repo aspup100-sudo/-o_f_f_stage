@@ -1,7 +1,7 @@
 // 둘러보기 맨 위 '오늘' 영역: 내 팝업까지 남은 날과 지금 해야 할 일을 모아 보여 준다.
 import { useMe } from '@/store/hooks';
 import { navigate } from '@/store/store';
-import { brandById, daysUntil, josa, manwon, recruitUrgency, dday, md, popupById, spaceById, teamById, teamPrep, teamsOfBrand, waitCount } from '@/store/logic';
+import { brandById, daysUntil, josa, manwon, partnerRating, rentalQuote, won, recruitUrgency, dday, md, popupById, spaceById, teamById, teamPrep, teamsOfBrand, waitCount } from '@/store/logic';
 import { STAMP_GOAL, toggleWaitlist } from '@/store/actions';
 import { DEMO_TODAY } from '@/data/mock';
 import { cx, Icon } from '@/components/ui';
@@ -283,5 +283,52 @@ export function ProfileProgress() {
       <ProgressBar pct={(done / steps.length) * 100} className="mt-2" />
       <div className="text-[12px] text-ink-500 mt-2">다음: <b className="text-ink-900">{next.label}</b> · {user?.verifyStatus === 'verified' ? '태그와 룩북을 채울수록 궁합 추천이 정확해져요' : '사업자 인증이 끝나면 다른 브랜드 목록에 내 브랜드가 보여요'}</div>
     </button>
+  );
+}
+
+export function TodayRental() {
+  const { db, rental } = useMe();
+  if (!rental) return null;
+  const orders = db.rentalOrders.filter((o) => o.partnerId === rental.id);
+  const requested = orders.filter((o) => o.status === 'requested').length;
+  const active = orders.filter((o) => o.status === 'confirmed' || o.status === 'delivered');
+  const earned = orders
+    .filter((o) => o.status !== 'requested' && o.status !== 'rejected')
+    .reduce((sum, o) => sum + rentalQuote(db, o.partnerId, o.lines, o.dates, o.delivery).total, 0);
+  const items = db.rentalItems.filter((i) => i.partnerId === rental.id && i.active);
+  const out = new Set(active.flatMap((o) => o.lines.map((l) => l.itemId)));
+  const r = partnerRating(db, rental.id);
+  // 아직 렌탈 예약이 없는, 곧 열리는 팀 = 영업 기회
+  const prospects = db.teams.filter((t) => t.stage === '준비 중' && !db.rentalOrders.some((o) => o.teamId === t.id)).length;
+
+  return (
+    <section className="px-4 pt-4">
+      <div className="rounded-3xl bg-ink-900 text-white p-5">
+        <div className="text-[13px] text-white/60">{rental.name} · 지금까지 제휴 매출</div>
+        <div className="text-2xl font-extrabold mt-1">{won(earned)}</div>
+        <div className="text-[12px] text-white/60 mt-1">완료 {r.done}건{r.avg !== null ? ` · 평점 ★ ${r.avg.toFixed(1)}` : ''} · 수수료 0원</div>
+        <div className="grid grid-cols-3 gap-2 mt-4">
+          <button onClick={() => navigate({ name: 'tab', tab: 'orders' })} className="rounded-2xl bg-white/10 p-3 text-left">
+            <div className="text-[11px] text-white/60">새 요청</div>
+            <div className={cx('text-lg font-extrabold', requested > 0 && 'text-brand-400')}>{requested}건</div>
+          </button>
+          <button onClick={() => navigate({ name: 'tab', tab: 'orders' })} className="rounded-2xl bg-white/10 p-3 text-left">
+            <div className="text-[11px] text-white/60">대여 중</div>
+            <div className="text-lg font-extrabold">{active.length}건</div>
+          </button>
+          <button onClick={() => navigate({ name: 'tab', tab: 'myitems' })} className="rounded-2xl bg-white/10 p-3 text-left">
+            <div className="text-[11px] text-white/60">쉬는 장비</div>
+            <div className="text-lg font-extrabold">{items.filter((i) => !out.has(i.id)).length}종</div>
+          </button>
+        </div>
+      </div>
+      {prospects > 0 && (
+        <div className="mt-3 rounded-2xl bg-white border border-ink-100 p-4">
+          <div className="text-[14px] font-bold">곧 팝업을 여는 팀 {prospects}곳이 아직 장비를 안 빌렸어요</div>
+          <p className="text-[12px] text-ink-500 mt-1">이 팀들의 렌탈 탭에 내 장비가 보이고 있어요. 제휴가와 재고를 미리 점검해 두세요.</p>
+          <button onClick={() => navigate({ name: 'tab', tab: 'myitems' })} className="mt-2 text-[13px] font-bold text-brand-600">내 장비 가격 보기 ›</button>
+        </div>
+      )}
+    </section>
   );
 }
