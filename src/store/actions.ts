@@ -1140,6 +1140,17 @@ export function toggleRecruitAlert(brandId: string, region: import('@/types').Re
   toast(on ? `${region}에 새 모집글이 올라오면 알려 드릴게요` : `${region} 모집글 알림을 껐어요`);
 }
 
+/** 팀장이 아직 준비가 남은 멤버에게 살짝 알려 준다 */
+export function nudgeMember(teamId: string, brandId: string, todo: string[]) {
+  update((s) => {
+    const t = s.db.teams.find((x) => x.id === teamId);
+    const b = s.db.brands.find((x) => x.id === brandId);
+    if (!t || !b) return;
+    notify(s.db, b.userId, 'agreement_request', `${t.name} 팀장이 알려요: ${todo.join(', ')}만 하면 준비 끝이에요`, { name: 'team', id: t.id });
+  });
+  toast('알림을 보냈어요');
+}
+
 // ───────── 다음 회차 ─────────
 const addDays = (iso: string, n: number) => {
   const d = new Date(iso + 'T00:00:00');

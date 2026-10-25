@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { navigate, replace, toast } from '@/store/store';
 import {
-  addCommonItem, agreeAgreement, remindPayment, autoFillShifts, cycleShift, fillAgreementExamples, removeCommonItem, renameTeam, setMemberHangers, setMemberRole,
+  addCommonItem, agreeAgreement, nudgeMember, remindPayment, autoFillShifts, cycleShift, fillAgreementExamples, removeCommonItem, renameTeam, setMemberHangers, setMemberRole,
   setMoodHeadline, simulateOthersAgree, toggleMoodPick, togglePaid, togglePromo, updateAgreementItem, updateCost,
 } from '@/store/actions';
 import { brandById, daysUntil, dday, manwon, md, period, spaceById, teamById, teamCost, teamPrep, teamsOfBrand, won } from '@/store/logic';
@@ -192,6 +192,7 @@ function MembersTab({ team, isLeader }: { team: Team; isLeader: boolean }) {
   const ag = db.agreements.find((a) => a.teamId === team.id);
   const split = db.costSplits.find((c) => c.teamId === team.id);
   const shift = db.shifts.find((x) => x.teamId === team.id);
+  const [nudged, setNudged] = useState<string[]>([]);
   const chip = (ok: boolean, label: string) => (
     <span className={cx('text-[11px] px-2 h-6 inline-flex items-center rounded-md font-semibold', ok ? 'bg-emerald-50 text-emerald-700' : 'bg-ink-100 text-ink-500')}>{ok ? '✓' : '…'} {label}</span>
   );
@@ -230,6 +231,21 @@ function MembersTab({ team, isLeader }: { team: Team; isLeader: boolean }) {
                 {chip(team.promoChecked.includes(m.brandId), '홍보')}
               </div>
             )}
+            {isLeader && team.stage !== '종료' && m.brandId !== team.leaderBrandId && (() => {
+              const todo = [
+                !ag?.agreedBy.includes(m.brandId) && '약속서 동의',
+                !split?.paid.includes(m.brandId) && '분담금',
+                !(shift && Object.values(shift.assign).includes(m.brandId)) && '근무 신청',
+                !team.promoChecked.includes(m.brandId) && '홍보 체크',
+              ].filter(Boolean) as string[];
+              if (!todo.length) return null;
+              const sent = nudged.includes(m.brandId);
+              return (
+                <button disabled={sent} onClick={() => { nudgeMember(team.id, m.brandId, todo); setNudged([...nudged, m.brandId]); }} className="mt-2.5 w-full h-9 rounded-lg border border-ink-300 text-[12px] font-semibold disabled:text-ink-500 disabled:bg-ink-100/60">
+                  {sent ? '✓ 알림 보냈어요' : `🔔 ${todo.length}가지 남았다고 알려 주기`}
+                </button>
+              );
+            })()}
           </Card>
         );
       })}
