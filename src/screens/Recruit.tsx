@@ -100,7 +100,7 @@ export function RecruitsTab({ initial }: { initial?: '찜' }) {
         const on = !!brand.recruitAlertRegions?.includes(region);
         return (
           <div className="mx-4 mb-2 mt-1 flex items-center gap-2 rounded-md bg-white border border-ink-100 px-3 py-2.5">
-            <span className="text-[13px] flex-1">{on ? `${region} 새 모집글 알림 받는 중` : `${region}에 새 모집글이 올라오면 알려 드릴까요?`}</span>
+            <span className="text-[13px] flex-1">{on ? `${region} 새 모집글 알림 받는 중` : `${region} 새 모집글 알림`}</span>
             <button onClick={() => toggleRecruitAlert(brand.id, region)} className={cx('h-8 px-3 rounded-md text-[12px] font-bold shrink-0', on ? 'bg-ink-100 text-ink-700' : 'bg-brand-500 text-white')}>{on ? '끄기' : '알림 받기'}</button>
           </div>
         );

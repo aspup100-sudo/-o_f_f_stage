@@ -52,13 +52,13 @@ export function TodayBrand() {
         {ended && !hasNext && (
           <button onClick={() => navigate({ name: 'team', id: ended.id, sub: 'wrap' })} className="w-full mb-3 bg-brand-500 text-white p-5 text-left">
             <div className="text-[13px] text-white/70">{ended.name} {ended.round}회차가 끝났어요</div>
-            <div className="text-xl font-extrabold leading-snug mt-1">팝업 리포트를 확인하고<br />{ended.round + 1}회차를 준비해 볼까요?</div>
+            <div className="text-xl font-extrabold leading-snug mt-1">팝업 리포트와<br />{ended.round + 1}회차 준비</div>
             <div className="mt-3 text-[13px] font-bold">리포트 보기 ›</div>
           </button>
         )}
         <div className="bg-white border border-ink-900 p-5">
           <div className="text-[13px] text-ink-500">{brand.name}님, 반가워요</div>
-          <div className="text-xl font-extrabold leading-snug mt-1">아직 함께할 팀이 없어요.<br />이번 달 모집글부터 볼까요?</div>
+          <div className="text-xl font-extrabold leading-snug mt-1">아직 함께할 팀이 없어요</div>
           <button onClick={() => navigate({ name: 'tab', tab: 'recruits' })} className="mt-4 h-10 px-4 bg-ink-900 text-white font-bold text-sm">같이 열 팀 찾기</button>
         </div>
         <ProfileProgress />

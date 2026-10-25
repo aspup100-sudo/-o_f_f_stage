@@ -340,7 +340,7 @@ export function SpaceDetail({ id }: { id: string }) {
             .slice(0, 4);
           return similar.length ? (
             <div className="mt-6">
-              <h3 className="text-[17px] font-extrabold tracking-tight mb-3">다른 공간도 비교해 보세요</h3>
+              <h3 className="text-[17px] font-extrabold tracking-tight mb-3">비슷한 공간</h3>
               <div className="flex gap-2.5 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
                 {similar.map((x) => (
                   <button key={x.id} onClick={() => navigate({ name: 'space', id: x.id })} className="w-[150px] shrink-0 text-left">

@@ -75,7 +75,7 @@ export function MyTeamTab() {
         })}
         {teams.length > 0 && (
           <div className="rounded border border-dashed border-ink-300 p-4">
-            <div className="font-bold text-[15px]">다음 팝업도 미리 준비해 볼까요?</div>
+            <div className="font-bold text-[15px]">다음 팝업 준비</div>
             <p className="text-[12px] text-ink-500 mt-0.5">팀은 여러 개 동시에 꾸릴 수 있어요. 다른 동네, 다른 조합으로도 열어 보세요.</p>
             <div className="grid grid-cols-2 gap-2 mt-3">
               <Button size="sm" variant="secondary" onClick={() => navigate({ name: 'tab', tab: 'recruits' })}>모집글 둘러보기</Button>
