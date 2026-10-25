@@ -236,6 +236,14 @@ export function RecruitDetail({ id }: { id: string }) {
                       </button>
                       <StatusPill status={a.status} />
                     </div>
+                    {(() => {
+                      const m = matchScore(db, host, b);
+                      return (
+                        <div className="mt-2 rounded-lg bg-brand-50 px-2.5 py-1.5 text-[12px] text-brand-700">
+                          <b>나와 궁합 {matchPct(m.score)}%</b>{m.reasons[0] ? ` · ${m.reasons[0]}` : ''}
+                        </div>
+                      );
+                    })()}
                     <div className="mt-2"><ThemeTagList tags={b.tags} limit={5} /></div>
                     <p className="text-sm text-ink-700 mt-2">"{a.message}"</p>
                     {a.status === 'pending' && (
