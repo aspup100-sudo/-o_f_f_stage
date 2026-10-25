@@ -309,7 +309,7 @@ function CostTab({ team, myBrandId, isLeader }: { team: Team; myBrandId: string;
             );
           })}
         </Card>
-        <p className="text-[12px] text-ink-500 mt-2">모인 금액 {won(paidSum)} / {won(total)} · 실제 결제는 이뤄지지 않아요. 팝스팟은 거래 수수료를 받지 않아요.</p>
+        <p className="text-[12px] text-ink-500 mt-2">모인 금액 {won(paidSum)} / {won(total)} · 실제 결제는 이뤄지지 않아요. off stage는 거래 수수료를 받지 않아요.</p>
       </div>
     </div>
   );
@@ -457,7 +457,7 @@ function PromoTab({ team, myBrandId }: { team: Team; myBrandId: string }) {
   const brands = team.members.map((m) => brandById(db, m.brandId)!);
   const pop = db.popups.find((p) => p.teamId === team.id && p.status !== '종료') ?? db.popups.find((p) => p.teamId === team.id);
   const tagName = team.name.replace(/\s/g, '');
-  const hashtags = [`#${tagName}`, `#${tagName}${team.round}회`, '#팝스팟', '#공동팝업', `#${team.region}팝업`, ...brands.map((b) => `#${b.name.replace(/\s/g, '')}`)];
+  const hashtags = [`#${tagName}`, `#${tagName}${team.round}회`, '#offstage', '#공동팝업', `#${team.region}팝업`, ...brands.map((b) => `#${b.name.replace(/\s/g, '')}`)];
   const poster = `[${team.name} ${team.round}회] ${brands.length}개 브랜드가 함께 여는 팝업
 
 📅 ${period(team.period)} ${pop ? `· ${pop.hours}` : ''}

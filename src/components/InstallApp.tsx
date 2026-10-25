@@ -36,7 +36,7 @@ export function InstallApp() {
     <div className="flex items-center gap-2.5 rounded-2xl border border-ink-100 bg-white p-3.5">
       <span className="w-9 h-9 rounded-xl bg-brand-500 text-white flex items-center justify-center text-lg">📲</span>
       <span className="flex-1 min-w-0">
-        <span className="block text-sm font-bold">팝스팟 앱으로 쓰기</span>
+        <span className="block text-sm font-bold">off stage 앱으로 쓰기</span>
         <span className="block text-[12px] text-ink-500">
           {deferred
             ? '홈 화면에 설치하면 앱처럼 바로 열려요'

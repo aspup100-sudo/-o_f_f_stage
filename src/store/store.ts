@@ -20,7 +20,7 @@ export interface AppState {
   session: Session;
 }
 
-const STORAGE_KEY = 'popspot-demo-v4';
+const STORAGE_KEY = 'offstage-demo-v5';
 
 function initialSession(): Session {
   return {

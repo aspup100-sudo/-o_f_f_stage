@@ -79,7 +79,7 @@ export function ShowcaseDetail({ id }: { id: string }) {
               {s.sales && <div><div className="text-[11px] text-ink-500">매출</div><div className="font-bold">{s.sales}</div></div>}
               {s.visitors && <div><div className="text-[11px] text-ink-500">방문자 수</div><div className="font-bold">{s.visitors.toLocaleString()}명</div></div>}
             </div>
-            <p className="text-[11px] text-ink-500 mt-2">팀이 직접 공개한 수치이며 팝스팟이 검증하지 않았어요.</p>
+            <p className="text-[11px] text-ink-500 mt-2">팀이 직접 공개한 수치이며 off stage가 검증하지 않았어요.</p>
           </div>
         )}
         <h3 className="font-bold mt-6 mb-2">방문객 조합 리뷰</h3>

@@ -14,8 +14,8 @@ function TopBar() {
   return (
     <header className="sticky top-0 z-30 bg-white border-b border-ink-100 h-14 flex items-center px-4">
       <button onClick={() => navigate({ name: 'tab', tab: role === 'admin' ? 'verify' : 'explore' })} className="flex items-center gap-1.5">
-        <span className="w-7 h-7 rounded-lg bg-brand-500 text-white flex items-center justify-center font-black text-sm">팝</span>
-        <span className="font-extrabold text-lg tracking-tight">팝스팟</span>
+        <span className="w-7 h-7 rounded-lg bg-brand-500 text-white flex items-center justify-center font-black text-[10px] tracking-tighter">OFF</span>
+        <span className="font-extrabold text-lg tracking-tight">off stage</span>
       </button>
       <div className="flex-1" />
       <RoleSwitcher />
