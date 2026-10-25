@@ -151,6 +151,16 @@ function BrandSection() {
           </Button>
         </div>
         <p className="text-[11px] text-ink-500 mt-2">받은 제안 대기 {recv}건 · 보낸 제안 {sent}건</p>
+        <div className="grid grid-cols-2 gap-2 mt-3">
+          <button onClick={() => navigate({ name: 'tab', tab: 'recruits', filter: '찜' })} className="rounded-xl border border-ink-100 px-3 py-2.5 text-left">
+            <span className="block text-[11px] text-ink-500">찜한 모집글</span>
+            <span className="block font-bold">♡ {b.savedRecruits?.length ?? 0}</span>
+          </button>
+          <button onClick={() => navigate({ name: 'tab', tab: 'spaces', filter: '찜' })} className="rounded-xl border border-ink-100 px-3 py-2.5 text-left">
+            <span className="block text-[11px] text-ink-500">찜한 공간</span>
+            <span className="block font-bold">♡ {b.savedSpaces?.length ?? 0}</span>
+          </button>
+        </div>
         {b.followers.length > 0 ? (
           <button onClick={() => setNewsOpen(true)} className="mt-3 w-full rounded-xl bg-brand-50 px-3.5 py-3 text-left flex items-center gap-3">
             <span className="text-xl">📣</span>

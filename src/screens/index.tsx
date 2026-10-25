@@ -19,13 +19,13 @@ import { StatsTab, VerifyTab, ReportsTab } from './Admin';
 import { MagazineAdminTab, MagazineDetail, MagazineNew } from './Magazine';
 import { MyItemsTab, OrdersTab, RentalItemEdit, RentalPartnerScreen, RentalsScreen } from './Rental';
 
-function renderTab(tab: string): ReactNode {
+function renderTab(tab: string, filter?: string): ReactNode {
   switch (tab) {
     case 'explore': return <Explore />;
     case 'me': return <MeScreen />;
-    case 'recruits': return <RecruitsTab />;
+    case 'recruits': return <RecruitsTab key={filter} initial={filter === '찜' ? '찜' : undefined} />;
     case 'myteam': return <MyTeamTab />;
-    case 'spaces': return <SpacesTab />;
+    case 'spaces': return <SpacesTab key={filter} initial={filter === '찜' ? '찜' : undefined} />;
     case 'myspaces': return <MySpacesTab />;
     case 'inbox': return <InboxTab />;
     case 'map': return <MapTab />;
@@ -43,7 +43,7 @@ function renderTab(tab: string): ReactNode {
 
 export function renderRoute(route: Route): ReactNode {
   switch (route.name) {
-    case 'tab': return renderTab(route.tab);
+    case 'tab': return renderTab(route.tab, route.filter);
     case 'onboarding': return <Onboarding />;
     case 'brand': return <BrandProfileScreen key={route.id} id={route.id} />;
     case 'propose': return <ProposeScreen toBrandId={route.toBrandId} />;

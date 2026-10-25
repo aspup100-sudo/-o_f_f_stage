@@ -543,7 +543,7 @@ export interface Report {
 
 // ───────── 화면 라우트 ─────────
 export type Route =
-  | { name: 'tab'; tab: string }
+  | { name: 'tab'; tab: string; filter?: string } // filter: 탭을 열 때 미리 고를 필터(예: '찜')
   | { name: 'brand'; id: ID }
   | { name: 'propose'; toBrandId: ID }
   | { name: 'chatList' }

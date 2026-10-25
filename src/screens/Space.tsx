@@ -64,9 +64,9 @@ export function SpaceCard({ db, s, onClick }: { db: DB; s: Space; onClick?: () =
   );
 }
 
-export function SpacesTab() {
+export function SpacesTab({ initial }: { initial?: '찜' }) {
   const { db, brand } = useMe();
-  const [region, setRegion] = useState<Region | '전체' | '찜'>('전체');
+  const [region, setRegion] = useState<Region | '전체' | '찜'>(initial ?? '전체');
   const [maxFee, setMaxFee] = useState<number>(0);
   const [minArea, setMinArea] = useState(0);
   const [date, setDate] = useState('');

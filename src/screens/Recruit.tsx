@@ -74,9 +74,9 @@ export function RecruitCard({ db, r, reasons }: { db: DB; r: Recruitment; reason
   );
 }
 
-export function RecruitsTab() {
+export function RecruitsTab({ initial }: { initial?: '찜' }) {
   const { db, brand } = useMe();
-  const [st, setSt] = useState<RecruitStatus | '전체' | '찜'>('전체');
+  const [st, setSt] = useState<RecruitStatus | '전체' | '찜'>(initial ?? '전체');
   const [region, setRegion] = useState<Region | '전체'>('전체');
   const saved = brand?.savedRecruits ?? [];
   const list = db.recruitments.filter((r) => (st === '전체' || (st === '찜' ? saved.includes(r.id) : r.status === st)) && (region === '전체' || r.region === region));
