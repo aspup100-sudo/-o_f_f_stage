@@ -44,21 +44,21 @@ export function SpaceCard({ db, s, onClick }: { db: DB; s: Space; onClick?: () =
         </div>
       </div>
       <div className="p-3.5">
-        <div className="flex items-center gap-1 flex-wrap mb-1">
-          <Tag>{s.region}</Tag>
-          {s.teamRental && <Tag tone="green">팀 단위 대관 가능</Tag>}
-          {s.fashionOnly && <Tag tone="purple">업종 고정(패션)</Tag>}
+        <div className="text-[12px] text-ink-500">{s.region} · {s.areaM2}㎡ · 최소 {s.minDays}일</div>
+        <div className="font-bold text-[16px] mt-0.5">{s.name}</div>
+        <div className="flex items-center gap-1 flex-wrap mt-1.5">
           {s.lastMinutePct && soonOpenDays(db, s.id) > 0 && <Tag tone="red"><Ic n="bolt" />2주 안 {s.lastMinutePct}% 할인</Tag>}
+          {s.teamRental && <Tag tone="green">팀 단위 대관</Tag>}
+          {s.fashionOnly && <Tag>패션 전용</Tag>}
         </div>
-        <div className="font-bold text-[15px]">{s.name}</div>
-        <div className="flex items-end justify-between mt-1">
-          <div className="text-[12px] text-ink-500">
-            {s.areaM2}㎡ · 최소 {s.minDays}일 · 비는 날 {openDays}일
+        <div className="flex items-end justify-between gap-3 mt-3 pt-3 border-t border-ink-100">
+          <div className="text-[12px] text-ink-700 min-w-0">
+            비는 날 <b className="text-ink-900">{openDays}일</b>
             <div className="mt-1"><TrustLine db={db} subjectId={ll.id} compact /></div>
           </div>
-          <div className="text-right">
-            <div className="text-[12px] text-ink-500">1일 대관료</div>
-            <div className="font-extrabold text-brand-600">{manwon(s.dailyFee)}</div>
+          <div className="text-right shrink-0">
+            <div className="text-[12px] text-ink-500">1일</div>
+            <div className="text-[18px] font-extrabold text-brand-600 leading-tight">{manwon(s.dailyFee)}</div>
             {s.teamRental && <div className="text-[12px] text-ink-700 mt-0.5">3곳이 나누면 <b>{manwon(s.dailyFee / 3)}</b></div>}
           </div>
         </div>
