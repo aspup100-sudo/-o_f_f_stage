@@ -52,8 +52,21 @@ export function PopupDetail({ id }: { id: string }) {
   return (
     <div className="bg-white min-h-screen">
       <SubHeader title={p.title} />
-      <div className="flex h-36">
-        {brands.map((b) => <Swatch key={b.id} hue={b.logoHue} pattern="stripe" rounded="" className="flex-1" />)}
+      <div className="relative h-44">
+        <div className="absolute inset-0 flex">
+          {brands.map((b) => <Swatch key={b.id} hue={b.logoHue} pattern="stripe" rounded="" className="flex-1" />)}
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+        <div className="absolute left-4 right-4 bottom-3 flex items-end justify-between gap-3">
+          <div className="flex -space-x-2.5">
+            {brands.map((b) => (
+              <span key={b.id} className="rounded-full ring-2 ring-white bg-white"><BrandLogo brand={b} size={36} /></span>
+            ))}
+          </div>
+          <span className="text-white text-[13px] font-bold drop-shadow">
+            {p.status === '예정' ? `오픈 ${dday(p.period.start)}` : p.status === '진행 중' ? `마감 ${dday(p.period.end)}` : '종료된 팝업'}
+          </span>
+        </div>
       </div>
       <div className="p-4">
         <div className="flex items-center gap-1.5 mb-1">
@@ -98,7 +111,7 @@ export function PopupDetail({ id }: { id: string }) {
                 <div className="font-bold">현장에서 방문 인증하기</div>
                 <div className="text-[13px] text-white/70 mt-0.5">QR 대신 매장에 붙은 6자리 코드를 입력해요 <Demo /></div>
                 <div className="flex gap-2 mt-3">
-                  <input className="flex-1 h-11 px-3 rounded-xl text-ink-900 text-lg tracking-[0.3em] font-bold outline-none" inputMode="numeric" maxLength={6} placeholder="000000" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} />
+                  <input className="flex-1 min-w-0 h-11 px-3 rounded-xl text-ink-900 text-lg tracking-[0.3em] font-bold outline-none" inputMode="numeric" maxLength={6} placeholder="000000" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} />
                   <Button disabled={code.length !== 6} onClick={() => checkIn(p.id, userId, code) && setCode('')}>인증</Button>
                 </div>
                 <button className="text-[12px] text-amber-300 mt-2 underline underline-offset-2" onClick={() => setCode(p.code)}>(데모) 현장 코드 {p.code} 자동 입력</button>
