@@ -40,32 +40,34 @@ export function RecruitCard({ db, r, reasons }: { db: DB; r: Recruitment; reason
   const sp = spaceById(db, r.spaceId);
   return (
     <Card className="p-4" onClick={() => navigate({ name: 'recruit', id: r.id })}>
-      <div className="flex items-center gap-1.5 mb-1.5">
-        <StatusPill status={r.status} />
-        <Tag>{r.slotMode === 'hanger' ? '행거 단위' : '카테고리 슬롯'}</Tag>
-        {r.spaceConfirmed && <Tag tone="green">공간 확정</Tag>}
-        {urgent && <Tag tone="red"><Ic n="flame" />{urgent}</Tag>}
+      <div className="flex items-center gap-1.5">
+        <BrandLogo brand={host} size={22} />
+        <span className="text-[13px] font-semibold">{host.name}</span>
+        <span className="text-[12px] text-ink-500">모집</span>
         <span className="flex-1" />
         <SaveRecruitButton r={r} />
       </div>
-      <div className="font-bold text-[15px] leading-snug">{r.title}</div>
+      <div className="font-bold text-[16px] leading-snug mt-1.5">{r.title}</div>
       <div className="text-[13px] text-ink-500 mt-1 flex items-center flex-wrap"><Ic n="pin" />{r.region}{sp ? ` · ${sp.name}` : ''}<span className="mx-1">·</span><Ic n="calendar" />{period(r.period)}</div>
-      <div className="flex items-center gap-1 mt-2.5">
-        {r.slots.map((s) => (
-          <span key={s.id} className={cx('h-2 flex-1 rounded-full border', SLOT_STYLE[s.status])} />
-        ))}
+      <div className="flex items-center gap-1.5 mt-2">
+        <StatusPill status={r.status} />
+        {r.spaceConfirmed && <Tag tone="green">공간 확정</Tag>}
+        {urgent && <Tag tone="red"><Ic n="flame" />{urgent}</Tag>}
       </div>
-      <div className="flex items-end justify-between mt-2.5">
-        <div className="flex items-center gap-1.5">
-          <BrandLogo brand={host} size={22} />
-          <span className="text-[13px] font-medium">{host.name}</span>
+      <div className="flex items-end justify-between gap-4 mt-3 pt-3 border-t border-ink-100">
+        <div className="flex-1 min-w-0">
+          <div className="text-[12px] text-ink-700 mb-1.5">남은 자리 <b className="text-ink-900">{empty}</b> / {r.slots.length} · {r.slotMode === 'hanger' ? '행거 단위' : '카테고리 슬롯'}</div>
+          <div className="flex items-center gap-1">
+            {r.slots.map((s) => (
+              <span key={s.id} className={cx('h-1.5 flex-1 border', SLOT_STYLE[s.status])} />
+            ))}
+          </div>
         </div>
-        <div className="text-right">
-          <div className="text-[12px] text-ink-500">{r.slotMode === 'hanger' ? '행거 1개' : '1자리'} 분담금</div>
-          <div className="font-extrabold text-brand-600">{manwon(share)}</div>
+        <div className="text-right shrink-0">
+          <div className="text-[12px] text-ink-500">{r.slotMode === 'hanger' ? '행거 1개' : '1자리'}</div>
+          <div className="text-[18px] font-extrabold text-brand-600 leading-tight">{manwon(share)}</div>
         </div>
       </div>
-      <div className="text-[12px] text-ink-700 mt-1">남은 자리 <b>{empty}</b> / {r.slots.length}</div>
       {reasons && reasons.length > 0 && (
         <div className="mt-2.5 pt-2.5 border-t border-ink-100 space-y-0.5">
           {reasons.slice(0, 3).map((x) => <div key={x} className="text-[12px] text-ink-700 flex"><span className="w-1 h-1 bg-ink-900 mt-[7px] mr-2 shrink-0" />{x}</div>)}
