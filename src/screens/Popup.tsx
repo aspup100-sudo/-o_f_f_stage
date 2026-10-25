@@ -170,6 +170,14 @@ export function PopupDetail({ id }: { id: string }) {
   );
 }
 
+const RATING_LABEL: Record<number, string> = { 1: '별로예요', 2: '아쉬워요', 3: '보통이에요', 4: '좋아요', 5: '최고예요' };
+
+const QUICK_PHRASES: Record<'popup' | 'brand' | 'combo', string[]> = {
+  combo: ['브랜드끼리 분위기가 잘 맞았어요.', '한 번에 여러 브랜드를 봐서 좋았어요.', '동선이 자연스러웠어요.'],
+  popup: ['공간이 예뻤어요.', '직원분들이 친절했어요.', '사진 찍기 좋았어요.', '대기 없이 들어갔어요.'],
+  brand: ['제품 퀄리티가 좋았어요.', '설명을 잘 해 주셨어요.', '가격이 괜찮았어요.', '다음 팝업도 갈래요.'],
+};
+
 function ReviewSheet({ popup, kind, onClose }: { popup: Popup; kind: null | 'popup' | 'brand' | 'combo'; onClose: () => void }) {
   const { db } = useMe();
   const team = teamById(db, popup.teamId)!;
@@ -204,8 +212,21 @@ function ReviewSheet({ popup, kind, onClose }: { popup: Popup; kind: null | 'pop
         </div>
       )}
       <div className="text-[13px] font-semibold mb-1.5">별점</div>
-      <Stars value={rating} onChange={setRating} size="w-8 h-8" />
-      <textarea className={textareaCls + ' mt-4'} value={comment} onChange={(e) => setComment(e.target.value)} placeholder="한 줄 후기를 남겨 주세요" />
+      <div className="flex items-center gap-3">
+        <Stars value={rating} onChange={setRating} size="w-8 h-8" />
+        <span className="text-sm font-bold text-brand-600">{RATING_LABEL[rating]}</span>
+      </div>
+      <div className="text-[13px] font-semibold mt-4 mb-2">이런 점이 좋았어요 <span className="font-normal text-ink-500">(눌러서 넣기)</span></div>
+      <div className="flex flex-wrap gap-1.5">
+        {QUICK_PHRASES[kind ?? 'popup'].map((q) => {
+          const on = comment.includes(q);
+          return (
+            <Chip key={q} active={on} onClick={() => setComment(on ? comment.replace(q, '').replace(/\s{2,}/g, ' ').trim() : (comment.trim() ? `${comment.trim()} ${q}` : q))}>{q}</Chip>
+          );
+        })}
+      </div>
+      <textarea className={textareaCls + ' mt-3'} value={comment} maxLength={200} onChange={(e) => setComment(e.target.value)} placeholder="한 줄 후기를 남겨 주세요" />
+      <div className="text-right text-[11px] text-ink-500 mt-1">{comment.length}/200</div>
       <Button
         full size="lg" className="mt-4"
         disabled={!comment.trim() || (kind === 'combo' && good === 'good' && !picked.length)}
