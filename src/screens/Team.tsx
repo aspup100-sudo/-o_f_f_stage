@@ -516,6 +516,24 @@ function MoodboardTab({ team, myBrandId }: { team: Team; myBrandId: string }) {
   );
 }
 
+/** 내 근무를 .ics 파일로 내려받아 휴대폰 캘린더에 넣는다 */
+function downloadShiftIcs(teamName: string, place: string, keys: string[]) {
+  const stamp = (d: string, hm: string) => d.replace(/-/g, '') + 'T' + hm.replace(':', '') + '00';
+  const events = keys.map((k, i) => {
+    const [d, t] = k.split('|');
+    const [s0, e0] = t.split('-');
+    return ['BEGIN:VEVENT', `UID:offstage-${encodeURIComponent(teamName)}-${i}@offstage`, `DTSTART:${stamp(d, s0)}`, `DTEND:${stamp(d, e0)}`, `SUMMARY:${teamName} 팝업 근무`, `LOCATION:${place}`, 'END:VEVENT'].join('\r\n');
+  });
+  const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//OFF STAGE//KO', ...events, 'END:VCALENDAR'].join('\r\n');
+  try {
+    const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+    const a = document.createElement('a');
+    a.href = url; a.download = `${teamName}-근무.ics`; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast('캘린더 파일을 받았어요. 열면 일정에 추가돼요');
+  } catch { toast('이 환경에서는 파일을 받을 수 없어요'); }
+}
+
 function ShiftTab({ team }: { team: Team }) {
   const { db, brand } = useMe();
   const sh = db.shifts.find((s) => s.teamId === team.id)!;
@@ -525,11 +543,15 @@ function ShiftTab({ team }: { team: Team }) {
   const ended = team.stage === '종료';
   const mine = Object.entries(sh.assign).filter(([, v]) => v === brand?.id).map(([k]) => k).sort();
   const dow = (d: string) => '일월화수목금토'[new Date(d + 'T00:00:00').getDay()];
+  const sp = spaceById(db, team.spaceId);
   return (
     <div>
       {brand && (
         <div className="mb-4 rounded-2xl bg-brand-50 p-4">
-          <div className="text-[13px] font-bold">내 근무 {mine.length}회</div>
+          <div className="flex items-center justify-between">
+            <span className="text-[13px] font-bold">내 근무 {mine.length}회</span>
+            {mine.length > 0 && <button className="text-[12px] font-semibold text-brand-600" onClick={() => downloadShiftIcs(team.name, sp?.name ?? team.region, mine)}>📅 내 캘린더에 넣기</button>}
+          </div>
           {mine.length ? (
             <div className="flex flex-wrap gap-1.5 mt-2">
               {mine.map((k) => { const [d, t] = k.split('|'); return <span key={k} className="text-[12px] font-semibold bg-white rounded-lg px-2 py-1">{md(d)}({dow(d)}) {t}</span>; })}
