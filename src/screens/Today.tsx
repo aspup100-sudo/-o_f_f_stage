@@ -5,7 +5,7 @@ import { navigate } from '@/store/store';
 import { brandById, chatUnread, daysUntil, displayName, josa, manwon, partnerRating, rentalQuote, won, recruitUrgency, dday, md, popupById, spaceById, teamById, teamPrep, teamsOfBrand, waitCount } from '@/store/logic';
 import { addTeamTodo, STAMP_GOAL, toggleTeamTodo, toggleWaitlist } from '@/store/actions';
 import { DEMO_TODAY } from '@/data/mock';
-import { cx, Icon } from '@/components/ui';
+import { cx, Icon, Swatch } from '@/components/ui';
 import type { Route } from '@/types';
 
 export function ProgressBar({ pct, className }: { pct: number; className?: string }) {
@@ -19,9 +19,9 @@ export function ProgressBar({ pct, className }: { pct: number; className?: strin
 function TodoRow({ label, hint, onClick, tone = 'default' }: { label: string; hint?: string; onClick: () => void; tone?: 'default' | 'hot' }) {
   return (
     <button onClick={onClick} className="w-full flex items-center gap-2.5 py-2.5 text-left">
-      <span className={cx('w-5 h-5 rounded-full border-2 shrink-0', tone === 'hot' ? 'border-brand-500' : 'border-ink-300')} />
-      <span className="flex-1 min-w-0 text-[14px] font-semibold truncate">{label}</span>
-      {hint && <span className={cx('text-[11px] shrink-0', tone === 'hot' ? 'text-brand-600 font-bold' : 'text-ink-500')}>{hint}</span>}
+      <span className={cx('w-4 h-4 border-[1.5px] shrink-0', tone === 'hot' ? 'border-ink-900' : 'border-ink-300')} />
+      <span className={cx('flex-1 min-w-0 text-[14px] truncate', tone === 'hot' ? 'font-semibold' : 'text-ink-700')}>{label}</span>
+      {hint && <span className={cx('text-[11px] shrink-0', tone === 'hot' ? 'text-ink-900 font-bold underline underline-offset-2' : 'text-ink-500')}>{hint}</span>}
       <span className="text-ink-300">›</span>
     </button>
   );
@@ -74,58 +74,70 @@ export function TodayBrand() {
 
   return (
     <section className="px-4 pt-4">
-      <div className="rounded-3xl bg-ink-900 text-white p-5">
-        <div className="flex items-center justify-between">
-          <div className="text-[13px] text-white/60">{brand.name}님의 다음 팝업</div>
-          <span className={cx('text-[11px] font-black px-2 py-0.5 rounded-full', live ? 'bg-emerald-400 text-ink-900' : 'bg-brand-500')}>{live ? '운영 중' : dday(t.period.start)}</span>
-        </div>
-        <button onClick={() => navigate({ name: 'team', id: t.id })} className="block text-left mt-1">
-          <div className="text-[22px] font-extrabold leading-tight">{t.name}</div>
-          <div className="text-[13px] text-white/70 mt-1">📍 {sp?.name ?? `${t.region} · 공간 미정`}</div>
-        </button>
-        <div className="mt-4">
-          <div className="flex items-center justify-between text-[12px] mb-1.5">
-            <span className="text-white/70">오픈 준비</span>
-            <span className="font-bold">{prep.done}/{prep.steps.length}</span>
+      {(() => {
+        // 매거진 표지처럼: 멤버 브랜드 룩북 사진이 먼저, 그 아래 큰 제목과 날짜. 색은 거의 쓰지 않는다.
+        const members = t.members.map((m) => brandById(db, m.brandId)).filter(Boolean) as NonNullable<ReturnType<typeof brandById>>[];
+        const shots = members.map((b) => db.lookbookImages.find((i) => i.id === b.lookbook[0])).filter(Boolean) as { id: string; hue: number; pattern: 'solid' | 'stripe' | 'dot' | 'grid' | 'wave' | 'circle' }[];
+        const pp = popupById(db, t.popupId);
+        const waiting = pp && pp.status === '예정' ? waitCount(pp) : 0;
+        const room = db.chatRooms.find((r) => r.context?.type === 'team' && r.context.refId === t.id);
+        const last = room && [...db.messages].reverse().find((m) => m.roomId === room.id && m.senderId !== 'system');
+        const unread = room ? chatUnread(db, room.id, brand.userId) : 0;
+        const dot = (iso: string) => iso.slice(5).replace('-', '.');
+        return (
+          <div className="bg-white border border-ink-900">
+            <button onClick={() => navigate({ name: 'team', id: t.id })} className="block w-full text-left">
+              <div className="flex h-32">
+                {(shots.length ? shots : members.map((b) => ({ id: b.id, hue: b.logoHue, pattern: 'solid' as const }))).map((im) => (
+                  <Swatch key={im.id} hue={im.hue} pattern={im.pattern} rounded="" className="flex-1" />
+                ))}
+              </div>
+              <div className="px-4 pt-3.5 pb-4 border-t border-ink-900">
+                <div className="flex items-baseline justify-between text-[11px] tracking-[0.14em] font-semibold text-ink-500">
+                  <span>NEXT POPUP</span>
+                  <span>{dot(t.period.start)} — {dot(t.period.end)}</span>
+                </div>
+                <div className="flex items-end justify-between gap-3 mt-1.5">
+                  <div className="min-w-0">
+                    <div className="text-[26px] font-black leading-none tracking-tight truncate">{t.name}</div>
+                    <div className="text-[13px] text-ink-700 mt-2 truncate">{sp?.name ?? `${t.region} · 공간 미정`} · {members.map((b) => b.name).join(' × ')}</div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="text-[34px] font-black leading-none tabular-nums">{live ? 'NOW' : left}</div>
+                    <div className="text-[11px] text-ink-500 mt-1">{live ? '운영 중' : '일 남음'}</div>
+                  </div>
+                </div>
+              </div>
+            </button>
+            <div className="px-4 pb-4">
+              <div className="flex items-center gap-1">
+                {[...prep.steps].sort((a, b) => Number(b.done) - Number(a.done)).map((x) => <span key={x.key} className={cx('h-1 flex-1', x.done ? 'bg-ink-900' : 'bg-ink-100')} />)}
+              </div>
+              <div className="flex justify-between text-[12px] mt-1.5">
+                <span className="text-ink-700">오픈 준비 {prep.done}/{prep.steps.length}{prep.done === prep.steps.length ? ' · 준비 끝' : ''}</span>
+                {waiting > 0 && <span className="text-ink-500">오픈 알림 {waiting}명 대기</span>}
+              </div>
+            </div>
+            {room && last && (
+              <button onClick={() => navigate({ name: 'chat', id: room.id })} className="w-full flex items-center gap-2.5 px-4 py-3 border-t border-ink-100 text-left">
+                <span className="text-[12px] font-bold shrink-0">{last.senderId === brand.userId ? '나' : displayName(db, last.senderId)}</span>
+                <span className="text-[12px] text-ink-500 truncate flex-1">{last.text}</span>
+                {unread > 0 ? <span className="text-[11px] font-bold text-white bg-ink-900 px-1.5 shrink-0">{unread}</span> : <span className="text-ink-300 shrink-0">›</span>}
+              </button>
+            )}
           </div>
-          <div className="h-2 rounded-full bg-white/15 overflow-hidden">
-            <div className="h-full rounded-full bg-brand-500" style={{ width: `${prep.pct}%` }} />
-          </div>
-          {(() => {
-            const pp = popupById(db, t.popupId);
-            return pp && pp.status === '예정' && waitCount(pp) > 0 ? (
-              <div className="mt-3 text-[12px] font-semibold text-brand-200">🔔 벌써 {waitCount(pp)}명이 오픈 알림을 신청했어요</div>
-            ) : null;
-          })()}
-          {(() => {
-            const note = live ? '오늘도 매장을 지키는 중이에요. 근무표를 확인해 주세요.' : prep.done === prep.steps.length ? '준비 끝! 오픈만 남았어요 🎉' : left <= 7 ? `오픈까지 ${left}일, 남은 일을 서둘러 끝내요` : '';
-            const room = db.chatRooms.find((r) => r.context?.type === 'team' && r.context.refId === t.id);
-            const last = room && [...db.messages].reverse().find((m) => m.roomId === room.id && m.senderId !== 'system');
-            return (
-              <>
-                {note && <div className="text-[12px] text-white/60 mt-2">{note}</div>}
-                {room && last && (
-                  <button onClick={() => navigate({ name: 'chat', id: room.id })} className="mt-3 w-full flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-left">
-                    <Icon name="chat" className="w-4 h-4 shrink-0 text-white/70" />
-                    <span className="text-[12px] truncate flex-1"><b>{last.senderId === brand.userId ? '나' : displayName(db, last.senderId)}</b> <span className="text-white/70">{last.text}</span></span>
-                    {chatUnread(db, room.id, brand.userId) > 0 && <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-brand-500 text-[10px] font-bold flex items-center justify-center">{chatUnread(db, room.id, brand.userId)}</span>}
-                  </button>
-                )}
-              </>
-            );
-          })()}
-        </div>
-      </div>
+        );
+      })()}
       {(
-        <div className="mt-3 rounded-2xl bg-white border border-ink-100 px-4 py-1.5">
+        <div className="mt-3 bg-white border border-ink-300 px-4 py-1.5">
           <div className="flex items-center justify-between pt-2 pb-0.5">
-            <span className="text-[13px] font-bold">오늘 할 일</span>
+            <span className="text-[11px] tracking-[0.14em] font-semibold text-ink-500">TO DO</span>
             <span className="text-[11px] text-ink-500">{todo.filter((x) => x.mine).length + extra.length + (t.todos ?? []).filter((x) => !x.done).length}개 남음</span>
           </div>
           <div className="divide-y divide-ink-100">
             {(t.todos ?? []).map((x) => (
               <label key={x.id} className="flex items-center gap-3 py-3 cursor-pointer">
-                <input type="checkbox" checked={x.done} onChange={() => toggleTeamTodo(t.id, x.id)} className="w-5 h-5 accent-brand-500 shrink-0" />
+                <input type="checkbox" checked={x.done} onChange={() => toggleTeamTodo(t.id, x.id)} className="w-4 h-4 accent-ink-900 shrink-0" />
                 <span className={cx('flex-1 text-[14px]', x.done && 'line-through text-ink-500')}>{x.text}</span>
                 <span className="text-[11px] text-ink-500 shrink-0">{x.byBrandId === brand.id ? '내가 추가' : brandById(db, x.byBrandId)?.name}</span>
               </label>
@@ -135,9 +147,9 @@ export function TodayBrand() {
             ))}
             {extra.map((e) => <TodoRow key={e.label} label={e.label} hint={e.hint} onClick={() => navigate(e.route)} />)}
             <form className="flex items-center gap-2 py-2.5" onSubmit={(e) => { e.preventDefault(); if (draft.trim()) { addTeamTodo(t.id, brand.id, draft.trim()); setDraft(''); } }}>
-              <span className="text-brand-500 font-bold">+</span>
+              <span className="text-ink-900 font-bold">+</span>
               <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={`${t.name} 할 일 직접 추가 (예: 현수막 주문)`} className="flex-1 min-w-0 text-[14px] outline-none bg-transparent" />
-              {draft.trim() && <button type="submit" className="text-[12px] font-bold text-brand-600 shrink-0">추가</button>}
+              {draft.trim() && <button type="submit" className="text-[12px] font-bold underline underline-offset-2 shrink-0">추가</button>}
             </form>
           </div>
         </div>
