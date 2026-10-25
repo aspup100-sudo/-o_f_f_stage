@@ -1156,6 +1156,27 @@ export function nudgeMember(teamId: string, brandId: string, todo: string[]) {
   toast('알림을 보냈어요');
 }
 
+export function addTeamTodo(teamId: string, brandId: string, text: string) {
+  update((s) => {
+    const t = s.db.teams.find((x) => x.id === teamId);
+    if (!t) return;
+    t.todos = [...(t.todos ?? []), { id: newId('td'), text, byBrandId: brandId, done: false }];
+    const me = s.db.brands.find((b) => b.id === brandId);
+    t.members.filter((m) => m.brandId !== brandId).forEach((m) => {
+      const b = s.db.brands.find((x) => x.id === m.brandId);
+      if (b) notify(s.db, b.userId, 'agreement_request', `${me?.name ?? '팀원'}님이 ${t.name} 할 일을 추가했어요: ${text}`, { name: 'team', id: t.id });
+    });
+  });
+  toast('할 일을 추가했어요. 팀원 모두에게 보여요');
+}
+
+export function toggleTeamTodo(teamId: string, todoId: string) {
+  update((s) => {
+    const td = s.db.teams.find((x) => x.id === teamId)?.todos?.find((x) => x.id === todoId);
+    if (td) td.done = !td.done;
+  });
+}
+
 // ───────── 다음 회차 ─────────
 const addDays = (iso: string, n: number) => {
   const d = new Date(iso + 'T00:00:00');

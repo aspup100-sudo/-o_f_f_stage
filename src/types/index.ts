@@ -315,6 +315,7 @@ export interface Team {
   popupId?: ID;
   round: number; // 회차
   promoChecked: ID[]; // 홍보 같은 날 게시 체크한 brandId
+  todos?: { id: ID; text: string; byBrandId: ID; done: boolean }[]; // 팀원이 직접 적은 할 일
   confirmed: boolean; // 약속서 전원 동의로 팀 확정
 }
 

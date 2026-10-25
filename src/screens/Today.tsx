@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { navigate } from '@/store/store';
 import { brandById, chatUnread, daysUntil, displayName, josa, manwon, partnerRating, rentalQuote, won, recruitUrgency, dday, md, popupById, spaceById, teamById, teamPrep, teamsOfBrand, waitCount } from '@/store/logic';
-import { STAMP_GOAL, toggleWaitlist } from '@/store/actions';
+import { addTeamTodo, STAMP_GOAL, toggleTeamTodo, toggleWaitlist } from '@/store/actions';
 import { DEMO_TODAY } from '@/data/mock';
 import { cx, Icon } from '@/components/ui';
 import type { Route } from '@/types';
@@ -29,6 +29,7 @@ function TodoRow({ label, hint, onClick, tone = 'default' }: { label: string; hi
 
 export function TodayBrand() {
   const { db, brand } = useMe();
+  const [draft, setDraft] = useState('');
   if (!brand) return null;
   const teams = teamsOfBrand(db, brand.id).filter((t) => t.stage !== '종료').sort((a, b) => a.period.start.localeCompare(b.period.start));
   const proposals = db.proposals.filter((p) => p.toBrandId === brand.id && p.status === 'sent').length;
@@ -115,17 +116,29 @@ export function TodayBrand() {
           })()}
         </div>
       </div>
-      {(todo.length > 0 || extra.length > 0) && (
+      {(
         <div className="mt-3 rounded-2xl bg-white border border-ink-100 px-4 py-1.5">
           <div className="flex items-center justify-between pt-2 pb-0.5">
             <span className="text-[13px] font-bold">오늘 할 일</span>
-            <span className="text-[11px] text-ink-500">{todo.filter((x) => x.mine).length + extra.length}개 남음</span>
+            <span className="text-[11px] text-ink-500">{todo.filter((x) => x.mine).length + extra.length + (t.todos ?? []).filter((x) => !x.done).length}개 남음</span>
           </div>
           <div className="divide-y divide-ink-100">
+            {(t.todos ?? []).map((x) => (
+              <label key={x.id} className="flex items-center gap-3 py-3 cursor-pointer">
+                <input type="checkbox" checked={x.done} onChange={() => toggleTeamTodo(t.id, x.id)} className="w-5 h-5 accent-brand-500 shrink-0" />
+                <span className={cx('flex-1 text-[14px]', x.done && 'line-through text-ink-500')}>{x.text}</span>
+                <span className="text-[11px] text-ink-500 shrink-0">{x.byBrandId === brand.id ? '내가 추가' : brandById(db, x.byBrandId)?.name}</span>
+              </label>
+            ))}
             {todo.slice(0, 3).map((x) => (
               <TodoRow key={x.key} label={x.label} hint={x.mine ? '내 차례' : '팀 일'} tone={x.mine ? 'hot' : 'default'} onClick={() => navigate({ name: 'team', id: t.id, sub: x.sub })} />
             ))}
             {extra.map((e) => <TodoRow key={e.label} label={e.label} hint={e.hint} onClick={() => navigate(e.route)} />)}
+            <form className="flex items-center gap-2 py-2.5" onSubmit={(e) => { e.preventDefault(); if (draft.trim()) { addTeamTodo(t.id, brand.id, draft.trim()); setDraft(''); } }}>
+              <span className="text-brand-500 font-bold">+</span>
+              <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={`${t.name} 할 일 직접 추가 (예: 현수막 주문)`} className="flex-1 min-w-0 text-[14px] outline-none bg-transparent" />
+              {draft.trim() && <button type="submit" className="text-[12px] font-bold text-brand-600 shrink-0">추가</button>}
+            </form>
           </div>
         </div>
       )}
