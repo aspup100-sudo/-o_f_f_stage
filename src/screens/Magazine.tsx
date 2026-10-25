@@ -209,7 +209,7 @@ export function MagazineNew() {
 
 /** 휴대폰이면 공유 시트를, 아니면 링크 복사를 쓴다. */
 async function shareMagazine(m: MagazinePost) {
-  const url = location.href.startsWith('http') ? location.origin + location.pathname : 'https://aspup100-sudo.github.io/-o_f_f_stage/';
+  const url = 'https://aspup100-sudo.github.io/-o_f_f_stage/'; // 공개 웹 주소
   const text = `${m.title} · OFF STAGE 매거진`;
   try {
     if (navigator.share) {
