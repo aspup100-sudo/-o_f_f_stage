@@ -51,7 +51,7 @@ export function QnaList() {
               <div className="flex items-center gap-1.5 mb-1"><Tag tone="orange">{p.tag}</Tag><span className="text-[11px] text-ink-500">{p.createdAt}</span></div>
               <div className="font-bold text-[15px]">Q. {p.title}</div>
               <p className="text-[13px] text-ink-500 line-clamp-1 mt-0.5">{p.body}</p>
-              <div className="text-[12px] mt-1.5 font-semibold text-emerald-700">답변 {n}</div>
+              {n > 0 ? <div className="text-[12px] mt-1.5 font-semibold text-emerald-700">답변 {n}</div> : <div className="text-[12px] mt-1.5 font-semibold text-brand-600">🙋 답변을 기다려요 · 첫 답변을 남겨 주세요</div>}
             </Card>
           );
         })}
