@@ -115,7 +115,7 @@ function Toast() {
   const t = useApp((s) => s.session.toast);
   if (!t) return null;
   return (
-    <div className="fixed z-[60] top-16 left-1/2 -translate-x-1/2 max-w-[400px] w-[calc(100%-32px)] bg-ink-900 text-white text-sm rounded-xl px-4 py-3 shadow-xl text-center">
+    <div className="fixed z-[60] top-16 left-1/2 -translate-x-1/2 max-w-[400px] w-[calc(100%-32px)] bg-ink-900 text-white text-sm rounded-md px-4 py-3 shadow-lg text-center">
       {t.text}
     </div>
   );

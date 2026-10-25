@@ -219,7 +219,7 @@ export function Sheet({ open, onClose, title, children }: { open: boolean; onClo
     <div className="fixed inset-0 z-50 flex justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="relative w-full max-w-[430px] h-full flex flex-col justify-end pointer-events-none">
-        <div className="pointer-events-auto bg-white rounded-t-3xl max-h-[88vh] overflow-y-auto pb-safe-lg">
+        <div className="pointer-events-auto bg-white rounded-t-xl max-h-[88vh] overflow-y-auto pb-safe-lg">
           <div className="sticky top-0 bg-white flex items-center px-4 pt-4 pb-2 z-10">
             <div className="flex-1 font-bold text-base">{title}</div>
             <button onClick={onClose} className="w-8 h-8 flex items-center justify-center text-ink-500" aria-label="닫기">
