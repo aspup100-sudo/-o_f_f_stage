@@ -37,3 +37,7 @@ export const TABS: Record<Role, { key: string; label: string; icon: string }[]> 
 
 export const ROLE_LABEL: Record<Role, string> = { brand: '브랜드', landlord: '임대인', visitor: '방문객', admin: '관리자', rental: '렌탈 업체' };
 
+
+/** 지금은 쓰지 않는 역할. 화면에서만 숨기고 데이터와 코드는 남겨 둔다 (2026-10-25 방문객 보류) */
+export const HIDDEN_ROLES: Role[] = ['visitor'];
+export const roleOn = (r: Role) => !HIDDEN_ROLES.includes(r);

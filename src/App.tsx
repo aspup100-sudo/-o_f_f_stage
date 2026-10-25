@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Role, Route } from '@/types';
 import { useApp, navigate, switchRole, resetDemo, update } from '@/store/store';
 import { useMe } from '@/store/hooks';
@@ -6,7 +6,7 @@ import { chatUnread, josa } from '@/store/logic';
 import { Icon, cx, Sheet, Button, Demo } from '@/components/ui';
 import { renderRoute } from '@/screens';
 import { startMatchChat } from '@/store/actions';
-import { TABS, ROLE_LABEL } from '@/config';
+import { TABS, ROLE_LABEL, roleOn } from '@/config';
 
 function TopBar() {
   const { db, userId, role } = useMe();
@@ -79,7 +79,7 @@ function RoleSwitcher() {
       <Sheet open={open} onClose={() => setOpen(false)} title={<>역할 전환 <Demo /></>}>
         <p className="text-xs text-ink-500 mb-3">실제 서비스에서는 한 계정이 하나의 역할만 가집니다. 데모에서는 시점을 바로 바꿔 볼 수 있어요.</p>
         <div className="grid grid-cols-3 gap-2 mb-4">
-          {(['brand', 'landlord', 'visitor', 'rental', 'admin'] as Role[]).map((r) => (
+          {(['brand', 'landlord', 'visitor', 'rental', 'admin'] as Role[]).filter(roleOn).map((r) => (
             <button key={r} onClick={() => { switchRole(r); setOpen(false); }} className={cx('h-14 rounded-xl border text-sm font-bold', role === r ? 'bg-ink-900 text-white border-ink-900' : 'bg-white border-ink-300')}>
               {ROLE_LABEL[r]}
             </button>
@@ -162,6 +162,9 @@ function MatchModal() {
 
 export default function App() {
   const stack = useApp((s) => s.session.stack);
+  const role = useApp((s) => s.session.role);
+  // 숨긴 역할로 저장돼 있던 화면이면 브랜드로 돌려놓는다
+  useEffect(() => { if (!roleOn(role)) switchRole('brand'); }, [role]);
   const route: Route = stack[stack.length - 1] ?? { name: 'tab', tab: 'explore' };
   const isTab = route.name === 'tab';
   const isOnboarding = route.name === 'onboarding';

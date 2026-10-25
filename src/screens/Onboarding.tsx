@@ -1,3 +1,4 @@
+import { roleOn } from '@/config';
 import { useState } from 'react';
 import { useApp, switchRole } from '@/store/store';
 import { chooseRole, finishOnboarding, goOnboardingStep, isValidBizNumber, socialLogin, submitBizNumber, type BrandDraft } from '@/store/actions';
@@ -75,11 +76,11 @@ function Login() {
 }
 
 function RolePick() {
-  const options: { role: Role; title: string; desc: string; emoji: string }[] = [
+  const options = ([
     { role: 'brand', title: '브랜드', desc: '다른 브랜드와 팀을 짜서 팝업을 열어요. 사업자 인증 필요', emoji: 'shirt' },
     { role: 'landlord', title: '임대인 (공간 운영자)', desc: '비는 날 공간을 팀에게 빌려줘요. 사업자 인증 필요', emoji: 'building' },
     { role: 'visitor', title: '방문객', desc: '공동 팝업을 구경하고 스탬프를 모아요. 인증 없이 가입', emoji: 'bag' },
-  ];
+  ] as { role: Role; title: string; desc: string; emoji: string }[]).filter((o) => roleOn(o.role));
   return (
     <div className="pt-6">
       <h1 className="text-2xl font-extrabold">어떤 분이신가요?</h1>
