@@ -479,6 +479,25 @@ export function OrdersTab() {
               </div>
               <OrderSummary db={db} o={o} />
               {o.status === 'requested' && (
+                <div className="mt-2 rounded-xl bg-ink-100/70 px-3 py-2 space-y-0.5">
+                  {o.lines.map((l) => {
+                    // 같은 기간에 이미 나가 있는 수량을 빼고 남는 재고
+                    const it = db.rentalItems.find((x) => x.id === l.itemId);
+                    if (!it) return null;
+                    const out = db.rentalOrders
+                      .filter((x) => x.id !== o.id && (x.status === 'confirmed' || x.status === 'delivered') && x.dates.start <= o.dates.end && o.dates.start <= x.dates.end)
+                      .reduce((n, x) => n + x.lines.filter((y) => y.itemId === l.itemId).reduce((m, y) => m + y.qty, 0), 0);
+                    const left = it.stock - out;
+                    return (
+                      <div key={l.itemId} className="flex justify-between text-[12px]">
+                        <span className="text-ink-500">{it.name} 이 기간 남은 재고</span>
+                        <span className={cx('font-bold', left >= l.qty ? 'text-emerald-700' : 'text-red-600')}>{left}개 {left >= l.qty ? '· 가능' : '· 부족'}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              {o.status === 'requested' && (
                 <div className="grid grid-cols-2 gap-2 mt-3">
                   <Button size="sm" variant="secondary" onClick={() => decideRental(o.id, false)}>재고 없음(거절)</Button>
                   <Button size="sm" onClick={() => decideRental(o.id, true)}>예약 확정</Button>
