@@ -129,13 +129,17 @@ export function InboxTab() {
     <div>
       <ScreenTitle>받은 지원</ScreenTitle>
       <div className="px-4 mb-3">
-        <Segmented items={[{ key: 'apps', label: `팀 지원 ${pending.length}` }, { key: 'offer', label: '팀에게 먼저 제안' }]} value={tab} onChange={setTab} />
+        <Segmented items={[{ key: 'apps', label: `팀 지원 ${pending.length}` }, { key: 'offer', label: `팀에게 먼저 제안 ${openRecruits.length + spacelessTeams.length}` }]} value={tab} onChange={setTab} />
       </div>
       {tab === 'apps' && (
         <div className="px-4 space-y-3">
           <LandlordCompletions />
           {pending.length > 0 && <h3 className="font-bold">대기 중인 팀 지원</h3>}
-          {pending.length === 0 && <Empty icon="inbox">대기 중인 지원이 없어요</Empty>}
+          {pending.length === 0 && (
+            <Empty icon="inbox" action={openRecruits.length + spacelessTeams.length > 0 ? { label: `공간 찾는 팀 ${openRecruits.length + spacelessTeams.length}곳에 먼저 제안하기`, onClick: () => setTab('offer') } : undefined}>
+              대기 중인 지원이 없어요
+            </Empty>
+          )}
           {pending.length === 0 && landlord.spaceIds[0] && db.recruitments.some((r) => !r.teamId && r.status !== '마감') && (
             <Button full variant="secondary" onClick={() => simulateTeamApplication(landlord.spaceIds[0])}>
               {spaceById(db, landlord.spaceIds[0])?.name}에 팀 지원 받아 보기 <Demo />
