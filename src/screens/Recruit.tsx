@@ -106,7 +106,7 @@ export function RecruitsTab({ initial }: { initial?: '찜' }) {
       })()}
       {brand && picks.length > 0 && st === '전체' && region === '전체' && (
         <section className="mt-2 mb-4">
-          <h2 className="px-4 font-bold text-[15px]"><span className="text-brand-500">{brand.name}</span>에 딱 맞는 자리</h2>
+          <h2 className="px-4 font-bold text-[15px]">내 브랜드와 맞는 모집글</h2>
           <p className="px-4 text-xs text-ink-500 mt-0.5 mb-2.5">빈자리 카테고리, 팝업 가능 기간, 모집자와의 무드로 골랐어요</p>
           <div className="flex gap-2.5 overflow-x-auto no-scrollbar px-4 pb-1">
             {picks.map((x) => (

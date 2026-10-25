@@ -72,7 +72,7 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
         <section className="pt-6">
           <div className="px-4 mb-2.5">
             <h2 className="font-bold text-[15px]">
-              <span className="text-brand-500">{brand.name}</span>{josa(brand.name, '과', '와').slice(brand.name.length)} 잘 맞는 브랜드
+              궁합이 높은 브랜드
             </h2>
             <p className="text-xs text-ink-500 mt-0.5">무드·가격대·고객층은 비슷하고, 카테고리는 다를수록 잘 맞아요</p>
           </div>
