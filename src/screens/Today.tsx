@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { navigate } from '@/store/store';
-import { brandById, daysUntil, josa, manwon, partnerRating, rentalQuote, won, recruitUrgency, dday, md, popupById, spaceById, teamById, teamPrep, teamsOfBrand, waitCount } from '@/store/logic';
+import { brandById, chatUnread, daysUntil, displayName, josa, manwon, partnerRating, rentalQuote, won, recruitUrgency, dday, md, popupById, spaceById, teamById, teamPrep, teamsOfBrand, waitCount } from '@/store/logic';
 import { STAMP_GOAL, toggleWaitlist } from '@/store/actions';
 import { DEMO_TODAY } from '@/data/mock';
 import { cx, Icon } from '@/components/ui';
@@ -96,9 +96,23 @@ export function TodayBrand() {
               <div className="mt-3 text-[12px] font-semibold text-brand-200">🔔 벌써 {waitCount(pp)}명이 오픈 알림을 신청했어요</div>
             ) : null;
           })()}
-          <div className="text-[12px] text-white/60 mt-2">
-            {live ? '오늘도 매장을 지키는 중이에요. 근무표를 확인해 주세요.' : prep.done === prep.steps.length ? '준비 끝! 오픈만 남았어요 🎉' : left <= 7 ? `오픈까지 ${left}일, 남은 일을 서둘러 끝내요` : `오픈까지 ${left}일 남았어요`}
-          </div>
+          {(() => {
+            const note = live ? '오늘도 매장을 지키는 중이에요. 근무표를 확인해 주세요.' : prep.done === prep.steps.length ? '준비 끝! 오픈만 남았어요 🎉' : left <= 7 ? `오픈까지 ${left}일, 남은 일을 서둘러 끝내요` : '';
+            const room = db.chatRooms.find((r) => r.context?.type === 'team' && r.context.refId === t.id);
+            const last = room && [...db.messages].reverse().find((m) => m.roomId === room.id && m.senderId !== 'system');
+            return (
+              <>
+                {note && <div className="text-[12px] text-white/60 mt-2">{note}</div>}
+                {room && last && (
+                  <button onClick={() => navigate({ name: 'chat', id: room.id })} className="mt-3 w-full flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-left">
+                    <Icon name="chat" className="w-4 h-4 shrink-0 text-white/70" />
+                    <span className="text-[12px] truncate flex-1"><b>{last.senderId === brand.userId ? '나' : displayName(db, last.senderId)}</b> <span className="text-white/70">{last.text}</span></span>
+                    {chatUnread(db, room.id, brand.userId) > 0 && <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-brand-500 text-[10px] font-bold flex items-center justify-center">{chatUnread(db, room.id, brand.userId)}</span>}
+                  </button>
+                )}
+              </>
+            );
+          })()}
         </div>
       </div>
       {(todo.length > 0 || extra.length > 0) && (
