@@ -2,6 +2,7 @@
 import { useSyncExternalStore } from 'react';
 import { createSeed, type DB } from '@/data/mock';
 import type { Role, Route } from '@/types';
+import { keyOf, listen, pullAll, pushDiff, remoteEnabled } from './remote';
 
 export const ROLE_HOME: Record<Role, string> = { brand: 'explore', landlord: 'explore', visitor: 'explore', admin: 'stats', rental: 'explore' };
 
@@ -13,6 +14,7 @@ export interface Session {
   onboarding?: { step: number; userId?: string };
   gate?: boolean; // 사업자 인증 안내 시트
   match?: string; // 서로 관심 매칭된 brandId (채팅 제안 팝업)
+  sync?: 'local' | 'loading' | 'online' | 'error'; // 서버 동기화 상태
 }
 
 export interface AppState {
@@ -63,6 +65,56 @@ export function update(mutate: (s: AppState) => void) {
   state = next;
   persist();
   listeners.forEach((l) => l());
+  if (remoteEnabled && synced && next.db !== synced) schedulePush();
+}
+
+// ───────── 서버 동기화 ─────────
+// synced: 서버와 마지막으로 맞춘 db. 바뀐 부분만 모아서 0.4초 뒤 올린다.
+let synced: AppState['db'] | null = null;
+let pushTimer: ReturnType<typeof setTimeout> | undefined;
+let pushing = Promise.resolve();
+function setSync(v: Session['sync']) {
+  state = { ...state, session: { ...state.session, sync: v } };
+  listeners.forEach((l) => l());
+}
+function schedulePush() {
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(() => {
+    const base = synced!;
+    const target = state.db;
+    if (base === target) return;
+    synced = target;
+    pushing = pushing.then(() => pushDiff(base, target)).then(() => setSync('online')).catch(() => setSync('error'));
+  }, 400);
+}
+
+if (remoteEnabled) {
+  state = { ...state, session: { ...state.session, sync: 'loading' } };
+  pullAll(createSeed())
+    .then((db) => {
+      if (!db) return;
+      state = { ...state, db, session: { ...state.session, sync: 'online' } };
+      synced = db;
+      persist();
+      listeners.forEach((l) => l());
+      listen((row, deleted) => {
+        const col = state.db[row.collection as keyof AppState['db']] as unknown as Record<string, unknown>[] | undefined;
+        if (!col) return;
+        const next = structuredClone(state.db);
+        const list = next[row.collection as keyof AppState['db']] as unknown as Record<string, unknown>[];
+        const i = list.findIndex((d) => keyOf(row.collection, d) === row.id);
+        if (deleted) { if (i >= 0) list.splice(i, 1); }
+        else if (i >= 0) list[i] = row.data as Record<string, unknown>;
+        else list.push(row.data as Record<string, unknown>);
+        // 내가 아직 안 올린 변경이 있으면 그대로 두고, 서버 기준만 함께 갱신한다
+        const clean = synced === state.db;
+        state = { ...state, db: next };
+        if (clean) synced = next;
+        persist();
+        listeners.forEach((l) => l());
+      });
+    })
+    .catch(() => setSync('error'));
 }
 
 export function subscribe(l: () => void) {
@@ -75,6 +127,13 @@ export function useApp<T>(selector: (s: AppState) => T): T {
 }
 
 export function resetDemo() {
+  // 서버를 쓰는 중이면 모두가 함께 쓰는 데이터라 지우지 않고, 내 화면 상태만 처음으로 돌린다
+  if (remoteEnabled) {
+    state = { ...state, session: { ...initialSession(), sync: state.session.sync } };
+    persist();
+    listeners.forEach((l) => l());
+    return;
+  }
   state = { db: createSeed(), session: initialSession() };
   persist();
   listeners.forEach((l) => l());
@@ -120,6 +179,6 @@ export function switchRole(role: Role, userId?: string) {
   window.scrollTo?.(0, 0);
 }
 
-let idSeq = Date.now() % 100000;
-export const newId = (prefix: string) => `${prefix}_${(idSeq++).toString(36)}`;
+// 여러 사람이 동시에 만들어도 겹치지 않게 시간 + 난수로 만든다
+export const newId = (prefix: string) => `${prefix}_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
 export const nowISO = () => new Date().toISOString().slice(0, 19);
