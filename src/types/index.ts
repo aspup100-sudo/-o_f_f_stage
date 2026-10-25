@@ -110,6 +110,7 @@ export interface Space {
   fashionOnly: boolean; // 업종 고정(패션)
   photoHues: number[];
   pastPopupIds: ID[];
+  lastMinutePct?: number; // 2주 안에 비는 날 할인율 (%)
 }
 
 export interface SpaceAvailability {

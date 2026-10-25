@@ -1117,3 +1117,12 @@ export function sendFollowerNews(brandId: string, text: string) {
   });
   toast(n ? `팔로워 ${n}명에게 소식을 보냈어요` : '소식을 올렸어요. 팔로워가 생기면 바로 받아 볼 수 있어요');
 }
+
+// ───────── 막판 할인 ─────────
+export function setLastMinute(spaceId: string, pct: number) {
+  update((s) => {
+    const sp = s.db.spaces.find((x) => x.id === spaceId)!;
+    sp.lastMinutePct = pct || undefined;
+  });
+  toast(pct ? `2주 안에 비는 날을 ${pct}% 할인해요. 공간 목록에 할인 표시가 붙어요` : '막판 할인을 껐어요');
+}

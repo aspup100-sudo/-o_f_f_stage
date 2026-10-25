@@ -308,3 +308,7 @@ export function popupReport(db: DB, popupId: string) {
     followers,
   };
 }
+
+/** 2주 안에 비는 날 수 (막판 할인 대상) */
+export const soonOpenDays = (db: DB, spaceId: string) =>
+  db.availability.filter((a) => a.spaceId === spaceId && a.status === 'open' && daysUntil(a.date) > 0 && daysUntil(a.date) <= 14).length;

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMe, guard } from '@/store/hooks';
 import { navigate } from '@/store/store';
 import { answerSpaceQuestion, applySpace, askSpaceQuestion, openDirectChat, openWeekendsOfMonth, toggleAvailability } from '@/store/actions';
-import { displayName, manwon, period, popupById, spaceById, teamById, teamsOfBrand, trustScore } from '@/store/logic';
+import { displayName, manwon, soonOpenDays, period, popupById, spaceById, teamById, teamsOfBrand, trustScore } from '@/store/logic';
 import { ScreenTitle, TrustLine } from '@/components/common';
 import { Avatar, Button, Card, Chip, Segmented, cx, Demo, Empty, Field, GradeBadge, Icon, inputCls, Sheet, StatusPill, SubHeader, Swatch, Tag, textareaCls } from '@/components/ui';
 import { FACILITIES, REGIONS, type Region, type Space } from '@/types';
@@ -29,6 +29,7 @@ export function SpaceCard({ db, s, onClick }: { db: DB; s: Space; onClick?: () =
           <Tag>{s.region}</Tag>
           {s.teamRental && <Tag tone="green">팀 단위 대관 가능</Tag>}
           {s.fashionOnly && <Tag tone="purple">업종 고정(패션)</Tag>}
+          {s.lastMinutePct && soonOpenDays(db, s.id) > 0 && <Tag tone="red">⚡ 2주 안 {s.lastMinutePct}% 할인</Tag>}
         </div>
         <div className="font-bold text-[15px]">{s.name}</div>
         <div className="flex items-end justify-between mt-1">

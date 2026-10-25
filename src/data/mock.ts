@@ -209,7 +209,7 @@ const spaces: Space[] = [
     id: 's2', landlordId: 'l2', name: '연남 코너하우스', region: '마포구', address: '서울 마포구 연남로 (예시) 34',
     intro: '연트럴파크에서 한 블록. 주말 유동 인구가 많은 골목 1층입니다.',
     areaM2: 33, dailyFee: 500000, minDays: 3, facilities: ['행거', '전신거울', '조명', '화장실'], electricKw: 5,
-    teamRental: true, fashionOnly: true, photoHues: [10, 50, 330], pastPopupIds: ['p1'],
+    teamRental: true, fashionOnly: true, photoHues: [10, 50, 330], pastPopupIds: ['p1'], lastMinutePct: 20,
   },
   {
     id: 's3', landlordId: 'l3', name: '한남 화이트큐브', region: '용산구', address: '서울 용산구 한남대로 (예시) 56',

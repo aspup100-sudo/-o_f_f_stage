@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useMe, guard } from '@/store/hooks';
 import { back, navigate, replace } from '@/store/store';
-import { decideSpaceApplication, proposeSpaceToRecruitment, proposeSpaceToTeam, saveSpace, simulateTeamApplication, type SpaceDraft } from '@/store/actions';
-import { brandById, manwon, period, spaceById, teamById } from '@/store/logic';
+import { setLastMinute, decideSpaceApplication, proposeSpaceToRecruitment, proposeSpaceToTeam, saveSpace, simulateTeamApplication, type SpaceDraft } from '@/store/actions';
+import { brandById, manwon, period, soonOpenDays, spaceById, teamById } from '@/store/logic';
 import { ScreenTitle, TrustLine } from '@/components/common';
 import { Button, Card, Chip, cx, Demo, Empty, Field, inputCls, Segmented, Sheet, StatusPill, SubHeader, Swatch, Tag, textareaCls } from '@/components/ui';
 import { FACILITIES, REGIONS } from '@/types';
@@ -32,6 +32,22 @@ export function MySpacesTab() {
             {current && <AvailabilityCalendar key={current} db={db} spaceId={current} editable />}
           </Card>
         )}
+        {current && (() => {
+          const sp = spaceById(db, current)!;
+          const n = soonOpenDays(db, current);
+          return (
+            <Card className="p-4">
+              <div className="font-bold">⚡ 막판 할인</div>
+              <p className="text-[12px] text-ink-500 mt-0.5 mb-3">2주 안에 아직 비어 있는 날({n}일)을 할인하면 공간 목록에 할인 표시가 붙어 팀 눈에 잘 띄어요.</p>
+              <div className="flex gap-1.5">
+                {[0, 10, 20, 30].map((v) => (
+                  <Chip key={v} active={(sp.lastMinutePct ?? 0) === v} onClick={() => setLastMinute(current, v)}>{v ? `${v}%` : '안 함'}</Chip>
+                ))}
+              </div>
+              {!!sp.lastMinutePct && n > 0 && <p className="text-[12px] text-brand-700 mt-2">하루 {manwon(sp.dailyFee)} → <b>{manwon(sp.dailyFee * (1 - sp.lastMinutePct / 100))}</b></p>}
+            </Card>
+          );
+        })()}
       </div>
     </div>
   );
