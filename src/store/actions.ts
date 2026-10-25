@@ -6,6 +6,7 @@ import { josa } from './logic';
 import type { DateRange, LoginProvider, NotificationType, Region, Role, Route, ThemeTags } from '@/types';
 
 export function notify(db: DB, userId: string, type: NotificationType, text: string, link?: Route) {
+  if (db.users.find((u) => u.id === userId)?.mutedTypes?.includes(type)) return;
   db.notifications.unshift({ id: newId('n'), userId, type, text, link, read: false, at: nowISO() });
 }
 
@@ -160,6 +161,15 @@ export function toggleFollow(visitorUserId: string, brandId: string) {
     }
   });
   toast(following ? '팔로우했어요. 다음 팝업이 열리면 알려드릴게요' : '팔로우를 취소했어요');
+}
+
+export function setMuted(userId: string, types: NotificationType[], muted: boolean) {
+  update((s) => {
+    const u = s.db.users.find((x) => x.id === userId)!;
+    const cur = new Set(u.mutedTypes ?? []);
+    types.forEach((t) => (muted ? cur.add(t) : cur.delete(t)));
+    u.mutedTypes = [...cur];
+  });
 }
 
 export function markAllRead(userId: string) {
