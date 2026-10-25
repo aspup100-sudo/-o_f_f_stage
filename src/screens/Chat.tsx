@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { navigate } from '@/store/store';
 import { sendMessage } from '@/store/actions';
-import { displayName, userById, brandOfUser } from '@/store/logic';
+import { brandOfUser, dday, displayName, teamById, teamPrep, userById } from '@/store/logic';
 import { Avatar, Empty, Icon, SubHeader, Card } from '@/components/ui';
 import { ReportButton } from './Report';
 import type { Route } from '@/types';
@@ -52,6 +52,20 @@ export function ChatScreen({ id }: { id: string }) {
     room.context?.type === 'recruit' ? { name: 'recruit', id: room.context.refId } :
     room.context?.type === 'interest' ? { name: 'brand', id: room.context.refId } : undefined;
   const send = () => { if (text.trim()) { sendMessage(id, text.trim()); setText(''); } };
+  // 팀 채팅방이면 남은 준비 항목으로 빠른 메시지를 만든다
+  const team = room.context?.type === 'team' ? teamById(db, room.context.refId) : undefined;
+  const myBrand = brandOfUser(db, userId);
+  const prep = team && myBrand && team.stage === '준비 중' ? teamPrep(db, team, myBrand.id) : undefined;
+  const quick = [
+    ...(prep ? prep.steps.filter((x) => !x.done).slice(0, 3).map((x) => {
+      const name = x.label.replace(/ \(.*\)$/, '');
+      return x.mine
+        ? { label: `✋ ${name} 할게요`, text: `'${name}' 오늘 안에 할게요!` }
+        : { label: `📌 ${name}`, text: `[오픈 ${dday(team!.period.start)}] '${x.label}' 아직 남았어요! 팀 공간에서 같이 챙겨 주세요 🙏` };
+    }) : []),
+    { label: '🙆 확인했어요', text: '확인했어요!' },
+    { label: '👍 좋아요', text: '좋아요 👍' },
+  ];
   return (
     <div className="min-h-screen flex flex-col bg-[#f4f3f1]">
       <SubHeader
@@ -61,10 +75,10 @@ export function ChatScreen({ id }: { id: string }) {
       {ctx && (
         <button onClick={() => navigate(ctx)} className="mx-4 mt-3 text-left text-[13px] bg-white rounded-xl px-3 py-2 border border-ink-100 flex items-center gap-2">
           <Icon name="sparkle" className="w-4 h-4 text-brand-500" />
-          <span className="flex-1">{room.context?.type === 'team' ? '팀 공간 열기' : room.context?.type === 'space' ? '공간 상세 보기' : room.context?.type === 'interest' ? '상대 브랜드 프로필 보기' : '관련 글 보기'}</span>›
+          <span className="flex-1">{prep ? `팀 공간 · 오픈 ${dday(team!.period.start)} · 준비 ${prep.done}/${prep.steps.length}` : room.context?.type === 'team' ? '팀 공간 열기' : room.context?.type === 'space' ? '공간 상세 보기' : room.context?.type === 'interest' ? '상대 브랜드 프로필 보기' : '관련 글 보기'}</span>›
         </button>
       )}
-      <div className="flex-1 px-4 py-4 space-y-2.5 pb-32">
+      <div className="flex-1 px-4 py-4 space-y-2.5 pb-40">
         {msgs.map((m) => {
           if (m.senderId === 'system')
             return (
@@ -85,9 +99,18 @@ export function ChatScreen({ id }: { id: string }) {
         })}
         <div ref={endRef} />
       </div>
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white border-t border-ink-100 p-2.5 flex gap-2 z-40">
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white border-t border-ink-100 z-40">
+        {room.memberIds.includes(userId) && (
+          <div className="flex gap-1.5 overflow-x-auto no-scrollbar px-2.5 pt-2.5">
+            {quick.map((q) => (
+              <button key={q.label} onClick={() => sendMessage(id, q.text)} className="h-8 px-3 rounded-full border border-ink-300 bg-white text-[12px] font-semibold whitespace-nowrap shrink-0">{q.label}</button>
+            ))}
+          </div>
+        )}
+        <div className="p-2.5 flex gap-2">
         <input className="flex-1 h-11 px-3 rounded-xl bg-ink-100 text-sm outline-none" placeholder="메시지 입력" value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && !e.nativeEvent.isComposing && send()} />
         <button onClick={send} className="h-11 px-4 rounded-xl bg-ink-900 text-white text-sm font-bold">전송</button>
+        </div>
       </div>
     </div>
   );
