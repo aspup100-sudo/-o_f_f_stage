@@ -291,11 +291,35 @@ export function RecruitNew() {
   const share = slotsPreview ? d.totalBudget / slotsPreview : 0;
   const ok = d.title.trim() && slotsPreview >= 2 && (!d.spaceConfirmed || d.spaceId) && (d.slotMode === 'hanger' || d.categorySlots.some((c) => c.category === d.hostCategory && c.count > 0));
   const regionSpaces = db.spaces.filter((s) => s.region === d.region);
+  const days = Math.max(1, Math.round((new Date(d.period.end).getTime() - new Date(d.period.start).getTime()) / 86400000) + 1);
+  const avgFee = regionSpaces.length ? regionSpaces.reduce((sum, x) => sum + x.dailyFee, 0) / regionSpaces.length : 0;
+
+  // 내 브랜드 태그로 제목·소개 초안을 만든다
+  const fillDraft = () => {
+    if (!brand) return;
+    const mood = brand.tags.moods[0] ?? '감각적인';
+    const want = d.categorySlots.map((c) => c.category).filter((c) => c !== myCat);
+    setD({
+      ...d,
+      title: `${d.region} ${mood} 무드 공동 팝업, 같이 열 브랜드 찾아요`,
+      intro: `${brand.name}입니다. ${brand.intro}\n${mood} 무드로 ${d.region}에서 ${days}일 동안 함께 팝업을 열 ${want.join('·') || '다른 카테고리'} 브랜드를 찾아요. 고객층은 ${brand.tags.ages.join(', ') || '20~30대'}, 가격대는 ${brand.tags.price}예요.`,
+      totalBudget: avgFee ? Math.round((avgFee * days) / 100000) * 100000 : d.totalBudget,
+    });
+  };
 
   return (
     <div className="bg-white min-h-screen">
       <SubHeader title="모집글 쓰기" />
       <div className="p-4">
+        {brand && (
+          <button onClick={fillDraft} className="w-full mb-4 rounded-2xl bg-brand-50 px-4 py-3 text-left flex items-center gap-3">
+            <span className="text-xl">✨</span>
+            <span className="flex-1">
+              <span className="block text-sm font-bold">내 브랜드 정보로 초안 채우기</span>
+              <span className="block text-[12px] text-ink-500">무드·고객층 태그로 제목과 소개를 쓰고, {d.region} 평균 대관료로 예산을 잡아요</span>
+            </span>
+          </button>
+        )}
         <Field label="제목" required>
           <input className={inputCls} value={d.title} onChange={(e) => setD({ ...d, title: e.target.value })} placeholder="예) 연말 성수 공동 팝업 같이 해요" />
         </Field>
@@ -314,7 +338,7 @@ export function RecruitNew() {
             <input type="date" className={inputCls} value={d.period.end} onChange={(e) => setD({ ...d, period: { ...d.period, end: e.target.value } })} />
           </div>
         </Field>
-        <Field label="총 예산" hint="대관료와 공통비를 합친 예상 금액">
+        <Field label="총 예산" hint={avgFee ? `${d.region} 공간 평균 대관료 ${manwon(avgFee)}/일 × ${days}일 ≈ ${manwon(avgFee * days)}` : '대관료와 공통비를 합친 예상 금액'}>
           <div className="flex items-center gap-2">
             <input type="number" className={inputCls} step={10} value={d.totalBudget / 10000} onChange={(e) => setD({ ...d, totalBudget: Number(e.target.value) * 10000 })} />
             <span className="text-sm shrink-0">만원</span>
