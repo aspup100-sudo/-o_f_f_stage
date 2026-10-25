@@ -90,7 +90,7 @@ export function RecruitsTab({ initial }: { initial?: '찜' }) {
       <p className="px-4 text-[13px] text-ink-500 -mt-1 mb-2">함께 팝업을 열 팀원을 모아요. 정원이 차면 자동으로 팀이 만들어져요.</p>
       <div className="flex gap-1.5 overflow-x-auto no-scrollbar px-4 pb-2">
         {(['전체', ...(brand ? (['찜'] as const) : []), '모집 중', '협의 중', '마감'] as const).map((s) => (
-          <Chip key={s} active={st === s} onClick={() => setSt(s)}>{s === '찜' ? `♥ 찜 ${saved.length}` : s}</Chip>
+          <Chip key={s} active={st === s} onClick={() => setSt(s)}>{s === '찜' ? `${saved.length ? "♥" : "♡"} 찜 ${saved.length}` : s}</Chip>
         ))}
         <span className="w-px bg-ink-300 mx-1" />
         {(['전체', ...REGIONS] as const).map((r) => <Chip key={'r' + r} active={region === r} onClick={() => setRegion(r)}>{r === '전체' ? '모든 지역' : r}</Chip>)}

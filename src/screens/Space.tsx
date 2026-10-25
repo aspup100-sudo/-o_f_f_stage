@@ -98,7 +98,7 @@ export function SpacesTab({ initial }: { initial?: '찜' }) {
         <button onClick={() => setFilterOpen(true)} className={cx('h-8 px-3 rounded-full border text-xs font-semibold shrink-0 flex items-center gap-1', filterCount ? 'bg-ink-900 text-white border-ink-900' : 'bg-white border-ink-300')}>
           <Icon name="search" className="w-3.5 h-3.5" /> 조건{filterCount > 0 && ` ${filterCount}`}
         </button>
-        {(['전체', ...(brand ? (['찜'] as const) : []), ...REGIONS] as const).map((r) => <Chip key={r} active={region === r} onClick={() => setRegion(r)}>{r === '찜' ? `♡ 찜 ${brand?.savedSpaces?.length ?? 0}` : r}</Chip>)}
+        {(['전체', ...(brand ? (['찜'] as const) : []), ...REGIONS] as const).map((r) => <Chip key={r} active={region === r} onClick={() => setRegion(r)}>{r === '찜' ? `${brand?.savedSpaces?.length ? '♥' : '♡'} 찜 ${brand?.savedSpaces?.length ?? 0}` : r}</Chip>)}
       </div>
       <Sheet open={filterOpen} onClose={() => setFilterOpen(false)} title="공간 조건">
         <div className="text-[13px] font-semibold mb-2">1일 대관료</div>
