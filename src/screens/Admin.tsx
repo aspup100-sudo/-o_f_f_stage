@@ -70,6 +70,16 @@ export function ReportsTab() {
             <div className="font-semibold text-sm mt-2">{r.targetLabel}</div>
             {r.detail && <p className="text-sm text-ink-700 mt-1">"{r.detail}"</p>}
             <div className="text-[12px] text-ink-500 mt-1">신고자 {displayName(db, r.reporterId)} · {r.at.slice(0, 10)}</div>
+            {(() => {
+              const same = db.reports.filter((x) => x.targetId === r.targetId).length;
+              const brand = r.targetType === 'profile' ? db.brands.find((b) => b.id === r.targetId) : undefined;
+              return (
+                <div className="flex items-center gap-2 mt-1.5 text-[12px]">
+                  {same > 1 && <span className="font-semibold text-red-600">같은 대상 신고 누적 {same}건</span>}
+                  {brand && <button className="font-semibold text-brand-600" onClick={() => navigate({ name: 'brand', id: brand.id })}>프로필 보기 ›</button>}
+                </div>
+              );
+            })()}
             {r.status === 'open' && (
               <div className="grid grid-cols-4 gap-1.5 mt-3">
                 <Button size="sm" variant="secondary" onClick={() => resolveReport(r.id, 'warned')}>경고</Button>
