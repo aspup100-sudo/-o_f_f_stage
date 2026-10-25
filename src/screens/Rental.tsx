@@ -534,7 +534,7 @@ export function OrdersTab() {
               {o.rating && <div className="mt-2 text-[12px] text-ink-700">★ {o.rating} · {o.ratingComment}</div>}
               {o.status !== 'returned' && o.status !== 'rejected' && (
                 <button className="mt-2.5 w-full text-center text-[12px] text-ink-500" onClick={() => openDirectChat(b.userId, `${rental.name} · ${b.name}`)}>
-                  설치 시간·위치를 {b.name}에게 물어보기 ›
+                  {o.status === "delivered" ? "반납 시간" : "설치 시간·위치"}을 {b.name}에게 물어보기 ›
                 </button>
               )}
             </Card>
