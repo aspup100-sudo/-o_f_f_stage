@@ -223,7 +223,7 @@ const brandName = (db: DB, brandId: string) => db.brands.find((b) => b.id === br
 export function sendProposal(p: Omit<import('@/types').Proposal, 'id' | 'status' | 'createdAt'>) {
   update((s) => {
     s.db.proposals.unshift({ ...p, id: newId('pr'), status: 'sent', createdAt: nowISO() });
-    notify(s.db, brandUser(s.db, p.toBrandId), 'proposal', `${brandName(s.db, p.fromBrandId)}이(가) 같이 해요 제안을 보냈어요.`, { name: 'proposals' });
+    notify(s.db, brandUser(s.db, p.toBrandId), 'proposal', `${josa(brandName(s.db, p.fromBrandId), '이', '가')} 같이 해요 제안을 보냈어요.`, { name: 'proposals' });
   });
   toast('제안서를 보냈어요');
 }
@@ -239,8 +239,8 @@ export function respondProposal(id: string, accept: boolean, openChat = true) {
       roomId = ensureRoom(s.db, [from, to], `${brandName(s.db, p.fromBrandId)} × ${brandName(s.db, p.toBrandId)}`, { type: 'proposal', refId: p.id });
       p.chatRoomId = roomId;
       systemMessage(s.db, roomId, `제안서: ${p.period} · ${p.region} · 1인 분담 ${Math.round(p.budgetPerBrand / 10000)}만원 · ${p.teamSize}팀\n"${p.reason}"`);
-      systemMessage(s.db, roomId, `${brandName(s.db, p.toBrandId)}이(가) "관심 있어요"를 눌렀어요. 대화를 시작해 보세요!`);
-      notify(s.db, from, 'proposal', `${brandName(s.db, p.toBrandId)}이(가) 제안에 "관심 있어요"를 눌렀어요. 채팅방이 열렸어요.`, { name: 'chat', id: roomId });
+      systemMessage(s.db, roomId, `${josa(brandName(s.db, p.toBrandId), '이', '가')} "관심 있어요"를 눌렀어요. 대화를 시작해 보세요!`);
+      notify(s.db, from, 'proposal', `${josa(brandName(s.db, p.toBrandId), '이', '가')} 제안에 "관심 있어요"를 눌렀어요. 채팅방이 열렸어요.`, { name: 'chat', id: roomId });
     } else {
       p.status = 'declined';
       notify(s.db, from, 'proposal', `${brandName(s.db, p.toBrandId)}: "제안 감사해요! 이번에는 일정이 맞지 않아 어렵지만, 다음에 꼭 함께해요." (자동 발송)`, { name: 'brand', id: p.toBrandId });
@@ -267,8 +267,8 @@ export function toggleHeart(myBrandId: string, targetId: string) {
     s.db.interests.push({ id: newId('i'), fromBrandId: myBrandId, toBrandId: targetId, createdAt: nowISO() });
     if (t.hearts.includes(myBrandId)) {
       matched = true;
-      notify(s.db, me.userId, 'interest_match', `${t.name}와(과) 서로 관심을 표시했어요! 채팅을 시작해 보세요.`, { name: 'brand', id: t.id });
-      notify(s.db, t.userId, 'interest_match', `${me.name}와(과) 서로 관심을 표시했어요! 채팅을 시작해 보세요.`, { name: 'brand', id: me.id });
+      notify(s.db, me.userId, 'interest_match', `${josa(t.name, '과', '와')} 서로 관심을 표시했어요! 채팅을 시작해 보세요.`, { name: 'brand', id: t.id });
+      notify(s.db, t.userId, 'interest_match', `${josa(me.name, '과', '와')} 서로 관심을 표시했어요! 채팅을 시작해 보세요.`, { name: 'brand', id: me.id });
       s.session.match = targetId;
     }
   });
@@ -346,7 +346,7 @@ export function applyRecruitment(recruitmentId: string, brandId: string, slotId:
     slot.status = '협의 중';
     slot.brandId = brandId;
     refreshRecruitStatus(r);
-    notify(s.db, brandUser(s.db, r.hostBrandId), 'application_result', `${brandName(s.db, brandId)}이(가) "${r.title}"에 지원했어요.`, { name: 'recruit', id: r.id });
+    notify(s.db, brandUser(s.db, r.hostBrandId), 'application_result', `${josa(brandName(s.db, brandId), '이', '가')} "${r.title}"에 지원했어요.`, { name: 'recruit', id: r.id });
   });
   toast('지원했어요. 모집자가 프로필을 보고 결정해요');
 }
@@ -702,11 +702,11 @@ export function decideSpaceApplication(appId: string, accept: boolean) {
     const roomId = ensureRoom(s.db, [...members, ll.userId], `${t.name} × ${sp.name}`, { type: 'space', refId: sp.id });
     systemMessage(s.db, roomId, `${sp.name} 이용이 확정됐어요 (${a.dates.start} ~ ${a.dates.end}). 입주·철거 시간과 집기를 여기서 맞춰 보세요.`);
     if (sp.fashionOnly) systemMessage(s.db, roomId, '업종 고정 공간이에요. 이전 팀의 집기·연출을 이어 쓸 수 있는지 확인해 보세요.');
-    members.forEach((u) => notify(s.db, u, 'application_result', `🎉 ${sp.name}이(가) "${t.name}" 팀의 지원을 수락했어요!`, { name: 'team', id: t.id, sub: 'space' }));
+    members.forEach((u) => notify(s.db, u, 'application_result', `🎉 ${josa(sp.name, '이', '가')} "${t.name}" 팀의 지원을 수락했어요!`, { name: 'team', id: t.id, sub: 'space' }));
     // 팔로워에게 새 팝업 알림
     const followers = new Set<string>();
     t.members.forEach((m) => s.db.brands.find((b) => b.id === m.brandId)!.followers.forEach((f) => followers.add(f)));
-    followers.forEach((f) => notify(s.db, f, 'follow_popup', `팔로우한 브랜드가 참여하는 공동 팝업 "${t.name}"이(가) 열려요! (${a.dates.start.slice(5)}~)`, { name: 'popup', id: pid! }));
+    followers.forEach((f) => notify(s.db, f, 'follow_popup', `팔로우한 브랜드가 참여하는 공동 팝업 "${t.name}" 일정이 잡혔어요! (${a.dates.start.slice(5)}~)`, { name: 'popup', id: pid! }));
   });
   toast(accept ? '수락했어요. 팝업 일정이 등록됐어요' : '거절했어요');
 }
@@ -721,7 +721,7 @@ export function proposeSpaceToRecruitment(recruitmentId: string, spaceId: string
     const hostUser = brandUser(s.db, r.hostBrandId);
     roomId = ensureRoom(s.db, [ll.userId, hostUser], `${sp.name} 제안`, { type: 'space', refId: sp.id });
     systemMessage(s.db, roomId, `${ll.name}님이 "${r.title}" 모집글에 ${sp.name}(1일 ${Math.round(sp.dailyFee / 10000)}만원, ${sp.areaM2}㎡)을 제안했어요.`);
-    notify(s.db, hostUser, 'space_application', `${ll.name}님이 "${r.title}"에 ${sp.name}을(를) 제안했어요.`, { name: 'chat', id: roomId });
+    notify(s.db, hostUser, 'space_application', `${ll.name}님이 "${r.title}"에 ${josa(sp.name, '을', '를')} 제안했어요.`, { name: 'chat', id: roomId });
   });
   toast('모집자에게 공간을 제안했어요');
   return roomId;
@@ -733,7 +733,7 @@ export function proposeSpaceToTeam(teamId: string, spaceId: string) {
     const t = s.db.teams.find((x) => x.id === teamId)!;
     const sp = s.db.spaces.find((x) => x.id === spaceId)!;
     s.db.spaceApplications.unshift({ id: newId('sa'), teamId, spaceId, dates: t.period, message: `${sp.name}에서 팝업을 열어 보시면 어떨까요?`, status: 'pending', direction: 'landlord', createdAt: nowISO() });
-    teamMemberUsers(s.db, teamId).forEach((u) => notify(s.db, u, 'space_application', `${sp.name}이(가) "${t.name}" 팀에 공간을 제안했어요.`, { name: 'team', id: teamId, sub: 'space' }));
+    teamMemberUsers(s.db, teamId).forEach((u) => notify(s.db, u, 'space_application', `${josa(sp.name, '이', '가')} "${t.name}" 팀에 공간을 제안했어요.`, { name: 'team', id: teamId, sub: 'space' }));
   });
   toast('팀에게 공간을 제안했어요');
 }
@@ -961,7 +961,7 @@ export function requestRental(o: Omit<import('@/types').RentalOrder, 'id' | 'sta
     s.db.rentalOrders.unshift({ ...o, id, status: 'requested', createdAt: nowISO() });
     const partner = s.db.rentalPartners.find((p) => p.id === o.partnerId)!;
     const team = s.db.teams.find((t) => t.id === o.teamId);
-    notify(s.db, partner.userId, 'rental', `${team ? `${team.name}(${brandName(s.db, o.brandId)})` : brandName(s.db, o.brandId)}이(가) 장비 대여를 요청했어요.`, { name: 'tab', tab: 'orders' });
+    notify(s.db, partner.userId, 'rental', `${team ? `${team.name}(${brandName(s.db, o.brandId)})에서` : josa(brandName(s.db, o.brandId), '이', '가')} 장비 대여를 요청했어요.`, { name: 'tab', tab: 'orders' });
     if (team) {
       const room = teamRoom(s.db, team.id);
       if (room) systemMessage(s.db, room.id, `${brandName(s.db, o.brandId)}님이 ${partner.name}에 장비 대여를 요청했어요 (${o.dates.start.slice(5)}~${o.dates.end.slice(5)}).`);
@@ -977,7 +977,7 @@ export function decideRental(id: string, accept: boolean) {
     const partner = s.db.rentalPartners.find((p) => p.id === o.partnerId)!;
     o.status = accept ? 'confirmed' : 'rejected';
     const targets = o.teamId ? teamMemberUsers(s.db, o.teamId) : [brandUser(s.db, o.brandId)];
-    targets.forEach((u) => notify(s.db, u, 'rental', accept ? `${partner.name}이(가) 장비 대여를 확정했어요.` : `${partner.name}: 요청하신 날짜에 재고가 없어 이번에는 어려워요.`, o.teamId ? { name: 'team', id: o.teamId, sub: 'rental' } : { name: 'rentals' }));
+    targets.forEach((u) => notify(s.db, u, 'rental', accept ? `${josa(partner.name, '이', '가')} 장비 대여를 확정했어요.` : `${partner.name}: 요청하신 날짜에 재고가 없어 이번에는 어려워요.`, o.teamId ? { name: 'team', id: o.teamId, sub: 'rental' } : { name: 'rentals' }));
     if (accept && o.addToTeamCost && o.teamId) {
       const cost = s.db.costSplits.find((c) => c.teamId === o.teamId);
       if (cost) {

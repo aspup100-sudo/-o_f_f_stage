@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { Role, Route } from '@/types';
 import { useApp, navigate, switchRole, resetDemo, update } from '@/store/store';
 import { useMe } from '@/store/hooks';
+import { josa } from '@/store/logic';
 import { Icon, cx, Sheet, Button, Demo } from '@/components/ui';
 import { renderRoute } from '@/screens';
 import { startMatchChat } from '@/store/actions';
@@ -137,7 +138,7 @@ function MatchModal() {
         <span className="text-2xl text-rose-500">♥</span>
         <span className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl" style={{ background: `hsl(${t.logoHue} 45% 55%)` }}>{t.name[0]}</span>
       </div>
-      <p className="text-center text-sm text-ink-700 mb-5">{brand.name}와(과) {t.name}이(가) 서로에게 관심을 눌렀어요. 먼저 인사해 볼까요?</p>
+      <p className="text-center text-sm text-ink-700 mb-5">{josa(brand.name, '과', '와')} {josa(t.name, '이', '가')} 서로에게 관심을 눌렀어요. 먼저 인사해 볼까요?</p>
       <div className="flex gap-2">
         <Button variant="secondary" full onClick={close}>나중에</Button>
         <Button full onClick={() => startMatchChat(brand.id, t.id)}>채팅 시작하기</Button>

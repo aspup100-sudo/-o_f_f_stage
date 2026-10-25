@@ -191,7 +191,7 @@ function BrandForm() {
       </Field>
       {!ok && (
         <p className="text-[12px] text-ink-500 text-center mb-2">
-          {[!d.name.trim() && '브랜드 이름', !d.tags.moods.length && '무드', !d.tags.categories.length && '카테고리'].filter(Boolean).join(', ')}을(를) 채우면 시작할 수 있어요
+          {[!d.name.trim() && '브랜드 이름', !d.tags.moods.length && '무드', !d.tags.categories.length && '카테고리'].filter(Boolean).join(', ')}만 채우면 시작할 수 있어요
         </p>
       )}
       <Button full size="lg" disabled={!ok} onClick={() => finishOnboarding({ brand: d })}>시작하기</Button>
