@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useMe, guard } from '@/store/hooks';
 import { back, navigate, switchRole } from '@/store/store';
-import { advanceRental, decideRental, rateRental, requestRental, saveRentalItem, toggleRentalItem } from '@/store/actions';
-import { brandById, discountPct, missingForSpace, partnerRating, period, rentalDays, rentalQuote, spaceById, teamById, teamsOfBrand, won } from '@/store/logic';
+import { advanceRental, decideRental, lowerPartnerPrice, rateRental, requestRental, saveRentalItem, toggleRentalItem } from '@/store/actions';
+import { brandById, discountPct, josa, missingForSpace, partnerRating, period, rentalDays, rentalQuote, spaceById, teamById, teamsOfBrand, won } from '@/store/logic';
 import { ScreenTitle } from '@/components/common';
 import { Avatar, Button, Card, Chip, cx, Demo, Empty, Field, inputCls, Segmented, Sheet, Stars, SubHeader, Swatch, Tag, textareaCls } from '@/components/ui';
 import { RENTAL_CATEGORIES, REGIONS, type RentalCategory, type RentalItem, type RentalOrder, type RentalOrderStatus, type Team } from '@/types';
-import type { DB } from '@/data/mock';
+import { DEMO_TODAY, type DB } from '@/data/mock';
 
 const STATUS: Record<RentalOrderStatus, { label: string; tone: 'yellow' | 'green' | 'blue' | 'gray' | 'red' }> = {
   requested: { label: '확인 대기', tone: 'yellow' },
@@ -379,6 +379,9 @@ export function MyItemsTab() {
   const rentedDays = orders.reduce((s, o) => s + o.lines.reduce((x, l) => x + l.qty, 0) * rentalDays(o.dates), 0);
   const capacity = items.reduce((s, i) => s + i.stock, 0) * 30;
   const r = partnerRating(db, rental.id);
+  const idle = items.filter((it) => it.active && !orders.some((o) => o.dates.end >= DEMO_TODAY && o.lines.some((l) => l.itemId === it.id)));
+  // 곧 열리는 팝업 중 공간에 이 장비 종류가 없는 곳 = 잠재 수요
+  const demand = (it: RentalItem) => db.popups.filter((p) => p.status === '예정' && missingForSpace(db, p.spaceId).some((m) => m.category === it.category)).length;
   return (
     <div>
       <ScreenTitle right={<Button size="sm" onClick={() => navigate({ name: 'rentalItemEdit' })}>+ 장비 등록</Button>}>내 장비</ScreenTitle>
@@ -391,6 +394,27 @@ export function MyItemsTab() {
         <p className="text-[12px] text-ink-500 mb-3">
           제휴가는 일반가보다 낮지만, 창고에 있던 장비가 팝업 일정마다 다시 나가요. {r.avg !== null && `브랜드 평점 ★ ${r.avg.toFixed(1)}`}
         </p>
+        {idle.length > 0 && (
+          <div className="rounded-2xl p-3.5 mb-4 border border-amber-200 bg-amber-50">
+            <div className="font-bold text-[14px] mb-0.5">💡 다가오는 예약이 없는 장비 {idle.length}개</div>
+            <p className="text-[12px] text-ink-700 mb-2.5">앞으로 잡힌 팝업 일정이 없어요. 제휴가를 조금 내리면 브랜드 장바구니에 먼저 담겨요.</p>
+            <div className="space-y-2">
+              {idle.map((it) => {
+                const n = demand(it);
+                return (
+                  <div key={it.id} className="flex items-center gap-2.5 bg-white rounded-xl p-2.5">
+                    <Swatch hue={it.hue} pattern="grid" className="w-10 h-10 shrink-0" rounded="rounded-lg" />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[13px] font-semibold truncate">{it.name}</div>
+                      <div className="text-[11px] text-ink-500">{n > 0 ? `곧 열 팝업 ${n}곳 공간에 ${josa(it.category, "이", "가")} 없어요` : `지금 제휴가 ${won(it.partnerPrice)} · ${discountPct(it)}% 할인 중`}</div>
+                    </div>
+                    <Button size="sm" variant="secondary" onClick={() => lowerPartnerPrice(it.id)}>10% 내리기</Button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
         <div className="space-y-2">
           {items.map((it) => (
             <Card key={it.id} className={cx('p-3', !it.active && 'opacity-50')}>

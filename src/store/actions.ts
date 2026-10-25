@@ -1057,6 +1057,15 @@ export function toggleRentalItem(id: string) {
   update((s) => { const it = s.db.rentalItems.find((i) => i.id === id)!; it.active = !it.active; });
 }
 
+/** 예약이 없는 장비의 제휴가를 10% 내려요(천원 단위) */
+export function lowerPartnerPrice(id: string) {
+  update((s) => {
+    const it = s.db.rentalItems.find((i) => i.id === id);
+    if (it) it.partnerPrice = Math.max(1000, Math.round((it.partnerPrice * 0.9) / 1000) * 1000);
+  });
+  toast('제휴가를 내렸어요. 장비 목록에서 "할인" 표시가 커져요');
+}
+
 // ───────── 매거진 ─────────
 export function toggleShowcaseHelpful(id: string, userId: string) {
   update((s) => {
