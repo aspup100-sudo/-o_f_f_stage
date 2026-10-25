@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { navigate, replace, toast } from '@/store/store';
 import { publishMagazine, toggleMagazineHidden, toggleMagazineLike } from '@/store/actions';
@@ -94,6 +94,7 @@ export function MagazineDetail({ id }: { id: string }) {
   const m = db.magazines.find((x) => x.id === id);
   const [page, setPage] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => { setPage(0); ref.current?.scrollTo({ left: 0 }); window.scrollTo({ top: 0 }); }, [id]);
   if (!m) return <Empty>글을 찾을 수 없어요</Empty>;
   const liked = m.likes.includes(userId);
   const go = (i: number) => {
@@ -111,7 +112,16 @@ export function MagazineDetail({ id }: { id: string }) {
           className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar"
         >
           {m.cards.map((c, i) => (
-            <div key={i} className="w-full shrink-0 snap-center px-4">
+            <div
+              key={i}
+              className="w-full shrink-0 snap-center px-4 cursor-pointer"
+              onClick={(e) => {
+                // 인스타 스토리처럼 왼쪽 1/3은 이전, 나머지는 다음 카드
+                const r = e.currentTarget.getBoundingClientRect();
+                if (e.clientX - r.left < r.width / 3) go(Math.max(0, i - 1));
+                else go(Math.min(m.cards.length - 1, i + 1));
+              }}
+            >
               <CardFace post={m} card={c} index={i} total={m.cards.length} />
             </div>
           ))}
@@ -135,6 +145,18 @@ export function MagazineDetail({ id }: { id: string }) {
           <Button variant="secondary" aria-label="공유" onClick={() => shareMagazine(m)}>공유</Button>
           {m.link && <Button variant="secondary" onClick={() => navigate(m.link!)}>{m.link.name === 'tab' ? '이 지역 공간 보기' : m.link.name === 'showcase' ? '팝업자랑 원문 보기' : '관련 글 보기'} ›</Button>}
         </div>
+        {(() => {
+          const more = db.magazines.filter((x) => !x.hidden && x.id !== m.id).slice(0, 4);
+          if (!more.length) return null;
+          return (
+            <>
+              <h3 className="font-bold mt-7 mb-2.5">다른 글도 읽어 보세요</h3>
+              <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
+                {more.map((x) => <MagazineThumb key={x.id} post={x} />)}
+              </div>
+            </>
+          );
+        })()}
         <div className="mt-6"><OfficialInsta /></div>
       </div>
     </div>
