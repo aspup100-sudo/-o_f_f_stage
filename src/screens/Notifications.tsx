@@ -25,18 +25,25 @@ export function NotificationsScreen() {
     <div className="bg-white min-h-screen">
       <SubHeader title="알림" right={unread > 0 && <Button size="sm" variant="ghost" onClick={() => markAllRead(userId)}>모두 읽음</Button>} />
       {list.length === 0 && <Empty icon="bell">새 알림이 없어요</Empty>}
-      <div className="divide-y divide-ink-100">
-        {list.map((n) => (
-          <button key={n.id} onClick={() => openNotification(n.id)} className={cx('w-full text-left flex gap-3 px-4 py-3.5', !n.read && 'bg-brand-50/60')}>
-            <span className="text-xl">{ICON[n.type]}</span>
-            <span className="flex-1">
-              <span className={cx('block text-sm', !n.read && 'font-semibold')}>{n.text}</span>
-              <span className="block text-[11px] text-ink-500 mt-0.5">{ago(n.at)}</span>
-            </span>
-            {!n.read && <span className="w-2 h-2 rounded-full bg-brand-500 mt-1.5" />}
-          </button>
-        ))}
-      </div>
+      {[{ title: '새 알림', items: list.filter((n) => !n.read) }, { title: '지난 알림', items: list.filter((n) => n.read) }].map((g) =>
+        g.items.length ? (
+          <section key={g.title}>
+            <div className="px-4 pt-4 pb-1.5 text-[13px] font-bold text-ink-500">{g.title}</div>
+            <div className="divide-y divide-ink-100">
+              {g.items.map((n) => (
+                <button key={n.id} onClick={() => openNotification(n.id)} className={cx('w-full text-left flex gap-3 px-4 py-3.5', !n.read && 'bg-brand-50/60')}>
+                  <span className="text-xl">{ICON[n.type]}</span>
+                  <span className="flex-1">
+                    <span className={cx('block text-sm', !n.read && 'font-semibold')}>{n.text}</span>
+                    <span className="block text-[11px] text-ink-500 mt-0.5">{ago(n.at)}</span>
+                  </span>
+                  {!n.read && <span className="w-2 h-2 rounded-full bg-brand-500 mt-1.5" />}
+                </button>
+              ))}
+            </div>
+          </section>
+        ) : null,
+      )}
     </div>
   );
 }
