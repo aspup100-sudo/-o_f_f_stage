@@ -1,3 +1,4 @@
+import { RENTAL_ON } from '@/config';
 import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { navigate } from '@/store/store';
@@ -190,13 +191,13 @@ export function StatsTab() {
             </div>
           );
         })()}
-        <div>
+        {RENTAL_ON && <div>
           <h3 className="font-bold mb-2 text-[15px]">렌탈 제휴</h3>
           <div className="grid grid-cols-2 gap-2">
             {tile('렌탈 거래액', won(rentalSum), `${db.rentalOrders.length}건 요청`)}
             {tile('브랜드가 아낀 금액', won(rentalSaved), '정가 대비')}
           </div>
-        </div>
+        </div>}
         <p className="text-[11px] text-ink-500">모든 수치는 데모 데이터에서 계산돼요.</p>
       </div>
     </div>

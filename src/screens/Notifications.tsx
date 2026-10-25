@@ -1,3 +1,4 @@
+import { RENTAL_ON } from '@/config';
 import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { markAllRead, openNotification, setMuted } from '@/store/actions';
@@ -23,7 +24,7 @@ const GROUPS: { label: string; desc: string; types: NotificationType[] }[] = [
   { label: '새 모집글', desc: '알림 켠 지역에 올라온 모집글', types: ['new_recruit'] },
   { label: '팀·지원', desc: '모집 지원 결과, 약속서, 공간 지원, 성사 확인', types: ['application_result', 'agreement_request', 'space_application', 'completion_request'] },
   { label: '팝업 소식', desc: '팔로우한 브랜드와 관심 동네의 새 팝업', types: ['follow_popup'] },
-  { label: '장비 렌탈', desc: '렌탈 요청과 확정', types: ['rental'] },
+  ...(RENTAL_ON ? [{ label: '장비 렌탈', desc: '렌탈 요청과 확정', types: ['rental'] as NotificationType[] }] : []),
 ];
 
 function NotiSettings({ open, onClose }: { open: boolean; onClose: () => void }) {

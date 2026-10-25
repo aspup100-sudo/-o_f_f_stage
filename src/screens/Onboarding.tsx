@@ -1,4 +1,4 @@
-import { roleOn } from '@/config';
+import { RENTAL_ON, roleOn } from '@/config';
 import { useState } from 'react';
 import { useApp, switchRole } from '@/store/store';
 import { chooseRole, finishOnboarding, goOnboardingStep, isValidBizNumber, socialLogin, submitBizNumber, type BrandDraft } from '@/store/actions';
@@ -53,7 +53,7 @@ function Login() {
         {[
           [`${recruiting}팀`, '지금 팀원 모집 중'],
           [`${popups}곳`, '열렸거나 곧 열릴 팝업'],
-          [`최대 ${maxOff}%`, '제휴 장비 렌탈 할인'],
+          RENTAL_ON ? [`최대 ${maxOff}%`, '제휴 장비 렌탈 할인'] : ['0원', '거래 수수료'],
         ].map(([v, l]) => (
           <div key={l} className="rounded-2xl bg-brand-50 p-3">
             <div className="text-lg font-extrabold text-brand-600">{v}</div>

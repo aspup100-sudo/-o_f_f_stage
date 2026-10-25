@@ -1,3 +1,4 @@
+import { RENTAL_ON } from '@/config';
 import { useState } from 'react';
 import { useMe, guard } from '@/store/hooks';
 import { navigate } from '@/store/store';
@@ -96,8 +97,8 @@ export function SpacesTab({ initial }: { initial?: '찜' }) {
     );
   return (
     <div>
-      <ScreenTitle>공간·장비</ScreenTitle>
-      <div className="px-4 mb-3"><Segmented items={[{ key: 'space', label: '공간 찾기' }, { key: 'rental', label: '장비 렌탈' }]} value={mode} onChange={setMode} /></div>
+      <ScreenTitle>{RENTAL_ON ? '공간·장비' : '공간'}</ScreenTitle>
+      {RENTAL_ON && <div className="px-4 mb-3"><Segmented items={[{ key: 'space', label: '공간 찾기' }, { key: 'rental', label: '장비 렌탈' }]} value={mode} onChange={setMode} /></div>}
       <div className="px-4 mb-3 flex gap-1.5 overflow-x-auto no-scrollbar">
         <button onClick={() => setFilterOpen(true)} className={cx('h-8 px-3 rounded-full border text-xs font-semibold shrink-0 flex items-center gap-1', filterCount ? 'bg-ink-900 text-white border-ink-900' : 'bg-white border-ink-300')}>
           <Icon name="search" className="w-3.5 h-3.5" /> 조건{filterCount > 0 && ` ${filterCount}`}
@@ -266,7 +267,7 @@ export function SpaceDetail({ id }: { id: string }) {
           })}
         </div>
 
-        {role === 'brand' && s.facilities.length < FACILITIES.length && (
+        {RENTAL_ON && role === 'brand' && s.facilities.length < FACILITIES.length && (
           <button onClick={() => navigate({ name: 'rentals' })} className="mt-2 w-full text-left text-[13px] rounded-xl bg-brand-50 text-brand-700 px-3 py-2.5 font-semibold">
             <Ic n="box" />없는 설비는 렌탈 제휴가로 빌릴 수 있어요 ›
           </button>

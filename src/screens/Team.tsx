@@ -1,3 +1,4 @@
+import { RENTAL_ON } from '@/config';
 import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { navigate, replace, toast } from '@/store/store';
@@ -156,14 +157,14 @@ export function TeamScreen({ id, sub = 'members' }: { id: string; sub?: string }
           );
         })()}
       </div>
-      <Tabs className="sticky top-12 z-10" items={SUBS} value={sub} onChange={(k) => replace({ name: 'team', id, sub: k })} />
+      <Tabs className="sticky top-12 z-10" items={SUBS.filter((x) => RENTAL_ON || x.key !== 'rental')} value={sub} onChange={(k) => replace({ name: 'team', id, sub: k })} />
       <div className="p-4 pb-10">
         {sub === 'members' && <MembersTab team={team} isLeader={isLeader} />}
         {sub === 'agreement' && <AgreementTab team={team} myBrandId={brand!.id} />}
         {sub === 'cost' && <CostTab team={team} myBrandId={brand!.id} isLeader={isLeader} />}
         {sub === 'moodboard' && <MoodboardTab team={team} myBrandId={brand!.id} />}
         {sub === 'space' && <TeamSpaceTab team={team} />}
-        {sub === 'rental' && <TeamRentalTab team={team} />}
+        {RENTAL_ON && sub === 'rental' && <TeamRentalTab team={team} />}
         {sub === 'shift' && <ShiftTab team={team} />}
         {sub === 'promo' && <PromoTab team={team} myBrandId={brand!.id} />}
         {sub === 'wrap' && <TeamWrapUp team={team} />}

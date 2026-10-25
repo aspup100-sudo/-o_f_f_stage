@@ -38,6 +38,9 @@ export const TABS: Record<Role, { key: string; label: string; icon: string }[]> 
 export const ROLE_LABEL: Record<Role, string> = { brand: '브랜드', landlord: '임대인', visitor: '방문객', admin: '관리자', rental: '렌탈 업체' };
 
 
+/** 장비 렌탈 제휴. 2026-10-25 보류 (나중에 다시). true로 바꾸고 HIDDEN_ROLES에서 rental을 빼면 다시 켜진다 */
+export const RENTAL_ON = false;
+
 /** 지금은 쓰지 않는 역할. 화면에서만 숨기고 데이터와 코드는 남겨 둔다 (지금은 없음) */
-export const HIDDEN_ROLES: Role[] = [];
+export const HIDDEN_ROLES: Role[] = ['rental'];
 export const roleOn = (r: Role) => !HIDDEN_ROLES.includes(r);
