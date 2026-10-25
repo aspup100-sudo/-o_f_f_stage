@@ -173,6 +173,25 @@ export function TodayVisitor() {
         </button>
       </div>
       {(() => {
+        // 다녀왔는데 아직 리뷰를 안 쓴 팝업
+        const todo = db.visits
+          .filter((v) => v.userId === userId)
+          .map((v) => popupById(db, v.popupId)!)
+          .filter((p) => p && !db.comboReviews.some((c) => c.popupId === p.id && c.authorId === userId) && !db.reviews.some((r) => r.popupId === p.id && r.authorId === userId));
+        if (!todo.length) return null;
+        const p = todo[0];
+        return (
+          <button onClick={() => navigate({ name: 'popup', id: p.id })} className="mt-3 w-full rounded-2xl bg-brand-50 border border-brand-100 p-4 text-left flex items-center gap-3">
+            <span className="text-2xl">✍️</span>
+            <span className="flex-1 min-w-0">
+              <span className="block text-[14px] font-bold truncate">{p.title} 어땠나요?</span>
+              <span className="block text-[12px] text-ink-700">어떤 브랜드 조합이 좋았는지 남기면 다음 팝업 구성에 반영돼요</span>
+            </span>
+            <span className="text-ink-300">›</span>
+          </button>
+        );
+      })()}
+      {(() => {
         const feed = visitor.following
           .flatMap((id) => { const b = brandById(db, id); return (b?.news ?? []).map((n) => ({ b: b!, n })); })
           .sort((a, b) => b.n.at.localeCompare(a.n.at))
