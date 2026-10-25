@@ -1,8 +1,9 @@
 // 둘러보기 맨 위 '오늘' 영역: 내 팝업까지 남은 날과 지금 해야 할 일을 모아 보여 준다.
 import { useMe } from '@/store/hooks';
 import { navigate } from '@/store/store';
-import { brandById, daysUntil, josa, dday, md, popupById, spaceById, teamById, teamPrep, teamsOfBrand, waitCount } from '@/store/logic';
+import { brandById, daysUntil, josa, manwon, dday, md, popupById, spaceById, teamById, teamPrep, teamsOfBrand, waitCount } from '@/store/logic';
 import { STAMP_GOAL, toggleWaitlist } from '@/store/actions';
+import { DEMO_TODAY } from '@/data/mock';
 import { cx, Icon } from '@/components/ui';
 import type { Route } from '@/types';
 
@@ -179,6 +180,46 @@ export function TodayVisitor() {
           })}
         </div>
       )}
+    </section>
+  );
+}
+
+export function TodayLandlord() {
+  const { db, landlord } = useMe();
+  if (!landlord) return null;
+  // 데모 기준일의 다음 달을 본다
+  const today = DEMO_TODAY;
+  const month = '2026-11';
+  const open = db.availability.filter((a) => landlord.spaceIds.includes(a.spaceId) && a.status === 'open' && a.date > today && a.date.startsWith(month));
+  const potential = open.reduce((sum, a) => sum + (spaceById(db, a.spaceId)?.dailyFee ?? 0), 0);
+  const pending = db.spaceApplications.filter((a) => landlord.spaceIds.includes(a.spaceId) && a.status === 'pending' && a.direction === 'team').length;
+  const seeking = db.recruitments.filter((r) => r.status !== '마감' && !r.spaceConfirmed).length + db.teams.filter((t) => t.confirmed && t.stage === '준비 중' && !t.spaceId).length;
+  const next = db.popups.filter((p) => landlord.spaceIds.includes(p.spaceId) && p.status !== '종료').sort((a, b) => a.period.start.localeCompare(b.period.start))[0];
+
+  return (
+    <section className="px-4 pt-4">
+      <div className="rounded-3xl bg-ink-900 text-white p-5">
+        <div className="text-[13px] text-white/60">{landlord.name}님의 11월 · 공간 {landlord.spaceIds.length}곳 합계</div>
+        <div className="text-xl font-extrabold leading-snug mt-1">
+          비는 날 <span className="text-brand-400">{open.length}일</span>
+          {potential > 0 && <><br />채우면 최대 {manwon(potential)}</>}
+        </div>
+        <div className="grid grid-cols-2 gap-2 mt-4">
+          <button onClick={() => navigate({ name: 'tab', tab: 'inbox' })} className="rounded-2xl bg-white/10 p-3 text-left">
+            <div className="text-[11px] text-white/60">공간을 찾는 팀</div>
+            <div className="text-lg font-extrabold">{seeking}팀 ›</div>
+          </button>
+          <button onClick={() => navigate({ name: 'tab', tab: 'inbox' })} className="rounded-2xl bg-white/10 p-3 text-left">
+            <div className="text-[11px] text-white/60">대기 중인 지원</div>
+            <div className="text-lg font-extrabold">{pending}건 ›</div>
+          </button>
+        </div>
+        {next && (
+          <button onClick={() => navigate({ name: 'popup', id: next.id })} className="mt-3 w-full text-left text-[12px] text-white/70">
+            {next.status === '진행 중' ? '🟢 지금 운영 중' : `📅 ${dday(next.period.start)}`} · {next.title} ({spaceById(db, next.spaceId)?.name}) ›
+          </button>
+        )}
+      </div>
     </section>
   );
 }
