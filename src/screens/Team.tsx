@@ -211,7 +211,7 @@ function MembersTab({ team, isLeader }: { team: Team; isLeader: boolean }) {
   const shift = db.shifts.find((x) => x.teamId === team.id);
   const [nudged, setNudged] = useState<string[]>([]);
   const chip = (ok: boolean, label: string) => (
-    <span className={cx('text-[12px] px-2 h-6 inline-flex items-center rounded-md font-semibold', ok ? 'border border-emerald-600 text-emerald-700' : 'border border-ink-300 text-ink-500')}>{ok ? '✓' : '…'} {label}</span>
+    <span className={cx('text-[12px] px-2 h-6 inline-flex items-center rounded-md font-semibold', ok ? 'border border-emerald-600 text-emerald-700' : 'border border-ink-300 text-ink-500')}>{ok && <Ic n="check" />}{label}</span>
   );
   return (
     <div className="space-y-2.5">
@@ -292,7 +292,7 @@ function AgreementTab({ team, myBrandId }: { team: Team; myBrandId: string }) {
           {team.members.map((m) => {
             const b = brandById(db, m.brandId)!;
             const ok = ag.agreedBy.includes(m.brandId);
-            return <Tag key={m.brandId} tone={ok ? 'green' : 'gray'}>{ok ? '✓' : '…'} {b.name}</Tag>;
+            return <Tag key={m.brandId} tone={ok ? 'green' : 'gray'}>{ok && <Ic n="check" />}{b.name}</Tag>;
           })}
         </div>
         {ag.locked && <p className="text-sm text-emerald-700 font-semibold mt-3">전원 동의로 팀이 확정됐어요. 약속서는 이제 고칠 수 없어요.</p>}

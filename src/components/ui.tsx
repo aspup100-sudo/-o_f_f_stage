@@ -170,7 +170,7 @@ export function Swatch({ hue, pattern = 'solid', label, className, rounded = 'ro
 export function Avatar({ name, hue = 20, size = 40, src }: { name: string; hue?: number; size?: number; src?: string }) {
   const [broken, setBroken] = useState<string | null>(null);
   return (
-    <div className="relative overflow-hidden rounded-full flex items-center justify-center font-bold text-white shrink-0" style={{ width: size, height: size, background: `hsl(${hue} 45% 55%)`, fontSize: size * 0.4 }}>
+    <div className="relative overflow-hidden rounded-full flex items-center justify-center font-bold text-white shrink-0" style={{ width: size, height: size, background: `hsl(${hue} 12% 42%)`, fontSize: size * 0.4 }}>
       {name.slice(0, 1)}
       {src && broken !== src && <img src={src} alt="" loading="lazy" onError={() => setBroken(src)} className="absolute inset-0 w-full h-full object-cover" />}
     </div>

@@ -290,7 +290,7 @@ export function SpaceDetail({ id }: { id: string }) {
 
         <h3 className="text-[17px] font-extrabold tracking-tight mt-9 mb-3">임대인</h3>
         <Card className="p-3.5 flex items-center gap-3">
-          <Avatar name={ll.name} hue={150} size={44} />
+          <Avatar name={ll.name} hue={150} size={44} src={spaceSrc(s, 1, 200)} />
           <div className="flex-1 min-w-0">
             <div className="font-bold">{ll.name}</div>
             <div className="flex items-center gap-1.5 mt-0.5 text-xs text-ink-700">

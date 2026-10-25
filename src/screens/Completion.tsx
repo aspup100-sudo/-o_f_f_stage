@@ -95,7 +95,7 @@ function CompletionStatus({ popupId }: { popupId: string }) {
         {c.required.map((u) => {
           const ok = c.confirmedBy.includes(u);
           const isLandlord = db.landlords.some((l) => l.userId === u);
-          return <Tag key={u} tone={ok ? 'green' : 'gray'}>{ok ? '✓' : '…'} {displayName(db, u)}{isLandlord ? ' (임대인)' : ''}</Tag>;
+          return <Tag key={u} tone={ok ? 'green' : 'gray'}>{ok && <Ic n="check" />}{displayName(db, u)}{isLandlord ? ' (임대인)' : ''}</Tag>;
         })}
       </div>
       {!c.verified && (
