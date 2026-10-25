@@ -8,7 +8,7 @@ const ICON: Record<NotificationType, string> = {
   follow_popup: '🛍️', space_application: '🏠', rental: '📦', system: '🔔',
 };
 
-function ago(iso: string) {
+export function ago(iso: string) {
   const min = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
   if (min < 1) return '방금';
   if (min < 60) return `${min}분 전`;

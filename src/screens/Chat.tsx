@@ -5,11 +5,13 @@ import { sendMessage } from '@/store/actions';
 import { brandOfUser, dday, displayName, teamById, teamPrep, userById } from '@/store/logic';
 import { Avatar, Empty, Icon, SubHeader, Card } from '@/components/ui';
 import { ReportButton } from './Report';
+import { ago } from './Notifications';
 import type { Route } from '@/types';
 
 export function ChatListScreen() {
   const { db, userId } = useMe();
-  const rooms = db.chatRooms.filter((r) => r.memberIds.includes(userId));
+  const lastAt = (id: string) => db.messages.filter((m) => m.roomId === id).reduce((t, m) => (m.at > t ? m.at : t), '');
+  const rooms = db.chatRooms.filter((r) => r.memberIds.includes(userId)).sort((a, b) => (lastAt(b.id) || b.createdAt).localeCompare(lastAt(a.id) || a.createdAt));
   return (
     <div>
       <SubHeader title="채팅" />
@@ -20,15 +22,19 @@ export function ChatListScreen() {
           const last = msgs[msgs.length - 1];
           const others = r.memberIds.filter((m) => m !== userId);
           const hue = brandOfUser(db, others[0])?.logoHue ?? 200;
+          const team = r.context?.type === 'team' ? teamById(db, r.context.refId) : undefined;
+          const who = !last || last.senderId === 'system' ? '' : last.senderId === userId ? '나: ' : r.memberIds.length > 2 ? `${displayName(db, last.senderId)}: ` : '';
           return (
             <Card key={r.id} className="p-3.5 flex items-center gap-3" onClick={() => navigate({ name: 'chat', id: r.id })}>
               <Avatar name={r.title} hue={hue} size={44} />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
                   <span className="font-bold truncate">{r.title}</span>
-                  <span className="text-xs text-ink-500">{r.memberIds.length > 2 ? r.memberIds.length : ''}</span>
+                  <span className="text-xs text-ink-500 shrink-0">{r.memberIds.length > 2 ? r.memberIds.length : ''}</span>
+                  {team && team.popupId && <span className="text-[10px] font-bold text-brand-600 bg-brand-50 rounded px-1.5 py-0.5 shrink-0">{dday(team.period.start)}</span>}
+                  <span className="ml-auto text-[11px] text-ink-500 shrink-0">{last ? ago(last.at) : ''}</span>
                 </div>
-                <div className="text-[13px] text-ink-500 truncate">{last ? last.text : '대화를 시작해 보세요'}</div>
+                <div className="text-[13px] text-ink-500 truncate">{last ? who + last.text : '대화를 시작해 보세요'}</div>
               </div>
             </Card>
           );
