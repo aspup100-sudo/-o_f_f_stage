@@ -2,7 +2,7 @@
 import type { BrandProfile, Popup, ThemeTags } from '@/types';
 import { AGE_GROUPS, CATEGORIES, MOODS, PRICE_RANGES } from '@/types';
 import type { DB } from '@/data/mock';
-import { brandById, daysUntil, period, spaceById, teamById, trustScore, waitCount } from '@/store/logic';
+import { brandById, daysUntil, openNow, period, spaceById, teamById, trustScore, waitCount } from '@/store/logic';
 import { DEMO_TODAY } from '@/data/mock';
 import { navigate } from '@/store/store';
 import { Avatar, Card, Chip, cx, GradeBadge, Icon, StatusPill, Swatch, Tag } from './ui';
@@ -166,7 +166,8 @@ export function PopupBannerCard({ db, popup, wide }: { db: DB; popup: Popup; wid
         {popup.status === '진행 중' && (() => {
           const n = db.visits.filter((v) => v.popupId === popup.id).length;
           const end = popup.period.end === DEMO_TODAY ? '오늘 마지막 날' : `${daysUntil(popup.period.end)}일 남음`;
-          return <div className="text-[11px] text-brand-200 mt-1.5 font-semibold">⏳ {end}{n > 0 ? ` · ${n}명 방문 인증` : ''}</div>;
+          const o = openNow(popup.hours);
+          return <div className="text-[11px] text-brand-200 mt-1.5 font-semibold">{o?.open ? <span className="text-emerald-300">● 영업 중 · </span> : null}⏳ {end}{n > 0 ? ` · ${n}명 방문 인증` : ''}</div>;
         })()}
       </div>
     </button>

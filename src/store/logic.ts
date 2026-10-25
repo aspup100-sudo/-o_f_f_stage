@@ -323,3 +323,16 @@ export function chatUnread(db: DB, roomId: string, userId: string) {
   const since = room?.readAt?.[userId] ?? '2026-10-24T12:00:00';
   return db.messages.filter((m) => m.roomId === roomId && m.senderId !== userId && m.senderId !== 'system' && m.at > since).length;
 }
+
+/** 운영 시간("11:00~19:00")과 지금 시각으로 영업 상태를 알려 준다 */
+export function openNow(hours: string, now = new Date()): { open: boolean; text: string } | null {
+  const m = hours.match(/(\d{1,2}):(\d{2})\s*~\s*(\d{1,2}):(\d{2})/);
+  if (!m) return null;
+  const cur = now.getHours() * 60 + now.getMinutes();
+  const start = +m[1] * 60 + +m[2];
+  const end = +m[3] * 60 + +m[4];
+  if (cur < start) return { open: false, text: `오늘 ${m[1]}:${m[2]} 오픈` };
+  if (cur >= end) return { open: false, text: '오늘 영업 종료' };
+  const left = end - cur;
+  return { open: true, text: left <= 60 ? `곧 마감 · ${left}분 남음` : `지금 영업 중 · ${m[3]}:${m[4]} 마감` };
+}
