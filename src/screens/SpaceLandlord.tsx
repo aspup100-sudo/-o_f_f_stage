@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMe, guard } from '@/store/hooks';
 import { back, navigate, replace } from '@/store/store';
 import { setLastMinute, decideSpaceApplication, proposeSpaceToRecruitment, proposeSpaceToTeam, saveSpace, simulateTeamApplication, type SpaceDraft } from '@/store/actions';
-import { brandById, manwon, period, soonOpenDays, spaceById, teamById } from '@/store/logic';
+import { brandById, daysUntil, manwon, period, soonOpenDays, spaceById, teamById } from '@/store/logic';
 import { ScreenTitle, TrustLine } from '@/components/common';
 import { Button, Card, Chip, cx, Demo, Empty, Field, inputCls, Segmented, Sheet, StatusPill, SubHeader, Swatch, Tag, textareaCls } from '@/components/ui';
 import { FACILITIES, REGIONS } from '@/types';
@@ -22,6 +22,27 @@ export function MySpacesTab() {
       <ScreenTitle right={<Button size="sm" onClick={() => guard(() => navigate({ name: 'spaceEdit' }))}>+ 공간 등록</Button>}>내 공간</ScreenTitle>
       <div className="px-4 space-y-3">
         {spaces.length === 0 && <Empty icon="building">아직 등록한 공간이 없어요. 공간을 등록하고 비는 날을 표시해 보세요.</Empty>}
+        {spaces.length > 0 && (() => {
+          const next30 = db.availability.filter((a) => landlord.spaceIds.includes(a.spaceId) && daysUntil(a.date) >= 0 && daysUntil(a.date) < 30);
+          const booked = next30.filter((a) => a.status === 'booked').length;
+          const open = next30.filter((a) => a.status === 'open').length;
+          const savers = db.brands.filter((b) => b.savedSpaces?.some((id) => landlord.spaceIds.includes(id))).length;
+          const pct = booked + open ? Math.round((booked / (booked + open)) * 100) : 0;
+          return (
+            <div className="rounded-2xl bg-ink-900 text-white p-4">
+              <div className="text-[12px] text-white/60">앞으로 30일 내 공간 현황</div>
+              <div className="flex items-end gap-2 mt-0.5">
+                <span className="text-2xl font-extrabold">{pct}%</span>
+                <span className="text-[12px] text-white/70 mb-1">예약됨 · 비는 날 {open}일</span>
+              </div>
+              <div className="h-1.5 rounded-full bg-white/15 mt-2 overflow-hidden"><div className="h-full bg-brand-400 rounded-full" style={{ width: `${pct}%` }} /></div>
+              <div className="flex gap-2 mt-3 text-[12px]">
+                <span className="rounded-full bg-white/10 px-2.5 py-1">♥ 찜한 브랜드 {savers}곳</span>
+                {open > 0 && <button onClick={() => navigate({ name: 'tab', tab: 'inbox', filter: 'offer' })} className="rounded-full bg-brand-500 px-2.5 py-1 font-semibold">빈 날 채우러 팀에게 제안 ›</button>}
+              </div>
+            </div>
+          );
+        })()}
         {spaces.map((s) => <SpaceCard key={s.id} db={db} s={s} />)}
         {spaces.length > 0 && (
           <Card className="p-4">
@@ -113,9 +134,9 @@ export function SpaceEdit({ id }: { id?: string }) {
   );
 }
 
-export function InboxTab() {
+export function InboxTab({ initial }: { initial?: 'offer' }) {
   const { db, landlord } = useMe();
-  const [tab, setTab] = useState<'apps' | 'offer'>('apps');
+  const [tab, setTab] = useState<'apps' | 'offer'>(initial ?? 'apps');
   const [view, setView] = useState<string | null>(null);
   if (!landlord) return <Empty>임대인 계정에서 볼 수 있어요</Empty>;
   const apps = db.spaceApplications.filter((a) => landlord.spaceIds.includes(a.spaceId));

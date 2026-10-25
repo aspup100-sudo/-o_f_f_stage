@@ -27,7 +27,7 @@ function renderTab(tab: string, filter?: string): ReactNode {
     case 'myteam': return <MyTeamTab />;
     case 'spaces': return <SpacesTab key={filter} initial={filter === '찜' ? '찜' : undefined} />;
     case 'myspaces': return <MySpacesTab />;
-    case 'inbox': return <InboxTab />;
+    case 'inbox': return <InboxTab key={filter} initial={filter === 'offer' ? 'offer' : undefined} />;
     case 'map': return <MapTab />;
     case 'stats': return <StatsTab />;
     case 'verify': return <VerifyTab />;
