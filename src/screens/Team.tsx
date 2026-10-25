@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { navigate, replace, toast } from '@/store/store';
 import {
-  addCommonItem, agreeAgreement, autoFillShifts, cycleShift, fillAgreementExamples, removeCommonItem, renameTeam, setMemberHangers, setMemberRole,
+  addCommonItem, agreeAgreement, remindPayment, autoFillShifts, cycleShift, fillAgreementExamples, removeCommonItem, renameTeam, setMemberHangers, setMemberRole,
   setMoodHeadline, simulateOthersAgree, toggleMoodPick, togglePaid, togglePromo, updateAgreementItem, updateCost,
 } from '@/store/actions';
 import { brandById, dday, manwon, md, period, spaceById, teamById, teamCost, teamPrep, teamsOfBrand, won } from '@/store/logic';
@@ -359,6 +359,9 @@ function CostTab({ team, myBrandId, isLeader }: { team: Team; myBrandId: string;
             );
           })}
         </Card>
+        {isLeader && split.paid.length < team.members.length && (
+          <Button full variant="secondary" className="mt-3" onClick={() => remindPayment(team.id)}>💰 미납 {team.members.length - split.paid.length}곳에 납부 알림 보내기</Button>
+        )}
         <p className="text-[12px] text-ink-500 mt-2">모인 금액 {won(paidSum)} / {won(total)} · 실제 결제는 이뤄지지 않아요. OFF STAGE는 거래 수수료를 받지 않아요.</p>
       </div>
     </div>

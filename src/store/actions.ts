@@ -1126,3 +1126,18 @@ export function setLastMinute(spaceId: string, pct: number) {
   });
   toast(pct ? `2주 안에 비는 날을 ${pct}% 할인해요. 공간 목록에 할인 표시가 붙어요` : '막판 할인을 껐어요');
 }
+
+// ───────── 분담금 리마인드 ─────────
+export function remindPayment(teamId: string) {
+  let n = 0;
+  update((s) => {
+    const t = s.db.teams.find((x) => x.id === teamId)!;
+    const split = s.db.costSplits.find((c) => c.teamId === teamId)!;
+    const unpaid = t.members.filter((m) => !split.paid.includes(m.brandId));
+    n = unpaid.length;
+    unpaid.forEach((m) => notify(s.db, brandUser(s.db, m.brandId), 'system', `"${t.name}" 분담금 납부 기한이 ${split.dueDate.slice(5).replace('-', '/')}이에요. 분담금 탭에서 확인해 주세요.`, { name: 'team', id: teamId, sub: 'cost' }));
+    const room = teamRoom(s.db, teamId);
+    if (room && n) systemMessage(s.db, room.id, `💰 분담금 리마인드: 아직 ${unpaid.map((m) => brandName(s.db, m.brandId)).join(', ')}의 납부가 남았어요.`);
+  });
+  toast(n ? `${n}곳에 납부 알림을 보냈어요` : '모두 납부했어요');
+}
