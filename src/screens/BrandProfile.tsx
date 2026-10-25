@@ -4,7 +4,7 @@ import { guard } from '@/store/hooks';
 import { navigate } from '@/store/store';
 import { brandById, displayName, josa, matchPct, matchScore, period, reviewAvg, spaceById, teamsOfBrand, trustEvents, trustScore, userById } from '@/store/logic';
 import { BrandLogo, LookbookGrid, ThemeTagList } from '@/components/common';
-import { Button, Card, Empty, GradeBadge, Icon, Stars, StatusPill, SubHeader, Tabs, Tag } from '@/components/ui';
+import { Button, Card, Empty, GradeBadge, Icon, Stars, StatusPill, SubHeader, Swatch, Tabs, Tag } from '@/components/ui';
 import { BrandActions } from './BrandActions';
 import { ReportButton } from './Report';
 import type { Review } from '@/types';
@@ -22,10 +22,11 @@ export default function BrandProfileScreen({ id }: { id: string }) {
   return (
     <div className="bg-white min-h-screen">
       <SubHeader title={brand.name} right={!isMe && <ReportButton targetType="profile" targetId={brand.id} targetLabel={`브랜드: ${brand.name}`} />} />
-      <div className="px-4 pt-4">
-        <div className="flex items-center gap-3">
-          <BrandLogo brand={brand} size={64} />
-          <div className="flex-1 min-w-0">
+      <Swatch hue={brand.logoHue} pattern="stripe" rounded="" className="h-24 w-full" />
+      <div className="px-4">
+        <div className="relative flex flex-col items-start gap-2 -mt-9">
+          <span className="rounded-full ring-4 ring-white bg-white shrink-0"><BrandLogo brand={brand} size={72} /></span>
+          <div className="w-full min-w-0">
             <div className="flex items-center gap-1.5">
               <h1 className="text-xl font-extrabold truncate">{brand.name}</h1>
               {owner?.verifyStatus === 'verified' && <Icon name="shield" className="w-4 h-4 text-emerald-500" />}
