@@ -459,6 +459,9 @@ const reviews: Review[] = [
   r('rv11', 'visitor_popup', 'u_v2', 'p3', { 전체: 5 }, '작지만 알찬 팝업. 니트랑 가죽 지갑 같이 샀어요.', { popupId: 'p3' }),
   r('rv12', 'visitor_brand', 'u_v3', 'b5', { 전체: 5 }, '선물용으로 귀걸이 샀는데 포장이 예뻐요.', { popupId: 'p3' }),
   r('rv13', 'visitor_popup', 'u_v4', 'p1', { 전체: 4 }, '골목 분위기랑 잘 어울려요. 주말엔 좀 붐벼요.', { popupId: 'p1', createdAt: '2026-10-24' }),
+  r('rv14', 'visitor_popup', 'u_v1', 'p1', { 전체: 3 }, '구경은 즐거웠는데 피팅룸이 하나라 기다렸어요.', { popupId: 'p1', createdAt: '2026-10-23' }),
+  r('rv15', 'visitor_brand', 'u_v4', 'b8', { 전체: 4 }, '빈티지 셔츠 상태가 좋아요. 가격도 적당해요.', { popupId: 'p3' }),
+  r('rv16', 'visitor_brand', 'u_v2', 'b12', { 전체: 3 }, '물건은 좋은데 사이즈가 다양하지 않았어요.', { popupId: 'p3' }),
 ];
 
 const comboReviews: ComboReview[] = [
