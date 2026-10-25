@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useMe } from '@/store/hooks';
+import { shareLink } from '@/store/share';
 import { navigate } from '@/store/store';
 import { checkIn, claimStampReward, STAMP_GOAL, toggleWaitlist, writeComboReview, writeVisitorReview } from '@/store/actions';
-import { avg, brandById, dday, displayName, period, popupById, spaceById, teamById, waitCount } from '@/store/logic';
+import { avg, brandById, dday, md, displayName, period, popupById, spaceById, teamById, waitCount } from '@/store/logic';
 import { BrandLogo, PopupBannerCard, ScreenTitle, ThemeTagList } from '@/components/common';
 import { Button, Card, Chip, cx, Demo, Empty, inputCls, Segmented, Sheet, Stars, StatusPill, SubHeader, Swatch, Tabs, Tag, textareaCls } from '@/components/ui';
 import type { DB } from '@/data/mock';
@@ -51,7 +52,7 @@ export function PopupDetail({ id }: { id: string }) {
 
   return (
     <div className="bg-white min-h-screen">
-      <SubHeader title={p.title} />
+      <SubHeader title={p.title} right={<button className="text-[13px] font-semibold text-ink-700" onClick={() => shareLink(p.title, `${p.title} · ${sp.name} ${md(p.period.start)}~${md(p.period.end)} · OFF STAGE에서 같이 가요`)}>공유</button>} />
       <div className="relative h-44">
         <div className="absolute inset-0 flex">
           {brands.map((b) => <Swatch key={b.id} hue={b.logoHue} pattern="stripe" rounded="" className="flex-1" />)}

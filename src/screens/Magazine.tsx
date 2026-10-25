@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useMe } from '@/store/hooks';
-import { navigate, replace, toast } from '@/store/store';
+import { shareLink } from '@/store/share';
+import { navigate, replace } from '@/store/store';
 import { publishMagazine, toggleMagazineHidden, toggleMagazineLike } from '@/store/actions';
 import { ScreenTitle } from '@/components/common';
 import { Button, Card, Chip, cx, Empty, Field, Icon, inputCls, SubHeader, Tag, textareaCls } from '@/components/ui';
@@ -241,17 +242,6 @@ export function MagazineNew() {
 }
 
 /** 휴대폰이면 공유 시트를, 아니면 링크 복사를 쓴다. */
-async function shareMagazine(m: MagazinePost) {
-  const url = 'https://aspup100-sudo.github.io/-o_f_f_stage/'; // 공개 웹 주소
-  const text = `${m.title} · OFF STAGE 매거진`;
-  try {
-    if (navigator.share) {
-      await navigator.share({ title: m.title, text, url });
-      return;
-    }
-    await navigator.clipboard.writeText(`${text}\n${url}`);
-    toast('링크를 복사했어요. 친구에게 붙여 넣어 보내 보세요');
-  } catch {
-    toast('공유를 취소했어요');
-  }
+function shareMagazine(m: MagazinePost) {
+  return shareLink(m.title, `${m.title} · OFF STAGE 매거진`);
 }
