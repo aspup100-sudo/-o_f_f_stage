@@ -302,7 +302,7 @@ export function StampsTab() {
             )
           )}
         </div>
-        {n > STAMP_GOAL && <p className="text-[12px] text-ink-500 mt-2">총 {n}곳 방문했어요.</p>}
+        <StampLevels n={n} />
         {live.length > 0 && (
           <>
             <h3 className="font-bold mt-6 mb-2">지금 스탬프 받을 수 있는 팝업</h3>
@@ -327,6 +327,45 @@ export function StampsTab() {
           })}
         </div>
       </div>
+    </div>
+  );
+}
+
+// 방문 수에 따라 오르는 탐험가 등급. 첫 배지 이후에도 계속 모을 이유를 준다.
+const STAMP_LEVELS = [
+  { at: 3, name: '팝업 입문자', emoji: '🌱', perk: '혜택 배지' },
+  { at: 6, name: '골목 탐험가', emoji: '🧭', perk: '오픈 하루 전 미리 알림' },
+  { at: 10, name: '팝업 마스터', emoji: '👑', perk: '프로필에 마스터 표시' },
+];
+
+function StampLevels({ n }: { n: number }) {
+  const next = STAMP_LEVELS.find((l) => n < l.at);
+  return (
+    <div className="mt-3 rounded-2xl bg-white border border-ink-100 p-4">
+      <div className="flex items-center justify-between">
+        <span className="font-bold text-[15px]">탐험가 등급</span>
+        <span className="text-[12px] text-ink-500">총 {n}곳 방문 <Demo /></span>
+      </div>
+      <div className="flex items-center mt-3">
+        {STAMP_LEVELS.map((l, i) => (
+          <div key={l.at} className="flex items-center flex-1 last:flex-none">
+            <div className={cx('w-11 h-11 rounded-full flex items-center justify-center text-xl shrink-0', n >= l.at ? 'bg-brand-500' : 'bg-ink-100 grayscale opacity-60')}>{l.emoji}</div>
+            {i < STAMP_LEVELS.length - 1 && (
+              <div className="flex-1 h-1 mx-1 rounded-full bg-ink-100 overflow-hidden">
+                <div className="h-full bg-brand-500" style={{ width: `${Math.max(0, Math.min(1, (n - l.at) / (STAMP_LEVELS[i + 1].at - l.at))) * 100}%` }} />
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-3 text-[11px] mt-1.5">
+        {STAMP_LEVELS.map((l, i) => (
+          <span key={l.at} className={cx(i === 1 && 'text-center', i === 2 && 'text-right', n >= l.at ? 'font-bold text-ink-900' : 'text-ink-500')}>{l.name}<br />{l.at}곳</span>
+        ))}
+      </div>
+      <p className="text-[13px] text-ink-700 mt-3">
+        {next ? <>다음 등급 <b>{next.name}</b>까지 <b className="text-brand-600">{next.at - n}곳</b> 남았어요 · {next.perk}</> : '모든 등급을 달성했어요! 👑'}
+      </p>
     </div>
   );
 }

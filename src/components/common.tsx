@@ -39,8 +39,32 @@ export function BrandLogo({ brand, size = 40 }: { brand: BrandProfile; size?: nu
   return <Avatar name={brand.name} hue={brand.logoHue} size={size} />;
 }
 
-export function BrandCard({ db, brand, right, reasons }: { db: DB; brand: BrandProfile; right?: React.ReactNode; reasons?: string[] }) {
+export function BrandCard({ db, brand, right, reasons, compact }: { db: DB; brand: BrandProfile; right?: React.ReactNode; reasons?: string[]; compact?: boolean }) {
   const imgs = brand.lookbook.slice(0, 3).map((id) => db.lookbookImages.find((i) => i.id === id)!).filter(Boolean);
+  if (compact) {
+    // 목록용: 룩북 한 장 + 핵심 정보 한 줄씩
+    const im = imgs[0];
+    return (
+      <div className="flex gap-3 py-3">
+        <button onClick={() => navigate({ name: 'brand', id: brand.id })} className="w-[84px] h-[104px] shrink-0 rounded-xl overflow-hidden">
+          {im ? <Swatch hue={im.hue} pattern={im.pattern} rounded="" className="w-full h-full" /> : <Swatch hue={brand.logoHue} rounded="" className="w-full h-full" />}
+        </button>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start gap-2">
+            <button className="flex-1 min-w-0 text-left" onClick={() => navigate({ name: 'brand', id: brand.id })}>
+              <div className="font-bold text-[15px] truncate">{brand.name}</div>
+              <TrustLine db={db} subjectId={brand.id} compact />
+            </button>
+            {right}
+          </div>
+          <p className="text-[13px] text-ink-700 mt-1 line-clamp-1">{brand.intro}</p>
+          <div className="mt-1.5">
+            <ThemeTagList tags={brand.tags} limit={3} />
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <Card className="overflow-hidden">
       <button className="w-full text-left" onClick={() => navigate({ name: 'brand', id: brand.id })}>

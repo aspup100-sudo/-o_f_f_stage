@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { isListedBrand, recommendations } from '@/store/logic';
 import { BrandCard, PopupBannerCard } from '@/components/common';
-import { Chip, Empty, Segmented, Sheet, Button, Icon, Tag } from '@/components/ui';
+import { Chip, cx, Empty, Sheet, Button, Icon, Tag } from '@/components/ui';
 import { CATEGORIES, MOODS, PRICE_RANGES, type Category, type Mood, type PriceRange } from '@/types';
 import { BrandActions } from './BrandActions';
 import { ShowcaseList } from './Showcase';
@@ -16,12 +16,16 @@ export default function Explore() {
   const [view, setView] = useState<View>('brand');
   return (
     <div>
-      <div className="px-4 pt-3 pb-1 bg-white">
-        <Segmented<View>
-          items={[{ key: 'brand', label: '홈' }, { key: 'magazine', label: '매거진' }, { key: 'showcase', label: '팝업자랑' }, { key: 'qna', label: 'Q&A' }]}
-          value={view}
-          onChange={setView}
-        />
+      <div className="sticky top-14 z-20 bg-white px-4 flex gap-5 border-b border-ink-100">
+        {([{ key: 'brand', label: '홈' }, { key: 'magazine', label: '매거진' }, { key: 'showcase', label: '팝업자랑' }, { key: 'qna', label: 'Q&A' }] as { key: View; label: string }[]).map((it) => (
+          <button
+            key={it.key}
+            onClick={() => { setView(it.key); window.scrollTo?.(0, 0); }}
+            className={cx('h-11 text-[16px] font-extrabold border-b-2 -mb-px', view === it.key ? 'border-ink-900 text-ink-900' : 'border-transparent text-ink-300')}
+          >
+            {it.label}
+          </button>
+        ))}
       </div>
       {view === 'brand' && <BrandFeed onMore={() => setView('magazine')} />}
       {view === 'magazine' && <MagazineList />}
@@ -112,9 +116,9 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
             {price && <Tag tone="blue">{price}</Tag>}
           </div>
         )}
-        <div className="space-y-3">
+        <div className="rounded-2xl bg-white px-3.5 divide-y divide-ink-100">
           {(showAll ? list : list.slice(0, 6)).map((b) => (
-            <BrandCard key={b.id} db={db} brand={b} right={<BrandActions brandId={b.id} />} />
+            <BrandCard key={b.id} compact db={db} brand={b} right={<BrandActions brandId={b.id} />} />
           ))}
           {!list.length && <Empty icon="search">조건에 맞는 브랜드가 없어요</Empty>}
         </div>
