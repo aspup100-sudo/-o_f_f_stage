@@ -230,7 +230,7 @@ export function MapTab() {
       </div>
       {view === 'map' && (
         <div className="px-4">
-          <div className="relative w-full aspect-[4/5] rounded-3xl overflow-hidden bg-[#eef1ea] border border-ink-100">
+          <div className="relative w-full aspect-square rounded-3xl overflow-hidden bg-[#eef1ea] border border-ink-100">
             <svg viewBox="0 0 100 125" className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
               <path d="M0 98 C 20 92, 35 104, 55 100 S 85 92, 100 98 L100 112 C 80 106, 60 116, 40 112 S 10 108, 0 112 Z" fill="#bfdbea" />
               <path d="M10 0 L 30 60 M 50 0 L 52 125 M 0 55 L 100 50 M 70 0 L 85 125" stroke="#ffffff" strokeWidth="1.6" fill="none" />
@@ -244,7 +244,7 @@ export function MapTab() {
             {popups.map((p) => (
               <button key={p.id} onClick={() => setSel(p.id)} className="absolute -translate-x-1/2 -translate-y-full flex flex-col items-center" style={{ left: `${p.mapX}%`, top: `${p.mapY}%` }}>
                 <span className={cx('px-2 py-1 rounded-full text-[11px] font-bold shadow whitespace-nowrap', selected?.id === p.id ? 'bg-ink-900 text-white' : p.status === '진행 중' ? 'bg-brand-500 text-white' : 'bg-white text-ink-900 border border-ink-300')}>
-                  {p.status === '진행 중' ? '● ' : ''}{p.title}
+                  {p.status === '진행 중' ? '● ' : `${dday(p.period.start)} · `}{p.title}
                 </span>
                 <span className={cx('w-2 h-2 rotate-45 -mt-1', selected?.id === p.id ? 'bg-ink-900' : p.status === '진행 중' ? 'bg-brand-500' : 'bg-white')} />
               </button>
