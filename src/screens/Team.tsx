@@ -326,10 +326,21 @@ function CostTab({ team, myBrandId, isLeader }: { team: Team; myBrandId: string;
           <span>{won(total)}</span>
         </div>
       </Card>
+      {shares[myBrandId] !== undefined && total > 0 && (
+        <div className="rounded-2xl bg-ink-900 text-white p-4">
+          <div className="text-[12px] text-white/60">혼자 열었다면 {won(total)}</div>
+          <div className="text-lg font-extrabold mt-0.5">같이 열어서 내 몫은 <span className="text-brand-400">{won(shares[myBrandId])}</span></div>
+          <div className="text-[12px] text-white/70 mt-0.5">{Math.round((1 - shares[myBrandId] / total) * 100)}% 아꼈어요 · {won(total - shares[myBrandId])} 절약</div>
+        </div>
+      )}
       <div>
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-bold">각자 분담금</h3>
           <span className="text-xs text-ink-500">납부 기한 {md(split.dueDate)}</span>
+        </div>
+        <div className="flex items-center gap-2 mb-2">
+          <div className="flex-1 h-1.5 rounded-full bg-ink-100 overflow-hidden"><div className="h-full rounded-full bg-emerald-500" style={{ width: `${total ? (paidSum / total) * 100 : 0}%` }} /></div>
+          <span className="text-[11px] font-semibold text-emerald-700">{split.paid.length}/{team.members.length}곳 납부</span>
         </div>
         <Card className="divide-y divide-ink-100">
           {team.members.map((m) => {
