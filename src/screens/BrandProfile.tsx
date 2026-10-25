@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { guard } from '@/store/hooks';
 import { navigate } from '@/store/store';
+import { shareLink } from '@/store/share';
 import { brandById, displayName, josa, matchPct, matchScore, period, reviewAvg, spaceById, teamsOfBrand, trustEvents, trustScore, userById } from '@/store/logic';
 import { BrandLogo, LookbookGrid, ThemeTagList } from '@/components/common';
 import { Button, Card, Empty, GradeBadge, Icon, Stars, StatusPill, SubHeader, Swatch, Tabs, Tag } from '@/components/ui';
@@ -21,7 +22,15 @@ export default function BrandProfileScreen({ id }: { id: string }) {
 
   return (
     <div className="bg-white min-h-screen">
-      <SubHeader title={brand.name} right={!isMe && <ReportButton targetType="profile" targetId={brand.id} targetLabel={`브랜드: ${brand.name}`} />} />
+      <SubHeader
+        title={brand.name}
+        right={
+          <div className="flex items-center gap-3">
+            <button className="text-[13px] font-semibold text-ink-700" onClick={() => shareLink(brand.name, isMe ? `OFF STAGE에서 ${brand.name}${josa(brand.name, '과', '와').slice(brand.name.length)} 같이 팝업 열 브랜드를 찾아요` : `${brand.name} · OFF STAGE 브랜드`)}>공유</button>
+            {!isMe && <ReportButton targetType="profile" targetId={brand.id} targetLabel={`브랜드: ${brand.name}`} />}
+          </div>
+        }
+      />
       <Swatch hue={brand.logoHue} pattern="stripe" rounded="" className="h-24 w-full" />
       <div className="px-4">
         <div className="relative flex flex-col items-start gap-2 -mt-9">
