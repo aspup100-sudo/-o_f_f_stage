@@ -2,6 +2,7 @@
 import { update, getState, newId, nowISO, toast, navigate, switchRole } from './store';
 import { INSTAGRAM_SAMPLE_LABELS, makeLookbook, DEMO_TODAY } from '@/data/mock';
 import type { DB } from '@/data/mock';
+import { josa } from './logic';
 import type { DateRange, LoginProvider, NotificationType, Role, Route, ThemeTags } from '@/types';
 
 export function notify(db: DB, userId: string, type: NotificationType, text: string, link?: Route) {
@@ -406,7 +407,7 @@ export function createTeamFromRecruitment(db: DB, r: import('@/types').Recruitme
   }));
   const hostName = brandName(db, r.hostBrandId);
   db.teams.unshift({
-    id: teamId, name: `${hostName}와 친구들`, recruitmentId: r.id, leaderBrandId: r.hostBrandId, members, stage: '준비 중',
+    id: teamId, name: `${josa(hostName, '과', '와')} 친구들`, recruitmentId: r.id, leaderBrandId: r.hostBrandId, members, stage: '준비 중',
     region: r.region, period: r.period, spaceId: r.spaceConfirmed ? r.spaceId : undefined, round: 1, promoChecked: [], confirmed: false,
   });
   db.agreements.push({ teamId, items: { cost: '', space: '', hours: '', stock: '', setup: '', damage: '', cancel: '', promo: '', record: '' }, agreedBy: [], locked: false, updatedAt: nowISO() });
@@ -422,9 +423,9 @@ export function createTeamFromRecruitment(db: DB, r: import('@/types').Recruitme
   r.teamId = teamId;
   r.status = '마감';
   const memberUsers = members.map((m) => brandUser(db, m.brandId));
-  const roomId = ensureRoom(db, memberUsers, `${hostName}와 친구들`, { type: 'team', refId: teamId });
+  const roomId = ensureRoom(db, memberUsers, `${josa(hostName, '과', '와')} 친구들`, { type: 'team', refId: teamId });
   systemMessage(db, roomId, '팀이 만들어졌어요! 공동 약속서 9개 항목을 함께 채우고 전원 동의하면 팀이 확정돼요.');
-  memberUsers.forEach((u) => notify(db, u, 'agreement_request', `팀 "${hostName}와 친구들"이 만들어졌어요. 공동 약속서에 동의해 주세요.`, { name: 'team', id: teamId, sub: 'agreement' }));
+  memberUsers.forEach((u) => notify(db, u, 'agreement_request', `팀 "${josa(hostName, '과', '와')} 친구들"이 만들어졌어요. 공동 약속서에 동의해 주세요.`, { name: 'team', id: teamId, sub: 'agreement' }));
   return teamId;
 }
 
@@ -811,7 +812,7 @@ function verifyIfDone(db: DB, c: import('@/types').Completion) {
   if (!c.verified && c.required.every((u) => c.confirmedBy.includes(u))) {
     c.verified = true;
     const p = db.popups.find((x) => x.id === c.popupId)!;
-    c.required.forEach((u) => notify(db, u, 'completion_request', `"${p.title}"이(가) 인증 공동 팝업으로 기록됐어요. 이제 후기를 남길 수 있어요.`));
+    c.required.forEach((u) => notify(db, u, 'completion_request', `"${p.title}" 팝업이 인증 공동 팝업으로 기록됐어요. 이제 후기를 남길 수 있어요.`, db.users.find((x) => x.id === u)?.role === 'landlord' ? { name: 'tab', tab: 'inbox' } : { name: 'team', id: c.teamId, sub: 'wrap' }));
     return true;
   }
   return false;
