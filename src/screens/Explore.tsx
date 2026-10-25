@@ -43,10 +43,12 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
   const [price, setPrice] = useState<PriceRange | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
   const [showAll, setShowAll] = useState(false);
-  const [sort, setSort] = useState<'base' | 'match' | 'exp'>('base');
+  const [sort, setSort] = useState<'base' | 'match' | 'exp' | 'fans' | 'live'>('base');
 
   const popups = db.popups.filter((p) => p.status !== '종료');
   const recs = brand ? recommendations(db, brand, 5) : [];
+  // 지금 진행 중인 공동 팝업에 참여한 브랜드인가
+  const isLive = (id: string) => db.popups.some((p) => p.status === '진행 중' && db.teams.find((t) => t.id === p.teamId)?.members.some((m) => m.brandId === id));
   const list = db.brands
     .filter((b) => isListedBrand(db, b) && b.id !== brand?.id)
     .filter((b) => !moods.length || b.tags.moods.some((m) => moods.includes(m)))
@@ -55,6 +57,8 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
     .sort((a, b) =>
       sort === 'match' && brand ? matchScore(db, brand, b).score - matchScore(db, brand, a).score
       : sort === 'exp' ? trustScore(db, b.id).verifiedPopups - trustScore(db, a.id).verifiedPopups
+      : sort === 'fans' ? b.followers.length - a.followers.length
+      : sort === 'live' ? Number(isLive(b.id)) - Number(isLive(a.id))
       : 0);
   const filterCount = moods.length + cats.length + (price ? 1 : 0);
 
@@ -124,6 +128,8 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
               <option value="base">기본순</option>
               {brand && <option value="match">궁합 높은 순</option>}
               <option value="exp">공동 팝업 많은 순</option>
+              <option value="fans">팔로워 많은 순</option>
+              <option value="live">지금 팝업 중 먼저</option>
             </select>
           </div>
           <button onClick={() => setFilterOpen(true)} className="flex items-center gap-1 text-sm font-semibold">
