@@ -14,7 +14,7 @@ export function ReportButton({ targetType, targetId, targetLabel, small }: { tar
   return (
     <>
       {small ? (
-        <button onClick={() => setOpen(true)} className="text-[11px] text-ink-500">신고</button>
+        <button onClick={() => setOpen(true)} className="text-[12px] text-ink-500">신고</button>
       ) : (
         <button onClick={() => setOpen(true)} className="w-10 h-10 flex items-center justify-center text-ink-500" aria-label="신고">
           <Icon name="flag" />
@@ -30,7 +30,7 @@ export function ReportButton({ targetType, targetId, targetLabel, small }: { tar
         <Button full className="mt-4" disabled={!reason} onClick={() => { submitReport({ reporterId: userId, targetType, targetId, targetLabel, reason: reason!, detail }); setOpen(false); setReason(null); setDetail(''); }}>
           신고 접수
         </Button>
-        <p className="text-[11px] text-ink-500 mt-2 text-center">신고 내용은 운영팀만 볼 수 있어요.</p>
+        <p className="text-[12px] text-ink-500 mt-2 text-center">신고 내용은 운영팀만 볼 수 있어요.</p>
       </Sheet>
     </>
   );

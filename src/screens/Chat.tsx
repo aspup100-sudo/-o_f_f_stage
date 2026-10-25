@@ -32,12 +32,12 @@ export function ChatListScreen() {
                 <div className="flex items-center gap-1.5">
                   <span className="font-bold truncate">{r.title}</span>
                   <span className="text-xs text-ink-500 shrink-0">{r.memberIds.length > 2 ? r.memberIds.length : ''}</span>
-                  {team && team.popupId && <span className="text-[10px] font-bold text-brand-600 bg-brand-50 rounded px-1.5 py-0.5 shrink-0">{dday(team.period.start)}</span>}
-                  <span className="ml-auto text-[11px] text-ink-500 shrink-0">{last ? ago(last.at) : ''}</span>
+                  {team && team.popupId && <span className="text-[11px] font-bold text-brand-600 bg-brand-50 rounded px-1.5 py-0.5 shrink-0">{dday(team.period.start)}</span>}
+                  <span className="ml-auto text-[12px] text-ink-500 shrink-0">{last ? ago(last.at) : ''}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className={unread ? 'text-[13px] text-ink-900 font-semibold truncate flex-1' : 'text-[13px] text-ink-500 truncate flex-1'}>{last ? who + last.text : '대화를 시작해 보세요'}</div>
-                  {unread > 0 && <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-brand-500 text-white text-[10px] font-bold flex items-center justify-center shrink-0">{unread}</span>}
+                  {unread > 0 && <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-brand-500 text-white text-[11px] font-bold flex items-center justify-center shrink-0">{unread}</span>}
                 </div>
               </div>
             </Card>
@@ -102,7 +102,7 @@ export function ChatScreen({ id }: { id: string }) {
             <div key={m.id} className={mine ? 'flex justify-end' : 'flex gap-2'}>
               {!mine && <Avatar name={displayName(db, m.senderId)} hue={brandOfUser(db, m.senderId)?.logoHue ?? 210} size={32} />}
               <div className="max-w-[75%]">
-                {!mine && <div className="text-[11px] text-ink-500 mb-0.5">{userById(db, m.senderId)?.name}</div>}
+                {!mine && <div className="text-[12px] text-ink-500 mb-0.5">{userById(db, m.senderId)?.name}</div>}
                 <div className={mine ? 'bg-brand-500 text-white rounded rounded-tr-sm px-3 py-2 text-sm' : 'bg-white rounded rounded-tl-sm px-3 py-2 text-sm'}>{m.text}</div>
               </div>
             </div>

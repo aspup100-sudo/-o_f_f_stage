@@ -11,7 +11,7 @@ import { toast } from '@/store/store';
 export function TrustLine({ db, subjectId, compact }: { db: DB; subjectId: string; compact?: boolean }) {
   const t = trustScore(db, subjectId);
   return (
-    <div className={cx('flex items-center gap-1.5 flex-wrap', compact ? 'text-[11px]' : 'text-xs')}>
+    <div className={cx('flex items-center gap-1.5 flex-wrap', compact ? 'text-[12px]' : 'text-xs')}>
       <GradeBadge grade={t.grade} small={compact} />
       <span className="text-ink-700">
         인증 공동 팝업 {t.verifiedPopups}회{t.avgRating !== null && <> · 평균 {t.avgRating.toFixed(1)}</>}
@@ -60,7 +60,7 @@ export function BrandCard({ db, brand, right, reasons, compact }: { db: DB; bran
             {right}
           </div>
           {live && (
-            <button onClick={() => navigate({ name: 'popup', id: live.id })} className="mt-1 inline-flex items-center gap-1 text-[11px] font-bold text-brand-600">
+            <button onClick={() => navigate({ name: 'popup', id: live.id })} className="mt-1 inline-flex items-center gap-1 text-[12px] font-bold text-brand-600">
               <span className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse" />지금 {live.title}에서 팝업 중 ›
             </button>
           )}
@@ -121,7 +121,7 @@ export function TagPicker({ value, onChange }: { value: ThemeTags; onChange: (t:
   const Group = ({ title, sub, children }: { title: string; sub: string; children: React.ReactNode }) => (
     <div className="mb-4">
       <div className="text-[13px] font-semibold mb-1.5">
-        {title} <span className="text-ink-500 font-normal text-[11px]">{sub}</span>
+        {title} <span className="text-ink-500 font-normal text-[12px]">{sub}</span>
       </div>
       <div className="flex flex-wrap gap-1.5">{children}</div>
     </div>
@@ -158,16 +158,16 @@ export function PopupBannerCard({ db, popup, wide }: { db: DB; popup: Popup; wid
       <div className="p-3.5">
         <div className="flex items-center gap-1.5 mb-1">
           <StatusPill status={popup.status} />
-          <span className="text-[11px] text-white/70">{period(popup.period)} · {space?.region}</span>
+          <span className="text-[12px] text-white/70">{period(popup.period)} · {space?.region}</span>
         </div>
         <div className="font-bold text-[15px]">{popup.title}</div>
         <div className="text-[12px] text-white/70 mt-0.5 truncate">{brands.map((b) => b.name).join(' × ')}</div>
-        {popup.status === '예정' && waitCount(popup) > 0 && <div className="text-[11px] text-brand-200 mt-1.5 font-semibold"><Ic n="bell" />{waitCount(popup)}명이 오픈을 기다려요</div>}
+        {popup.status === '예정' && waitCount(popup) > 0 && <div className="text-[12px] text-brand-200 mt-1.5 font-semibold"><Ic n="bell" />{waitCount(popup)}명이 오픈을 기다려요</div>}
         {popup.status === '진행 중' && (() => {
           const n = db.visits.filter((v) => v.popupId === popup.id).length;
           const end = popup.period.end === DEMO_TODAY ? '오늘 마지막 날' : `${daysUntil(popup.period.end)}일 남음`;
           const o = openNow(popup.hours);
-          return <div className="text-[11px] text-brand-200 mt-1.5 font-semibold">{o?.open ? <span className="text-emerald-300">● 영업 중 · </span> : null}<Ic n="clock" />{end}{n > 0 ? ` · ${n}명 방문 인증` : ''}</div>;
+          return <div className="text-[12px] text-brand-200 mt-1.5 font-semibold">{o?.open ? <span className="text-emerald-300">● 영업 중 · </span> : null}<Ic n="clock" />{end}{n > 0 ? ` · ${n}명 방문 인증` : ''}</div>;
         })()}
       </div>
     </button>

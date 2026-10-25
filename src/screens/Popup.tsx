@@ -210,7 +210,7 @@ export function PopupDetail({ id }: { id: string }) {
                 {others.map((x) => (
                   <div key={x.id} className="relative">
                     <PopupBannerCard db={db} popup={x} />
-                    {role === 'visitor' && !stamped.includes(x.id) && <span className="absolute top-2 right-2 text-[10px] font-bold bg-white text-brand-600 rounded px-2 py-0.5 shadow">+1 스탬프</span>}
+                    {role === 'visitor' && !stamped.includes(x.id) && <span className="absolute top-2 right-2 text-[11px] font-bold bg-white text-brand-600 rounded px-2 py-0.5 shadow">+1 스탬프</span>}
                   </div>
                 ))}
               </div>
@@ -279,7 +279,7 @@ function ReviewSheet({ popup, kind, onClose }: { popup: Popup; kind: null | 'pop
         })}
       </div>
       <textarea className={textareaCls + ' mt-3'} value={comment} maxLength={200} onChange={(e) => setComment(e.target.value)} placeholder="한 줄 후기를 남겨 주세요" />
-      <div className="text-right text-[11px] text-ink-500 mt-1">{comment.length}/200</div>
+      <div className="text-right text-[12px] text-ink-500 mt-1">{comment.length}/200</div>
       <Button
         full size="lg" className="mt-4"
         disabled={!comment.trim() || (kind === 'combo' && good === 'good' && !picked.length)}
@@ -332,22 +332,22 @@ export function MapTab() {
               <rect x="56" y="18" width="12" height="10" rx="2" fill="#d5e5cc" />
               <rect x="80" y="62" width="14" height="10" rx="2" fill="#d5e5cc" />
             </svg>
-            <span className="absolute text-[10px] text-sky-700 font-semibold" style={{ left: '40%', top: '84%' }}>한강</span>
+            <span className="absolute text-[11px] text-sky-700 font-semibold" style={{ left: '40%', top: '84%' }}>한강</span>
             {REGION_LABELS.map((r) => (
-              <span key={r.name} className="absolute text-[11px] font-bold text-ink-500 -translate-x-1/2" style={{ left: `${r.x}%`, top: `${r.y}%` }}>{r.name}</span>
+              <span key={r.name} className="absolute text-[12px] font-bold text-ink-500 -translate-x-1/2" style={{ left: `${r.x}%`, top: `${r.y}%` }}>{r.name}</span>
             ))}
             {popups.map((p) => (
               <button key={p.id} onClick={() => setSel(p.id)} className="absolute -translate-x-1/2 -translate-y-full flex flex-col items-center" style={{ left: `${p.mapX}%`, top: `${p.mapY}%` }}>
-                <span className={cx('px-2 py-1 text-[11px] font-bold whitespace-nowrap border border-ink-900 flex items-center gap-1', selected?.id === p.id ? 'bg-ink-900 text-white' : p.status === '진행 중' ? 'bg-brand-500 text-white' : 'bg-white text-ink-900 border border-ink-300')}>
+                <span className={cx('px-2 py-1 text-[12px] font-bold whitespace-nowrap border border-ink-900 flex items-center gap-1', selected?.id === p.id ? 'bg-ink-900 text-white' : p.status === '진행 중' ? 'bg-brand-500 text-white' : 'bg-white text-ink-900 border border-ink-300')}>
                   {p.status === '진행 중' ? <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> : `${dday(p.period.start)} · `}{p.title}
                 </span>
                 <span className={cx('w-2 h-2 rotate-45 -mt-1 border-r border-b border-ink-900', selected?.id === p.id ? 'bg-ink-900' : p.status === '진행 중' ? 'bg-brand-500' : 'bg-white')} />
               </button>
             ))}
           </div>
-          <p className="text-[11px] text-ink-500 mt-1.5 text-center">카카오맵 연결 전이라 간략한 지도로 보여요 <Demo /></p>
+          <p className="text-[12px] text-ink-500 mt-1.5 text-center">카카오맵 연결 전이라 간략한 지도로 보여요 <Demo /></p>
           </>} />
-          {kakaoMapEnabled && <p className="text-[11px] text-ink-500 mt-1.5 text-center">공간 위치는 예시 주소 기준이에요 <Demo /></p>}
+          {kakaoMapEnabled && <p className="text-[12px] text-ink-500 mt-1.5 text-center">공간 위치는 예시 주소 기준이에요 <Demo /></p>}
           {selected && <div className="mt-3"><PopupBannerCard db={db} popup={selected} wide /></div>}
         </div>
       )}
@@ -380,17 +380,17 @@ export function StampsTab() {
               return (
                 <div
                   key={i}
-                  className={cx('aspect-square rounded-full border-2 flex flex-col items-center justify-center text-center p-1', p ? 'border-white/80 text-white' : 'border-dashed border-ink-300 text-ink-300')}
+                  className={cx('aspect-square rounded-full border-2 flex flex-col items-center justify-center text-center p-1', p ? 'border-white/80 text-white' : 'border-dashed border-ink-300 text-ink-400')}
                   style={p ? { background: `hsl(${brandById(db, teamById(db, p.teamId)?.members[0]?.brandId ?? '')?.logoHue ?? 250} 45% 45%)`, transform: `rotate(${(i % 2 ? 1 : -1) * (6 + i * 3)}deg)` } : undefined}
                 >
                   {p ? (
                     <>
                       <span className="text-[9px] font-bold tracking-widest opacity-80">OFF STAGE</span>
-                      <span className="text-[11px] font-extrabold leading-tight mt-0.5 line-clamp-2">{p.title}</span>
+                      <span className="text-[12px] font-extrabold leading-tight mt-0.5 line-clamp-2">{p.title}</span>
                       <span className="text-[9px] opacity-80 mt-0.5">{md(p.period.start)}</span>
                     </>
                   ) : (
-                    <span className="text-ink-300 text-xs">{i + 1}</span>
+                    <span className="text-ink-400 text-xs">{i + 1}</span>
                   )}
                 </div>
               );
@@ -423,7 +423,7 @@ export function StampsTab() {
                   <div className="font-semibold text-sm">{p.title}</div>
                   <div className="text-[12px] text-ink-500">{period(p.period)} · {v?.at.slice(0, 10)} 인증</div>
                 </div>
-                <span className="text-ink-300">›</span>
+                <span className="text-ink-400">›</span>
               </Card>
             );
           })}
@@ -460,7 +460,7 @@ function StampLevels({ n }: { n: number }) {
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-3 text-[11px] mt-1.5">
+      <div className="grid grid-cols-3 text-[12px] mt-1.5">
         {STAMP_LEVELS.map((l, i) => (
           <span key={l.at} className={cx(i === 1 && 'text-center', i === 2 && 'text-right', n >= l.at ? 'font-bold text-ink-900' : 'text-ink-500')}>{l.name}<br />{l.at}곳</span>
         ))}

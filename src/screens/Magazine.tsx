@@ -22,7 +22,7 @@ export function OfficialInsta({ compact }: { compact?: boolean }) {
         <span className="block text-sm font-bold">@{OFFICIAL_INSTAGRAM}</span>
         <span className="block text-[12px] text-ink-500">공식 인스타그램 · 매거진 카드뉴스를 먼저 받아 보세요</span>
       </span>
-      <span className="text-ink-300">↗</span>
+      <span className="text-ink-400">↗</span>
     </a>
   );
 }
@@ -35,7 +35,7 @@ function CardFace({ post, card, index, total }: { post: Pick<MagazinePost, 'hue'
       className="relative aspect-square w-full rounded overflow-hidden p-6 flex flex-col"
       style={{ background: cover ? `hsl(${post.hue} 35% 28%)` : `hsl(${post.hue} 40% 96%)`, color: cover ? '#fff' : `hsl(${post.hue} 45% 18%)` }}
     >
-      <div className="flex items-center justify-between text-[11px] font-bold opacity-80">
+      <div className="flex items-center justify-between text-[12px] font-bold opacity-80">
         <span>{post.category}</span>
         <span className="tabular-nums">{index + 1} / {total}</span>
       </div>
@@ -44,7 +44,7 @@ function CardFace({ post, card, index, total }: { post: Pick<MagazinePost, 'hue'
         <div className={cx('font-extrabold leading-snug', cover ? 'text-[26px]' : 'text-xl')} style={{ textWrap: 'balance' } as React.CSSProperties}>{cover ? post.title : card.heading}</div>
         <p className={cx('mt-2 leading-relaxed', cover ? 'text-sm opacity-80' : 'text-[15px]')}>{card.body}</p>
       </div>
-      <div className="text-[11px] font-bold opacity-60">OFF STAGE 매거진 · @{OFFICIAL_INSTAGRAM}</div>
+      <div className="text-[12px] font-bold opacity-60">OFF STAGE 매거진 · @{OFFICIAL_INSTAGRAM}</div>
     </div>
   );
 }
@@ -60,7 +60,7 @@ export function MagazineThumb({ post, wide }: { post: MagazinePost; wide?: boole
         className="aspect-[4/5] rounded overflow-hidden p-3.5 flex flex-col text-white"
         style={{ background: `hsl(${post.hue} 35% 28%)` }}
       >
-        <div className="flex items-center justify-between text-[10px] font-bold opacity-80">
+        <div className="flex items-center justify-between text-[11px] font-bold opacity-80">
           <span className="flex items-center gap-1">{fresh && <span className="bg-white text-ink-900 rounded px-1 py-px text-[9px] font-black">NEW</span>}{post.category}</span>
           <span>{post.cards.length}장</span>
         </div>
@@ -182,7 +182,7 @@ export function MagazineAdminTab() {
               <CardFace post={m} card={m.cards[0]} index={0} total={m.cards.length} />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-[11px] text-ink-500">{m.category} · {m.createdAt} · 카드 {m.cards.length}장 · 좋아요 {m.likes.length}</div>
+              <div className="text-[12px] text-ink-500">{m.category} · {m.createdAt} · 카드 {m.cards.length}장 · 좋아요 {m.likes.length}</div>
               <div className="font-semibold text-sm truncate">{m.title}</div>
             </div>
             <Button size="sm" variant="secondary" onClick={() => toggleMagazineHidden(m.id)}>{m.hidden ? '다시 공개' : '숨기기'}</Button>
@@ -245,7 +245,7 @@ export function MagazineNew() {
           const id = publishMagazine({ category, title, subtitle, region, hue, cards: cards.map((c) => ({ ...c, stat: c.stat?.trim() || undefined })) });
           replace({ name: 'magazine', id });
         }}>발행하기</Button>
-        <p className="text-[11px] text-ink-500 text-center mt-2">발행하면 브랜드와 방문객에게 알림이 가요. 같은 카드를 공식 인스타그램 @{OFFICIAL_INSTAGRAM}에도 올려 보세요.</p>
+        <p className="text-[12px] text-ink-500 text-center mt-2">발행하면 브랜드와 방문객에게 알림이 가요. 같은 카드를 공식 인스타그램 @{OFFICIAL_INSTAGRAM}에도 올려 보세요.</p>
       </div>
     </div>
   );

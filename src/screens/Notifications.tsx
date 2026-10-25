@@ -48,7 +48,7 @@ function NotiSettings({ open, onClose }: { open: boolean; onClose: () => void })
           );
         })}
       </div>
-      <p className="text-[11px] text-ink-500 mt-2">운영 공지와 신고 처리 결과는 끌 수 없어요.</p>
+      <p className="text-[12px] text-ink-500 mt-2">운영 공지와 신고 처리 결과는 끌 수 없어요.</p>
     </Sheet>
   );
 }
@@ -81,7 +81,7 @@ export function NotificationsScreen() {
                   <span className="w-9 h-9 rounded-full bg-ink-100 text-ink-700 flex items-center justify-center shrink-0"><Icon name={ICON[n.type]} className="w-[18px] h-[18px]" /></span>
                   <span className="flex-1">
                     <span className={cx('block text-sm', !n.read && 'font-semibold')}>{n.text}</span>
-                    <span className="block text-[11px] text-ink-500 mt-0.5">{ago(n.at)}</span>
+                    <span className="block text-[12px] text-ink-500 mt-0.5">{ago(n.at)}</span>
                   </span>
                   {!n.read && <span className="w-2 h-2 rounded-full bg-brand-500 mt-1.5" />}
                 </button>

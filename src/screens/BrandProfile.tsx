@@ -49,15 +49,15 @@ export default function BrandProfileScreen({ id }: { id: string }) {
         <div className="grid grid-cols-3 mt-4 rounded bg-ink-100/70 py-3 text-center">
           <div>
             <div className="text-lg font-extrabold">{t.verifiedPopups}회</div>
-            <div className="text-[11px] text-ink-500">인증 공동 팝업</div>
+            <div className="text-[12px] text-ink-500">인증 공동 팝업</div>
           </div>
           <div className="border-x border-ink-300/60">
             <div className="text-lg font-extrabold">{t.avgRating !== null ? t.avgRating.toFixed(1) : '-'}</div>
-            <div className="text-[11px] text-ink-500">후기 평균 ({t.reviewCount})</div>
+            <div className="text-[12px] text-ink-500">후기 평균 ({t.reviewCount})</div>
           </div>
           <div>
             <div className="text-lg font-extrabold">{brand.followers.length}</div>
-            <div className="text-[11px] text-ink-500">팔로워</div>
+            <div className="text-[12px] text-ink-500">팔로워</div>
           </div>
         </div>
         {t.grade === '새싹' && <p className="text-[12px] text-lime-700 mt-2"><Ic n="leaf" />OFF STAGE에서 첫 공동 팝업을 준비 중인 새싹 브랜드예요.</p>}
@@ -78,7 +78,7 @@ export default function BrandProfileScreen({ id }: { id: string }) {
           <div className="mt-4 rounded border border-ink-100 p-3.5">
             <div className="text-[12px] font-bold text-ink-500 mb-1"><Ic n="megaphone" />최근 소식</div>
             {brand.news.slice(0, 2).map((n) => (
-              <div key={n.id} className="text-sm py-1"><span className="text-ink-900">{n.text}</span> <span className="text-[11px] text-ink-500">{n.at.slice(5, 10).replace('-', '/')}</span></div>
+              <div key={n.id} className="text-sm py-1"><span className="text-ink-900">{n.text}</span> <span className="text-[12px] text-ink-500">{n.at.slice(5, 10).replace('-', '/')}</span></div>
             ))}
           </div>
         )}
@@ -224,7 +224,7 @@ export function ReviewGroup({ title, reviews }: { title: string; reviews: Review
             )}
             <p className="text-sm text-ink-700 mt-1.5">{r.comment}</p>
             <div className="flex justify-between items-center mt-1">
-              <span className="text-[11px] text-ink-500">{r.createdAt}</span>
+              <span className="text-[12px] text-ink-500">{r.createdAt}</span>
               <ReportButton targetType="review" targetId={r.id} targetLabel={`리뷰: "${r.comment.slice(0, 20)}"`} small />
             </div>
           </Card>
@@ -264,7 +264,7 @@ function MatchCard({ me, other }: { me: import('@/types').BrandProfile; other: i
             </div>
           ))}
           <div className="flex justify-between border-t border-ink-100 mt-1.5 pt-1.5 font-bold"><span>합계 {m.score}점</span><span>40 + {m.score}×4 = {pct}%</span></div>
-          <p className="text-[11px] text-ink-500 mt-1.5">가입할 때 고른 무드·카테고리·가격대·고객 연령 태그로 계산해요. 태그는 내 정보에서 바꿀 수 있어요.{learned.samples > 0 && ` 항목별 점수는 실제로 함께 팝업을 연 ${learned.samples}쌍의 후기 결과로 자동 보정돼요.`} (데모)</p>
+          <p className="text-[12px] text-ink-500 mt-1.5">가입할 때 고른 무드·카테고리·가격대·고객 연령 태그로 계산해요. 태그는 내 정보에서 바꿀 수 있어요.{learned.samples > 0 && ` 항목별 점수는 실제로 함께 팝업을 연 ${learned.samples}쌍의 후기 결과로 자동 보정돼요.`} (데모)</p>
         </div>
       )}
     </div>

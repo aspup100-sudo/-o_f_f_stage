@@ -57,7 +57,7 @@ function Login() {
         ].map(([v, l]) => (
           <div key={l} className="border-t-2 border-ink-900 pt-2.5">
             <div className="text-2xl font-black">{v}</div>
-            <div className="text-[11px] text-ink-700 leading-tight mt-0.5 break-keep">{l}</div>
+            <div className="text-[12px] text-ink-700 leading-tight mt-0.5 break-keep">{l}</div>
           </div>
         ))}
       </div>
@@ -68,7 +68,7 @@ function Login() {
         <button onClick={() => socialLogin('naver')} className="w-full h-12 rounded-md bg-[#03C75A] text-white font-bold text-[15px]">
           네이버로 시작하기 <Demo />
         </button>
-        <p className="text-center text-[11px] text-ink-500 pt-1">데모에서는 버튼을 누르면 바로 로그인돼요.</p>
+        <p className="text-center text-[12px] text-ink-500 pt-1">데모에서는 버튼을 누르면 바로 로그인돼요.</p>
         <a href="https://www.instagram.com/o_f_f_stage/" target="_blank" rel="noreferrer" className="block text-center text-[12px] text-ink-700 font-semibold pt-2">공식 인스타그램 @o_f_f_stage ↗</a>
       </div>
     </div>
@@ -93,7 +93,7 @@ function RolePick() {
               <span className="block font-bold">{o.title}</span>
               <span className="block text-[13px] text-ink-500 mt-0.5">{o.desc}</span>
             </span>
-            <span className="text-ink-300">›</span>
+            <span className="text-ink-400">›</span>
           </button>
         ))}
       </div>
@@ -167,7 +167,7 @@ function MatchPreview({ tags }: { tags: ThemeTags }) {
           </div>
         ))}
       </div>
-      <p className="text-[11px] text-ink-500 mt-2">무드가 겹치고 카테고리가 다를수록 높아져요. 태그를 바꾸면 바로 다시 계산해요.</p>
+      <p className="text-[12px] text-ink-500 mt-2">무드가 겹치고 카테고리가 다를수록 높아져요. 태그를 바꾸면 바로 다시 계산해요.</p>
     </div>
   );
 }

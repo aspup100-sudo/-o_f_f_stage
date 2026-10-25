@@ -56,9 +56,9 @@ export function SpaceCard({ db, s, onClick }: { db: DB; s: Space; onClick?: () =
             <div className="mt-1"><TrustLine db={db} subjectId={ll.id} compact /></div>
           </div>
           <div className="text-right">
-            <div className="text-[11px] text-ink-500">1일 대관료</div>
+            <div className="text-[12px] text-ink-500">1일 대관료</div>
             <div className="font-extrabold text-brand-600">{manwon(s.dailyFee)}</div>
-            {s.teamRental && <div className="text-[11px] text-ink-700 mt-0.5">3곳이 나누면 <b>{manwon(s.dailyFee / 3)}</b></div>}
+            {s.teamRental && <div className="text-[12px] text-ink-700 mt-0.5">3곳이 나누면 <b>{manwon(s.dailyFee / 3)}</b></div>}
           </div>
         </div>
       </div>
@@ -164,7 +164,7 @@ export function AvailabilityCalendar({ db, spaceId, editable }: { db: DB; spaceI
         <div className="font-bold">{first.getFullYear()}년 {first.getMonth() + 1}월</div>
         <button disabled={mi === MONTHS.length - 1} onClick={() => setMi(mi + 1)} className="w-8 h-8 disabled:opacity-30">›</button>
       </div>
-      <div className="grid grid-cols-7 gap-1 text-center text-[11px] text-ink-500 mb-1">
+      <div className="grid grid-cols-7 gap-1 text-center text-[12px] text-ink-500 mb-1">
         {'일월화수목금토'.split('').map((d) => <div key={d}>{d}</div>)}
       </div>
       <div className="grid grid-cols-7 gap-1">
@@ -179,7 +179,7 @@ export function AvailabilityCalendar({ db, spaceId, editable }: { db: DB; spaceI
               onClick={() => toggleAvailability(spaceId, d)}
               className={cx(
                 'aspect-square rounded-lg text-[12px] font-semibold flex items-center justify-center',
-                past ? 'text-ink-300' : st === 'open' ? 'bg-white border border-ink-900 text-ink-900 font-bold' : st === 'booked' ? 'bg-ink-100 text-ink-300 line-through' : 'bg-white border border-ink-100 text-ink-700',
+                past ? 'text-ink-400' : st === 'open' ? 'bg-white border border-ink-900 text-ink-900 font-bold' : st === 'booked' ? 'bg-ink-100 text-ink-400 line-through' : 'bg-white border border-ink-100 text-ink-700',
               )}
             >
               {Number(d.slice(8))}
@@ -187,14 +187,14 @@ export function AvailabilityCalendar({ db, spaceId, editable }: { db: DB; spaceI
           );
         })}
       </div>
-      <div className="flex gap-3 text-[11px] text-ink-500 mt-2">
+      <div className="flex gap-3 text-[12px] text-ink-500 mt-2">
         <span><span className="inline-block w-2.5 h-2.5 border border-ink-900 mr-1" />비는 날</span>
         <span><span className="inline-block w-2.5 h-2.5 rounded bg-ink-300 mr-1" />예약됨</span>
         <span><span className="inline-block w-2.5 h-2.5 rounded border border-ink-300 mr-1" />미정</span>
       </div>
       {editable && (
         <div className="flex items-center justify-between mt-2">
-          <p className="text-[11px] text-ink-500">날짜를 눌러 비는 날을 켜고 끄세요.</p>
+          <p className="text-[12px] text-ink-500">날짜를 눌러 비는 날을 켜고 끄세요.</p>
           <Button size="sm" variant="secondary" onClick={() => openWeekendsOfMonth(spaceId, ym)}>이 달 주말 모두 열기</Button>
         </div>
       )}
@@ -244,9 +244,9 @@ export function SpaceDetail({ id }: { id: string }) {
         })()}
         <p className="text-sm text-ink-700 mt-3 leading-relaxed">{s.intro}</p>
         <div className="grid grid-cols-3 mt-4 text-center border border-ink-300 divide-x divide-ink-300">
-          <div className="py-2.5"><div className="text-[11px] text-ink-500">실측 면적</div><div className="font-bold">{s.areaM2}㎡ <span className="text-[11px] text-ink-500 font-normal">({(s.areaM2 / 3.3).toFixed(0)}평)</span></div></div>
-          <div className="py-2.5"><div className="text-[11px] text-ink-500">1일 대관료</div><div className="font-bold text-brand-600">{manwon(s.dailyFee)}</div>{s.lastMinutePct && soonOpenDays(db, s.id) > 0 && <div className="text-[10px] text-red-600 font-bold">2주 안 {manwon(s.dailyFee * (1 - s.lastMinutePct / 100))}</div>}</div>
-          <div className="py-2.5"><div className="text-[11px] text-ink-500">최소 대관</div><div className="font-bold">{s.minDays}일</div></div>
+          <div className="py-2.5"><div className="text-[12px] text-ink-500">실측 면적</div><div className="font-bold">{s.areaM2}㎡ <span className="text-[12px] text-ink-500 font-normal">({(s.areaM2 / 3.3).toFixed(0)}평)</span></div></div>
+          <div className="py-2.5"><div className="text-[12px] text-ink-500">1일 대관료</div><div className="font-bold text-brand-600">{manwon(s.dailyFee)}</div>{s.lastMinutePct && soonOpenDays(db, s.id) > 0 && <div className="text-[11px] text-red-600 font-bold">2주 안 {manwon(s.dailyFee * (1 - s.lastMinutePct / 100))}</div>}</div>
+          <div className="py-2.5"><div className="text-[12px] text-ink-500">최소 대관</div><div className="font-bold">{s.minDays}일</div></div>
         </div>
         {s.fashionOnly && (
           <div className="mt-3 border-l-2 border-ink-900 text-ink-700 text-[13px] pl-3 py-1">
@@ -259,7 +259,7 @@ export function SpaceDetail({ id }: { id: string }) {
           {FACILITIES.map((f) => {
             const has = s.facilities.includes(f);
             return (
-              <div key={f} className={cx('flex items-center gap-2 text-sm px-1 py-2 border-b border-ink-100', has ? 'text-ink-900' : 'text-ink-300 line-through')}>
+              <div key={f} className={cx('flex items-center gap-2 text-sm px-1 py-2 border-b border-ink-100', has ? 'text-ink-900' : 'text-ink-400 line-through')}>
                 <Icon name={has ? 'check' : 'x'} className="w-4 h-4" />
                 {f}{f === '전기 용량' && has && s.electricKw ? ` ${s.electricKw}kW` : ''}
               </div>
@@ -305,7 +305,7 @@ export function SpaceDetail({ id }: { id: string }) {
         <div className="space-y-2">
           {qnas.map((x) => (
             <div key={x.id} className="rounded-md border border-ink-100 p-3 text-sm">
-              <div><b className="text-brand-600">Q</b> {x.question} <span className="text-[11px] text-ink-500">· {displayName(db, x.authorId)}</span></div>
+              <div><b className="text-brand-600">Q</b> {x.question} <span className="text-[12px] text-ink-500">· {displayName(db, x.authorId)}</span></div>
               {x.answer ? (
                 <div className="mt-1.5 text-ink-700"><b className="text-emerald-600">A</b> {x.answer}</div>
               ) : isOwner ? (
@@ -345,7 +345,7 @@ export function SpaceDetail({ id }: { id: string }) {
                   <button key={x.id} onClick={() => navigate({ name: 'space', id: x.id })} className="w-[150px] shrink-0 text-left">
                     <Swatch hue={x.photoHues[0] ?? 30} pattern="solid" className="w-full h-24" rounded="rounded-md" />
                     <div className="text-[13px] font-bold mt-1.5 truncate">{x.name}</div>
-                    <div className="text-[11px] text-ink-500">{x.region} · {x.areaM2}㎡</div>
+                    <div className="text-[12px] text-ink-500">{x.region} · {x.areaM2}㎡</div>
                     <div className="text-[12px] font-bold text-brand-600">1일 {manwon(x.dailyFee)}{x.lastMinutePct ? <span className="text-rose-500"> · {x.lastMinutePct}%↓</span> : null}</div>
                   </button>
                 ))}
@@ -392,7 +392,7 @@ function ApplySheet({ open, onClose, space, brandId }: { open: boolean; onClose:
               {teams.map((t) => (
                 <button key={t.id} disabled={!t.confirmed} onClick={() => { setTeamId(t.id); setStart(''); setEnd(''); }} className={cx('w-full text-left rounded-md border p-3 text-sm disabled:opacity-50', team?.id === t.id ? 'border-ink-900 bg-ink-100' : 'border-ink-300')}>
                   <b>{t.name}</b> · {t.members.length}개 브랜드
-                  {!t.confirmed && <div className="text-[11px] text-red-500">약속서 전원 동의 후 지원할 수 있어요</div>}
+                  {!t.confirmed && <div className="text-[12px] text-red-500">약속서 전원 동의 후 지원할 수 있어요</div>}
                 </button>
               ))}
             </div>
@@ -409,15 +409,15 @@ function ApplySheet({ open, onClose, space, brandId }: { open: boolean; onClose:
               {days > 0 && (
                 <div className="rounded border border-ink-300 p-3 mb-4">
                   <div className="grid grid-cols-3 text-center gap-1">
-                    <div><div className="text-[11px] text-ink-500">기간</div><div className="font-bold">{days}일</div></div>
-                    <div><div className="text-[11px] text-ink-500">비어 있는 날</div><div className={cx('font-bold', openCount < days && 'text-amber-600')}>{openCount}일</div></div>
-                    <div><div className="text-[11px] text-ink-500">예상 대관료</div><div className="font-bold">{manwon(space.dailyFee * days)}</div></div>
+                    <div><div className="text-[12px] text-ink-500">기간</div><div className="font-bold">{days}일</div></div>
+                    <div><div className="text-[12px] text-ink-500">비어 있는 날</div><div className={cx('font-bold', openCount < days && 'text-amber-600')}>{openCount}일</div></div>
+                    <div><div className="text-[12px] text-ink-500">예상 대관료</div><div className="font-bold">{manwon(space.dailyFee * days)}</div></div>
                   </div>
                   <div className="text-[12px] text-ink-700 mt-2 text-center">
                     {team.members.length}개 브랜드가 나누면 한 곳당 약 <b className="text-brand-600">{manwon(Math.round((space.dailyFee * days) / team.members.length / 10000) * 10000)}</b>
                   </div>
-                  {openCount < days && <div className="text-[11px] text-amber-700 mt-1.5 text-center">일부 날짜는 이미 예약됐거나 열려 있지 않아요. 임대인과 조율이 필요할 수 있어요.</div>}
-                  {space.lastMinutePct ? <div className="text-[11px] text-ink-500 mt-1 text-center">2주 안 날짜는 {space.lastMinutePct}% 할인이 따로 적용돼요</div> : null}
+                  {openCount < days && <div className="text-[12px] text-amber-700 mt-1.5 text-center">일부 날짜는 이미 예약됐거나 열려 있지 않아요. 임대인과 조율이 필요할 수 있어요.</div>}
+                  {space.lastMinutePct ? <div className="text-[12px] text-ink-500 mt-1 text-center">2주 안 날짜는 {space.lastMinutePct}% 할인이 따로 적용돼요</div> : null}
                 </div>
               )}
               <Field label="메시지">
@@ -439,7 +439,7 @@ function ApplySheet({ open, onClose, space, brandId }: { open: boolean; onClose:
           )}
         </>
       )}
-      <p className="text-[11px] text-ink-500 mt-3 text-center">OFF STAGE는 대관 계약 수수료를 받지 않아요. <Demo /></p>
+      <p className="text-[12px] text-ink-500 mt-3 text-center">OFF STAGE는 대관 계약 수수료를 받지 않아요. <Demo /></p>
     </Sheet>
   );
 }

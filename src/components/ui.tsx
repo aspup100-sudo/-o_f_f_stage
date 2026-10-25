@@ -84,7 +84,7 @@ export function Button({
 }) {
   const v: Record<BtnVariant, string> = {
     primary: 'bg-brand-500 text-white active:bg-brand-600 disabled:bg-ink-300',
-    secondary: 'bg-white text-ink-900 border border-ink-300 active:bg-ink-100 disabled:text-ink-300',
+    secondary: 'bg-white text-ink-900 border border-ink-300 active:bg-ink-100 disabled:text-ink-400',
     ghost: 'text-ink-700 active:bg-ink-100',
     danger: 'bg-red-50 text-red-600 border border-red-200 active:bg-red-100',
     dark: 'bg-ink-900 text-white active:bg-ink-700 disabled:bg-ink-300',
@@ -118,11 +118,11 @@ export function Tag({ children, tone = 'gray' }: { children: ReactNode; tone?: '
     gray: 'border-ink-300 text-ink-700', orange: 'border-ink-900 text-ink-900', green: 'border-emerald-600 text-emerald-700',
     blue: 'border-ink-900 text-ink-900', purple: 'border-ink-900 text-ink-900', red: 'border-red-500 text-red-600', yellow: 'border-amber-500 text-amber-700',
   }[tone];
-  return <span className={cx('inline-flex items-center px-1.5 h-[22px] border bg-white text-[11px] font-semibold whitespace-nowrap', t)}>{children}</span>;
+  return <span className={cx('inline-flex items-center px-1.5 h-[22px] border bg-white text-[12px] font-semibold whitespace-nowrap', t)}>{children}</span>;
 }
 
 export function Demo({ children = '데모' }: { children?: ReactNode }) {
-  return <span className="inline-flex items-center px-1.5 h-5 rounded bg-amber-100 text-amber-800 text-[10px] font-bold align-middle">({children})</span>;
+  return <span className="inline-flex items-center px-1.5 h-5 rounded bg-amber-100 text-amber-800 text-[11px] font-bold align-middle">({children})</span>;
 }
 
 const gradeStyle: Record<Grade, { cls: string; icon: string }> = {
@@ -134,7 +134,7 @@ const gradeStyle: Record<Grade, { cls: string; icon: string }> = {
 export function GradeBadge({ grade, small }: { grade: Grade; small?: boolean }) {
   const g = gradeStyle[grade];
   return (
-    <span className={cx('inline-flex items-center gap-0.5 border font-semibold whitespace-nowrap', g.cls, small ? 'px-1.5 h-5 text-[10px]' : 'px-2 h-6 text-xs')}>
+    <span className={cx('inline-flex items-center gap-0.5 border font-semibold whitespace-nowrap', g.cls, small ? 'px-1.5 h-5 text-[11px]' : 'px-2 h-6 text-xs')}>
       <Icon name={g.icon} className={small ? 'w-3 h-3' : 'w-3.5 h-3.5'} />
       {grade}
     </span>
@@ -157,7 +157,7 @@ export function Swatch({ hue, pattern = 'solid', label, className, rounded = 'ro
   return (
     <div className={cx('relative overflow-hidden', rounded, className)} style={{ background: bg[pattern] }}>
       {label && (
-        <span className="absolute left-1.5 bottom-1.5 px-1.5 py-0.5 rounded bg-white/80 text-[10px] font-medium" style={{ color: c3 }}>
+        <span className="absolute left-1.5 bottom-1.5 px-1.5 py-0.5 rounded bg-white/80 text-[11px] font-medium" style={{ color: c3 }}>
           {label}
         </span>
       )}
@@ -202,7 +202,7 @@ export function Section({ title, right, children, className }: { title?: ReactNo
 export function Empty({ children, icon = 'inbox', action }: { children: ReactNode; icon?: string; action?: { label: string; onClick: () => void } }) {
   return (
     <div className="py-10 flex flex-col items-center text-ink-500 text-sm gap-2 text-center">
-      <Icon name={icon} className="w-8 h-8 text-ink-300" />
+      <Icon name={icon} className="w-8 h-8 text-ink-400" />
       {children}
       {action && <button onClick={action.onClick} className="mt-1 h-9 px-4 rounded-md bg-ink-900 text-white text-[13px] font-semibold">{action.label}</button>}
     </div>
@@ -238,7 +238,7 @@ export function Field({ label, children, hint, required }: { label: ReactNode; c
         {required && <span className="text-brand-500"> *</span>}
       </div>
       {children}
-      {hint && <div className="text-[11px] text-ink-500 mt-1">{hint}</div>}
+      {hint && <div className="text-[12px] text-ink-500 mt-1">{hint}</div>}
     </label>
   );
 }
@@ -250,7 +250,7 @@ export function Stars({ value, onChange, size = 'w-6 h-6' }: { value: number; on
   return (
     <div className="flex gap-0.5">
       {[1, 2, 3, 4, 5].map((n) => (
-        <button key={n} type="button" disabled={!onChange} onClick={() => onChange?.(n)} className={n <= value ? 'text-amber-400' : 'text-ink-300'}>
+        <button key={n} type="button" disabled={!onChange} onClick={() => onChange?.(n)} className={n <= value ? 'text-amber-400' : 'text-ink-400'}>
           <Icon name="star" filled className={size} />
         </button>
       ))}

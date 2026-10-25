@@ -78,9 +78,9 @@ export default function MeScreen() {
               const saves = db.brands.filter((b) => b.savedSpaces?.some((id) => landlord.spaceIds.includes(id))).length;
               return (
                 <div className="grid grid-cols-3 text-center rounded border border-ink-300 py-2.5 mb-3">
-                  <div><div className="font-extrabold">{acc.length}팀</div><div className="text-[11px] text-ink-500">받은 팀</div></div>
-                  <div className="border-x border-ink-300/60"><div className="font-extrabold">{manwon(income)}</div><div className="text-[11px] text-ink-500">대관 매출</div></div>
-                  <div><div className="font-extrabold">{saves}</div><div className="text-[11px] text-ink-500">공간 찜</div></div>
+                  <div><div className="font-extrabold">{acc.length}팀</div><div className="text-[12px] text-ink-500">받은 팀</div></div>
+                  <div className="border-x border-ink-300/60"><div className="font-extrabold">{manwon(income)}</div><div className="text-[12px] text-ink-500">대관 매출</div></div>
+                  <div><div className="font-extrabold">{saves}</div><div className="text-[12px] text-ink-500">공간 찜</div></div>
                 </div>
               );
             })()}
@@ -133,7 +133,7 @@ function MenuRow({ icon, label, onClick }: { icon: string; label: string; onClic
     <button onClick={onClick} className="w-full flex items-center gap-3 px-4 h-12 text-sm text-left">
       <Icon name={icon} className="w-5 h-5 text-ink-500" />
       <span className="flex-1">{label}</span>
-      <span className="text-ink-300">›</span>
+      <span className="text-ink-400">›</span>
     </button>
   );
 }
@@ -191,14 +191,14 @@ function BrandSection() {
             제안함 {recv > 0 && <span className="text-brand-500">{recv}</span>}
           </Button>
         </div>
-        <p className="text-[11px] text-ink-500 mt-2">받은 제안 대기 {recv}건 · 보낸 제안 {sent}건</p>
+        <p className="text-[12px] text-ink-500 mt-2">받은 제안 대기 {recv}건 · 보낸 제안 {sent}건</p>
         <div className="grid grid-cols-2 gap-2 mt-3">
           <button onClick={() => navigate({ name: 'tab', tab: 'recruits', filter: '찜' })} className="rounded-md border border-ink-100 px-3 py-2.5 text-left">
-            <span className="block text-[11px] text-ink-500">찜한 모집글</span>
+            <span className="block text-[12px] text-ink-500">찜한 모집글</span>
             <span className="block font-bold">{b.savedRecruits?.length ?? 0}</span>
           </button>
           <button onClick={() => navigate({ name: 'tab', tab: 'spaces', filter: '찜' })} className="rounded-md border border-ink-100 px-3 py-2.5 text-left">
-            <span className="block text-[11px] text-ink-500">찜한 공간</span>
+            <span className="block text-[12px] text-ink-500">찜한 공간</span>
             <span className="block font-bold">{b.savedSpaces?.length ?? 0}</span>
           </button>
         </div>
@@ -209,7 +209,7 @@ function BrandSection() {
               <span className="block text-sm font-bold">팔로워 {b.followers.length}명에게 소식 보내기</span>
               <span className="block text-[12px] text-ink-500">팝업 오픈, 신상, 현장 혜택을 알림으로 바로 전해요</span>
             </span>
-            <span className="text-ink-300">›</span>
+            <span className="text-ink-400">›</span>
           </button>
         ) : (
           <div className="mt-3 rounded border border-ink-300 px-3.5 py-3 flex items-center gap-3">
@@ -228,7 +228,7 @@ function BrandSection() {
           ))}
         </div>
         <textarea className={textareaCls} maxLength={80} value={news} onChange={(e) => setNews(e.target.value)} placeholder="80자 이내로 짧게 써 주세요" />
-        <p className="text-[11px] text-ink-500 mt-1">{news.length}/80 · 프로필의 '소식'에도 남아요</p>
+        <p className="text-[12px] text-ink-500 mt-1">{news.length}/80 · 프로필의 '소식'에도 남아요</p>
         <Button full size="lg" className="mt-3" disabled={!news.trim()} onClick={() => { sendFollowerNews(b.id, news.trim()); setNews(''); setNewsOpen(false); }}>보내기</Button>
       </Sheet>
       <Sheet open={edit} onClose={() => setEdit(false)} title="브랜드 프로필 수정">
@@ -270,9 +270,9 @@ function VisitorSection() {
   return (
     <Card className="p-4">
       <div className="grid grid-cols-3 text-center mb-3">
-        <div><div className="text-lg font-extrabold">{visitor!.following.length}</div><div className="text-[11px] text-ink-500">팔로잉</div></div>
-        <button onClick={() => navigate({ name: 'tab', tab: 'stamps' })}><div className="text-lg font-extrabold">{stamp?.popupIds.length ?? 0}</div><div className="text-[11px] text-ink-500">스탬프 ›</div></button>
-        <button onClick={() => setReviewsOpen(true)}><div className="text-lg font-extrabold">{mine.length}</div><div className="text-[11px] text-ink-500">작성한 리뷰 ›</div></button>
+        <div><div className="text-lg font-extrabold">{visitor!.following.length}</div><div className="text-[12px] text-ink-500">팔로잉</div></div>
+        <button onClick={() => navigate({ name: 'tab', tab: 'stamps' })}><div className="text-lg font-extrabold">{stamp?.popupIds.length ?? 0}</div><div className="text-[12px] text-ink-500">스탬프 ›</div></button>
+        <button onClick={() => setReviewsOpen(true)}><div className="text-lg font-extrabold">{mine.length}</div><div className="text-[12px] text-ink-500">작성한 리뷰 ›</div></button>
       </div>
       <Sheet open={reviewsOpen} onClose={() => setReviewsOpen(false)} title={`내가 쓴 리뷰 ${mine.length}`}>
         {!mine.length && <Empty icon="star">방문 인증한 팝업에서 리뷰를 남겨 보세요</Empty>}
@@ -288,7 +288,7 @@ function VisitorSection() {
           ))}
         </div>
       </Sheet>
-      <div className="text-[13px] font-semibold mb-1.5">새 팝업 알림 받을 동네 {!visitor!.regions?.length && <span className="text-[11px] font-normal text-ink-500">고르면 새 팝업이 열릴 때 알려 드려요</span>}</div>
+      <div className="text-[13px] font-semibold mb-1.5">새 팝업 알림 받을 동네 {!visitor!.regions?.length && <span className="text-[12px] font-normal text-ink-500">고르면 새 팝업이 열릴 때 알려 드려요</span>}</div>
       <div className="flex flex-wrap gap-1.5 mb-3">
         {REGIONS.map((r) => <Chip key={r} active={!!visitor!.regions?.includes(r)} onClick={() => toggleVisitorRegion(userId, r)}>{visitor!.regions?.includes(r) ? <><Ic n="bell" />{r}</> : r}</Chip>)}
       </div>
@@ -311,9 +311,9 @@ function VisitorSection() {
             <Icon name={cur?.emoji ?? 'compass'} className="w-6 h-6 shrink-0 text-brand-600" />
             <span className="flex-1 min-w-0">
               <span className="block text-[13px] font-bold">{cur?.name ?? '탐험 준비 중'}</span>
-              <span className="block text-[11px] text-ink-500">{next ? `${next.name}까지 ${next.at - n}곳 더 방문하면 돼요` : '최고 등급이에요'}</span>
+              <span className="block text-[12px] text-ink-500">{next ? `${next.name}까지 ${next.at - n}곳 더 방문하면 돼요` : '최고 등급이에요'}</span>
             </span>
-            <span className="text-ink-300">›</span>
+            <span className="text-ink-400">›</span>
           </button>
         );
       })()}

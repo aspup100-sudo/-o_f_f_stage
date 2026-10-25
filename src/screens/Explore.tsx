@@ -83,7 +83,7 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
                   <div className="flex items-center justify-between">
                     <BrandLogo brand={r.brand} size={44} />
                     <span className="text-right">
-                      <span className="block text-[10px] text-ink-500">궁합</span>
+                      <span className="block text-[11px] text-ink-500">궁합</span>
                       <span className="block text-lg font-extrabold text-brand-600 leading-none">{matchPct(r.score)}%</span>
                     </span>
                   </div>

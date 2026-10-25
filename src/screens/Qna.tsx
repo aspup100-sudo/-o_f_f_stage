@@ -17,7 +17,7 @@ function Author({ db, userId }: { db: DB; userId: string }) {
     <button disabled={!b} onClick={() => b && navigate({ name: 'brand', id: b.id })} className="flex items-center gap-1.5 text-left">
       <Avatar name={displayName(db, userId)} hue={b?.logoHue ?? 150} size={24} />
       <span className="text-[13px] font-semibold">{displayName(db, userId)}</span>
-      <span className="text-[11px] text-ink-500">{role}</span>
+      <span className="text-[12px] text-ink-500">{role}</span>
       {grade && <GradeBadge grade={grade} small />}
     </button>
   );
@@ -54,7 +54,7 @@ export function QnaList() {
           const n = answers(p.id);
           return (
             <Card key={p.id} className="p-3.5" onClick={() => navigate({ name: 'qna', id: p.id })}>
-              <div className="flex items-center gap-1.5 mb-1"><Tag tone="orange">{p.tag}</Tag><span className="text-[11px] text-ink-500">{p.createdAt}</span></div>
+              <div className="flex items-center gap-1.5 mb-1"><Tag tone="orange">{p.tag}</Tag><span className="text-[12px] text-ink-500">{p.createdAt}</span></div>
               <div className="font-bold text-[15px]">Q. {p.title}</div>
               <p className="text-[13px] text-ink-500 line-clamp-1 mt-0.5">{p.body}</p>
               {n > 0 ? (() => {
@@ -62,7 +62,7 @@ export function QnaList() {
                 const l = landlordOfUser(db, first.authorId);
                 return (
                   <div className="mt-2 rounded-md bg-emerald-50/70 px-3 py-2">
-                    <div className="text-[11px] font-semibold text-emerald-700">A. {displayName(db, first.authorId)}{l ? ' · 임대인' : brandOfUser(db, first.authorId) ? ' · 브랜드' : ''}{n > 1 ? ` 외 답변 ${n - 1}개` : ''}</div>
+                    <div className="text-[12px] font-semibold text-emerald-700">A. {displayName(db, first.authorId)}{l ? ' · 임대인' : brandOfUser(db, first.authorId) ? ' · 브랜드' : ''}{n > 1 ? ` 외 답변 ${n - 1}개` : ''}</div>
                     <p className="text-[13px] text-ink-700 line-clamp-2 mt-0.5">{first.body}</p>
                   </div>
                 );
@@ -106,7 +106,7 @@ export function QnaDetail({ id }: { id: string }) {
           <div className="mt-4">
             <textarea className={textareaCls} value={text} onChange={(e) => setText(e.target.value)} placeholder="경험을 나눠 주세요" />
             <Button full className="mt-2" disabled={!text.trim()} onClick={() => { answerQna(p.id, userId, text.trim()); setText(''); }}>답변 등록</Button>
-            <p className="text-[11px] text-ink-500 mt-2">가격 협상처럼 민감한 내용은 공개 답변 대신 "비공개로 묻기"를 써 주세요.</p>
+            <p className="text-[12px] text-ink-500 mt-2">가격 협상처럼 민감한 내용은 공개 답변 대신 "비공개로 묻기"를 써 주세요.</p>
           </div>
         )}
       </div>

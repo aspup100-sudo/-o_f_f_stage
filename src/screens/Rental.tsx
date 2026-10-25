@@ -19,12 +19,12 @@ const STATUS: Record<RentalOrderStatus, { label: string; tone: 'yellow' | 'green
 function Price({ it, big }: { it: RentalItem; big?: boolean }) {
   return (
     <div className="text-right">
-      <div className="text-[11px] text-ink-500 line-through tabular-nums">{won(it.dailyPrice)}</div>
+      <div className="text-[12px] text-ink-500 line-through tabular-nums">{won(it.dailyPrice)}</div>
       <div className={cx('font-extrabold text-brand-600 tabular-nums', big ? 'text-lg' : 'text-[15px]')}>
-        <span className="text-[11px] mr-0.5 text-rose-500">{discountPct(it)}%</span>
+        <span className="text-[12px] mr-0.5 text-rose-500">{discountPct(it)}%</span>
         {won(it.partnerPrice)}
       </div>
-      <div className="text-[10px] text-ink-500">1일 · OFF STAGE 제휴가</div>
+      <div className="text-[11px] text-ink-500">1일 · OFF STAGE 제휴가</div>
     </div>
   );
 }
@@ -32,7 +32,7 @@ function Price({ it, big }: { it: RentalItem; big?: boolean }) {
 function WinWinBanner() {
   return (
     <div className="bg-white border border-ink-900 p-4">
-      <div className="text-[11px] text-ink-500">렌탈 제휴</div>
+      <div className="text-[12px] text-ink-500">렌탈 제휴</div>
       <div className="font-extrabold text-lg leading-snug mt-0.5">집기는 사지 말고, 제휴가로 빌려요</div>
       <div className="grid grid-cols-2 gap-2 mt-3 text-[12px]">
         <div className="rounded-md border border-ink-300 p-2.5">
@@ -44,7 +44,7 @@ function WinWinBanner() {
           <div className="text-ink-500 mt-0.5">놀고 있는 행거·조명이 매주 팝업에서 다시 돌아가요</div>
         </div>
       </div>
-      <p className="text-[11px] text-ink-500 mt-2">OFF STAGE는 렌탈 거래에서도 수수료를 받지 않아요.</p>
+      <p className="text-[12px] text-ink-500 mt-2">OFF STAGE는 렌탈 거래에서도 수수료를 받지 않아요.</p>
     </div>
   );
 }
@@ -70,8 +70,8 @@ export function PartnerCard({ db, partnerId, teamId }: { db: DB; partnerId: stri
         {items.slice(0, 4).map((it) => (
           <div key={it.id} className="w-24 shrink-0">
             <Swatch hue={it.hue} pattern="grid" className="h-16" rounded="rounded-lg" />
-            <div className="text-[11px] mt-1 truncate">{it.name}</div>
-            <div className="text-[11px] font-bold text-brand-600 tabular-nums">{won(it.partnerPrice)}</div>
+            <div className="text-[12px] mt-1 truncate">{it.name}</div>
+            <div className="text-[12px] font-bold text-brand-600 tabular-nums">{won(it.partnerPrice)}</div>
           </div>
         ))}
       </div>
@@ -181,7 +181,7 @@ export function RentalPartnerScreen({ id, teamId }: { id: string; teamId?: strin
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold text-sm">{it.name}</div>
                     <div className="text-[12px] text-ink-500 mt-0.5">{it.desc}</div>
-                    <div className="text-[11px] text-ink-500 mt-0.5">재고 {it.stock}개</div>
+                    <div className="text-[12px] text-ink-500 mt-0.5">재고 {it.stock}개</div>
                   </div>
                   <Price it={it} />
                 </div>
@@ -292,7 +292,7 @@ function OrderSheet({ open, onClose, partnerId, lines, defaultTeamId, onDone }: 
         onDone();
         if (team) navigate({ name: 'team', id: team.id, sub: 'rental' });
       }}>{won(q.total)} 예약 요청</Button>
-      <p className="text-[11px] text-ink-500 text-center mt-2">실제 결제는 이뤄지지 않아요 <Demo /></p>
+      <p className="text-[12px] text-ink-500 text-center mt-2">실제 결제는 이뤄지지 않아요 <Demo /></p>
     </Sheet>
   );
 }
@@ -346,7 +346,7 @@ export function TeamRentalTab({ team }: { team: Team }) {
           return (
             <Card key={o.id} className="p-3.5">
               <OrderSummary db={db} o={o} />
-              <div className="text-[11px] text-ink-500 mt-1">신청: {brandById(db, o.brandId)?.name}</div>
+              <div className="text-[12px] text-ink-500 mt-1">신청: {brandById(db, o.brandId)?.name}</div>
               {o.status === 'requested' && (
                 <Button size="sm" variant="secondary" className="mt-2" onClick={() => { switchRole('rental', partner.userId); navigate({ name: 'tab', tab: 'orders' }); }}>
                   {partner.name} 시점으로 확정하러 가기 <Demo />
@@ -389,9 +389,9 @@ export function MyItemsTab() {
       <ScreenTitle right={<Button size="sm" onClick={() => navigate({ name: 'rentalItemEdit' })}>+ 장비 등록</Button>}>내 장비</ScreenTitle>
       <div className="px-4">
         <div className="grid grid-cols-3 gap-2 mb-4 text-center">
-          <div className="rounded-md bg-white border border-ink-100 py-3"><div className="text-[11px] text-ink-500">팝업 예약</div><div className="font-extrabold">{orders.length}건</div></div>
-          <div className="rounded-md bg-white border border-ink-100 py-3"><div className="text-[11px] text-ink-500">예약 매출</div><div className="font-extrabold tabular-nums">{Math.round(revenue / 10000)}만원</div></div>
-          <div className="rounded-md bg-white border border-ink-100 py-3"><div className="text-[11px] text-ink-500">30일 가동률</div><div className="font-extrabold">{capacity ? Math.min(100, Math.round((rentedDays / capacity) * 100)) : 0}%</div></div>
+          <div className="rounded-md bg-white border border-ink-100 py-3"><div className="text-[12px] text-ink-500">팝업 예약</div><div className="font-extrabold">{orders.length}건</div></div>
+          <div className="rounded-md bg-white border border-ink-100 py-3"><div className="text-[12px] text-ink-500">예약 매출</div><div className="font-extrabold tabular-nums">{Math.round(revenue / 10000)}만원</div></div>
+          <div className="rounded-md bg-white border border-ink-100 py-3"><div className="text-[12px] text-ink-500">30일 가동률</div><div className="font-extrabold">{capacity ? Math.min(100, Math.round((rentedDays / capacity) * 100)) : 0}%</div></div>
         </div>
         <p className="text-[12px] text-ink-500 mb-3">
           제휴가는 일반가보다 낮지만, 창고에 있던 장비가 팝업 일정마다 다시 나가요. {r.avg !== null && `브랜드 평점 ★ ${r.avg.toFixed(1)}`}
@@ -408,7 +408,7 @@ export function MyItemsTab() {
                     <Swatch hue={it.hue} pattern="grid" className="w-10 h-10 shrink-0" rounded="rounded-lg" />
                     <div className="flex-1 min-w-0">
                       <div className="text-[13px] font-semibold truncate">{it.name}</div>
-                      <div className="text-[11px] text-ink-500">{n > 0 ? `곧 열 팝업 ${n}곳 공간에 ${josa(it.category, "이", "가")} 없어요` : `지금 제휴가 ${won(it.partnerPrice)} · ${discountPct(it)}% 할인 중`}</div>
+                      <div className="text-[12px] text-ink-500">{n > 0 ? `곧 열 팝업 ${n}곳 공간에 ${josa(it.category, "이", "가")} 없어요` : `지금 제휴가 ${won(it.partnerPrice)} · ${discountPct(it)}% 할인 중`}</div>
                     </div>
                     <Button size="sm" variant="secondary" onClick={() => lowerPartnerPrice(it.id)}>10% 내리기</Button>
                   </div>
@@ -500,7 +500,7 @@ export function OrdersTab() {
           return (
             <Card key={o.id} className="p-4">
               <div className="text-[13px] mb-2">
-                {o.status === 'confirmed' && <span className="text-[11px] font-black text-white bg-brand-500 px-2 py-0.5 mr-1.5">배송 {dday(o.dates.start)}</span>}
+                {o.status === 'confirmed' && <span className="text-[12px] font-black text-white bg-brand-500 px-2 py-0.5 mr-1.5">배송 {dday(o.dates.start)}</span>}
                 <b>{team ? `팀 ${team.name}` : b.name}</b>
                 <span className="text-ink-500"> · 신청 {b.name}{team ? ` 외 ${team.members.length - 1}곳` : ''}</span>
                 {sp && <div className="text-[12px] text-ink-500"><Ic n="pin" />{sp.name} ({sp.region})</div>}

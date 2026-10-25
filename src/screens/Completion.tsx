@@ -37,7 +37,7 @@ export function PopupReportCard({ popupId }: { popupId: string }) {
   const r = popupReport(db, popupId);
   const stat = (label: string, value: string) => (
     <div className="border border-ink-300 p-3">
-      <div className="text-[11px] text-ink-500">{label}</div>
+      <div className="text-[12px] text-ink-500">{label}</div>
       <div className="text-lg font-extrabold mt-0.5">{value}</div>
     </div>
   );
@@ -53,11 +53,11 @@ export function PopupReportCard({ popupId }: { popupId: string }) {
       </div>
       {r.bestPair && (
         <div className="mt-3 border-t border-ink-300 pt-3">
-          <div className="text-[11px] text-ink-500">방문객이 가장 좋아한 조합</div>
+          <div className="text-[12px] text-ink-500">방문객이 가장 좋아한 조합</div>
           <div className="font-bold mt-0.5"><Ic n="heart" className="text-rose-500" />{brandById(db, r.bestPair[0])?.name} × {brandById(db, r.bestPair[1])?.name} <span className="text-[12px] text-ink-500 font-normal">· {r.bestPairCount}명</span></div>
         </div>
       )}
-      <p className="text-[11px] text-ink-500 mt-3">OFF STAGE 안에서 모인 기록만 보여요. 매출은 팝업자랑에 직접 공개할 수 있어요.</p>
+      <p className="text-[12px] text-ink-500 mt-3">OFF STAGE 안에서 모인 기록만 보여요. 매출은 팝업자랑에 직접 공개할 수 있어요.</p>
     </div>
   );
 }
@@ -175,7 +175,7 @@ export function TeamWrapUp({ team }: { team: Team }) {
                 <Card key={b.id} className="p-3.5 flex items-center justify-between">
                   <div>
                     <div className="text-sm font-semibold">{b.name}</div>
-                    <div className="text-[11px] text-ink-500">브랜드 → 브랜드 · 분담금 이행, 역할 이행, 소통</div>
+                    <div className="text-[12px] text-ink-500">브랜드 → 브랜드 · 분담금 이행, 역할 이행, 소통</div>
                   </div>
                   <Button size="sm" variant={done ? 'secondary' : 'primary'} disabled={done} onClick={() => setForm({ kind: 'brand_to_brand', targetId: b.id, label: b.name })}>{done ? '작성 완료' : '후기 쓰기'}</Button>
                 </Card>
@@ -184,7 +184,7 @@ export function TeamWrapUp({ team }: { team: Team }) {
             <Card className="p-3.5 flex items-center justify-between">
               <div>
                 <div className="text-sm font-semibold">{sp.name}</div>
-                <div className="text-[11px] text-ink-500">브랜드 → 공간 · 정보 정확성, 소통, 조건 투명성, 인수인계</div>
+                <div className="text-[12px] text-ink-500">브랜드 → 공간 · 정보 정확성, 소통, 조건 투명성, 인수인계</div>
               </div>
               <Button size="sm" variant={written('brand_to_space', sp.id) ? 'secondary' : 'primary'} disabled={written('brand_to_space', sp.id)} onClick={() => setForm({ kind: 'brand_to_space', targetId: sp.id, label: sp.name })}>{written('brand_to_space', sp.id) ? '작성 완료' : '후기 쓰기'}</Button>
             </Card>
@@ -278,7 +278,7 @@ export function LandlordCompletions() {
                 <Card className={cx('p-3.5 flex items-center justify-between')}>
                   <div>
                     <div className="text-sm font-semibold flex items-center gap-1"><Icon name="check" className="w-4 h-4 text-emerald-600" /> 인증 공동 팝업</div>
-                    <div className="text-[11px] text-ink-500">공간 → 팀 · 약속 이행, 이용 규칙, 원상복구, 일정 준수</div>
+                    <div className="text-[12px] text-ink-500">공간 → 팀 · 약속 이행, 이용 규칙, 원상복구, 일정 준수</div>
                   </div>
                   <Button size="sm" disabled={done} variant={done ? 'secondary' : 'primary'} onClick={() => setForm({ teamId: t.id, popupId: p.id, label: t.name })}>{done ? '작성 완료' : '팀 후기 쓰기'}</Button>
                 </Card>

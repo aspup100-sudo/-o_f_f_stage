@@ -79,7 +79,7 @@ export function ProposalsScreen() {
                 <div className="flex items-center gap-2.5">
                   <BrandLogo brand={other} size={40} />
                   <button className="flex-1 min-w-0 text-left" onClick={() => navigate({ name: 'brand', id: other.id })}>
-                    <div className="font-bold truncate">{tab === 'recv' ? `${other.name}의 제안` : `${other.name}에게`} <span className="text-ink-300 font-normal">›</span></div>
+                    <div className="font-bold truncate">{tab === 'recv' ? `${other.name}의 제안` : `${other.name}에게`} <span className="text-ink-400 font-normal">›</span></div>
                     <TrustLine db={db} subjectId={other.id} compact />
                   </button>
                   <StatusPill status={p.status === 'sent' ? 'pending' : p.status === 'accepted' ? 'accepted' : 'rejected'} />

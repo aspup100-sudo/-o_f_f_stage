@@ -25,7 +25,7 @@ export function SaveRecruitButton({ r }: { r: Recruitment }) {
     <button
       aria-label={on ? '찜 해제' : '찜하기'}
       onClick={(e) => { e.stopPropagation(); toggleSaveRecruit(brand.id, r.id); }}
-      className={cx('w-8 h-8 -mr-1 -mt-1 rounded-full flex items-center justify-center text-lg', on ? 'text-brand-500' : 'text-ink-300')}
+      className={cx('w-8 h-8 -mr-1 -mt-1 rounded-full flex items-center justify-center text-lg', on ? 'text-brand-500' : 'text-ink-400')}
     >
       <Icon name="heart" className="w-5 h-5" filled={on} />
     </button>
@@ -61,7 +61,7 @@ export function RecruitCard({ db, r, reasons }: { db: DB; r: Recruitment; reason
           <span className="text-[13px] font-medium">{host.name}</span>
         </div>
         <div className="text-right">
-          <div className="text-[11px] text-ink-500">{r.slotMode === 'hanger' ? '행거 1개' : '1자리'} 분담금</div>
+          <div className="text-[12px] text-ink-500">{r.slotMode === 'hanger' ? '행거 1개' : '1자리'} 분담금</div>
           <div className="font-extrabold text-brand-600">{manwon(share)}</div>
         </div>
       </div>
@@ -188,7 +188,7 @@ export function RecruitDetail({ id }: { id: string }) {
               </div>
               <div className="h-2 rounded-full bg-white mt-2 overflow-hidden"><div className="h-full bg-brand-500" style={{ width: `${pct}%` }} /></div>
               <div className="flex flex-wrap gap-1 mt-2.5">
-                {scores.map(({ b, m }) => <span key={b.id} className="text-[11px] bg-white rounded-md px-2 py-0.5">{b.name} {matchPct(m.score)}%</span>)}
+                {scores.map(({ b, m }) => <span key={b.id} className="text-[12px] bg-white rounded-md px-2 py-0.5">{b.name} {matchPct(m.score)}%</span>)}
               </div>
               {fit.reasons.length > 0 && <div className="mt-2 space-y-0.5">{fit.reasons.slice(0, 2).map((x) => <div key={x} className="text-[12px] text-ink-700 flex"><span className="w-1 h-1 bg-ink-900 mt-[7px] mr-2 shrink-0" />{x}</div>)}</div>}
             </div>
@@ -203,14 +203,14 @@ export function RecruitDetail({ id }: { id: string }) {
               <div key={s.id} className={cx('rounded-md border p-2.5 min-h-[72px] flex flex-col justify-between', SLOT_STYLE[s.status])}>
                 <div className="text-[12px] font-bold">{r.slotMode === 'hanger' ? <><Ic n="hanger" />{s.label}</> : s.label}</div>
                 <div>
-                  <div className="text-[11px] opacity-80">{s.status}</div>
+                  <div className="text-[12px] opacity-80">{s.status}</div>
                   {b && <div className="text-[12px] font-semibold truncate">{b.name}</div>}
                 </div>
               </div>
             );
           })}
         </div>
-        {r.slotMode === 'hanger' && <p className="text-[11px] text-ink-500 mt-2">분담금은 행거 수에 비례해요 (총 {totalHangers}개).</p>}
+        {r.slotMode === 'hanger' && <p className="text-[12px] text-ink-500 mt-2">분담금은 행거 수에 비례해요 (총 {totalHangers}개).</p>}
 
         <h3 className="font-bold mt-6 mb-2">모집자</h3>
         <Card className="p-3 flex items-center gap-3" onClick={() => navigate({ name: 'brand', id: host.id })}>
@@ -219,7 +219,7 @@ export function RecruitDetail({ id }: { id: string }) {
             <div className="font-bold">{host.name}</div>
             <TrustLine db={db} subjectId={host.id} compact />
           </div>
-          <span className="text-ink-300">›</span>
+          <span className="text-ink-400">›</span>
         </Card>
 
         {isHost && (
@@ -320,7 +320,7 @@ export function RecruitDetail({ id }: { id: string }) {
 function Info({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
     <div className="rounded border border-ink-300 p-3">
-      <div className="text-[11px] text-ink-500">{label}</div>
+      <div className="text-[12px] text-ink-500">{label}</div>
       <div className={cx('font-bold mt-0.5', accent && 'text-brand-600')}>{value}</div>
     </div>
   );
@@ -447,7 +447,7 @@ export function RecruitNew() {
             </div>
             <div className="grid grid-cols-6 gap-1 mt-3">
               {Array.from({ length: d.hangerCount }).map((_, i) => (
-                <div key={i} className={cx('h-10 rounded-lg border text-[10px] flex items-center justify-center', i < d.hostHangers ? SLOT_STYLE['모집자'] : SLOT_STYLE['비어 있음'])}>{i + 1}</div>
+                <div key={i} className={cx('h-10 rounded-lg border text-[11px] flex items-center justify-center', i < d.hostHangers ? SLOT_STYLE['모집자'] : SLOT_STYLE['비어 있음'])}>{i + 1}</div>
               ))}
             </div>
           </div>

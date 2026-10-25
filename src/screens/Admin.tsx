@@ -109,9 +109,9 @@ export function StatsTab() {
   const waits = db.popups.reduce((s, p) => s + (p.waiters?.length ?? 0), 0);
   const tile = (label: string, value: string | number, hint?: string) => (
     <Card className="p-3.5">
-      <div className="text-[11px] text-ink-500">{label}</div>
+      <div className="text-[12px] text-ink-500">{label}</div>
       <div className="text-xl font-extrabold mt-0.5">{value}</div>
-      {hint && <div className="text-[11px] text-ink-500 mt-0.5">{hint}</div>}
+      {hint && <div className="text-[12px] text-ink-500 mt-0.5">{hint}</div>}
     </Card>
   );
   return (
@@ -198,7 +198,7 @@ export function StatsTab() {
             {tile('브랜드가 아낀 금액', won(rentalSaved), '정가 대비')}
           </div>
         </div>}
-        <p className="text-[11px] text-ink-500">모든 수치는 데모 데이터에서 계산돼요.</p>
+        <p className="text-[12px] text-ink-500">모든 수치는 데모 데이터에서 계산돼요.</p>
       </div>
     </div>
   );

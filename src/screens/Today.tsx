@@ -21,8 +21,8 @@ function TodoRow({ label, hint, onClick, tone = 'default' }: { label: string; hi
     <button onClick={onClick} className="w-full flex items-center gap-2.5 py-2.5 text-left">
       <span className={cx('w-4 h-4 border-[1.5px] shrink-0', tone === 'hot' ? 'border-ink-900' : 'border-ink-300')} />
       <span className={cx('flex-1 min-w-0 text-[14px] truncate', tone === 'hot' ? 'font-semibold' : 'text-ink-700')}>{label}</span>
-      {hint && <span className={cx('text-[11px] shrink-0', tone === 'hot' ? 'text-ink-900 font-bold underline underline-offset-2' : 'text-ink-500')}>{hint}</span>}
-      <span className="text-ink-300">›</span>
+      {hint && <span className={cx('text-[12px] shrink-0', tone === 'hot' ? 'text-ink-900 font-bold underline underline-offset-2' : 'text-ink-500')}>{hint}</span>}
+      <span className="text-ink-400">›</span>
     </button>
   );
 }
@@ -93,7 +93,7 @@ export function TodayBrand() {
                 ))}
               </div>
               <div className="px-4 pt-3.5 pb-4 border-t border-ink-900">
-                <div className="flex items-baseline justify-between text-[11px] tracking-[0.14em] font-semibold text-ink-500">
+                <div className="flex items-baseline justify-between text-[12px] tracking-[0.14em] font-semibold text-ink-500">
                   <span>NEXT POPUP</span>
                   <span>{dot(t.period.start)} — {dot(t.period.end)}</span>
                 </div>
@@ -104,7 +104,7 @@ export function TodayBrand() {
                   </div>
                   <div className="text-right shrink-0">
                     <div className="text-[34px] font-black leading-none tabular-nums">{live ? 'NOW' : left}</div>
-                    <div className="text-[11px] text-ink-500 mt-1">{live ? '운영 중' : '일 남음'}</div>
+                    <div className="text-[12px] text-ink-500 mt-1">{live ? '운영 중' : '일 남음'}</div>
                   </div>
                 </div>
               </div>
@@ -122,7 +122,7 @@ export function TodayBrand() {
               <button onClick={() => navigate({ name: 'chat', id: room.id })} className="w-full flex items-center gap-2.5 px-4 py-3 border-t border-ink-100 text-left">
                 <span className="text-[12px] font-bold shrink-0">{last.senderId === brand.userId ? '나' : displayName(db, last.senderId)}</span>
                 <span className="text-[12px] text-ink-500 truncate flex-1">{last.text}</span>
-                {unread > 0 ? <span className="text-[11px] font-bold text-white bg-ink-900 px-1.5 shrink-0">{unread}</span> : <span className="text-ink-300 shrink-0">›</span>}
+                {unread > 0 ? <span className="text-[12px] font-bold text-white bg-ink-900 px-1.5 shrink-0">{unread}</span> : <span className="text-ink-400 shrink-0">›</span>}
               </button>
             )}
           </div>
@@ -131,15 +131,15 @@ export function TodayBrand() {
       {(
         <div className="mt-3 bg-white border border-ink-300 px-4 py-1.5">
           <div className="flex items-center justify-between pt-2 pb-0.5">
-            <span className="text-[11px] tracking-[0.14em] font-semibold text-ink-500">TO DO</span>
-            <span className="text-[11px] text-ink-500">{todo.filter((x) => x.mine).length + extra.length + (t.todos ?? []).filter((x) => !x.done).length}개 남음</span>
+            <span className="text-[12px] tracking-[0.14em] font-semibold text-ink-500">TO DO</span>
+            <span className="text-[12px] text-ink-500">{todo.filter((x) => x.mine).length + extra.length + (t.todos ?? []).filter((x) => !x.done).length}개 남음</span>
           </div>
           <div className="divide-y divide-ink-100">
             {(t.todos ?? []).map((x) => (
               <label key={x.id} className="flex items-center gap-3 py-3 cursor-pointer">
                 <input type="checkbox" checked={x.done} onChange={() => toggleTeamTodo(t.id, x.id)} className="w-4 h-4 accent-ink-900 shrink-0" />
                 <span className={cx('flex-1 text-[14px]', x.done && 'line-through text-ink-500')}>{x.text}</span>
-                <span className="text-[11px] text-ink-500 shrink-0">{x.byBrandId === brand.id ? '내가 추가' : brandById(db, x.byBrandId)?.name}</span>
+                <span className="text-[12px] text-ink-500 shrink-0">{x.byBrandId === brand.id ? '내가 추가' : brandById(db, x.byBrandId)?.name}</span>
               </label>
             ))}
             {todo.slice(0, 3).map((x) => (
@@ -189,7 +189,7 @@ function WeekStrip() {
       <div className="flex gap-1.5 overflow-x-auto no-scrollbar mt-2.5 -mx-1 px-1">
         {days.map((d) => (
           <button key={d.iso} onClick={() => setSel(d.iso)} className={cx('w-11 shrink-0 rounded-md py-1.5 flex flex-col items-center', sel === d.iso ? 'bg-ink-900 text-white' : 'bg-ink-100/70')}>
-            <span className={cx('text-[10px]', sel !== d.iso && (d.dow === 0 ? 'text-red-500' : d.dow === 6 ? 'text-blue-500' : 'text-ink-500'))}>{d.iso === DEMO_TODAY ? '오늘' : '일월화수목금토'[d.dow]}</span>
+            <span className={cx('text-[11px]', sel !== d.iso && (d.dow === 0 ? 'text-red-500' : d.dow === 6 ? 'text-blue-500' : 'text-ink-500'))}>{d.iso === DEMO_TODAY ? '오늘' : '일월화수목금토'[d.dow]}</span>
             <span className="text-[15px] font-bold leading-tight">{d.date}</span>
             <span className={cx('w-1.5 h-1.5 rounded-full mt-0.5', d.list.length ? 'bg-brand-500' : 'bg-transparent')} />
           </button>
@@ -201,9 +201,9 @@ function WeekStrip() {
           <button key={p.id} onClick={() => navigate({ name: 'popup', id: p.id })} className="w-full flex items-center justify-between py-1.5 text-left">
             <span className="min-w-0">
               <span className="block text-[13px] font-semibold truncate">{p.title}</span>
-              <span className="block text-[11px] text-ink-500">{spaceById(db, p.spaceId)?.name} · {p.hours}</span>
+              <span className="block text-[12px] text-ink-500">{spaceById(db, p.spaceId)?.name} · {p.hours}</span>
             </span>
-            <span className="text-[11px] text-brand-600 font-bold shrink-0">{p.period.end === day.iso ? '마지막 날' : p.period.start === day.iso ? '첫날' : ''} ›</span>
+            <span className="text-[12px] text-brand-600 font-bold shrink-0">{p.period.end === day.iso ? '마지막 날' : p.period.start === day.iso ? '첫날' : ''} ›</span>
           </button>
         ))}
       </div>
@@ -238,7 +238,7 @@ export function TodayVisitor() {
               <span className="block text-[13px] font-bold">팔로우한 {josa(followed.b!.name, '이', '가')} {followed.p.status === '진행 중' ? '지금 팝업 중이에요' : `${md(followed.p.period.start)}에 팝업을 열어요`}</span>
               <span className="block text-[12px] text-ink-500 truncate">{followed.p.title} · {spaceById(db, followed.p.spaceId)?.name} · ~{md(followed.p.period.end)}</span>
             </span>
-            <span className="text-ink-300">›</span>
+            <span className="text-ink-400">›</span>
           </button>
         )}
         <button onClick={() => navigate({ name: 'tab', tab: 'stamps' })} className="mt-3 w-full text-left">
@@ -267,7 +267,7 @@ export function TodayVisitor() {
               <span className="block text-[14px] font-bold truncate">{p.title} 어땠나요?</span>
               <span className="block text-[12px] text-ink-700">어떤 브랜드 조합이 좋았는지 남기면 다음 팝업 구성에 반영돼요</span>
             </span>
-            <span className="text-ink-300">›</span>
+            <span className="text-ink-400">›</span>
           </button>
         );
       })()}
@@ -284,7 +284,7 @@ export function TodayVisitor() {
               {feed.map(({ b, n }) => (
                 <button key={n.id} onClick={() => navigate({ name: 'brand', id: b.id })} className="w-full text-left py-2.5">
                   <span className="text-[12px] font-bold text-brand-600">{b.name}</span>
-                  <span className="text-[11px] text-ink-500"> · {n.at.slice(5, 10).replace('-', '/')}</span>
+                  <span className="text-[12px] text-ink-500"> · {n.at.slice(5, 10).replace('-', '/')}</span>
                   <span className="block text-[14px] mt-0.5">{n.text}</span>
                 </button>
               ))}
@@ -299,8 +299,8 @@ export function TodayVisitor() {
             return (
               <div key={p.id} className="flex items-center gap-3 py-3">
                 <span className="w-11 text-center shrink-0">
-                  <span className="block text-[11px] font-black text-brand-600">{dday(p.period.start)}</span>
-                  <span className="block text-[11px] text-ink-500">{md(p.period.start)}</span>
+                  <span className="block text-[12px] font-black text-brand-600">{dday(p.period.start)}</span>
+                  <span className="block text-[12px] text-ink-500">{md(p.period.start)}</span>
                 </span>
                 <button onClick={() => navigate({ name: 'popup', id: p.id })} className="flex-1 min-w-0 text-left">
                   <span className="block text-[14px] font-bold truncate">{p.title}</span>
@@ -340,11 +340,11 @@ export function TodayLandlord() {
         </div>
         <div className="grid grid-cols-2 gap-2 mt-4">
           <button onClick={() => navigate({ name: 'tab', tab: 'inbox' })} className="border border-ink-300 p-3 text-left">
-            <div className="text-[11px] text-ink-500">공간을 찾는 팀</div>
+            <div className="text-[12px] text-ink-500">공간을 찾는 팀</div>
             <div className="text-lg font-extrabold">{seeking}팀 ›</div>
           </button>
           <button onClick={() => navigate({ name: 'tab', tab: 'inbox' })} className="border border-ink-300 p-3 text-left">
-            <div className="text-[11px] text-ink-500">대기 중인 지원</div>
+            <div className="text-[12px] text-ink-500">대기 중인 지원</div>
             <div className="text-lg font-extrabold">{pending}건 ›</div>
           </button>
         </div>
@@ -365,7 +365,7 @@ export function TodayLandlord() {
               <span className="block text-[14px] font-bold">답변 기다리는 공간 질문 {qs.length}건</span>
               <span className="block text-[12px] text-ink-500 truncate">"{q.question}" · {spaceById(db, q.spaceId)?.name}</span>
             </span>
-            <span className="text-ink-300">›</span>
+            <span className="text-ink-400">›</span>
           </button>
         );
       })()}
@@ -423,15 +423,15 @@ export function TodayRental() {
         <div className="text-[12px] text-ink-500 mt-1">완료 {r.done}건{r.avg !== null ? ` · 평점 ★ ${r.avg.toFixed(1)}` : ''} · 수수료 0원</div>
         <div className="grid grid-cols-3 gap-2 mt-4">
           <button onClick={() => navigate({ name: 'tab', tab: 'orders' })} className="border border-ink-300 p-3 text-left">
-            <div className="text-[11px] text-ink-500">새 요청</div>
+            <div className="text-[12px] text-ink-500">새 요청</div>
             <div className={cx('text-lg font-extrabold', requested > 0 && 'text-brand-500')}>{requested}건</div>
           </button>
           <button onClick={() => navigate({ name: 'tab', tab: 'orders' })} className="border border-ink-300 p-3 text-left">
-            <div className="text-[11px] text-ink-500">대여 중</div>
+            <div className="text-[12px] text-ink-500">대여 중</div>
             <div className="text-lg font-extrabold">{active.length}건</div>
           </button>
           <button onClick={() => navigate({ name: 'tab', tab: 'myitems' })} className="border border-ink-300 p-3 text-left">
-            <div className="text-[11px] text-ink-500">쉬는 장비</div>
+            <div className="text-[12px] text-ink-500">쉬는 장비</div>
             <div className="text-lg font-extrabold">{items.filter((i) => !out.has(i.id)).length}종</div>
           </button>
         </div>
@@ -447,9 +447,9 @@ export function TodayRental() {
                 <span className="w-12 shrink-0 text-center rounded-lg bg-brand-50 text-brand-600 text-[12px] font-extrabold py-1">{dday(started ? o.dates.end : o.dates.start)}</span>
                 <span className="flex-1 min-w-0">
                   <span className="block text-[13px] font-semibold truncate">{who}</span>
-                  <span className="block text-[11px] text-ink-500">{started ? `${o.delivery ? '회수' : '반납'} ${md(o.dates.end)}` : `${o.delivery ? '배송' : '수령'} ${md(o.dates.start)}`} · 장비 {o.lines.reduce((n, l) => n + l.qty, 0)}개</span>
+                  <span className="block text-[12px] text-ink-500">{started ? `${o.delivery ? '회수' : '반납'} ${md(o.dates.end)}` : `${o.delivery ? '배송' : '수령'} ${md(o.dates.start)}`} · 장비 {o.lines.reduce((n, l) => n + l.qty, 0)}개</span>
                 </span>
-                <span className="text-ink-300">›</span>
+                <span className="text-ink-400">›</span>
               </button>
             );
           })}

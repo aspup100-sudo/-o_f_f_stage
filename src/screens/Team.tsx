@@ -38,7 +38,7 @@ export function MyTeamTab() {
           return (
             <Card key={t.id} className="p-4" onClick={() => navigate({ name: 'team', id: t.id })}>
               <div className="flex items-center gap-1.5">
-                {t.stage === '준비 중' && <span className="text-[11px] font-black text-white bg-brand-500 px-2 py-0.5">{dday(t.period.start)}</span>}
+                {t.stage === '준비 중' && <span className="text-[12px] font-black text-white bg-brand-500 px-2 py-0.5">{dday(t.period.start)}</span>}
                 <StatusPill status={t.stage} />
                 {t.confirmed ? <Tag tone="green">팀 확정</Tag> : <Tag tone="yellow">약속서 {ag?.agreedBy.length ?? 0}/{t.members.length} 동의</Tag>}
                 {t.leaderBrandId === brand.id && <Tag>내가 팀장</Tag>}
@@ -54,7 +54,7 @@ export function MyTeamTab() {
                 </div>
                 {t.stage === '준비 중' && (
                   <div className="flex-1">
-                    <div className="flex justify-between text-[11px] text-ink-500 mb-1"><span>오픈 준비</span><span className="font-bold text-ink-900">{prep.done}/{prep.steps.length}</span></div>
+                    <div className="flex justify-between text-[12px] text-ink-500 mb-1"><span>오픈 준비</span><span className="font-bold text-ink-900">{prep.done}/{prep.steps.length}</span></div>
                     <ProgressBar pct={prep.pct} />
                   </div>
                 )}
@@ -63,7 +63,7 @@ export function MyTeamTab() {
                 const next = prep.steps.find((x) => !x.done && x.mine) ?? prep.steps.find((x) => !x.done);
                 return next ? (
                   <button onClick={(e) => { e.stopPropagation(); navigate({ name: 'team', id: t.id, sub: next.sub }); }} className="mt-3 w-full flex items-center gap-2 rounded border border-ink-300 bg-white px-3 py-2.5 text-left">
-                    <span className="text-[11px] font-bold text-brand-600 shrink-0">{next.mine ? '내 차례' : '다음 할 일'}</span>
+                    <span className="text-[12px] font-bold text-brand-600 shrink-0">{next.mine ? '내 차례' : '다음 할 일'}</span>
                     <span className="text-[13px] font-semibold flex-1 truncate">{next.label}</span>
                     <span className="text-brand-600">›</span>
                   </button>
@@ -185,7 +185,7 @@ export function TeamScreen({ id, sub = 'members' }: { id: string; sub?: string }
             <label key={x.id} className="flex items-center gap-3 py-2 cursor-pointer">
               <input type="checkbox" checked={x.done} onChange={() => toggleTeamTodo(team.id, x.id)} className="w-5 h-5 accent-brand-500 shrink-0" />
               <span className={cx('flex-1 text-[14px]', x.done && 'line-through text-ink-500')}>{x.text}</span>
-              <span className="text-[11px] text-ink-500">{brandById(db, x.byBrandId)?.name}</span>
+              <span className="text-[12px] text-ink-500">{brandById(db, x.byBrandId)?.name}</span>
             </label>
           ))}
           <form className="flex gap-2 mt-1" onSubmit={(e) => { e.preventDefault(); if (todoDraft.trim()) { addTeamTodo(team.id, brand!.id, todoDraft.trim()); setTodoDraft(''); } }}>
@@ -210,7 +210,7 @@ function MembersTab({ team, isLeader }: { team: Team; isLeader: boolean }) {
   const shift = db.shifts.find((x) => x.teamId === team.id);
   const [nudged, setNudged] = useState<string[]>([]);
   const chip = (ok: boolean, label: string) => (
-    <span className={cx('text-[11px] px-2 h-6 inline-flex items-center rounded-md font-semibold', ok ? 'border border-emerald-600 text-emerald-700' : 'border border-ink-300 text-ink-500')}>{ok ? '✓' : '…'} {label}</span>
+    <span className={cx('text-[12px] px-2 h-6 inline-flex items-center rounded-md font-semibold', ok ? 'border border-emerald-600 text-emerald-700' : 'border border-ink-300 text-ink-500')}>{ok ? '✓' : '…'} {label}</span>
   );
   return (
     <div className="space-y-2.5">
@@ -227,11 +227,11 @@ function MembersTab({ team, isLeader }: { team: Team; isLeader: boolean }) {
             </div>
             <div className="grid grid-cols-2 gap-2 mt-3 text-sm">
               <div className="border-l-2 border-ink-900 pl-2.5 py-0.5">
-                <div className="text-[11px] text-ink-500">자리</div>
+                <div className="text-[12px] text-ink-500">자리</div>
                 <div className="font-semibold">{m.slotLabel} · 행거 {m.hangers}개</div>
               </div>
               <div className="border-l-2 border-ink-900 pl-2.5 py-0.5">
-                <div className="text-[11px] text-ink-500">역할</div>
+                <div className="text-[12px] text-ink-500">역할</div>
                 {isLeader ? (
                   <input className="w-full bg-transparent font-semibold outline-none" defaultValue={m.role} onBlur={(e) => setMemberRole(team.id, m.brandId, e.target.value)} />
                 ) : (
@@ -265,7 +265,7 @@ function MembersTab({ team, isLeader }: { team: Team; isLeader: boolean }) {
           </Card>
         );
       })}
-      {isLeader && <p className="text-[11px] text-ink-500">팀장은 역할 칸을 눌러 바로 고칠 수 있어요.</p>}
+      {isLeader && <p className="text-[12px] text-ink-500">팀장은 역할 칸을 눌러 바로 고칠 수 있어요.</p>}
     </div>
   );
 }
@@ -316,7 +316,7 @@ function AgreementTab({ team, myBrandId }: { team: Team; myBrandId: string }) {
                     <div className="font-bold text-sm">{it.title}</div>
                     {!ag.locked && <button className="text-[12px] text-brand-600 font-semibold" onClick={() => { setDraft(v); setEditing(it.key); }}>{v ? '수정' : '작성'}</button>}
                   </div>
-                  <div className="text-[11px] text-ink-500">{it.hint}</div>
+                  <div className="text-[12px] text-ink-500">{it.hint}</div>
                   {v ? <p className="text-sm text-ink-700 mt-1.5 leading-relaxed">{v}</p> : <p className="text-sm text-red-400 mt-1.5">아직 비어 있어요</p>}
                 </div>
               </div>
@@ -392,7 +392,7 @@ function CostTab({ team, myBrandId, isLeader }: { team: Team; myBrandId: string;
         </div>
         <div className="flex items-center gap-2 mb-2">
           <div className="flex-1 h-1 bg-ink-100 overflow-hidden"><div className="h-full bg-emerald-500" style={{ width: `${total ? (paidSum / total) * 100 : 0}%` }} /></div>
-          <span className="text-[11px] font-semibold text-emerald-700">{split.paid.length}/{team.members.length}곳 납부</span>
+          <span className="text-[12px] font-semibold text-emerald-700">{split.paid.length}/{team.members.length}곳 납부</span>
         </div>
         <Card className="divide-y divide-ink-100">
           {team.members.map((m) => {
@@ -406,7 +406,7 @@ function CostTab({ team, myBrandId, isLeader }: { team: Team; myBrandId: string;
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-semibold truncate">{b.name}</div>
                   {split.mode === 'hanger' && (
-                    <div className="flex items-center gap-1 text-[11px] text-ink-500">
+                    <div className="flex items-center gap-1 text-[12px] text-ink-500">
                       행거
                       <button className="w-5 h-5 rounded border border-ink-300" onClick={() => setMemberHangers(team.id, m.brandId, m.hangers - 1)}>−</button>
                       <b>{m.hangers}</b>
@@ -416,7 +416,7 @@ function CostTab({ team, myBrandId, isLeader }: { team: Team; myBrandId: string;
                 </div>
                 <div className="text-right">
                   <div className="font-bold text-sm">{won(shares[m.brandId] ?? 0)}</div>
-                  <div className={cx('text-[11px]', paid ? 'text-emerald-600' : 'text-ink-500')}>{paid ? '납부 완료' : '미납'}</div>
+                  <div className={cx('text-[12px]', paid ? 'text-emerald-600' : 'text-ink-500')}>{paid ? '납부 완료' : '미납'}</div>
                 </div>
               </div>
             );
@@ -446,11 +446,11 @@ export function TeamIntroPage({ db, team, compact }: { db: DB; team: Team; compa
           })}
         </div>
         <div className="p-4 bg-ink-900 text-white">
-          <div className="text-[11px] text-white/60">팀 소개 · {team.members.length}개 브랜드</div>
+          <div className="text-[12px] text-white/60">팀 소개 · {team.members.length}개 브랜드</div>
           <div className="text-lg font-extrabold">{team.name}</div>
           <div className="text-sm text-white/80 mt-0.5">"{mb?.headline}"</div>
           <div className="flex flex-wrap gap-1 mt-2">
-            {allMoods.map((m) => <span key={m} className="text-[11px] px-2 py-0.5 rounded bg-white/15">#{m}</span>)}
+            {allMoods.map((m) => <span key={m} className="text-[12px] px-2 py-0.5 rounded bg-white/15">#{m}</span>)}
           </div>
         </div>
       </div>
@@ -519,7 +519,7 @@ function MoodboardTab({ team, myBrandId }: { team: Team; myBrandId: string }) {
             return im ? (
               <Swatch key={m.brandId + i} hue={im.hue} pattern={im.pattern} rounded="" className="aspect-square" />
             ) : (
-              <div key={m.brandId + i} className="aspect-square bg-ink-100 flex items-center justify-center text-[10px] text-ink-500">{i === 0 ? b.name[0] : ''}</div>
+              <div key={m.brandId + i} className="aspect-square bg-ink-100 flex items-center justify-center text-[11px] text-ink-500">{i === 0 ? b.name[0] : ''}</div>
             );
           });
         })}
@@ -604,7 +604,7 @@ function ShiftTab({ team }: { team: Team }) {
                   const b = brandById(db, bid);
                   return (
                     <td key={t}>
-                      <button disabled={ended} onClick={() => cycleShift(team.id, k)} className={cx('w-full h-10 rounded-lg font-semibold', b ? colorOf(bid) : 'border border-dashed border-ink-300 text-ink-300', bid && bid === brand?.id && 'ring-2 ring-brand-500')}>
+                      <button disabled={ended} onClick={() => cycleShift(team.id, k)} className={cx('w-full h-10 rounded-lg font-semibold', b ? colorOf(bid) : 'border border-dashed border-ink-300 text-ink-400', bid && bid === brand?.id && 'ring-2 ring-brand-500')}>
                         {b ? b.name : '+ 배정'}
                       </button>
                     </td>
@@ -659,15 +659,15 @@ ${hashtags.join(' ')}`;
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/10" />
           <div className="absolute left-4 right-4 bottom-3 text-white">
-            <div className="text-[10px] font-bold tracking-[0.2em] opacity-80">OFF STAGE · 공동 팝업</div>
+            <div className="text-[11px] font-bold tracking-[0.2em] opacity-80">OFF STAGE · 공동 팝업</div>
             <div className="text-xl font-extrabold leading-tight mt-0.5">{team.name}</div>
             <div className="text-[12px] opacity-90 mt-0.5">{period(team.period)} · {sp?.name ?? team.region}</div>
-            <div className="text-[11px] opacity-80 mt-0.5 truncate">{brands.map((b) => b.name).join(' × ')}</div>
+            <div className="text-[12px] opacity-80 mt-0.5 truncate">{brands.map((b) => b.name).join(' × ')}</div>
           </div>
         </div>
         <div className="p-4">
           <Segmented items={[{ key: 'feed', label: '피드 글' }, { key: 'story', label: '스토리' }, { key: 'short', label: '짧은 공지' }]} value={fmt} onChange={setFmt} />
-          <div className="text-[11px] text-ink-500 mt-3">{fmt === 'feed' ? '공통 포스터 문구 (자동 생성)' : fmt === 'story' ? '스토리 위에 올릴 짧은 글 · 내 브랜드 기준' : '카톡·문자로 단골에게 보내기 좋아요 · 내 브랜드 기준'}</div>
+          <div className="text-[12px] text-ink-500 mt-3">{fmt === 'feed' ? '공통 포스터 문구 (자동 생성)' : fmt === 'story' ? '스토리 위에 올릴 짧은 글 · 내 브랜드 기준' : '카톡·문자로 단골에게 보내기 좋아요 · 내 브랜드 기준'}</div>
           <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed mt-1 select-text">{text}</pre>
         </div>
       </div>

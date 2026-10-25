@@ -38,7 +38,7 @@ function pinEl(p: MapPin, onSelect: (id: string) => void) {
   el.type = 'button';
   el.className = 'flex flex-col items-center';
   const tag = document.createElement('span');
-  tag.className = `px-2 py-1 text-[11px] font-bold whitespace-nowrap border border-ink-900 flex items-center gap-1 ${cls}`;
+  tag.className = `px-2 py-1 text-[12px] font-bold whitespace-nowrap border border-ink-900 flex items-center gap-1 ${cls}`;
   if (p.tone === 'live') {
     const dot = document.createElement('span');
     dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400';
