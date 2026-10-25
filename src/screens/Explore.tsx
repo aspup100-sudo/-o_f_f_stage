@@ -134,7 +134,7 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
           {(showAll ? list : list.slice(0, 6)).map((b) => (
             <BrandCard key={b.id} compact db={db} brand={b} right={<BrandActions brandId={b.id} />} />
           ))}
-          {!list.length && <Empty icon="search">조건에 맞는 브랜드가 없어요</Empty>}
+          {!list.length && <Empty icon="search" action={{ label: '필터 초기화', onClick: () => { setMoods([]); setCats([]); setPrice(null); } }}>조건에 맞는 브랜드가 없어요</Empty>}
         </div>
         {!showAll && list.length > 6 && (
           <button onClick={() => setShowAll(true)} className="w-full h-11 mt-3 rounded-xl border border-ink-200 bg-white text-sm font-semibold">

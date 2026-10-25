@@ -111,7 +111,7 @@ export function SpacesTab() {
       </Sheet>
       <div className="px-4 space-y-3">
         {list.map((s) => <SpaceCard key={s.id} db={db} s={s} />)}
-        {!list.length && <Empty icon="building">조건에 맞는 공간이 없어요</Empty>}
+        {!list.length && <Empty icon="building" action={{ label: '조건 초기화', onClick: () => { setMaxFee(0); setMinArea(0); setTeam(false); setFashion(false); setDate(''); } }}>조건에 맞는 공간이 없어요</Empty>}
       </div>
     </div>
   );

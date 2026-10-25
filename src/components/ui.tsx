@@ -170,11 +170,12 @@ export function Section({ title, right, children, className }: { title?: ReactNo
   );
 }
 
-export function Empty({ children, icon = 'sparkle' }: { children: ReactNode; icon?: string }) {
+export function Empty({ children, icon = 'sparkle', action }: { children: ReactNode; icon?: string; action?: { label: string; onClick: () => void } }) {
   return (
     <div className="py-10 flex flex-col items-center text-ink-500 text-sm gap-2 text-center">
       <Icon name={icon} className="w-8 h-8 text-ink-300" />
       {children}
+      {action && <button onClick={action.onClick} className="mt-1 h-9 px-4 rounded-full bg-ink-900 text-white text-[13px] font-semibold">{action.label}</button>}
     </div>
   );
 }

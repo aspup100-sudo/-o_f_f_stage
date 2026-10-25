@@ -108,7 +108,7 @@ export function RecruitsTab() {
       )}
       <div className="px-4 space-y-3 mt-2">
         {list.map((r) => <RecruitCard key={r.id} db={db} r={r} />)}
-        {!list.length && <Empty>{st === '찜' ? '찜한 모집글이 없어요. 마음에 드는 글의 ♡를 눌러 두세요' : '조건에 맞는 모집글이 없어요'}</Empty>}
+        {!list.length && <Empty action={st !== '전체' ? { label: '전체 모집글 보기', onClick: () => setSt('전체') } : undefined}>{st === '찜' ? '찜한 모집글이 없어요. 마음에 드는 글의 ♡를 눌러 두세요' : '조건에 맞는 모집글이 없어요'}</Empty>}
       </div>
     </div>
   );
