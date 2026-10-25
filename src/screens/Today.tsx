@@ -1,4 +1,5 @@
 // 둘러보기 맨 위 '오늘' 영역: 내 팝업까지 남은 날과 지금 해야 할 일을 모아 보여 준다.
+import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { navigate } from '@/store/store';
 import { brandById, daysUntil, josa, manwon, partnerRating, rentalQuote, won, recruitUrgency, dday, md, popupById, spaceById, teamById, teamPrep, teamsOfBrand, waitCount } from '@/store/logic';
@@ -132,6 +133,45 @@ function ExtraList({ items }: { items: { label: string; hint?: string; route: Ro
   );
 }
 
+// 앞으로 2주 동안 날짜별로 열려 있는 팝업. 주말 계획을 세우러 다시 들어올 이유가 된다.
+function WeekStrip() {
+  const { db } = useMe();
+  const days = Array.from({ length: 14 }, (_, i) => {
+    const d = new Date(DEMO_TODAY + 'T00:00:00');
+    d.setDate(d.getDate() + i);
+    const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return { iso, dow: d.getDay(), date: d.getDate(), list: db.popups.filter((p) => p.status !== '종료' && p.period.start <= iso && iso <= p.period.end) };
+  });
+  const [sel, setSel] = useState(DEMO_TODAY);
+  const day = days.find((d) => d.iso === sel)!;
+  return (
+    <div className="mt-3 rounded-2xl bg-white border border-ink-100 p-4">
+      <div className="text-[14px] font-bold">날짜별 팝업 캘린더</div>
+      <div className="flex gap-1.5 overflow-x-auto no-scrollbar mt-2.5 -mx-1 px-1">
+        {days.map((d) => (
+          <button key={d.iso} onClick={() => setSel(d.iso)} className={cx('w-11 shrink-0 rounded-xl py-1.5 flex flex-col items-center', sel === d.iso ? 'bg-ink-900 text-white' : 'bg-ink-100/70')}>
+            <span className={cx('text-[10px]', sel !== d.iso && (d.dow === 0 ? 'text-red-500' : d.dow === 6 ? 'text-blue-500' : 'text-ink-500'))}>{d.iso === DEMO_TODAY ? '오늘' : '일월화수목금토'[d.dow]}</span>
+            <span className="text-[15px] font-bold leading-tight">{d.date}</span>
+            <span className={cx('w-1.5 h-1.5 rounded-full mt-0.5', d.list.length ? 'bg-brand-500' : 'bg-transparent')} />
+          </button>
+        ))}
+      </div>
+      <div className="mt-2.5">
+        {day.list.length === 0 && <div className="text-[13px] text-ink-500 py-1">이날 열린 공동 팝업이 없어요</div>}
+        {day.list.map((p) => (
+          <button key={p.id} onClick={() => navigate({ name: 'popup', id: p.id })} className="w-full flex items-center justify-between py-1.5 text-left">
+            <span className="min-w-0">
+              <span className="block text-[13px] font-semibold truncate">{p.title}</span>
+              <span className="block text-[11px] text-ink-500">{spaceById(db, p.spaceId)?.name} · {p.hours}</span>
+            </span>
+            <span className="text-[11px] text-brand-600 font-bold shrink-0">{p.period.end === day.iso ? '마지막 날' : p.period.start === day.iso ? '첫날' : ''} ›</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function TodayVisitor() {
   const { db, visitor, userId } = useMe();
   if (!visitor) return null;
@@ -172,6 +212,7 @@ export function TodayVisitor() {
           </div>
         </button>
       </div>
+      <WeekStrip />
       {(() => {
         // 다녀왔는데 아직 리뷰를 안 쓴 팝업
         const todo = db.visits
