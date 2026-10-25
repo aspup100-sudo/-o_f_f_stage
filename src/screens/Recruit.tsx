@@ -157,7 +157,7 @@ export function RecruitDetail({ id }: { id: string }) {
 
         {brand && !isHost && !inSlot && (() => {
           // 이미 자리를 잡은 브랜드들과 나의 평균 궁합
-          const members = r.slots.filter((x) => x.brandId && x.brandId !== brand.id).map((x) => brandById(db, x.brandId)!).filter(Boolean);
+          const members = [...new Set(r.slots.map((x) => x.brandId).filter((id): id is string => !!id && id !== brand.id))].map((id) => brandById(db, id)!).filter(Boolean);
           if (!members.length) return null;
           const scores = members.map((b) => ({ b, m: matchScore(db, brand, b) }));
           const pct = matchPct(scores.reduce((sum, x) => sum + x.m.score, 0) / scores.length);
