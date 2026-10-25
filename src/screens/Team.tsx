@@ -438,14 +438,28 @@ function MoodboardTab({ team, myBrandId }: { team: Team; myBrandId: string }) {
 }
 
 function ShiftTab({ team }: { team: Team }) {
-  const { db } = useMe();
+  const { db, brand } = useMe();
   const sh = db.shifts.find((s) => s.teamId === team.id)!;
   const colors = ['bg-orange-100 text-orange-800', 'bg-sky-100 text-sky-800', 'bg-emerald-100 text-emerald-800', 'bg-violet-100 text-violet-800', 'bg-rose-100 text-rose-800', 'bg-amber-100 text-amber-800'];
   const colorOf = (bid?: string) => colors[team.members.findIndex((m) => m.brandId === bid) % colors.length];
   const counts = team.members.map((m) => ({ m, n: Object.values(sh.assign).filter((x) => x === m.brandId).length }));
   const ended = team.stage === '종료';
+  const mine = Object.entries(sh.assign).filter(([, v]) => v === brand?.id).map(([k]) => k).sort();
+  const dow = (d: string) => '일월화수목금토'[new Date(d + 'T00:00:00').getDay()];
   return (
     <div>
+      {brand && (
+        <div className="mb-4 rounded-2xl bg-brand-50 p-4">
+          <div className="text-[13px] font-bold">내 근무 {mine.length}회</div>
+          {mine.length ? (
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {mine.map((k) => { const [d, t] = k.split('|'); return <span key={k} className="text-[12px] font-semibold bg-white rounded-lg px-2 py-1">{md(d)}({dow(d)}) {t}</span>; })}
+            </div>
+          ) : (
+            <p className="text-[12px] text-ink-500 mt-1">아직 배정된 근무가 없어요. 빈칸을 눌러 내 근무를 정해 보세요.</p>
+          )}
+        </div>
+      )}
       <div className="flex items-center justify-between mb-2">
         <p className="text-[13px] text-ink-500">칸을 누를 때마다 담당 브랜드가 바뀌어요.</p>
         {!ended && <Button size="sm" variant="secondary" onClick={() => autoFillShifts(team.id)}>자동 배정</Button>}
@@ -461,14 +475,14 @@ function ShiftTab({ team }: { team: Team }) {
           <tbody>
             {sh.dates.map((d) => (
               <tr key={d}>
-                <td className="font-semibold pr-1 whitespace-nowrap">{md(d)} ({'일월화수목금토'[new Date(d + 'T00:00:00').getDay()]})</td>
+                <td className="font-semibold pr-1 whitespace-nowrap">{md(d)} ({dow(d)})</td>
                 {sh.timeSlots.map((t) => {
                   const k = `${d}|${t}`;
                   const bid = sh.assign[k];
                   const b = brandById(db, bid);
                   return (
                     <td key={t}>
-                      <button disabled={ended} onClick={() => cycleShift(team.id, k)} className={cx('w-full h-10 rounded-lg font-semibold', b ? colorOf(bid) : 'border border-dashed border-ink-300 text-ink-300')}>
+                      <button disabled={ended} onClick={() => cycleShift(team.id, k)} className={cx('w-full h-10 rounded-lg font-semibold', b ? colorOf(bid) : 'border border-dashed border-ink-300 text-ink-300', bid && bid === brand?.id && 'ring-2 ring-brand-500')}>
                         {b ? b.name : '+ 배정'}
                       </button>
                     </td>

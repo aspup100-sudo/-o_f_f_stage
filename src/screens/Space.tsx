@@ -211,7 +211,7 @@ export function SpaceDetail({ id }: { id: string }) {
         <p className="text-sm text-ink-700 mt-3 leading-relaxed">{s.intro}</p>
         <div className="grid grid-cols-3 gap-2 mt-4 text-center">
           <div className="rounded-xl bg-ink-100/60 py-2.5"><div className="text-[11px] text-ink-500">실측 면적</div><div className="font-bold">{s.areaM2}㎡ <span className="text-[11px] text-ink-500 font-normal">({(s.areaM2 / 3.3).toFixed(0)}평)</span></div></div>
-          <div className="rounded-xl bg-ink-100/60 py-2.5"><div className="text-[11px] text-ink-500">1일 대관료</div><div className="font-bold text-brand-600">{manwon(s.dailyFee)}</div></div>
+          <div className="rounded-xl bg-ink-100/60 py-2.5"><div className="text-[11px] text-ink-500">1일 대관료</div><div className="font-bold text-brand-600">{manwon(s.dailyFee)}</div>{s.lastMinutePct && soonOpenDays(db, s.id) > 0 && <div className="text-[10px] text-red-600 font-bold">2주 안 {manwon(s.dailyFee * (1 - s.lastMinutePct / 100))}</div>}</div>
           <div className="rounded-xl bg-ink-100/60 py-2.5"><div className="text-[11px] text-ink-500">최소 대관</div><div className="font-bold">{s.minDays}일</div></div>
         </div>
         {s.fashionOnly && (
@@ -343,7 +343,7 @@ function ApplySheet({ open, onClose, space, brandId }: { open: boolean; onClose:
           </Field>
           {team && (
             <>
-              <Field label="희망 날짜" hint={`${days}일 · 그중 비는 날 ${openCount}일 · 최소 ${space.minDays}일 · 예상 대관료 ${manwon(space.dailyFee * Math.max(days, 0))}`}>
+              <Field label="희망 날짜" hint={`${days}일 · 그중 비는 날 ${openCount}일 · 최소 ${space.minDays}일 · 예상 대관료 ${manwon(space.dailyFee * Math.max(days, 0))}${space.lastMinutePct ? ` · 2주 안 날짜는 ${space.lastMinutePct}% 할인 적용 전 금액` : ''}`}>
                 <div className="flex items-center gap-2">
                   <input type="date" className={inputCls} value={s0} onChange={(e) => setStart(e.target.value)} />
                   <span>~</span>
