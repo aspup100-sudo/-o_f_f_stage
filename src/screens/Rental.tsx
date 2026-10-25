@@ -153,7 +153,7 @@ export function RentalPartnerScreen({ id, teamId }: { id: string; teamId?: strin
   const setQty = (itemId: string, n: number, max: number) => setCart({ ...cart, [itemId]: Math.max(0, Math.min(max, n)) });
 
   return (
-    <div className="bg-white min-h-screen pb-24">
+    <div className="bg-white min-h-screen pb-36">
       <SubHeader title={p.name} />
       <div className="p-4">
         <div className="flex items-center gap-3">
@@ -213,6 +213,14 @@ export function RentalPartnerScreen({ id, teamId }: { id: string; teamId?: strin
       </div>
       {role === 'brand' && (
         <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white border-t border-ink-100 p-3 z-30">
+          {lines.length > 0 && p.freeDeliveryOver > 0 && (
+            <div className="mb-2.5">
+              <div className="text-[12px] font-semibold">
+                {q.partnerSum >= p.freeDeliveryOver ? <span className="text-emerald-700">🚚 배송·설치비 무료 적용돼요</span> : <>🚚 <b className="text-brand-600">{won(p.freeDeliveryOver - q.partnerSum)}</b> 더 담으면 배송·설치비 {won(p.deliveryFee)} 무료</>}
+              </div>
+              <div className="h-1.5 rounded-full bg-ink-100 mt-1.5 overflow-hidden"><div className={cx('h-full rounded-full', q.partnerSum >= p.freeDeliveryOver ? 'bg-emerald-500' : 'bg-brand-500')} style={{ width: `${Math.min(100, (q.partnerSum / p.freeDeliveryOver) * 100)}%` }} /></div>
+            </div>
+          )}
           <div className="flex items-center gap-3">
             <div className="flex-1">
               <div className="text-[12px] text-ink-500">{lines.length ? `${q.days}일 기준 · ${won(q.saved)} 아껴요` : '장비를 담아 주세요'}</div>
