@@ -39,6 +39,10 @@ export function MySpacesTab() {
             <Card className="p-4">
               <div className="font-bold">⚡ 막판 할인</div>
               <p className="text-[12px] text-ink-500 mt-0.5 mb-3">2주 안에 아직 비어 있는 날({n}일)을 할인하면 공간 목록에 할인 표시가 붙어 팀 눈에 잘 띄어요.</p>
+              {(() => {
+                const savers = db.brands.filter((b) => b.savedSpaces?.includes(current)).length;
+                return savers > 0 ? <p className="text-[12px] font-semibold text-red-600 -mt-1.5 mb-3">♥ 이 공간을 찜한 브랜드 {savers}곳에 할인 소식이 바로 가요</p> : null;
+              })()}
               <div className="flex gap-1.5">
                 {[0, 10, 20, 30].map((v) => (
                   <Chip key={v} active={(sp.lastMinutePct ?? 0) === v} onClick={() => setLastMinute(current, v)}>{v ? `${v}%` : '안 함'}</Chip>
