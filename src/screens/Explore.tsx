@@ -8,6 +8,7 @@ import { BrandActions } from './BrandActions';
 import { ShowcaseList } from './Showcase';
 import { QnaList } from './Qna';
 import { MagazineList, MagazineThumb } from './Magazine';
+import { TodayBrand } from './Today';
 
 type View = 'brand' | 'magazine' | 'showcase' | 'qna';
 
@@ -36,6 +37,7 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
   const [cats, setCats] = useState<Category[]>([]);
   const [price, setPrice] = useState<PriceRange | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [showAll, setShowAll] = useState(false);
 
   const popups = db.popups.filter((p) => p.status !== '종료');
   const recs = brand ? recommendations(db, brand, 5) : [];
@@ -48,7 +50,8 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
 
   return (
     <div>
-      <section className="pt-4">
+      {role === 'brand' && <TodayBrand />}
+      <section className="pt-6">
         <div className="px-4 flex items-center justify-between mb-2.5">
           <h2 className="font-bold text-[15px]">진행 중·예정 공동 팝업</h2>
           <span className="text-xs text-ink-500">{popups.length}곳</span>
@@ -108,12 +111,17 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
           </div>
         )}
         <div className="space-y-3">
-          {list.map((b) => (
+          {(showAll ? list : list.slice(0, 6)).map((b) => (
             <BrandCard key={b.id} db={db} brand={b} right={<BrandActions brandId={b.id} />} />
           ))}
           {!list.length && <Empty icon="search">조건에 맞는 브랜드가 없어요</Empty>}
         </div>
-        {role === 'brand' && !brand && <div className="h-4" />}
+        {!showAll && list.length > 6 && (
+          <button onClick={() => setShowAll(true)} className="w-full h-11 mt-3 rounded-xl border border-ink-200 bg-white text-sm font-semibold">
+            브랜드 {list.length - 6}곳 더 보기
+          </button>
+        )}
+        <div className="h-6" />
       </section>
 
       <Sheet open={filterOpen} onClose={() => setFilterOpen(false)} title="필터">

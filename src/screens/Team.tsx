@@ -5,7 +5,8 @@ import {
   addCommonItem, agreeAgreement, autoFillShifts, cycleShift, fillAgreementExamples, removeCommonItem, renameTeam, setMemberHangers, setMemberRole,
   setMoodHeadline, simulateOthersAgree, toggleMoodPick, togglePaid, togglePromo, updateAgreementItem, updateCost,
 } from '@/store/actions';
-import { brandById, manwon, md, period, spaceById, teamById, teamCost, teamsOfBrand, won } from '@/store/logic';
+import { brandById, dday, manwon, md, period, spaceById, teamById, teamCost, teamPrep, teamsOfBrand, won } from '@/store/logic';
+import { ProgressBar } from './Today';
 import { BrandLogo, LookbookGrid, ScreenTitle, ThemeTagList, TrustLine } from '@/components/common';
 import { Button, Card, cx, Demo, Empty, Icon, inputCls, Segmented, Sheet, StatusPill, SubHeader, Swatch, Tabs, Tag, textareaCls } from '@/components/ui';
 import { AGREEMENT_ITEMS, type AgreementKey, type Team } from '@/types';
@@ -32,20 +33,30 @@ export function MyTeamTab() {
         {[...teams].sort((a, b) => order[a.stage] - order[b.stage]).map((t) => {
           const ag = db.agreements.find((a) => a.teamId === t.id);
           const sp = spaceById(db, t.spaceId);
+          const prep = teamPrep(db, t, brand.id);
           return (
             <Card key={t.id} className="p-4" onClick={() => navigate({ name: 'team', id: t.id })}>
               <div className="flex items-center gap-1.5">
+                {t.stage === '준비 중' && <span className="text-[11px] font-black text-white bg-brand-500 px-2 py-0.5 rounded-full">{dday(t.period.start)}</span>}
                 <StatusPill status={t.stage} />
                 {t.confirmed ? <Tag tone="green">팀 확정</Tag> : <Tag tone="yellow">약속서 {ag?.agreedBy.length ?? 0}/{t.members.length} 동의</Tag>}
                 {t.leaderBrandId === brand.id && <Tag>내가 팀장</Tag>}
               </div>
               <div className="font-bold text-lg mt-1.5">{t.name}</div>
               <div className="text-[13px] text-ink-500">📅 {period(t.period)} · 📍 {sp?.name ?? `${t.region} · 공간 미정`}</div>
-              <div className="flex -space-x-2 mt-3">
-                {t.members.map((m) => {
-                  const b = brandById(db, m.brandId)!;
-                  return <span key={m.brandId} className="ring-2 ring-white rounded-full"><BrandLogo brand={b} size={32} /></span>;
-                })}
+              <div className="flex items-center gap-3 mt-3">
+                <div className="flex -space-x-2">
+                  {t.members.map((m) => {
+                    const b = brandById(db, m.brandId)!;
+                    return <span key={m.brandId} className="ring-2 ring-white rounded-full"><BrandLogo brand={b} size={32} /></span>;
+                  })}
+                </div>
+                {t.stage === '준비 중' && (
+                  <div className="flex-1">
+                    <div className="flex justify-between text-[11px] text-ink-500 mb-1"><span>오픈 준비</span><span className="font-bold text-ink-900">{prep.done}/{prep.steps.length}</span></div>
+                    <ProgressBar pct={prep.pct} />
+                  </div>
+                )}
               </div>
             </Card>
           );
@@ -71,6 +82,7 @@ export function TeamScreen({ id, sub = 'members' }: { id: string; sub?: string }
   const { db, brand, role } = useMe();
   const team = teamById(db, id);
   const [renaming, setRenaming] = useState(false);
+  const [prepOpen, setPrepOpen] = useState(false);
   const [name, setName] = useState('');
   if (!team) return <Empty>팀을 찾을 수 없어요</Empty>;
   const isMember = !!brand && team.members.some((m) => m.brandId === brand.id);
@@ -110,6 +122,18 @@ export function TeamScreen({ id, sub = 'members' }: { id: string; sub?: string }
           {isLeader && <button onClick={() => { setName(team.name); setRenaming(true); }} className="text-ink-500"><Icon name="edit" className="w-4 h-4" /></button>}
         </div>
         <div className="text-[13px] text-ink-700 mt-0.5">📅 {period(team.period)} · 📍 {sp ? sp.name : `${team.region} · 공간 미정`}</div>
+        {team.stage === '준비 중' && (() => {
+          const prep = teamPrep(db, team, brand!.id);
+          return (
+            <button onClick={() => setPrepOpen(true)} className="w-full mt-3 rounded-2xl bg-white border border-brand-100 px-3.5 py-3 text-left">
+              <div className="flex items-center justify-between text-[13px]">
+                <span className="font-bold">오픈 {dday(team.period.start)} · 준비 {prep.done}/{prep.steps.length}</span>
+                <span className="text-brand-600 text-[12px] font-semibold">체크리스트 ›</span>
+              </div>
+              <ProgressBar pct={prep.pct} className="mt-2" />
+            </button>
+          );
+        })()}
       </div>
       <Tabs className="sticky top-12 z-10" items={SUBS} value={sub} onChange={(k) => replace({ name: 'team', id, sub: k })} />
       <div className="p-4 pb-10">
@@ -123,6 +147,18 @@ export function TeamScreen({ id, sub = 'members' }: { id: string; sub?: string }
         {sub === 'promo' && <PromoTab team={team} myBrandId={brand!.id} />}
         {sub === 'wrap' && <TeamWrapUp team={team} />}
       </div>
+      <Sheet open={prepOpen} onClose={() => setPrepOpen(false)} title="오픈 준비 체크리스트">
+        <div className="divide-y divide-ink-100">
+          {teamPrep(db, team, brand!.id).steps.map((x) => (
+            <button key={x.key} onClick={() => { setPrepOpen(false); replace({ name: 'team', id, sub: x.sub }); }} className="w-full flex items-center gap-3 py-3 text-left">
+              <span className={cx('w-6 h-6 rounded-full flex items-center justify-center text-[12px] font-black shrink-0', x.done ? 'bg-emerald-500 text-white' : 'border-2 border-ink-300')}>{x.done ? '✓' : ''}</span>
+              <span className={cx('flex-1 text-[14px]', x.done ? 'text-ink-500 line-through' : 'font-semibold')}>{x.label}</span>
+              {!x.done && x.mine && <Tag tone="orange">내 차례</Tag>}
+            </button>
+          ))}
+        </div>
+        <p className="text-[12px] text-ink-500 mt-3">항목을 누르면 해당 탭으로 이동해요.</p>
+      </Sheet>
       <Sheet open={renaming} onClose={() => setRenaming(false)} title="팀 이름 바꾸기">
         <input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} />
         <Button full className="mt-3" disabled={!name.trim()} onClick={() => { renameTeam(team.id, name.trim()); setRenaming(false); }}>저장</Button>

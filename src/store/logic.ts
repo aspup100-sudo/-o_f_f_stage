@@ -2,6 +2,7 @@
 import type { DB } from '@/data/mock';
 import type { BrandProfile, Grade, Review, Team, TrustEvent, TrustScore } from '@/types';
 import { PRICE_RANGES } from '@/types';
+import { DEMO_TODAY } from '@/data/mock';
 
 // ───────── 포맷 ─────────
 export const won = (n: number) => `${Math.round(n).toLocaleString('ko-KR')}원`;
@@ -201,4 +202,40 @@ export function missingForSpace(db: DB, spaceId?: string) {
   const sp = db.spaces.find((s) => s.id === spaceId);
   if (!sp) return [];
   return Object.entries(FACILITY_TO_RENTAL).filter(([f]) => !sp.facilities.includes(f as any)).map(([f, c]) => ({ facility: f, category: c }));
+}
+
+// ───────── 준비 체크리스트 · D-day ─────────
+/** 오늘(데모 기준일)부터 날짜까지 남은 일수. 지났으면 음수. */
+export const daysUntil = (date: string) => Math.round((new Date(date).getTime() - new Date(DEMO_TODAY).getTime()) / 86400000);
+export const dday = (date: string) => {
+  const n = daysUntil(date);
+  return n > 0 ? `D-${n}` : n === 0 ? 'D-DAY' : `D+${-n}`;
+};
+
+export interface PrepStep {
+  key: string;
+  label: string;
+  done: boolean;
+  sub: string; // 팀 화면의 탭
+  mine?: boolean; // 내가 해야 하는 일
+}
+
+/** 팝업 오픈까지 팀이 끝내야 할 일. 데이터에서 바로 계산한다. */
+export function teamPrep(db: DB, team: Team, myBrandId: string): { steps: PrepStep[]; done: number; pct: number } {
+  const ag = db.agreements.find((a) => a.teamId === team.id);
+  const split = db.costSplits.find((c) => c.teamId === team.id);
+  const mood = db.moodboards.find((m) => m.teamId === team.id);
+  const shift = db.shifts.find((x) => x.teamId === team.id);
+  const slots = shift ? shift.dates.length * shift.timeSlots.length : 0;
+  const filled = shift ? Object.values(shift.assign).filter(Boolean).length : 0;
+  const steps: PrepStep[] = [
+    { key: 'agree', label: ag?.agreedBy.includes(myBrandId) ? `약속서 전원 동의 (${ag?.agreedBy.length ?? 0}/${team.members.length})` : '약속서 읽고 동의하기', done: team.confirmed, sub: 'agreement', mine: !ag?.agreedBy.includes(myBrandId) },
+    { key: 'space', label: '공간 확정', done: !!team.spaceId, sub: 'space' },
+    { key: 'pay', label: split ? `분담금 내기 (기한 ${md(split.dueDate)})` : '분담금 내기', done: !!split?.paid.includes(myBrandId), sub: 'cost', mine: true },
+    { key: 'mood', label: '무드보드에 룩북 3장 고르기', done: (mood?.picks[myBrandId]?.length ?? 0) >= 3, sub: 'moodboard', mine: true },
+    { key: 'shift', label: `근무표 채우기 (${filled}/${slots})`, done: slots > 0 && filled >= slots, sub: 'shift' },
+    { key: 'promo', label: '홍보 같은 날 게시 체크', done: team.promoChecked.includes(myBrandId), sub: 'promo', mine: true },
+  ];
+  const done = steps.filter((x) => x.done).length;
+  return { steps, done, pct: Math.round((done / steps.length) * 100) };
 }
