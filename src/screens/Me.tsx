@@ -151,14 +151,24 @@ function BrandSection() {
           </Button>
         </div>
         <p className="text-[11px] text-ink-500 mt-2">받은 제안 대기 {recv}건 · 보낸 제안 {sent}건</p>
-        <button onClick={() => setNewsOpen(true)} className="mt-3 w-full rounded-xl bg-brand-50 px-3.5 py-3 text-left flex items-center gap-3">
-          <span className="text-xl">📣</span>
-          <span className="flex-1">
-            <span className="block text-sm font-bold">팔로워 {b.followers.length}명에게 소식 보내기</span>
-            <span className="block text-[12px] text-ink-500">팝업 오픈, 신상, 현장 혜택을 알림으로 바로 전해요</span>
-          </span>
-          <span className="text-ink-300">›</span>
-        </button>
+        {b.followers.length > 0 ? (
+          <button onClick={() => setNewsOpen(true)} className="mt-3 w-full rounded-xl bg-brand-50 px-3.5 py-3 text-left flex items-center gap-3">
+            <span className="text-xl">📣</span>
+            <span className="flex-1">
+              <span className="block text-sm font-bold">팔로워 {b.followers.length}명에게 소식 보내기</span>
+              <span className="block text-[12px] text-ink-500">팝업 오픈, 신상, 현장 혜택을 알림으로 바로 전해요</span>
+            </span>
+            <span className="text-ink-300">›</span>
+          </button>
+        ) : (
+          <div className="mt-3 rounded-xl bg-ink-100/70 px-3.5 py-3 flex items-center gap-3">
+            <span className="text-xl">🌱</span>
+            <span className="flex-1">
+              <span className="block text-sm font-bold">아직 팔로워가 없어요</span>
+              <span className="block text-[12px] text-ink-500">팝업을 열면 다녀간 방문객이 팔로우할 수 있어요. 팔로워가 생기면 여기서 소식을 보내요</span>
+            </span>
+          </div>
+        )}
       </Card>
       <Sheet open={newsOpen} onClose={() => setNewsOpen(false)} title="팔로워에게 소식 보내기">
         <div className="flex flex-wrap gap-1.5 mb-3">
