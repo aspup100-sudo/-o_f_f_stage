@@ -5,7 +5,7 @@ import {
   addCommonItem, agreeAgreement, nudgeMember, remindPayment, autoFillShifts, cycleShift, fillAgreementExamples, removeCommonItem, renameTeam, setMemberHangers, setMemberRole,
   setMoodHeadline, simulateOthersAgree, toggleMoodPick, togglePaid, togglePromo, updateAgreementItem, updateCost,
 } from '@/store/actions';
-import { brandById, daysUntil, dday, manwon, md, period, spaceById, teamById, teamCost, teamPrep, teamsOfBrand, won } from '@/store/logic';
+import { brandById, daysUntil, dday, manwon, md, period, spaceById, teamById, teamCost, teamPrep, teamsOfBrand, won, josa } from '@/store/logic';
 import { ProgressBar } from './Today';
 import { BrandLogo, LookbookGrid, ScreenTitle, ThemeTagList, TrustLine } from '@/components/common';
 import { Button, Card, cx, Demo, Empty, Icon, inputCls, Segmented, Sheet, StatusPill, SubHeader, Swatch, Tabs, Tag, textareaCls } from '@/components/ui';
@@ -603,8 +603,14 @@ ${brands.map((b) => `· ${b.name} — ${b.tags.categories.join('/')}`).join('\n'
 ${db.moodboards.find((m) => m.teamId === team.id)?.headline ?? ''}
 
 ${hashtags.join(' ')}`;
+  const me = brands.find((b) => b.id === myBrandId);
+  const others = brands.filter((b) => b.id !== myBrandId).map((b) => b.name).join(', ');
+  const story = `${period(team.period)} ${sp?.name ?? team.region}\n${me?.name ?? ''} × ${others}\n같이 열어요 🛍️\n\n${hashtags.slice(0, 3).join(' ')}`;
+  const short = `${me ? josa(me.name, '이', '가') : ''} ${others ? josa(others, '과', '와') : ''} 함께 ${period(team.period)} ${sp?.name ?? team.region}에서 공동 팝업을 열어요! 놀러 오세요 🙌 ${hashtags[0]}`;
+  const [fmt, setFmt] = useState<'feed' | 'story' | 'short'>('feed');
+  const text = fmt === 'feed' ? poster : fmt === 'story' ? story : short;
   const copy = async () => {
-    try { await navigator.clipboard.writeText(poster); toast('포스터 문구를 복사했어요'); } catch { toast('복사가 안 되는 환경이에요. 문구를 길게 눌러 복사해 주세요'); }
+    try { await navigator.clipboard.writeText(text); toast('문구를 복사했어요'); } catch { toast('복사가 안 되는 환경이에요. 문구를 길게 눌러 복사해 주세요'); }
   };
   return (
     <div>
@@ -622,8 +628,9 @@ ${hashtags.join(' ')}`;
           </div>
         </div>
         <div className="p-4">
-          <div className="text-[11px] text-ink-500">공통 포스터 문구 (자동 생성)</div>
-          <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed mt-1 select-text">{poster}</pre>
+          <Segmented items={[{ key: 'feed', label: '피드 글' }, { key: 'story', label: '스토리' }, { key: 'short', label: '짧은 공지' }]} value={fmt} onChange={setFmt} />
+          <div className="text-[11px] text-ink-500 mt-3">{fmt === 'feed' ? '공통 포스터 문구 (자동 생성)' : fmt === 'story' ? '스토리 위에 올릴 짧은 글 · 내 브랜드 기준' : '카톡·문자로 단골에게 보내기 좋아요 · 내 브랜드 기준'}</div>
+          <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed mt-1 select-text">{text}</pre>
         </div>
       </div>
       <Button full variant="dark" onClick={copy}>문구 복사하기</Button>
