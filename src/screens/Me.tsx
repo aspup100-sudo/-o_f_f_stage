@@ -9,6 +9,7 @@ import type { ThemeTags } from '@/types';
 import { ROLE_LABEL } from '@/config';
 import { RentalMeCard } from './Rental';
 import { OfficialInsta } from './Magazine';
+import { InstallApp } from '@/components/InstallApp';
 
 export default function MeScreen() {
   const { db, user, role, brand, landlord, visitor } = useMe();
@@ -47,6 +48,7 @@ export default function MeScreen() {
         {visitor && <VisitorSection />}
         {role === 'rental' && <RentalMeCard />}
 
+        <InstallApp />
         <OfficialInsta />
 
         <Card className="divide-y divide-ink-100">
