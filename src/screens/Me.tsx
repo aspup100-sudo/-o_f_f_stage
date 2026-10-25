@@ -3,7 +3,7 @@ import { useMe } from '@/store/hooks';
 import { navigate, update } from '@/store/store';
 import { STAMP_LEVELS } from './Popup';
 import { importInstagram, isValidBizNumber, requestVerification, sendFollowerNews, toggleVisitorRegion, updateBrandProfile } from '@/store/actions';
-import { brandById, manwon, period, popupById, trustScore } from '@/store/logic';
+import { brandById, dday, manwon, period, popupById, teamsOfBrand, trustScore } from '@/store/logic';
 import { BrandLogo, ScreenTitle, TagPicker, ThemeTagList, TrustLine } from '@/components/common';
 import { Avatar, Button, Card, Chip, Demo, Empty, Field, GradeBadge, Icon, inputCls, Sheet, Stars, Tag, textareaCls } from '@/components/ui';
 import { REGIONS, type ThemeTags } from '@/types';
@@ -32,6 +32,30 @@ export default function MeScreen() {
           {(brand || landlord) && (
             <div className="mt-3">
               <TrustLine db={db} subjectId={(brand ?? landlord)!.id} />
+              {(() => {
+                const t = trustScore(db, (brand ?? landlord)!.id);
+                const steps: [string, number][] = [['실버', 55], ['골드', 58]];
+                const nextTeam = brand ? teamsOfBrand(db, brand.id).filter((x) => x.stage !== '종료').sort((a, b) => a.period.start.localeCompare(b.period.start))[0] : undefined;
+                let msg: React.ReactNode;
+                let pct = 0;
+                if (t.grade === '새싹') {
+                  msg = <>공동 팝업 1회를 마치고 성사 확인을 받으면 <b>브론즈</b>가 돼요{nextTeam ? <> · {nextTeam.name} {dday(nextTeam.period.start)}</> : ''}</>;
+                  pct = nextTeam ? 50 : 10;
+                } else if (t.grade === '골드') {
+                  msg = <>최고 등급이에요. 좋은 후기를 계속 받으면 유지돼요</>;
+                  pct = 100;
+                } else {
+                  const [name, at] = steps.find(([, v]) => t.score < v)!;
+                  msg = <>신뢰 점수 {t.score}점 · {at - t.score}점 더 받으면 <b>{name}</b>. 성사 확인·좋은 후기로 올라가요</>;
+                  pct = Math.max(5, Math.round(((t.score - 50) / (at - 50)) * 100));
+                }
+                return (
+                  <button onClick={() => setRulesOpen(true)} className="mt-2.5 w-full text-left rounded-xl bg-ink-100/70 px-3 py-2.5">
+                    <div className="text-[12px] text-ink-700">{msg} <span className="text-ink-500">›</span></div>
+                    <div className="h-1.5 rounded-full bg-white mt-2 overflow-hidden"><div className="h-full bg-brand-500 rounded-full" style={{ width: `${pct}%` }} /></div>
+                  </button>
+                );
+              })()}
             </div>
           )}
         </Card>
