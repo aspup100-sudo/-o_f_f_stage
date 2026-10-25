@@ -360,14 +360,33 @@ function ApplySheet({ open, onClose, space, brandId }: { open: boolean; onClose:
           </Field>
           {team && (
             <>
-              <Field label="희망 날짜" hint={`${days}일 · 그중 비는 날 ${openCount}일 · 최소 ${space.minDays}일 · 예상 대관료 ${manwon(space.dailyFee * Math.max(days, 0))}${space.lastMinutePct ? ` · 2주 안 날짜는 ${space.lastMinutePct}% 할인 적용 전 금액` : ''}`}>
+              <Field label="희망 날짜" hint={`최소 ${space.minDays}일부터 빌릴 수 있어요`}>
                 <div className="flex items-center gap-2">
-                  <input type="date" className={inputCls} value={s0} onChange={(e) => setStart(e.target.value)} />
+                  <input type="date" className={cx(inputCls, 'min-w-0')} value={s0} onChange={(e) => setStart(e.target.value)} />
                   <span>~</span>
-                  <input type="date" className={inputCls} value={e0} onChange={(e) => setEnd(e.target.value)} />
+                  <input type="date" className={cx(inputCls, 'min-w-0')} value={e0} onChange={(e) => setEnd(e.target.value)} />
                 </div>
               </Field>
+              {days > 0 && (
+                <div className="rounded-xl bg-ink-100/70 p-3 mb-4">
+                  <div className="grid grid-cols-3 text-center gap-1">
+                    <div><div className="text-[11px] text-ink-500">기간</div><div className="font-bold">{days}일</div></div>
+                    <div><div className="text-[11px] text-ink-500">비어 있는 날</div><div className={cx('font-bold', openCount < days && 'text-amber-600')}>{openCount}일</div></div>
+                    <div><div className="text-[11px] text-ink-500">예상 대관료</div><div className="font-bold">{manwon(space.dailyFee * days)}</div></div>
+                  </div>
+                  <div className="text-[12px] text-ink-700 mt-2 text-center">
+                    {team.members.length}개 브랜드가 나누면 한 곳당 약 <b className="text-brand-600">{manwon(Math.round((space.dailyFee * days) / team.members.length / 10000) * 10000)}</b>
+                  </div>
+                  {openCount < days && <div className="text-[11px] text-amber-700 mt-1.5 text-center">일부 날짜는 이미 예약됐거나 열려 있지 않아요. 임대인과 조율이 필요할 수 있어요.</div>}
+                  {space.lastMinutePct ? <div className="text-[11px] text-ink-500 mt-1 text-center">2주 안 날짜는 {space.lastMinutePct}% 할인이 따로 적용돼요</div> : null}
+                </div>
+              )}
               <Field label="메시지">
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {[`${team.name} 팀입니다. 공간 분위기가 저희 무드와 잘 맞아요!`, '설치·철수는 영업시간 밖에 깔끔하게 할게요.', '방문객 동선과 SNS 홍보 계획도 준비돼 있어요.'].map((q) => (
+                    <Chip key={q} onClick={() => setMsg((m) => (m ? `${m} ${q}` : q))}>{q.length > 18 ? q.slice(0, 17) + '…' : q}</Chip>
+                  ))}
+                </div>
                 <textarea className={textareaCls} value={msg} onChange={(e) => setMsg(e.target.value)} placeholder="우리 팀과 팝업을 소개해 주세요" />
               </Field>
               <div className="text-[13px] font-semibold text-ink-700 mb-1.5">함께 첨부되는 팀 소개 페이지</div>
