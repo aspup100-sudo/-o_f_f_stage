@@ -334,7 +334,7 @@ export function RecruitNew() {
       ...d,
       title: `${d.region} ${mood} 무드 공동 팝업, 같이 열 브랜드 찾아요`,
       intro: `${brand.name}입니다. ${brand.intro}\n${mood} 무드로 ${d.region}에서 ${days}일 동안 함께 팝업을 열 ${want.join('·') || '다른 카테고리'} 브랜드를 찾아요. 고객층은 ${brand.tags.ages.join(', ') || '20~30대'}, 가격대는 ${brand.tags.price}예요.`,
-      totalBudget: avgFee ? Math.round((avgFee * days) / 100000) * 100000 : d.totalBudget,
+      totalBudget: avgFee ? Math.round((avgFee * days) / 10000) * 10000 : d.totalBudget,
     });
   };
 
@@ -374,6 +374,11 @@ export function RecruitNew() {
             <input type="number" className={inputCls} step={10} value={d.totalBudget / 10000} onChange={(e) => setD({ ...d, totalBudget: Number(e.target.value) * 10000 })} />
             <span className="text-sm shrink-0">만원</span>
           </div>
+          {avgFee > 0 && days > 0 && Math.abs(d.totalBudget - avgFee * days) > 100000 && (
+            <button type="button" className="mt-1.5 text-[12px] font-semibold text-brand-600" onClick={() => setD({ ...d, totalBudget: Math.round((avgFee * days) / 10000) * 10000 })}>
+              평균 예상액 {manwon(Math.round((avgFee * days) / 10000) * 10000)}으로 바꾸기 ›
+            </button>
+          )}
         </Field>
         <Field label="공간 확정 여부">
           <Segmented items={[{ key: 'no', label: '아직 미정' }, { key: 'yes', label: '확정됨' }]} value={d.spaceConfirmed ? 'yes' : 'no'} onChange={(k) => setD({ ...d, spaceConfirmed: k === 'yes' })} />
