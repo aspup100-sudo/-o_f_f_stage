@@ -1074,6 +1074,11 @@ export function lowerPartnerPrice(id: string) {
 }
 
 // ───────── 매거진 ─────────
+export function markMagazineRead(id: string, userId: string) {
+  const u = getState().db.users.find((x) => x.id === userId);
+  if (!u || u.readMagazines?.includes(id)) return;
+  update((s) => { const x = s.db.users.find((y) => y.id === userId)!; x.readMagazines = [...(x.readMagazines ?? []), id]; });
+}
 export function toggleShowcaseHelpful(id: string, userId: string) {
   update((s) => {
     const p = s.db.showcases.find((x) => x.id === id)!;

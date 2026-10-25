@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { shareLink } from '@/store/share';
 import { navigate, replace } from '@/store/store';
-import { publishMagazine, toggleMagazineHidden, toggleMagazineLike } from '@/store/actions';
+import { markMagazineRead, publishMagazine, toggleMagazineHidden, toggleMagazineLike } from '@/store/actions';
+import { daysUntil } from '@/store/logic';
 import { ScreenTitle } from '@/components/common';
 import { Button, Card, Chip, cx, Empty, Field, Icon, inputCls, SubHeader, Tag, textareaCls } from '@/components/ui';
 import { MAGAZINE_CATEGORIES, OFFICIAL_INSTAGRAM, REGIONS, type MagazineCard, type MagazineCategory, type MagazinePost, type Region } from '@/types';
@@ -49,6 +50,9 @@ function CardFace({ post, card, index, total }: { post: Pick<MagazinePost, 'hue'
 }
 
 export function MagazineThumb({ post, wide }: { post: MagazinePost; wide?: boolean }) {
+  const { user } = useMe();
+  // 최근 7일 안에 올라왔고 아직 안 읽은 글
+  const fresh = daysUntil(post.createdAt) >= -7 && !user?.readMagazines?.includes(post.id);
   return (
     <button onClick={() => navigate({ name: 'magazine', id: post.id })} className={cx('block text-left shrink-0 self-start align-top', wide ? 'w-full' : 'w-[200px]')}>
       {/* 목록용 작은 표지: 제목만 크게 */}
@@ -57,7 +61,7 @@ export function MagazineThumb({ post, wide }: { post: MagazinePost; wide?: boole
         style={{ background: `linear-gradient(160deg, hsl(${post.hue} 55% 42%), hsl(${(post.hue + 30) % 360} 50% 22%))` }}
       >
         <div className="flex items-center justify-between text-[10px] font-bold opacity-80">
-          <span>{post.category}</span>
+          <span className="flex items-center gap-1">{fresh && <span className="bg-white text-ink-900 rounded px-1 py-px text-[9px] font-black">NEW</span>}{post.category}</span>
           <span>{post.cards.length}장</span>
         </div>
         <div className="flex-1 flex items-end">
@@ -95,7 +99,7 @@ export function MagazineDetail({ id }: { id: string }) {
   const m = db.magazines.find((x) => x.id === id);
   const [page, setPage] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => { setPage(0); ref.current?.scrollTo({ left: 0 }); window.scrollTo({ top: 0 }); }, [id]);
+  useEffect(() => { setPage(0); ref.current?.scrollTo({ left: 0 }); window.scrollTo({ top: 0 }); markMagazineRead(id, userId); }, [id, userId]);
   if (!m) return <Empty>글을 찾을 수 없어요</Empty>;
   const liked = m.likes.includes(userId);
   const go = (i: number) => {

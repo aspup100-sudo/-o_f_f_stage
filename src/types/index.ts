@@ -22,6 +22,7 @@ export interface User {
   hidden?: boolean; // 관리자 숨김 처리
   warnings?: number;
   mutedTypes?: NotificationType[]; // 알림 설정에서 끈 종류
+  readMagazines?: ID[]; // 읽은 매거진
 }
 
 // ───────── 테마 태그 ─────────
