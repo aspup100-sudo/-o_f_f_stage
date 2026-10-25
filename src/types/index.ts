@@ -71,6 +71,7 @@ export interface BrandProfile {
   followers: ID[]; // 방문객 userId
   hearts: ID[]; // 내가 관심 표시한 brandId
   savedRecruits?: ID[]; // 찜한 모집글
+  news?: { id: ID; text: string; at: ISODateTime }[]; // 팔로워에게 보낸 소식 (최신이 앞)
   logoHue: number;
 }
 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { navigate, update } from '@/store/store';
-import { importInstagram, isValidBizNumber, requestVerification, updateBrandProfile } from '@/store/actions';
+import { importInstagram, isValidBizNumber, requestVerification, sendFollowerNews, updateBrandProfile } from '@/store/actions';
 import { brandById, period, popupById, trustScore } from '@/store/logic';
 import { BrandLogo, ScreenTitle, TagPicker, ThemeTagList, TrustLine } from '@/components/common';
 import { Avatar, Button, Card, Demo, Field, GradeBadge, Icon, inputCls, Sheet, Tag, textareaCls } from '@/components/ui';
@@ -130,6 +130,8 @@ function BrandSection() {
   const [tags, setTags] = useState<ThemeTags>(b.tags);
   const [avail, setAvail] = useState(b.availability);
   const [ig, setIg] = useState(b.instagram ?? '');
+  const [newsOpen, setNewsOpen] = useState(false);
+  const [news, setNews] = useState('');
   const sent = db.proposals.filter((p) => p.fromBrandId === b.id).length;
   const recv = db.proposals.filter((p) => p.toBrandId === b.id && p.status === 'sent').length;
   return (
@@ -148,7 +150,25 @@ function BrandSection() {
           </Button>
         </div>
         <p className="text-[11px] text-ink-500 mt-2">받은 제안 대기 {recv}건 · 보낸 제안 {sent}건</p>
+        <button onClick={() => setNewsOpen(true)} className="mt-3 w-full rounded-xl bg-brand-50 px-3.5 py-3 text-left flex items-center gap-3">
+          <span className="text-xl">📣</span>
+          <span className="flex-1">
+            <span className="block text-sm font-bold">팔로워 {b.followers.length}명에게 소식 보내기</span>
+            <span className="block text-[12px] text-ink-500">팝업 오픈, 신상, 현장 혜택을 알림으로 바로 전해요</span>
+          </span>
+          <span className="text-ink-300">›</span>
+        </button>
       </Card>
+      <Sheet open={newsOpen} onClose={() => setNewsOpen(false)} title="팔로워에게 소식 보내기">
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          {['이번 주말 팝업에서 만나요!', '신상 입고했어요. 팝업에서 먼저 보여 드릴게요', '팝업 현장에서 팔로워 10% 할인해요'].map((t) => (
+            <button key={t} onClick={() => setNews(t)} className="px-3 h-8 rounded-full border border-ink-300 text-xs">{t}</button>
+          ))}
+        </div>
+        <textarea className={textareaCls} maxLength={80} value={news} onChange={(e) => setNews(e.target.value)} placeholder="80자 이내로 짧게 써 주세요" />
+        <p className="text-[11px] text-ink-500 mt-1">{news.length}/80 · 프로필의 '소식'에도 남아요</p>
+        <Button full size="lg" className="mt-3" disabled={!news.trim()} onClick={() => { sendFollowerNews(b.id, news.trim()); setNews(''); setNewsOpen(false); }}>보내기</Button>
+      </Sheet>
       <Sheet open={edit} onClose={() => setEdit(false)} title="브랜드 프로필 수정">
         <Field label="소개">
           <textarea className={textareaCls} value={intro} onChange={(e) => setIntro(e.target.value)} />

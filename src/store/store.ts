@@ -20,7 +20,7 @@ export interface AppState {
   session: Session;
 }
 
-const STORAGE_KEY = 'offstage-demo-v5';
+const STORAGE_KEY = 'offstage-demo-v6';
 
 function initialSession(): Session {
   return {

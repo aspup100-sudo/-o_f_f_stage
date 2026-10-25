@@ -172,6 +172,27 @@ export function TodayVisitor() {
           </div>
         </button>
       </div>
+      {(() => {
+        const feed = visitor.following
+          .flatMap((id) => { const b = brandById(db, id); return (b?.news ?? []).map((n) => ({ b: b!, n })); })
+          .sort((a, b) => b.n.at.localeCompare(a.n.at))
+          .slice(0, 3);
+        if (!feed.length) return null;
+        return (
+          <div className="mt-3 rounded-2xl bg-white border border-ink-100 px-4 py-1">
+            <div className="text-[13px] font-bold pt-2.5">📣 팔로우한 브랜드 소식</div>
+            <div className="divide-y divide-ink-100">
+              {feed.map(({ b, n }) => (
+                <button key={n.id} onClick={() => navigate({ name: 'brand', id: b.id })} className="w-full text-left py-2.5">
+                  <span className="text-[12px] font-bold text-brand-600">{b.name}</span>
+                  <span className="text-[11px] text-ink-500"> · {n.at.slice(5, 10).replace('-', '/')}</span>
+                  <span className="block text-[14px] mt-0.5">{n.text}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
       {soon.length > 0 && (
         <div className="mt-3 rounded-2xl bg-white border border-ink-100 px-4 py-1 divide-y divide-ink-100">
           {soon.map((p) => {

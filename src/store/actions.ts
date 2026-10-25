@@ -1105,3 +1105,15 @@ export function startNextRound(teamId: string, byBrandId: string) {
   toast('다음 회차 팀을 만들었어요. 지난 약속서와 무드보드를 그대로 가져왔어요');
   navigate({ name: 'team', id: newTeamId, sub: 'agreement' });
 }
+
+// ───────── 팔로워 소식 ─────────
+export function sendFollowerNews(brandId: string, text: string) {
+  let n = 0;
+  update((s) => {
+    const b = s.db.brands.find((x) => x.id === brandId)!;
+    (b.news ?? (b.news = [])).unshift({ id: newId('nw'), text, at: nowISO() });
+    b.followers.forEach((u) => notify(s.db, u, 'follow_popup', `${b.name}: ${text}`, { name: 'brand', id: b.id }));
+    n = b.followers.length;
+  });
+  toast(n ? `팔로워 ${n}명에게 소식을 보냈어요` : '소식을 올렸어요. 팔로워가 생기면 바로 받아 볼 수 있어요');
+}

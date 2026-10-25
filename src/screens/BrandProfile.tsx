@@ -64,6 +64,14 @@ export default function BrandProfileScreen({ id }: { id: string }) {
             ))}
           </div>
         )}
+        {brand.news && brand.news.length > 0 && (
+          <div className="mt-4 rounded-2xl border border-ink-100 p-3.5">
+            <div className="text-[12px] font-bold text-ink-500 mb-1">📣 최근 소식</div>
+            {brand.news.slice(0, 2).map((n) => (
+              <div key={n.id} className="text-sm py-1"><span className="text-ink-900">{n.text}</span> <span className="text-[11px] text-ink-500">{n.at.slice(5, 10).replace('-', '/')}</span></div>
+            ))}
+          </div>
+        )}
         {role === 'brand' && !isMe && me && <MatchCard me={me} other={brand} />}
         <div className="flex gap-2 mt-4">
           {role === 'brand' && !isMe && (
