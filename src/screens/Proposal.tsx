@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { back, navigate } from '@/store/store';
 import { respondProposal, sendProposal } from '@/store/actions';
-import { brandById, manwon } from '@/store/logic';
-import { BrandCard } from '@/components/common';
+import { brandById, manwon, matchPct, matchScore } from '@/store/logic';
+import { BrandCard, BrandLogo, TrustLine } from '@/components/common';
 import { Button, Card, Chip, Demo, Empty, Field, inputCls, Segmented, StatusPill, SubHeader, Tag, textareaCls } from '@/components/ui';
 import { REGIONS, type Region } from '@/types';
 
@@ -76,10 +76,19 @@ export function ProposalsScreen() {
             const other = brandById(db, tab === 'recv' ? p.fromBrandId : p.toBrandId)!;
             return (
               <Card key={p.id} className="p-4">
-                <div className="flex items-center justify-between">
-                  <button className="font-bold" onClick={() => navigate({ name: 'brand', id: other.id })}>{tab === 'recv' ? `${other.name}의 제안` : `${other.name}에게`}</button>
+                <div className="flex items-center gap-2.5">
+                  <BrandLogo brand={other} size={40} />
+                  <button className="flex-1 min-w-0 text-left" onClick={() => navigate({ name: 'brand', id: other.id })}>
+                    <div className="font-bold truncate">{tab === 'recv' ? `${other.name}의 제안` : `${other.name}에게`} <span className="text-ink-300 font-normal">›</span></div>
+                    <TrustLine db={db} subjectId={other.id} compact />
+                  </button>
                   <StatusPill status={p.status === 'sent' ? 'pending' : p.status === 'accepted' ? 'accepted' : 'rejected'} />
                 </div>
+                {brand && (() => {
+                  const m = matchScore(db, brand, other);
+                  const pct = matchPct(m.score);
+                  return <div className="mt-2 text-[12px] text-brand-700 bg-brand-50 rounded-lg px-2.5 py-1.5">궁합 {pct}%{m.reasons[0] ? ` · ${m.reasons[0]}` : ''}</div>;
+                })()}
                 <div className="flex flex-wrap gap-1 mt-2">
                   <Tag>📅 {p.period}</Tag>
                   <Tag>📍 {p.region}</Tag>

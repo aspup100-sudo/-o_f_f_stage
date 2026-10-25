@@ -312,3 +312,6 @@ export function popupReport(db: DB, popupId: string) {
 /** 2주 안에 비는 날 수 (막판 할인 대상) */
 export const soonOpenDays = (db: DB, spaceId: string) =>
   db.availability.filter((a) => a.spaceId === spaceId && a.status === 'open' && daysUntil(a.date) > 0 && daysUntil(a.date) <= 14).length;
+
+/** 추천 점수를 사람이 읽는 궁합 %로 바꾼다 */
+export const matchPct = (score: number) => Math.max(10, Math.min(98, Math.round(40 + score * 4)));

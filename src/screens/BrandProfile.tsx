@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { guard } from '@/store/hooks';
 import { navigate } from '@/store/store';
-import { brandById, displayName, josa, matchScore, period, reviewAvg, spaceById, teamsOfBrand, trustEvents, trustScore, userById } from '@/store/logic';
+import { brandById, displayName, josa, matchPct, matchScore, period, reviewAvg, spaceById, teamsOfBrand, trustEvents, trustScore, userById } from '@/store/logic';
 import { BrandLogo, LookbookGrid, ThemeTagList } from '@/components/common';
 import { Button, Card, Empty, GradeBadge, Icon, Stars, StatusPill, SubHeader, Tabs, Tag } from '@/components/ui';
 import { BrandActions } from './BrandActions';
@@ -228,7 +228,7 @@ export function ReviewGroup({ title, reviews }: { title: string; reviews: Review
 function MatchCard({ me, other }: { me: import('@/types').BrandProfile; other: import('@/types').BrandProfile }) {
   const { db } = useMe();
   const m = matchScore(db, me, other);
-  const pct = Math.max(10, Math.min(98, Math.round(40 + m.score * 4)));
+  const pct = matchPct(m.score);
   const word = pct >= 80 ? '찰떡 궁합' : pct >= 60 ? '잘 맞아요' : pct >= 45 ? '무난해요' : '색이 많이 달라요';
   return (
     <div className="mt-4 rounded-2xl bg-brand-50 p-4">
