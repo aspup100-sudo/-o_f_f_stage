@@ -11,8 +11,13 @@ import type { Popup } from '@/types';
 import { BrandActions } from './BrandActions';
 import { ReportButton } from './Report';
 
-export function ComboReviewList({ db, popupIds }: { db: DB; popupIds: string[] }) {
-  const list = db.comboReviews.filter((c) => popupIds.includes(c.popupId));
+type ReviewSort = 'new' | 'high' | 'low';
+const REVIEW_SORTS: { key: ReviewSort; label: string }[] = [{ key: 'new', label: '최신순' }, { key: 'high', label: '별점 높은 순' }, { key: 'low', label: '별점 낮은 순' }];
+const sortBy = <T,>(list: T[], sort: ReviewSort, rating: (x: T) => number, at: (x: T) => string) =>
+  [...list].sort((a, b) => (sort === 'new' ? at(b).localeCompare(at(a)) : sort === 'high' ? rating(b) - rating(a) : rating(a) - rating(b)));
+
+export function ComboReviewList({ db, popupIds, sort = 'new' }: { db: DB; popupIds: string[]; sort?: ReviewSort }) {
+  const list = sortBy(db.comboReviews.filter((c) => popupIds.includes(c.popupId)), sort, (c) => c.rating, (c) => c.createdAt);
   if (!list.length) return <div className="text-sm text-ink-500 py-2">아직 조합 리뷰가 없어요</div>;
   return (
     <div className="space-y-2">
@@ -39,6 +44,8 @@ export function PopupDetail({ id }: { id: string }) {
   const [code, setCode] = useState('');
   const [tab, setTab] = useState<'popup' | 'brand' | 'combo'>('combo');
   const [writing, setWriting] = useState<null | 'popup' | 'brand' | 'combo'>(null);
+  const [sort, setSort] = useState<ReviewSort>('new');
+  const [brandFilter, setBrandFilter] = useState<string | null>(null);
   if (!p) return <Empty>팝업을 찾을 수 없어요</Empty>;
   const team = teamById(db, p.teamId)!;
   const sp = spaceById(db, p.spaceId)!;
@@ -153,10 +160,25 @@ export function PopupDetail({ id }: { id: string }) {
         </div>
         <Tabs items={[{ key: 'combo', label: `조합 리뷰 ${combos.length}` }, { key: 'popup', label: `팝업 ${popupReviews.length}` }, { key: 'brand', label: `브랜드별 ${brandReviews.length}` }]} value={tab} onChange={setTab} />
         <div className="pt-3">
-          {tab === 'combo' && <ComboReviewList db={db} popupIds={[p.id]} />}
+          {(tab === 'combo' ? combos.length : tab === 'popup' ? popupReviews.length : brandReviews.length) > 1 && (
+            <div className="flex items-center gap-1.5 mb-2.5 overflow-x-auto no-scrollbar">
+              {tab === 'brand' && (
+                <>
+                  <Chip active={!brandFilter} onClick={() => setBrandFilter(null)}>전체</Chip>
+                  {brands.filter((b) => brandReviews.some((r) => r.targetId === b.id)).map((b) => (
+                    <Chip key={b.id} active={brandFilter === b.id} onClick={() => setBrandFilter(brandFilter === b.id ? null : b.id)}>{b.name}</Chip>
+                  ))}
+                </>
+              )}
+              <select aria-label="리뷰 정렬" value={sort} onChange={(e) => setSort(e.target.value as ReviewSort)} className="ml-auto shrink-0 h-8 rounded-full border border-ink-300 bg-white px-2.5 text-[12px]">
+                {REVIEW_SORTS.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
+              </select>
+            </div>
+          )}
+          {tab === 'combo' && <ComboReviewList db={db} popupIds={[p.id]} sort={sort} />}
           {tab !== 'combo' && (
             <div className="space-y-2">
-              {(tab === 'popup' ? popupReviews : brandReviews).map((r) => (
+              {sortBy((tab === 'popup' ? popupReviews : brandReviews.filter((r) => !brandFilter || r.targetId === brandFilter)), sort, (r) => r.scores['전체'], (r) => r.createdAt).map((r) => (
                 <Card key={r.id} className="p-3.5">
                   <div className="flex items-center justify-between">
                     <span className="text-[13px] font-semibold">{displayName(db, r.authorId)}{r.kind === 'visitor_brand' && <span className="text-ink-500 font-normal"> → {brandById(db, r.targetId)?.name}</span>}</span>
