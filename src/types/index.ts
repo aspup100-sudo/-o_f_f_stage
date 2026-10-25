@@ -437,6 +437,7 @@ export interface ShowcasePost {
   authorId: ID;
   createdAt: ISODate;
   hidden?: boolean;
+  helpful?: ID[]; // 운영 팁이 도움됐다고 누른 userId
 }
 
 export const QNA_TAGS = ['원상복구', '신고·허가', '비용', '계약', '운영', '홍보', '기타'] as const;

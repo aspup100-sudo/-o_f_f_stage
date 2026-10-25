@@ -502,14 +502,14 @@ const trustSeedEvents: TrustEvent[] = [
 
 const showcases: ShowcasePost[] = [
   {
-    id: 'sc1', teamId: 't3', popupId: 'p3', title: '오래된 것들의 시간 2회 후기', period: { start: '2026-10-10', end: '2026-10-13' }, spaceId: 's4',
+    id: 'sc1', helpful: ['u_b4', 'u_b6', 'u_v2'], teamId: 't3', popupId: 'p3', title: '오래된 것들의 시간 2회 후기', period: { start: '2026-10-10', end: '2026-10-13' }, spaceId: 's4',
     brandIds: ['b8', 'b12', 'b5'], photoHues: [75, 35, 330, 60], authorId: 'u_b8', createdAt: '2026-10-15',
     body: '해방촌 계단집에서 두 번째 회차를 마쳤어요. 1회 때 배운 걸 바탕으로 동선을 바꿨더니 체류 시간이 확 늘었습니다.',
     tips: '좁은 공간은 행거를 벽에 붙이지 말고 ㄷ자로 두면 동선이 생겨요. 계단 입구에 작은 입간판 필수!',
     sales: '3일 합산 약 620만원', visitors: 410,
   },
   {
-    id: 'sc2', teamId: 't3', popupId: 'p4', title: '한옥에서 연 첫 공동 팝업', period: { start: '2026-06-05', end: '2026-06-08' }, spaceId: 's5',
+    id: 'sc2', helpful: ['u_b2'], teamId: 't3', popupId: 'p4', title: '한옥에서 연 첫 공동 팝업', period: { start: '2026-06-05', end: '2026-06-08' }, spaceId: 's5',
     brandIds: ['b8', 'b12', 'b5'], photoHues: [35, 100, 25], authorId: 'u_b12', createdAt: '2026-06-12',
     body: '세 브랜드 모두 첫 공동 팝업이었어요. 대관료를 3분의 1로 나누니 부담이 확 줄었고, 서로의 손님이 서로의 손님이 됐어요.',
     tips: '약속서에 교차 판매 정산 방식을 꼭 적어 두세요. 마감 때 10분이면 끝납니다.',

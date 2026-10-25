@@ -1013,6 +1013,14 @@ export function toggleRentalItem(id: string) {
 }
 
 // ───────── 매거진 ─────────
+export function toggleShowcaseHelpful(id: string, userId: string) {
+  update((s) => {
+    const p = s.db.showcases.find((x) => x.id === id)!;
+    const list = p.helpful ?? [];
+    p.helpful = list.includes(userId) ? list.filter((x) => x !== userId) : [...list, userId];
+  });
+}
+
 export function toggleMagazineLike(id: string, userId: string) {
   update((s) => {
     const m = s.db.magazines.find((x) => x.id === id)!;

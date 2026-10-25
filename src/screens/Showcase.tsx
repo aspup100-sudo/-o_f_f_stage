@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { navigate, replace } from '@/store/store';
-import { createShowcase } from '@/store/actions';
+import { createShowcase, toggleShowcaseHelpful } from '@/store/actions';
 import { brandById, displayName, period, spaceById, teamById } from '@/store/logic';
 import { BrandLogo } from '@/components/common';
-import { Button, Card, Demo, Empty, Field, inputCls, SubHeader, Swatch, Tag, textareaCls } from '@/components/ui';
+import { Button, Card, cx, Demo, Empty, Field, Icon, inputCls, SubHeader, Swatch, Tag, textareaCls } from '@/components/ui';
 import { ComboReviewList } from './Popup';
 import { ReportButton } from './Report';
 
@@ -27,6 +27,7 @@ export function ShowcaseList() {
               <div className="text-[12px] text-ink-500 mt-0.5">{period(s.period)} · {sp?.name} · {teamById(db, s.teamId)?.name}</div>
               <div className="flex flex-wrap gap-1 mt-2">{s.brandIds.map((b) => <Tag key={b}>@{brandById(db, b)?.name}</Tag>)}</div>
               <p className="text-[13px] text-ink-700 mt-2 line-clamp-2">💡 {s.tips}</p>
+              <div className="text-[12px] text-ink-500 mt-2 flex items-center gap-1"><Icon name="heart" filled={!!s.helpful?.length} className="w-3.5 h-3.5 text-brand-500" /> 팁이 도움됐어요 {s.helpful?.length ?? 0}</div>
             </div>
           </Card>
         );
@@ -36,7 +37,7 @@ export function ShowcaseList() {
 }
 
 export function ShowcaseDetail({ id }: { id: string }) {
-  const { db } = useMe();
+  const { db, userId } = useMe();
   const s = db.showcases.find((x) => x.id === id);
   if (!s) return <Empty>글을 찾을 수 없어요</Empty>;
   const sp = spaceById(db, s.spaceId);
@@ -71,6 +72,14 @@ export function ShowcaseDetail({ id }: { id: string }) {
         <div className="mt-4 rounded-2xl bg-amber-50 p-4">
           <div className="font-bold text-amber-900 mb-1">💡 운영 팁</div>
           <p className="text-sm text-amber-900 leading-relaxed">{s.tips}</p>
+          {(() => {
+            const on = !!s.helpful?.includes(userId);
+            return (
+              <button onClick={() => toggleShowcaseHelpful(s.id, userId)} className={cx('mt-3 h-9 px-3.5 rounded-full text-[13px] font-semibold flex items-center gap-1.5', on ? 'bg-amber-900 text-white' : 'bg-white text-amber-900 border border-amber-200')}>
+                <Icon name="heart" filled={on} className="w-4 h-4" /> 팁이 도움됐어요 {s.helpful?.length ?? 0}
+              </button>
+            );
+          })()}
         </div>
         {(s.sales || s.visitors) && (
           <div className="mt-3 rounded-2xl border border-ink-100 p-4">
