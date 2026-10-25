@@ -239,6 +239,7 @@ function MatchCard({ me, other }: { me: import('@/types').BrandProfile; other: i
   const { db } = useMe();
   const m = matchScore(db, me, other);
   const pct = matchPct(m.score);
+  const [open, setOpen] = useState(false);
   const word = pct >= 80 ? '찰떡 궁합' : pct >= 60 ? '잘 맞아요' : pct >= 45 ? '무난해요' : '색이 많이 달라요';
   return (
     <div className="mt-4 rounded-2xl bg-brand-50 p-4">
@@ -250,6 +251,19 @@ function MatchCard({ me, other }: { me: import('@/types').BrandProfile; other: i
       {m.reasons.length > 0 && (
         <div className="mt-2.5 space-y-0.5">
           {m.reasons.slice(0, 3).map((r) => <div key={r} className="text-[12px] text-brand-700">✓ {r}</div>)}
+        </div>
+      )}
+      <button onClick={() => setOpen(!open)} className="mt-2 text-[12px] font-semibold text-ink-500">{open ? '접기 ▴' : '이렇게 계산했어요 ▾'}</button>
+      {open && (
+        <div className="mt-2 rounded-xl bg-white p-3 text-[12px]">
+          {m.parts.map((x) => (
+            <div key={x.label} className="flex justify-between py-0.5">
+              <span className="text-ink-700">{x.label}</span>
+              <span className={x.pts > 0 ? 'font-bold text-brand-600' : x.pts < 0 ? 'font-bold text-rose-500' : 'text-ink-500'}>{x.pts > 0 ? '+' : ''}{x.pts}</span>
+            </div>
+          ))}
+          <div className="flex justify-between border-t border-ink-100 mt-1.5 pt-1.5 font-bold"><span>합계 {m.score}점</span><span>40 + {m.score}×4 = {pct}%</span></div>
+          <p className="text-[11px] text-ink-500 mt-1.5">가입할 때 고른 무드·카테고리·가격대·고객 연령 태그로 계산해요. 태그는 내 정보에서 바꿀 수 있어요. (데모 공식)</p>
         </div>
       )}
     </div>

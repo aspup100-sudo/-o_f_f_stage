@@ -95,20 +95,26 @@ const sim = (a: BrandProfile, b: BrandProfile) =>
 
 export function matchScore(db: DB, me: BrandProfile, other: BrandProfile) {
   const reasons: string[] = [];
+  const parts: { label: string; pts: number }[] = []; // 항목별 점수(궁합 카드에서 펼쳐 보기)
   let score = 0;
   const moods = me.tags.moods.filter((m) => other.tags.moods.includes(m));
   if (moods.length) {
     score += moods.length * 3;
     reasons.push(`무드 겹침: ${moods.join(', ')}`);
   }
+  parts.push({ label: moods.length ? `무드 겹침 (${moods.join(', ')})` : '겹치는 무드 없음', pts: moods.length * 3 });
   const pd = Math.abs(PRICE_RANGES.indexOf(me.tags.price) - PRICE_RANGES.indexOf(other.tags.price));
   if (pd === 0) { score += 2; reasons.push('가격대 같음'); } else if (pd === 1) score += 1;
+  parts.push({ label: pd === 0 ? '가격대 같음' : pd === 1 ? '가격대 한 칸 차이' : '가격대 차이 큼', pts: pd === 0 ? 2 : pd === 1 ? 1 : 0 });
   const ages = me.tags.ages.filter((a) => other.tags.ages.includes(a));
   if (ages.length) { score += ages.length * 1.5; reasons.push(`고객층 겹침: ${ages.join(', ')}`); }
+  parts.push({ label: ages.length ? `고객 연령 겹침 (${ages.join(', ')})` : '고객 연령 다름', pts: ages.length * 1.5 });
   const diffCats = other.tags.categories.filter((c) => !me.tags.categories.includes(c));
   const sameCats = other.tags.categories.filter((c) => me.tags.categories.includes(c));
   score += diffCats.length * 2 - sameCats.length;
   if (diffCats.length) reasons.push(`서로 다른 카테고리: ${diffCats.join(', ')}`);
+  if (diffCats.length) parts.push({ label: `서로 다른 카테고리 (${diffCats.join(', ')})`, pts: diffCats.length * 2 });
+  if (sameCats.length) parts.push({ label: `같은 카테고리 (${sameCats.join(', ')}) · 자리 경쟁`, pts: -sameCats.length });
   // 조합 리뷰 가산점: 평점 높은 조합(x,y)에서 내가 x와 비슷하고 상대가 y와 비슷하면
   let comboBonus = false;
   db.comboReviews.filter((c) => c.good && c.rating >= 4).forEach((c) =>
@@ -119,8 +125,8 @@ export function matchScore(db: DB, me: BrandProfile, other: BrandProfile) {
       if ((sim(me, bx) >= 2 && sim(other, by) >= 2) || (sim(me, by) >= 2 && sim(other, bx) >= 2)) comboBonus = true;
     }),
   );
-  if (comboBonus) { score += 2; reasons.push('방문객이 좋아한 조합과 닮았어요'); }
-  return { score, reasons };
+  if (comboBonus) { score += 2; reasons.push('방문객이 좋아한 조합과 닮았어요'); parts.push({ label: '방문객이 좋아한 조합과 닮음', pts: 2 }); }
+  return { score, reasons, parts };
 }
 
 export function recommendations(db: DB, me: BrandProfile, limit = 5) {
