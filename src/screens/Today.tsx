@@ -341,6 +341,25 @@ export function TodayRental() {
           </button>
         </div>
       </div>
+      {active.length > 0 && (
+        <div className="mt-3 rounded-2xl bg-white border border-ink-100 p-4">
+          <div className="text-[14px] font-bold mb-1">다가오는 {active.some((o) => o.delivery) ? '배송·회수' : '대여'} 일정</div>
+          {[...active].sort((a, b) => a.dates.start.localeCompare(b.dates.start)).slice(0, 3).map((o) => {
+            const started = o.dates.start <= DEMO_TODAY;
+            const who = o.teamId ? teamById(db, o.teamId)?.name : brandById(db, o.brandId)?.name;
+            return (
+              <button key={o.id} onClick={() => navigate({ name: 'tab', tab: 'orders' })} className="w-full flex items-center gap-3 py-2 text-left border-t border-ink-100 first:border-t-0">
+                <span className="w-12 shrink-0 text-center rounded-lg bg-brand-50 text-brand-600 text-[12px] font-extrabold py-1">{dday(started ? o.dates.end : o.dates.start)}</span>
+                <span className="flex-1 min-w-0">
+                  <span className="block text-[13px] font-semibold truncate">{who}</span>
+                  <span className="block text-[11px] text-ink-500">{started ? `${o.delivery ? '회수' : '반납'} ${md(o.dates.end)}` : `${o.delivery ? '배송' : '수령'} ${md(o.dates.start)}`} · 장비 {o.lines.reduce((n, l) => n + l.qty, 0)}개</span>
+                </span>
+                <span className="text-ink-300">›</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
       {prospects > 0 && (
         <div className="mt-3 rounded-2xl bg-white border border-ink-100 p-4">
           <div className="text-[14px] font-bold">곧 팝업을 여는 팀 {prospects}곳이 아직 장비를 안 빌렸어요</div>
