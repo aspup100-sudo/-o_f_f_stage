@@ -1,0 +1,121 @@
+import { useState } from 'react';
+import { useMe, guard } from '@/store/hooks';
+import { navigate, replace } from '@/store/store';
+import { answerQna, createQna, openDirectChat } from '@/store/actions';
+import { brandOfUser, displayName, landlordOfUser, trustScore } from '@/store/logic';
+import { Avatar, Button, Card, Chip, Empty, Field, GradeBadge, Icon, inputCls, SubHeader, Tag, textareaCls } from '@/components/ui';
+import { QNA_TAGS, type QnaTag } from '@/types';
+import type { DB } from '@/data/mock';
+import { ReportButton } from './Report';
+
+function Author({ db, userId }: { db: DB; userId: string }) {
+  const b = brandOfUser(db, userId);
+  const l = landlordOfUser(db, userId);
+  const grade = b ? trustScore(db, b.id).grade : l ? trustScore(db, l.id).grade : null;
+  const role = b ? '브랜드' : l ? '임대인' : '방문객';
+  return (
+    <button disabled={!b} onClick={() => b && navigate({ name: 'brand', id: b.id })} className="flex items-center gap-1.5 text-left">
+      <Avatar name={displayName(db, userId)} hue={b?.logoHue ?? 150} size={24} />
+      <span className="text-[13px] font-semibold">{displayName(db, userId)}</span>
+      <span className="text-[11px] text-ink-500">{role}</span>
+      {grade && <GradeBadge grade={grade} small />}
+    </button>
+  );
+}
+
+export function QnaList() {
+  const { db } = useMe();
+  const [tag, setTag] = useState<QnaTag | '전체'>('전체');
+  const [q, setQ] = useState('');
+  const list = db.qnaPosts
+    .filter((p) => !p.hidden)
+    .filter((p) => tag === '전체' || p.tag === tag)
+    .filter((p) => !q || (p.title + p.body).includes(q));
+  return (
+    <div className="pt-4">
+      <div className="px-4 flex gap-2 mb-2">
+        <div className="flex-1 relative">
+          <Icon name="search" className="w-4 h-4 absolute left-3 top-3.5 text-ink-500" />
+          <input className={inputCls + ' pl-9'} placeholder="원상복구, 신고, 비용…" value={q} onChange={(e) => setQ(e.target.value)} />
+        </div>
+        <Button variant="dark" className="h-11" onClick={() => navigate({ name: 'qnaNew' })}>질문하기</Button>
+      </div>
+      <div className="flex gap-1.5 overflow-x-auto no-scrollbar px-4 pb-3">
+        {(['전체', ...QNA_TAGS] as const).map((t) => <Chip key={t} active={tag === t} onClick={() => setTag(t)}>{t}</Chip>)}
+      </div>
+      <div className="px-4 space-y-2">
+        {list.map((p) => {
+          const n = db.qnaAnswers.filter((a) => a.postId === p.id).length;
+          return (
+            <Card key={p.id} className="p-3.5" onClick={() => navigate({ name: 'qna', id: p.id })}>
+              <div className="flex items-center gap-1.5 mb-1"><Tag tone="orange">{p.tag}</Tag><span className="text-[11px] text-ink-500">{p.createdAt}</span></div>
+              <div className="font-bold text-[15px]">Q. {p.title}</div>
+              <p className="text-[13px] text-ink-500 line-clamp-1 mt-0.5">{p.body}</p>
+              <div className="text-[12px] mt-1.5 font-semibold text-emerald-700">답변 {n}</div>
+            </Card>
+          );
+        })}
+        {!list.length && <Empty icon="search">검색 결과가 없어요</Empty>}
+      </div>
+    </div>
+  );
+}
+
+export function QnaDetail({ id }: { id: string }) {
+  const { db, userId, role } = useMe();
+  const p = db.qnaPosts.find((x) => x.id === id);
+  const [text, setText] = useState('');
+  if (!p) return <Empty>글을 찾을 수 없어요</Empty>;
+  const answers = db.qnaAnswers.filter((a) => a.postId === p.id);
+  return (
+    <div className="bg-white min-h-screen">
+      <SubHeader title="실무 Q&A" right={<ReportButton targetType="post" targetId={p.id} targetLabel={`Q&A: ${p.title}`} />} />
+      <div className="p-4">
+        <Tag tone="orange">{p.tag}</Tag>
+        <h1 className="text-xl font-extrabold mt-2">Q. {p.title}</h1>
+        <div className="mt-2"><Author db={db} userId={p.authorId} /></div>
+        <p className="text-[15px] leading-relaxed mt-3">{p.body}</p>
+        <h3 className="font-bold mt-6 mb-2">답변 {answers.length}</h3>
+        <div className="space-y-2">
+          {answers.map((a) => (
+            <Card key={a.id} className="p-3.5">
+              <Author db={db} userId={a.authorId} />
+              <p className="text-sm text-ink-700 mt-2 leading-relaxed">{a.body}</p>
+              {a.authorId !== userId && role !== 'visitor' && role !== 'admin' && (
+                <button className="text-[12px] text-ink-700 underline underline-offset-2 mt-2" onClick={() => guard(() => openDirectChat(a.authorId, `Q&A: ${p.title.slice(0, 12)}…`))}>🔒 비공개로 더 묻기 (채팅)</button>
+              )}
+            </Card>
+          ))}
+        </div>
+        {role !== 'admin' && (
+          <div className="mt-4">
+            <textarea className={textareaCls} value={text} onChange={(e) => setText(e.target.value)} placeholder="경험을 나눠 주세요" />
+            <Button full className="mt-2" disabled={!text.trim()} onClick={() => { answerQna(p.id, userId, text.trim()); setText(''); }}>답변 등록</Button>
+            <p className="text-[11px] text-ink-500 mt-2">가격 협상처럼 민감한 내용은 공개 답변 대신 "비공개로 묻기"를 써 주세요.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function QnaNew() {
+  const { userId } = useMe();
+  const [title, setTitle] = useState('');
+  const [body, setBody] = useState('');
+  const [tag, setTag] = useState<QnaTag>('운영');
+  return (
+    <div className="bg-white min-h-screen">
+      <SubHeader title="질문하기" />
+      <div className="p-4">
+        <Field label="분류">
+          <div className="flex flex-wrap gap-1.5">{QNA_TAGS.map((t) => <Chip key={t} active={tag === t} onClick={() => setTag(t)}>{t}</Chip>)}</div>
+        </Field>
+        <Field label="제목" required><input className={inputCls} value={title} onChange={(e) => setTitle(e.target.value)} /></Field>
+        <Field label="내용" required><textarea className={textareaCls + ' min-h-[140px]'} value={body} onChange={(e) => setBody(e.target.value)} /></Field>
+        {tag === '비용' && <p className="text-[12px] text-amber-700 bg-amber-50 rounded-lg p-2.5 mb-3">특정 공간의 가격 협상은 공간 상세의 "비공개로 묻기"(채팅)를 이용해 주세요.</p>}
+        <Button full size="lg" disabled={!title.trim() || !body.trim()} onClick={() => { const id = createQna(userId, title, body, tag); replace({ name: 'qna', id }); }}>올리기</Button>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,127 @@
+import { useState } from 'react';
+import { useMe } from '@/store/hooks';
+import { isListedBrand, recommendations } from '@/store/logic';
+import { BrandCard, PopupBannerCard } from '@/components/common';
+import { Chip, Empty, Segmented, Sheet, Button, Icon, Tag } from '@/components/ui';
+import { CATEGORIES, MOODS, PRICE_RANGES, type Category, type Mood, type PriceRange } from '@/types';
+import { BrandActions } from './BrandActions';
+import { ShowcaseList } from './Showcase';
+import { QnaList } from './Qna';
+
+type View = 'brand' | 'showcase' | 'qna';
+
+export default function Explore() {
+  const [view, setView] = useState<View>('brand');
+  return (
+    <div>
+      <div className="px-4 pt-3 pb-1 bg-white">
+        <Segmented<View>
+          items={[{ key: 'brand', label: '브랜드' }, { key: 'showcase', label: '팝업자랑' }, { key: 'qna', label: 'Q&A' }]}
+          value={view}
+          onChange={setView}
+        />
+      </div>
+      {view === 'brand' && <BrandFeed />}
+      {view === 'showcase' && <ShowcaseList />}
+      {view === 'qna' && <QnaList />}
+    </div>
+  );
+}
+
+function BrandFeed() {
+  const { db, brand, role } = useMe();
+  const [moods, setMoods] = useState<Mood[]>([]);
+  const [cats, setCats] = useState<Category[]>([]);
+  const [price, setPrice] = useState<PriceRange | null>(null);
+  const [filterOpen, setFilterOpen] = useState(false);
+
+  const popups = db.popups.filter((p) => p.status !== '종료');
+  const recs = brand ? recommendations(db, brand, 5) : [];
+  const list = db.brands
+    .filter((b) => isListedBrand(db, b) && b.id !== brand?.id)
+    .filter((b) => !moods.length || b.tags.moods.some((m) => moods.includes(m)))
+    .filter((b) => !cats.length || b.tags.categories.some((c) => cats.includes(c)))
+    .filter((b) => !price || b.tags.price === price);
+  const filterCount = moods.length + cats.length + (price ? 1 : 0);
+
+  return (
+    <div>
+      <section className="pt-4">
+        <div className="px-4 flex items-center justify-between mb-2.5">
+          <h2 className="font-bold text-[15px]">진행 중·예정 공동 팝업</h2>
+          <span className="text-xs text-ink-500">{popups.length}곳</span>
+        </div>
+        <div className="flex gap-2.5 overflow-x-auto no-scrollbar px-4 pb-1">
+          {popups.map((p) => (
+            <PopupBannerCard key={p.id} db={db} popup={p} />
+          ))}
+        </div>
+      </section>
+
+      {brand && recs.length > 0 && (
+        <section className="pt-6">
+          <div className="px-4 mb-2.5">
+            <h2 className="font-bold text-[15px]">
+              <span className="text-brand-500">{brand.name}</span>와 잘 맞는 브랜드
+            </h2>
+            <p className="text-xs text-ink-500 mt-0.5">무드·가격대·고객층은 비슷하고, 카테고리는 다를수록 잘 맞아요</p>
+          </div>
+          <div className="flex gap-2.5 overflow-x-auto no-scrollbar px-4 pb-1">
+            {recs.map((r) => (
+              <div key={r.brand.id} className="w-[290px] shrink-0">
+                <BrandCard db={db} brand={r.brand} reasons={r.reasons} right={<BrandActions brandId={r.brand.id} />} />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section className="pt-6 px-4">
+        <div className="flex items-center justify-between mb-2.5">
+          <h2 className="font-bold text-[15px]">브랜드 둘러보기</h2>
+          <button onClick={() => setFilterOpen(true)} className="flex items-center gap-1 text-sm font-semibold">
+            <Icon name="search" className="w-4 h-4" /> 필터{filterCount > 0 && <span className="text-brand-500">{filterCount}</span>}
+          </button>
+        </div>
+        <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-3 -mx-4 px-4">
+          <Chip active={!filterCount} onClick={() => { setMoods([]); setCats([]); setPrice(null); }}>전체</Chip>
+          {MOODS.map((m) => (
+            <Chip key={m} active={moods.includes(m)} onClick={() => setMoods(moods.includes(m) ? moods.filter((x) => x !== m) : [...moods, m])}>#{m}</Chip>
+          ))}
+        </div>
+        {(cats.length > 0 || price) && (
+          <div className="flex flex-wrap gap-1 mb-3">
+            {cats.map((c) => <Tag key={c}>{c}</Tag>)}
+            {price && <Tag tone="blue">{price}</Tag>}
+          </div>
+        )}
+        <div className="space-y-3">
+          {list.map((b) => (
+            <BrandCard key={b.id} db={db} brand={b} right={<BrandActions brandId={b.id} />} />
+          ))}
+          {!list.length && <Empty icon="search">조건에 맞는 브랜드가 없어요</Empty>}
+        </div>
+        {role === 'brand' && !brand && <div className="h-4" />}
+      </section>
+
+      <Sheet open={filterOpen} onClose={() => setFilterOpen(false)} title="필터">
+        <div className="text-[13px] font-semibold mb-2">무드</div>
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {MOODS.map((m) => <Chip key={m} active={moods.includes(m)} onClick={() => setMoods(moods.includes(m) ? moods.filter((x) => x !== m) : [...moods, m])}>{m}</Chip>)}
+        </div>
+        <div className="text-[13px] font-semibold mb-2">카테고리</div>
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {CATEGORIES.map((c) => <Chip key={c} active={cats.includes(c)} onClick={() => setCats(cats.includes(c) ? cats.filter((x) => x !== c) : [...cats, c])}>{c}</Chip>)}
+        </div>
+        <div className="text-[13px] font-semibold mb-2">가격대</div>
+        <div className="flex flex-wrap gap-1.5 mb-6">
+          {PRICE_RANGES.map((p) => <Chip key={p} active={price === p} onClick={() => setPrice(price === p ? null : p)}>{p}</Chip>)}
+        </div>
+        <div className="flex gap-2">
+          <Button variant="secondary" onClick={() => { setMoods([]); setCats([]); setPrice(null); }}>초기화</Button>
+          <Button full onClick={() => setFilterOpen(false)}>{list.length}개 브랜드 보기</Button>
+        </div>
+      </Sheet>
+    </div>
+  );
+}

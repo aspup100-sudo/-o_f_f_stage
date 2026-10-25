@@ -1,0 +1,61 @@
+import type { ReactNode } from 'react';
+import type { Route } from '@/types';
+import { Empty } from '@/components/ui';
+import Explore from './Explore';
+import Onboarding from './Onboarding';
+import BrandProfileScreen from './BrandProfile';
+import MeScreen from './Me';
+import { ProposeScreen, ProposalsScreen } from './Proposal';
+import { ChatListScreen, ChatScreen } from './Chat';
+import { RecruitsTab, RecruitDetail, RecruitNew } from './Recruit';
+import { MyTeamTab, TeamScreen } from './Team';
+import { SpacesTab, SpaceDetail } from './Space';
+import { MySpacesTab, SpaceEdit, InboxTab } from './SpaceLandlord';
+import { PopupDetail, MapTab, StampsTab } from './Popup';
+import { NotificationsScreen } from './Notifications';
+import { ShowcaseDetail, ShowcaseNew } from './Showcase';
+import { QnaDetail, QnaNew } from './Qna';
+import { VerifyTab, ReportsTab } from './Admin';
+
+function renderTab(tab: string): ReactNode {
+  switch (tab) {
+    case 'explore': return <Explore />;
+    case 'me': return <MeScreen />;
+    case 'recruits': return <RecruitsTab />;
+    case 'myteam': return <MyTeamTab />;
+    case 'spaces': return <SpacesTab />;
+    case 'myspaces': return <MySpacesTab />;
+    case 'inbox': return <InboxTab />;
+    case 'map': return <MapTab />;
+    case 'verify': return <VerifyTab />;
+    case 'reports': return <ReportsTab />;
+    case 'stamps': return <StampsTab />;
+    default:
+      return <Empty>화면을 찾을 수 없어요</Empty>;
+  }
+}
+
+export function renderRoute(route: Route): ReactNode {
+  switch (route.name) {
+    case 'tab': return renderTab(route.tab);
+    case 'onboarding': return <Onboarding />;
+    case 'brand': return <BrandProfileScreen key={route.id} id={route.id} />;
+    case 'propose': return <ProposeScreen toBrandId={route.toBrandId} />;
+    case 'proposals': return <ProposalsScreen />;
+    case 'chatList': return <ChatListScreen />;
+    case 'chat': return <ChatScreen key={route.id} id={route.id} />;
+    case 'recruit': return <RecruitDetail key={route.id} id={route.id} />;
+    case 'recruitNew': return <RecruitNew />;
+    case 'space': return <SpaceDetail key={route.id} id={route.id} />;
+    case 'spaceEdit': return <SpaceEdit key={route.id ?? 'new'} id={route.id} />;
+    case 'popup': return <PopupDetail key={route.id} id={route.id} />;
+    case 'notifications': return <NotificationsScreen />;
+    case 'showcase': return <ShowcaseDetail key={route.id} id={route.id} />;
+    case 'showcaseNew': return <ShowcaseNew teamId={route.teamId} />;
+    case 'qna': return <QnaDetail key={route.id} id={route.id} />;
+    case 'qnaNew': return <QnaNew />;
+    case 'team': return <TeamScreen key={route.id} id={route.id} sub={route.sub} />;
+    default:
+      return <Empty>화면을 찾을 수 없어요</Empty>;
+  }
+}
