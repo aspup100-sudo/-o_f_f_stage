@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { navigate, replace, toast } from '@/store/store';
 import {
-  addCommonItem, agreeAgreement, nudgeMember, remindPayment, autoFillShifts, cycleShift, fillAgreementExamples, removeCommonItem, renameTeam, setMemberHangers, setMemberRole,
+  addCommonItem, addTeamTodo, agreeAgreement, nudgeMember, toggleTeamTodo, remindPayment, autoFillShifts, cycleShift, fillAgreementExamples, removeCommonItem, renameTeam, setMemberHangers, setMemberRole,
   setMoodHeadline, simulateOthersAgree, toggleMoodPick, togglePaid, togglePromo, updateAgreementItem, updateCost,
 } from '@/store/actions';
 import { brandById, daysUntil, dday, manwon, md, period, spaceById, teamById, teamCost, teamPrep, teamsOfBrand, won, josa } from '@/store/logic';
@@ -103,6 +103,7 @@ export function TeamScreen({ id, sub = 'members' }: { id: string; sub?: string }
   const team = teamById(db, id);
   const [renaming, setRenaming] = useState(false);
   const [prepOpen, setPrepOpen] = useState(false);
+  const [todoDraft, setTodoDraft] = useState('');
   const [name, setName] = useState('');
   if (!team) return <Empty>팀을 찾을 수 없어요</Empty>;
   const isMember = !!brand && team.members.some((m) => m.brandId === brand.id);
@@ -177,7 +178,21 @@ export function TeamScreen({ id, sub = 'members' }: { id: string; sub?: string }
             </button>
           ))}
         </div>
-        <p className="text-[12px] text-ink-500 mt-3">항목을 누르면 해당 탭으로 이동해요.</p>
+        <div className="mt-3 pt-3 border-t border-ink-100">
+          <div className="text-[13px] font-bold mb-1">팀원이 적은 할 일</div>
+          {(team.todos ?? []).map((x) => (
+            <label key={x.id} className="flex items-center gap-3 py-2 cursor-pointer">
+              <input type="checkbox" checked={x.done} onChange={() => toggleTeamTodo(team.id, x.id)} className="w-5 h-5 accent-brand-500 shrink-0" />
+              <span className={cx('flex-1 text-[14px]', x.done && 'line-through text-ink-500')}>{x.text}</span>
+              <span className="text-[11px] text-ink-500">{brandById(db, x.byBrandId)?.name}</span>
+            </label>
+          ))}
+          <form className="flex gap-2 mt-1" onSubmit={(e) => { e.preventDefault(); if (todoDraft.trim()) { addTeamTodo(team.id, brand!.id, todoDraft.trim()); setTodoDraft(''); } }}>
+            <input className={cx(inputCls, 'h-10')} value={todoDraft} onChange={(e) => setTodoDraft(e.target.value)} placeholder="예: 현수막 주문, 포장 봉투 사기" />
+            <Button size="sm" className="h-10 shrink-0" disabled={!todoDraft.trim()}>추가</Button>
+          </form>
+        </div>
+        <p className="text-[12px] text-ink-500 mt-3">위 6단계는 누르면 해당 탭으로 이동해요.</p>
       </Sheet>
       <Sheet open={renaming} onClose={() => setRenaming(false)} title="팀 이름 바꾸기">
         <input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} />
