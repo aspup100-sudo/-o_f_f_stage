@@ -4,7 +4,8 @@ import { chooseRole, finishOnboarding, goOnboardingStep, isValidBizNumber, socia
 import { Button, Demo, Field, Icon, inputCls, textareaCls, cx, Swatch } from '@/components/ui';
 import { TagPicker } from '@/components/common';
 import { INSTAGRAM_SAMPLE_LABELS } from '@/data/mock';
-import type { Role } from '@/types';
+import type { BrandProfile, Role, ThemeTags } from '@/types';
+import { isListedBrand, matchPct, matchScore } from '@/store/logic';
 
 const STEPS = ['로그인', '역할', '인증', '프로필'];
 
@@ -147,6 +148,29 @@ function ProfileForm({ role }: { role: Role }) {
   return <VisitorForm />;
 }
 
+/** 태그를 고르는 동안 지금 등록된 브랜드 중 잘 맞을 곳을 바로 보여 준다 */
+function MatchPreview({ tags }: { tags: ThemeTags }) {
+  const db = useApp((s) => s.db);
+  if (!tags.moods.length || !tags.categories.length) return null;
+  const me = { id: '_new', userId: '_new', name: '나', intro: '', tags, channels: [], availability: [], lookbook: [], followers: [], hearts: [], logoHue: 0 } as BrandProfile;
+  const top = db.brands.filter((b) => isListedBrand(db, b)).map((b) => ({ b, pct: matchPct(matchScore(db, me, b).score) })).sort((x, y) => y.pct - x.pct).slice(0, 3);
+  return (
+    <div className="mb-5 -mt-1 rounded-2xl bg-brand-50 p-3.5">
+      <div className="text-[13px] font-bold text-brand-700">이 태그라면 이런 브랜드와 잘 맞아요</div>
+      <div className="mt-2 space-y-1.5">
+        {top.map(({ b, pct }) => (
+          <div key={b.id} className="flex items-center gap-2">
+            <span className="w-7 h-7 rounded-full text-white text-[12px] font-bold flex items-center justify-center shrink-0" style={{ background: `hsl(${b.logoHue} 45% 55%)` }}>{b.name[0]}</span>
+            <span className="text-[13px] font-semibold flex-1 truncate">{b.name} <span className="text-ink-500 font-normal">· {b.tags.categories.join('/')}</span></span>
+            <span className="text-[13px] font-extrabold text-brand-600">{pct}%</span>
+          </div>
+        ))}
+      </div>
+      <p className="text-[11px] text-ink-500 mt-2">무드가 겹치고 카테고리가 다를수록 높아져요. 태그를 바꾸면 바로 다시 계산해요.</p>
+    </div>
+  );
+}
+
 function BrandForm() {
   const [d, setD] = useState<BrandDraft>({
     name: '', intro: '', tags: { moods: [], categories: [], price: '3~7만원', ages: [] }, instagram: '', igImported: false,
@@ -166,6 +190,7 @@ function BrandForm() {
       </Field>
       <div className="text-[13px] font-semibold mb-2 text-ink-700">테마 태그 <span className="text-brand-500">*</span></div>
       <TagPicker value={d.tags} onChange={(tags) => setD({ ...d, tags })} />
+      <MatchPreview tags={d.tags} />
       <Field label={<>인스타그램 연동 <Demo /></>} hint="계정 아이디를 입력하면 예시 사진 9장을 룩북으로 가져와요">
         <div className="flex gap-2">
           <input className={inputCls} value={ig} onChange={(e) => setIg(e.target.value.replace(/\s/g, ''))} placeholder="instagram_id" />
