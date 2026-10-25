@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { guard } from '@/store/hooks';
 import { navigate } from '@/store/store';
-import { brandById, displayName, period, reviewAvg, spaceById, teamsOfBrand, trustEvents, trustScore, userById } from '@/store/logic';
+import { brandById, displayName, josa, matchScore, period, reviewAvg, spaceById, teamsOfBrand, trustEvents, trustScore, userById } from '@/store/logic';
 import { BrandLogo, LookbookGrid, ThemeTagList } from '@/components/common';
 import { Button, Card, Empty, GradeBadge, Icon, Stars, StatusPill, SubHeader, Tabs, Tag } from '@/components/ui';
 import { BrandActions } from './BrandActions';
@@ -64,6 +64,7 @@ export default function BrandProfileScreen({ id }: { id: string }) {
             ))}
           </div>
         )}
+        {role === 'brand' && !isMe && me && <MatchCard me={me} other={brand} />}
         <div className="flex gap-2 mt-4">
           {role === 'brand' && !isMe && (
             <>
@@ -211,6 +212,28 @@ export function ReviewGroup({ title, reviews }: { title: string; reviews: Review
           </Card>
         ))}
       </div>
+    </div>
+  );
+}
+
+/** 브랜드끼리 보는 '나와의 궁합'. 추천 점수를 사람이 읽기 쉬운 %로 바꿔 보여 준다. */
+function MatchCard({ me, other }: { me: import('@/types').BrandProfile; other: import('@/types').BrandProfile }) {
+  const { db } = useMe();
+  const m = matchScore(db, me, other);
+  const pct = Math.max(10, Math.min(98, Math.round(40 + m.score * 4)));
+  const word = pct >= 80 ? '찰떡 궁합' : pct >= 60 ? '잘 맞아요' : pct >= 45 ? '무난해요' : '색이 많이 달라요';
+  return (
+    <div className="mt-4 rounded-2xl bg-brand-50 p-4">
+      <div className="flex items-center justify-between">
+        <span className="text-[13px] font-bold">{josa(me.name, '과', '와')}의 궁합</span>
+        <span className="text-[13px] font-extrabold text-brand-600">{pct}% · {word}</span>
+      </div>
+      <div className="h-2 rounded-full bg-white mt-2 overflow-hidden"><div className="h-full rounded-full bg-brand-500" style={{ width: `${pct}%` }} /></div>
+      {m.reasons.length > 0 && (
+        <div className="mt-2.5 space-y-0.5">
+          {m.reasons.slice(0, 3).map((r) => <div key={r} className="text-[12px] text-brand-700">✓ {r}</div>)}
+        </div>
+      )}
     </div>
   );
 }
