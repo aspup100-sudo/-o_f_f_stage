@@ -231,12 +231,20 @@ export function Stars({ value, onChange, size = 'w-6 h-6' }: { value: number; on
 
 export function Tabs<T extends string>({ items, value, onChange, className }: { items: { key: T; label: ReactNode }[]; value: T; onChange: (k: T) => void; className?: string }) {
   return (
-    <div className={cx('flex border-b border-ink-100 bg-white overflow-x-auto no-scrollbar', className)}>
-      {items.map((it) => (
-        <button key={it.key} onClick={() => onChange(it.key)} className={cx('px-3.5 h-11 text-sm font-semibold whitespace-nowrap border-b-2 -mb-px', value === it.key ? 'border-ink-900 text-ink-900' : 'border-transparent text-ink-500')}>
-          {it.label}
-        </button>
-      ))}
+    <div className={cx('relative bg-white', className)}>
+      <div className="flex border-b border-ink-100 overflow-x-auto no-scrollbar">
+        {items.map((it) => (
+          <button
+            key={it.key}
+            onClick={(e) => { onChange(it.key); e.currentTarget.scrollIntoView?.({ inline: 'center', block: 'nearest', behavior: 'smooth' }); }}
+            className={cx('px-3.5 h-11 text-sm font-semibold whitespace-nowrap border-b-2 -mb-px', value === it.key ? 'border-ink-900 text-ink-900' : 'border-transparent text-ink-500')}
+          >
+            {it.label}
+          </button>
+        ))}
+        {items.length > 4 && <span className="w-6 shrink-0" />}
+      </div>
+      {items.length > 4 && <div className="pointer-events-none absolute right-0 top-0 bottom-px w-8 bg-gradient-to-l from-white to-transparent" />}
     </div>
   );
 }
