@@ -3,7 +3,7 @@ import { update, getState, newId, nowISO, toast, navigate, switchRole } from './
 import { INSTAGRAM_SAMPLE_LABELS, makeLookbook, DEMO_TODAY } from '@/data/mock';
 import type { DB } from '@/data/mock';
 import { josa } from './logic';
-import type { DateRange, LoginProvider, NotificationType, Role, Route, ThemeTags } from '@/types';
+import type { DateRange, LoginProvider, NotificationType, Region, Role, Route, ThemeTags } from '@/types';
 
 export function notify(db: DB, userId: string, type: NotificationType, text: string, link?: Route) {
   db.notifications.unshift({ id: newId('n'), userId, type, text, link, read: false, at: nowISO() });
@@ -118,6 +118,17 @@ export function updateBrandProfile(brandId: string, patch: Partial<{ intro: stri
     Object.assign(s.db.brands.find((b) => b.id === brandId)!, patch);
   });
   toast('프로필을 저장했어요');
+}
+
+export function toggleVisitorRegion(visitorUserId: string, region: Region) {
+  let on = false;
+  update((s) => {
+    const v = s.db.visitors.find((x) => x.userId === visitorUserId)!;
+    const list = v.regions ?? [];
+    on = !list.includes(region);
+    v.regions = on ? [...list, region] : list.filter((r) => r !== region);
+  });
+  toast(on ? `${region}에 새 팝업이 열리면 알려 드릴게요` : `${region} 알림을 껐어요`);
 }
 
 export function followAll(visitorUserId: string, brandIds: string[]) {
@@ -707,6 +718,8 @@ export function decideSpaceApplication(appId: string, accept: boolean) {
     const followers = new Set<string>();
     t.members.forEach((m) => s.db.brands.find((b) => b.id === m.brandId)!.followers.forEach((f) => followers.add(f)));
     followers.forEach((f) => notify(s.db, f, 'follow_popup', `팔로우한 브랜드가 참여하는 공동 팝업 "${t.name}" 일정이 잡혔어요! (${a.dates.start.slice(5)}~)`, { name: 'popup', id: pid! }));
+    // 이 동네 알림을 켠 방문객 (팔로워로 이미 받은 사람은 빼고)
+    s.db.visitors.filter((v) => v.regions?.includes(sp.region) && !followers.has(v.userId)).forEach((v) => notify(s.db, v.userId, 'follow_popup', `${sp.region}에 새 공동 팝업이 열려요: "${t.name}" (${a.dates.start.slice(5)}~)`, { name: 'popup', id: pid! }));
   });
   toast(accept ? '수락했어요. 팝업 일정이 등록됐어요' : '거절했어요');
 }

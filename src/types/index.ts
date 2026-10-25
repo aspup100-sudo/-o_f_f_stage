@@ -89,6 +89,7 @@ export interface VisitorProfile {
   userId: ID;
   nickname: string;
   following: ID[]; // brandId
+  regions?: Region[]; // 새 팝업 알림을 받을 동네
 }
 
 // ───────── 공간 ─────────

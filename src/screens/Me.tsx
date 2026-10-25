@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { navigate, update } from '@/store/store';
 import { STAMP_LEVELS } from './Popup';
-import { importInstagram, isValidBizNumber, requestVerification, sendFollowerNews, updateBrandProfile } from '@/store/actions';
+import { importInstagram, isValidBizNumber, requestVerification, sendFollowerNews, toggleVisitorRegion, updateBrandProfile } from '@/store/actions';
 import { brandById, manwon, period, popupById, trustScore } from '@/store/logic';
 import { BrandLogo, ScreenTitle, TagPicker, ThemeTagList, TrustLine } from '@/components/common';
-import { Avatar, Button, Card, Demo, Field, GradeBadge, Icon, inputCls, Sheet, Tag, textareaCls } from '@/components/ui';
-import type { ThemeTags } from '@/types';
+import { Avatar, Button, Card, Chip, Demo, Field, GradeBadge, Icon, inputCls, Sheet, Tag, textareaCls } from '@/components/ui';
+import { REGIONS, type ThemeTags } from '@/types';
 import { ROLE_LABEL } from '@/config';
 import { RentalMeCard } from './Rental';
 import { OfficialInsta } from './Magazine';
@@ -245,6 +245,10 @@ function VisitorSection() {
         <div><div className="text-lg font-extrabold">{visitor!.following.length}</div><div className="text-[11px] text-ink-500">팔로잉</div></div>
         <div><div className="text-lg font-extrabold">{stamp?.popupIds.length ?? 0}</div><div className="text-[11px] text-ink-500">스탬프</div></div>
         <div><div className="text-lg font-extrabold">{myReviews}</div><div className="text-[11px] text-ink-500">작성한 리뷰</div></div>
+      </div>
+      <div className="text-[13px] font-semibold mb-1.5">새 팝업 알림 받을 동네</div>
+      <div className="flex flex-wrap gap-1.5 mb-3">
+        {REGIONS.map((r) => <Chip key={r} active={!!visitor!.regions?.includes(r)} onClick={() => toggleVisitorRegion(userId, r)}>{visitor!.regions?.includes(r) ? `🔔 ${r}` : r}</Chip>)}
       </div>
       <div className="text-[13px] font-semibold mb-1.5">팔로우한 브랜드</div>
       <div className="flex flex-wrap gap-1.5">
