@@ -139,6 +139,28 @@ export function TeamWrapUp({ team }: { team: Team }) {
         )}
       </Card>
 
+      {current.status !== '종료' && (
+        <Card className="p-4">
+          <div className="font-bold text-[15px] mb-3">팝업이 끝나면 이렇게 마무리해요</div>
+          {[
+            ['🤝', '성사 확인', '참여 브랜드와 임대인이 "무사히 마쳤어요"를 눌러요. 인증 공동 팝업 횟수가 올라가요'],
+            ['⭐', '서로 후기', '함께한 브랜드와 공간에 후기를 남겨요. 신뢰 지수에 반영돼요'],
+            ['📊', '팝업 리포트', '방문 인증, 조합 리뷰, 오픈 알림 수를 한눈에 봐요'],
+            ['🔁', '다음 회차', '같은 팀으로 2회차를 바로 열 수 있어요'],
+          ].map(([e, t, d], i) => (
+            <div key={t} className="flex gap-3 pb-3 last:pb-0">
+              <div className="flex flex-col items-center">
+                <span className="w-8 h-8 rounded-full bg-brand-50 flex items-center justify-center">{e}</span>
+                {i < 3 && <span className="flex-1 w-px bg-ink-100 mt-1" />}
+              </div>
+              <div className="pb-1">
+                <div className="text-sm font-bold">{t}</div>
+                <div className="text-[12px] text-ink-500">{d}</div>
+              </div>
+            </div>
+          ))}
+        </Card>
+      )}
       {current.status === '종료' && <PopupReportCard popupId={current.id} />}
       {current.status === '종료' && comp && <CompletionStatus popupId={current.id} />}
 
