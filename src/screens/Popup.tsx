@@ -175,6 +175,25 @@ export function PopupDetail({ id }: { id: string }) {
             </Button>
           )}
         </div>
+        {(() => {
+          const others = db.popups.filter((x) => x.id !== p.id && x.status !== '종료');
+          if (!others.length) return null;
+          const stamped = db.stamps.find((x) => x.userId === userId)?.popupIds ?? [];
+          return (
+            <>
+              <h3 className="font-bold mt-7 mb-1">다른 공동 팝업도 가 보세요</h3>
+              {role === 'visitor' && <p className="text-[12px] text-ink-500 mb-2">아직 안 간 곳에서 인증하면 스탬프가 하나 더 쌓여요</p>}
+              <div className="flex gap-2.5 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
+                {others.map((x) => (
+                  <div key={x.id} className="relative">
+                    <PopupBannerCard db={db} popup={x} />
+                    {role === 'visitor' && !stamped.includes(x.id) && <span className="absolute top-2 right-2 text-[10px] font-bold bg-white text-brand-600 rounded-full px-2 py-0.5 shadow">+1 스탬프</span>}
+                  </div>
+                ))}
+              </div>
+            </>
+          );
+        })()}
       </div>
       <ReviewSheet popup={p} kind={writing} onClose={() => setWriting(null)} />
     </div>
