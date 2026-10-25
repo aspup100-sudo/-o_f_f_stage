@@ -73,6 +73,8 @@ export function SpacesTab({ initial }: { initial?: '찜' }) {
   const [team, setTeam] = useState(false);
   const [fashion, setFashion] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [sort, setSort] = useState<'base' | 'fee' | 'open' | 'deal'>('base');
+  const openDays = (id: string) => db.availability.filter((a) => a.spaceId === id && a.status === 'open' && a.date > DEMO_TODAY).length;
   const filterCount = (maxFee ? 1 : 0) + (minArea ? 1 : 0) + (team ? 1 : 0) + (fashion ? 1 : 0) + (date ? 1 : 0);
   const list = db.spaces
     .filter((s) => region === '전체' || (region === '찜' ? !!brand?.savedSpaces?.includes(s.id) : s.region === region))
@@ -80,7 +82,8 @@ export function SpacesTab({ initial }: { initial?: '찜' }) {
     .filter((s) => s.areaM2 >= minArea)
     .filter((s) => !team || s.teamRental)
     .filter((s) => !fashion || s.fashionOnly)
-    .filter((s) => !date || db.availability.some((a) => a.spaceId === s.id && a.date === date && a.status === 'open'));
+    .filter((s) => !date || db.availability.some((a) => a.spaceId === s.id && a.date === date && a.status === 'open'))
+    .sort((a, b) => (sort === 'fee' ? a.dailyFee - b.dailyFee : sort === 'open' ? openDays(b.id) - openDays(a.id) : sort === 'deal' ? (b.lastMinutePct ?? 0) - (a.lastMinutePct ?? 0) : 0));
   const [mode, setMode] = useState<'space' | 'rental'>('space');
   if (mode === 'rental')
     return (
@@ -125,6 +128,15 @@ export function SpacesTab({ initial }: { initial?: '찜' }) {
           <Button full onClick={() => setFilterOpen(false)}>{list.length}곳 보기</Button>
         </div>
       </Sheet>
+      <div className="px-4 mb-2 flex items-center justify-between">
+        <span className="text-[13px] text-ink-500">공간 <b className="text-ink-900">{list.length}</b>곳</span>
+        <select aria-label="공간 정렬" value={sort} onChange={(e) => setSort(e.target.value as typeof sort)} className="h-8 rounded-full border border-ink-300 bg-white px-2.5 text-[12px]">
+          <option value="base">기본순</option>
+          <option value="fee">대관료 낮은 순</option>
+          <option value="open">비는 날 많은 순</option>
+          <option value="deal">할인 중 먼저</option>
+        </select>
+      </div>
       <div className="px-4 space-y-3">
         {list.map((s) => <SpaceCard key={s.id} db={db} s={s} />)}
         {!list.length && <Empty icon="building" action={{ label: '조건 초기화', onClick: () => { setRegion('전체'); setMaxFee(0); setMinArea(0); setTeam(false); setFashion(false); setDate(''); } }}>{region === '찜' ? '찜한 공간이 없어요. 마음에 드는 공간의 ♡를 눌러 두세요' : '조건에 맞는 공간이 없어요'}</Empty>}
