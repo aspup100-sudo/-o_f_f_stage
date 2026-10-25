@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { navigate, update } from '@/store/store';
+import { STAMP_LEVELS } from './Popup';
 import { importInstagram, isValidBizNumber, requestVerification, sendFollowerNews, updateBrandProfile } from '@/store/actions';
 import { brandById, period, popupById, trustScore } from '@/store/logic';
 import { BrandLogo, ScreenTitle, TagPicker, ThemeTagList, TrustLine } from '@/components/common';
@@ -218,9 +219,21 @@ function VisitorSection() {
         })}
         {!visitor!.following.length && <span className="text-sm text-ink-500">아직 없어요</span>}
       </div>
-      {stamp && stamp.popupIds.length > 0 && (
-        <div className="text-[12px] text-ink-500 mt-3">방문한 팝업: {stamp.popupIds.map((p) => popupById(db, p)?.title).join(', ')}</div>
-      )}
+      {(() => {
+        const n = stamp?.popupIds.length ?? 0;
+        const cur = [...STAMP_LEVELS].reverse().find((l) => n >= l.at);
+        const next = STAMP_LEVELS.find((l) => n < l.at);
+        return (
+          <button className="mt-3 w-full rounded-xl bg-brand-50 px-3 py-2.5 flex items-center gap-2.5 text-left" onClick={() => navigate({ name: 'tab', tab: 'stamps' })}>
+            <span className="text-xl">{cur?.emoji ?? '🥚'}</span>
+            <span className="flex-1 min-w-0">
+              <span className="block text-[13px] font-bold">{cur?.name ?? '탐험 준비 중'}</span>
+              <span className="block text-[11px] text-ink-500">{next ? `${next.name}까지 ${next.at - n}곳 더 방문하면 돼요` : '최고 등급이에요'}</span>
+            </span>
+            <span className="text-ink-300">›</span>
+          </button>
+        );
+      })()}
     </Card>
   );
 }

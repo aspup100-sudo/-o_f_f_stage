@@ -344,7 +344,7 @@ export function StampsTab() {
           </>
         )}
         <h3 className="font-bold mt-6 mb-2">방문 기록</h3>
-        {st.popupIds.length === 0 && <Empty icon="stamp">아직 방문한 팝업이 없어요</Empty>}
+        {st.popupIds.length === 0 && <Empty icon="stamp" action={{ label: '근처 팝업 찾아보기', onClick: () => navigate({ name: 'tab', tab: 'map' }) }}>아직 방문한 팝업이 없어요</Empty>}
         <div className="space-y-2">
           {st.popupIds.map((pid) => {
             const p = popupById(db, pid)!;
@@ -366,7 +366,7 @@ export function StampsTab() {
 }
 
 // 방문 수에 따라 오르는 탐험가 등급. 첫 배지 이후에도 계속 모을 이유를 준다.
-const STAMP_LEVELS = [
+export const STAMP_LEVELS = [
   { at: 3, name: '팝업 입문자', emoji: '🌱', perk: '혜택 배지' },
   { at: 6, name: '골목 탐험가', emoji: '🧭', perk: '오픈 하루 전 미리 알림' },
   { at: 10, name: '팝업 마스터', emoji: '👑', perk: '프로필에 마스터 표시' },
