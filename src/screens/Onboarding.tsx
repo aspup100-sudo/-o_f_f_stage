@@ -189,6 +189,11 @@ function BrandForm() {
         ))}
         <button type="button" className="text-sm text-brand-600 font-semibold" onClick={() => setD({ ...d, availability: [...d.availability, { start: '2027-01-01', end: '2027-01-31' }] })}>+ 기간 추가</button>
       </Field>
+      {!ok && (
+        <p className="text-[12px] text-ink-500 text-center mb-2">
+          {[!d.name.trim() && '브랜드 이름', !d.tags.moods.length && '무드', !d.tags.categories.length && '카테고리'].filter(Boolean).join(', ')}을(를) 채우면 시작할 수 있어요
+        </p>
+      )}
       <Button full size="lg" disabled={!ok} onClick={() => finishOnboarding({ brand: d })}>시작하기</Button>
       {!ok && <p className="text-center text-xs text-ink-500 mt-2">이름, 무드 1개 이상, 카테고리 1개 이상이 필요해요</p>}
     </div>
