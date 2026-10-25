@@ -2,7 +2,7 @@
 import type { BrandProfile, Popup, ThemeTags } from '@/types';
 import { AGE_GROUPS, CATEGORIES, MOODS, PRICE_RANGES } from '@/types';
 import type { DB } from '@/data/mock';
-import { brandById, period, spaceById, teamById, trustScore } from '@/store/logic';
+import { brandById, period, spaceById, teamById, trustScore, waitCount } from '@/store/logic';
 import { navigate } from '@/store/store';
 import { Avatar, Card, Chip, cx, GradeBadge, Icon, StatusPill, Swatch, Tag } from './ui';
 import { toast } from '@/store/store';
@@ -131,6 +131,7 @@ export function PopupBannerCard({ db, popup, wide }: { db: DB; popup: Popup; wid
         </div>
         <div className="font-bold text-[15px]">{popup.title}</div>
         <div className="text-[12px] text-white/70 mt-0.5 truncate">{brands.map((b) => b.name).join(' × ')}</div>
+        {popup.status === '예정' && waitCount(popup) > 0 && <div className="text-[11px] text-brand-200 mt-1.5 font-semibold">🔔 {waitCount(popup)}명이 오픈을 기다려요</div>}
       </div>
     </button>
   );

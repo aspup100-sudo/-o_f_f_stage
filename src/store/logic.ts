@@ -239,3 +239,12 @@ export function teamPrep(db: DB, team: Team, myBrandId: string): { steps: PrepSt
   const done = steps.filter((x) => x.done).length;
   return { steps, done, pct: Math.round((done / steps.length) * 100) };
 }
+
+export const waitCount = (p: { waiters?: string[]; waitBase?: number }) => (p.waitBase ?? 0) + (p.waiters?.length ?? 0);
+
+/** 받침에 맞춰 '이/가' 같은 조사를 붙인다. josa('소금상점', '이', '가') → '소금상점이' */
+export const josa = (word: string, withBatchim: string, without: string) => {
+  const c = word.charCodeAt(word.length - 1);
+  const has = c >= 0xac00 && c <= 0xd7a3 ? (c - 0xac00) % 28 !== 0 : false;
+  return word + (has ? withBatchim : without);
+};

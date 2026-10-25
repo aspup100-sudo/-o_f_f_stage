@@ -1033,3 +1033,18 @@ export function publishMagazine(m: Omit<import('@/types').MagazinePost, 'id' | '
 export function toggleMagazineHidden(id: string) {
   update((s) => { const m = s.db.magazines.find((x) => x.id === id)!; m.hidden = !m.hidden; });
 }
+
+// ───────── 오픈 알림 ─────────
+export function toggleWaitlist(popupId: string, userId: string) {
+  let on = false;
+  update((s) => {
+    const p = s.db.popups.find((x) => x.id === popupId)!;
+    const w = p.waiters ?? (p.waiters = []);
+    if (w.includes(userId)) p.waiters = w.filter((x) => x !== userId);
+    else {
+      w.push(userId);
+      on = true;
+    }
+  });
+  toast(on ? '오픈 알림을 신청했어요. 전날 저녁과 오픈 당일에 알려 드릴게요 (데모)' : '오픈 알림을 껐어요');
+}

@@ -1,7 +1,8 @@
 // 둘러보기 맨 위 '오늘' 영역: 내 팝업까지 남은 날과 지금 해야 할 일을 모아 보여 준다.
 import { useMe } from '@/store/hooks';
 import { navigate } from '@/store/store';
-import { daysUntil, dday, spaceById, teamPrep, teamsOfBrand } from '@/store/logic';
+import { brandById, daysUntil, josa, dday, md, popupById, spaceById, teamById, teamPrep, teamsOfBrand, waitCount } from '@/store/logic';
+import { STAMP_GOAL, toggleWaitlist } from '@/store/actions';
 import { cx, Icon } from '@/components/ui';
 import type { Route } from '@/types';
 
@@ -74,6 +75,12 @@ export function TodayBrand() {
           <div className="h-2 rounded-full bg-white/15 overflow-hidden">
             <div className="h-full rounded-full bg-brand-500" style={{ width: `${prep.pct}%` }} />
           </div>
+          {(() => {
+            const pp = popupById(db, t.popupId);
+            return pp && pp.status === '예정' && waitCount(pp) > 0 ? (
+              <div className="mt-3 text-[12px] font-semibold text-brand-200">🔔 벌써 {waitCount(pp)}명이 오픈 알림을 신청했어요</div>
+            ) : null;
+          })()}
           <div className="text-[12px] text-white/60 mt-2">
             {live ? '오늘도 매장을 지키는 중이에요. 근무표를 확인해 주세요.' : prep.done === prep.steps.length ? '준비 끝! 오픈만 남았어요 🎉' : left <= 7 ? `오픈까지 ${left}일, 남은 일을 서둘러 끝내요` : `오픈까지 ${left}일 남았어요`}
           </div>
@@ -107,5 +114,71 @@ function ExtraList({ items }: { items: { label: string; hint?: string; route: Ro
     <div className="mt-3 rounded-2xl bg-white border border-ink-100 px-4 py-1 divide-y divide-ink-100">
       {items.map((e) => <TodoRow key={e.label} label={e.label} hint={e.hint} onClick={() => navigate(e.route)} />)}
     </div>
+  );
+}
+
+export function TodayVisitor() {
+  const { db, visitor, userId } = useMe();
+  if (!visitor) return null;
+  const open = db.popups.filter((p) => p.status === '진행 중');
+  const soon = db.popups.filter((p) => p.status === '예정').sort((a, b) => a.period.start.localeCompare(b.period.start));
+  const stamp = db.stamps.find((x) => x.userId === userId);
+  const got = stamp?.popupIds.length ?? 0;
+  // 팔로우한 브랜드가 지금 열린(또는 곧 열릴) 팝업에 있으면 맨 위에 알려 준다
+  const followed = [...open, ...soon]
+    .map((p) => ({ p, b: teamById(db, p.teamId)?.members.map((m) => brandById(db, m.brandId)!).find((b) => visitor.following.includes(b.id)) }))
+    .find((x) => x.b);
+
+  return (
+    <section className="px-4 pt-4">
+      <div className="rounded-3xl bg-ink-900 text-white p-5">
+        <div className="text-[13px] text-white/60">{visitor.nickname}님, 오늘은 어디 갈까요?</div>
+        <div className="text-xl font-extrabold leading-snug mt-1">
+          지금 열린 공동 팝업 <span className="text-brand-400">{open.length}곳</span>
+          {soon.length > 0 && <>,<br />곧 열릴 팝업 {soon.length}곳</>}
+        </div>
+        {followed && (
+          <button onClick={() => navigate({ name: 'popup', id: followed.p.id })} className="mt-4 w-full rounded-2xl bg-white/10 p-3 text-left flex items-center gap-3">
+            <span className="text-2xl">💌</span>
+            <span className="flex-1 min-w-0">
+              <span className="block text-[13px] font-bold">팔로우한 {josa(followed.b!.name, '이', '가')} {followed.p.status === '진행 중' ? '지금 팝업 중이에요' : `${md(followed.p.period.start)}에 팝업을 열어요`}</span>
+              <span className="block text-[12px] text-white/60 truncate">{followed.p.title} · {spaceById(db, followed.p.spaceId)?.name} · ~{md(followed.p.period.end)}</span>
+            </span>
+            <span className="text-white/40">›</span>
+          </button>
+        )}
+        <button onClick={() => navigate({ name: 'tab', tab: 'stamps' })} className="mt-3 w-full text-left">
+          <div className="flex items-center justify-between text-[12px] mb-1.5">
+            <span className="text-white/70">스탬프 {Math.min(got, STAMP_GOAL)}/{STAMP_GOAL}</span>
+            <span className="font-bold text-brand-200">{got >= STAMP_GOAL ? '혜택 배지를 받을 수 있어요 ›' : `${STAMP_GOAL - got}곳만 더 가면 혜택 배지 ›`}</span>
+          </div>
+          <div className="h-2 rounded-full bg-white/15 overflow-hidden">
+            <div className="h-full rounded-full bg-brand-500" style={{ width: `${Math.min(100, (got / STAMP_GOAL) * 100)}%` }} />
+          </div>
+        </button>
+      </div>
+      {soon.length > 0 && (
+        <div className="mt-3 rounded-2xl bg-white border border-ink-100 px-4 py-1 divide-y divide-ink-100">
+          {soon.map((p) => {
+            const on = !!p.waiters?.includes(userId);
+            return (
+              <div key={p.id} className="flex items-center gap-3 py-3">
+                <span className="w-11 text-center shrink-0">
+                  <span className="block text-[11px] font-black text-brand-600">{dday(p.period.start)}</span>
+                  <span className="block text-[11px] text-ink-500">{md(p.period.start)}</span>
+                </span>
+                <button onClick={() => navigate({ name: 'popup', id: p.id })} className="flex-1 min-w-0 text-left">
+                  <span className="block text-[14px] font-bold truncate">{p.title}</span>
+                  <span className="block text-[12px] text-ink-500">{waitCount(p)}명이 기다려요</span>
+                </button>
+                <button onClick={() => toggleWaitlist(p.id, userId)} className={cx('h-8 px-3 rounded-full text-[12px] font-bold shrink-0', on ? 'bg-brand-50 text-brand-600' : 'bg-ink-900 text-white')}>
+                  {on ? '🔔 켜짐' : '알림 받기'}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </section>
   );
 }

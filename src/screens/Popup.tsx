@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { navigate } from '@/store/store';
-import { checkIn, claimStampReward, STAMP_GOAL, writeComboReview, writeVisitorReview } from '@/store/actions';
-import { avg, brandById, displayName, period, popupById, spaceById, teamById } from '@/store/logic';
+import { checkIn, claimStampReward, STAMP_GOAL, toggleWaitlist, writeComboReview, writeVisitorReview } from '@/store/actions';
+import { avg, brandById, dday, displayName, period, popupById, spaceById, teamById, waitCount } from '@/store/logic';
 import { BrandLogo, PopupBannerCard, ScreenTitle, ThemeTagList } from '@/components/common';
 import { Button, Card, Chip, cx, Demo, Empty, inputCls, Segmented, Sheet, Stars, StatusPill, SubHeader, Swatch, Tabs, Tag, textareaCls } from '@/components/ui';
 import type { DB } from '@/data/mock';
@@ -69,7 +69,24 @@ export function PopupDetail({ id }: { id: string }) {
           <button className="flex px-3.5 py-2.5 w-full text-left" onClick={() => navigate({ name: 'space', id: sp.id })}><span className="w-20 text-ink-500 shrink-0">위치</span><span className="font-semibold">{sp.name} <span className="font-normal text-ink-500">· {sp.address}</span> ›</span></button>
         </div>
 
-        {role === 'visitor' && (
+        {p.status === '예정' && (
+          <div className="mt-4 rounded-2xl bg-brand-50 border border-brand-100 p-4 flex items-center gap-3">
+            <div className="flex-1">
+              <div className="font-bold text-[15px]">오픈 {dday(p.period.start)} · <span className="text-brand-600">{waitCount(p)}명</span>이 기다려요</div>
+              <div className="text-[12px] text-ink-500 mt-0.5">알림을 켜 두면 전날 저녁과 오픈 당일에 알려 드려요</div>
+            </div>
+            {role === 'visitor' && (() => {
+              const on = !!p.waiters?.includes(userId);
+              return (
+                <button onClick={() => toggleWaitlist(p.id, userId)} className={cx('h-10 px-3.5 rounded-full text-sm font-bold shrink-0', on ? 'bg-white border border-brand-200 text-brand-600' : 'bg-brand-500 text-white')}>
+                  {on ? '🔔 알림 켜짐' : '🔔 알림 받기'}
+                </button>
+              );
+            })()}
+          </div>
+        )}
+
+        {role === 'visitor' && p.status !== '예정' && (
           <div className="mt-4">
             {visited ? (
               <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-emerald-800">

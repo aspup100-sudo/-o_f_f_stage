@@ -420,7 +420,7 @@ const spaceApplications: SpaceApplication[] = [
 
 const popups: Popup[] = [
   { id: 'p1', teamId: 't2', title: '골목 옷장', spaceId: 's2', period: { start: '2026-10-22', end: '2026-10-28' }, hours: '11:00~19:00', code: '482913', status: '진행 중', mapX: 22, mapY: 40 },
-  { id: 'p2', teamId: 't1', title: '가을 산책단', spaceId: 's1', period: { start: '2026-11-07', end: '2026-11-09' }, hours: '12:00~20:00', code: '731546', status: '예정', mapX: 74, mapY: 52 },
+  { id: 'p2', teamId: 't1', title: '가을 산책단', spaceId: 's1', period: { start: '2026-11-07', end: '2026-11-09' }, hours: '12:00~20:00', code: '731546', status: '예정', mapX: 74, mapY: 52, waiters: [], waitBase: 46 },
   { id: 'p3', teamId: 't3', title: '오래된 것들의 시간 2회', spaceId: 's4', period: { start: '2026-10-10', end: '2026-10-13' }, hours: '12:00~20:00', code: '205871', status: '종료', mapX: 48, mapY: 72 },
   { id: 'p4', teamId: 't3', title: '오래된 것들의 시간 1회', spaceId: 's5', period: { start: '2026-06-05', end: '2026-06-08' }, hours: '11:00~19:00', code: '664210', status: '종료', mapX: 42, mapY: 26 },
 ];

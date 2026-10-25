@@ -336,6 +336,8 @@ export interface Popup {
   // 지도 표시용 (0~100 상대 좌표)
   mapX: number;
   mapY: number;
+  waiters?: ID[]; // 오픈 알림을 신청한 userId
+  waitBase?: number; // 목업용: 앱 밖에서 이미 신청한 사람 수
 }
 
 export interface VisitCheckIn {
