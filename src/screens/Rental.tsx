@@ -81,9 +81,11 @@ export function PartnerCard({ db, partnerId, teamId }: { db: DB; partnerId: stri
 
 /** 브랜드: 렌탈 제휴 둘러보기 */
 export function RentalsBrowse({ teamId, embedded }: { teamId?: string; embedded?: boolean }) {
-  const { db } = useMe();
+  const { db, brand } = useMe();
   const [cat, setCat] = useState<RentalCategory | '전체'>('전체');
-  const team = teamById(db, teamId);
+  // 팀 화면 밖에서 열어도, 준비 중인 내 팀 공간 기준으로 없는 설비를 짚어 준다
+  const team = teamById(db, teamId) ?? (brand ? teamsOfBrand(db, brand.id).find((t) => t.stage === '준비 중' && t.spaceId) : undefined);
+  teamId = team?.id;
   const missing = missingForSpace(db, team?.spaceId);
   const items = db.rentalItems.filter((i) => i.active && (cat === '전체' || i.category === cat));
   const partners = db.rentalPartners.filter((p) => cat === '전체' || items.some((i) => i.partnerId === p.id));
@@ -92,7 +94,7 @@ export function RentalsBrowse({ teamId, embedded }: { teamId?: string; embedded?
       <WinWinBanner />
       {team && missing.length > 0 && (
         <div className="mt-3 rounded-2xl bg-brand-50 p-3.5">
-          <div className="text-[13px] font-bold text-brand-700">{spaceById(db, team.spaceId)?.name}에 없는 설비</div>
+          <div className="text-[13px] font-bold text-brand-700">{team.name} 공간 · {spaceById(db, team.spaceId)?.name}에 없는 설비</div>
           <div className="flex flex-wrap gap-1.5 mt-2">
             {missing.map((m) => <Chip key={m.facility} active={cat === m.category} onClick={() => setCat(m.category)}>{m.facility} → {m.category} 빌리기</Chip>)}
           </div>
