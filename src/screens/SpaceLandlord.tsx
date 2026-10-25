@@ -178,6 +178,7 @@ function AppCard({ appId, onOpen }: { appId: string; onOpen: () => void }) {
   const a = db.spaceApplications.find((x) => x.id === appId)!;
   const t = teamById(db, a.teamId)!;
   const sp = spaceById(db, a.spaceId)!;
+  const days = Math.round((new Date(a.dates.end).getTime() - new Date(a.dates.start).getTime()) / 86400000) + 1;
   return (
     <Card className="p-4" onClick={onOpen}>
       <div className="flex items-center justify-between">
@@ -193,7 +194,13 @@ function AppCard({ appId, onOpen }: { appId: string; onOpen: () => void }) {
         {t.members.map((m) => <Tag key={m.brandId}>{brandById(db, m.brandId)!.name}</Tag>)}
       </div>
       <p className="text-sm text-ink-700 mt-2">"{a.message}"</p>
-      <div className="text-[12px] text-brand-600 font-semibold mt-2">무드보드·등급·이력 보기 ›</div>
+      {a.status === 'pending' && (
+        <div className="mt-3 rounded-xl bg-brand-50 px-3 py-2.5 flex items-center justify-between">
+          <span className="text-[12px] text-ink-500">수락하면 예상 대관료 ({days}일)</span>
+          <span className="font-extrabold text-brand-600">{manwon(sp.dailyFee * days)}</span>
+        </div>
+      )}
+      <div className="text-[12px] text-brand-600 font-semibold mt-2">{a.status === 'pending' && a.direction === 'team' ? '무드보드·등급·이력 보고 수락하기 ›' : '무드보드·등급·이력 보기 ›'}</div>
     </Card>
   );
 }
