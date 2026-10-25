@@ -493,6 +493,21 @@ function MoodboardTab({ team, myBrandId }: { team: Team; myBrandId: string }) {
           return <Tag key={m.brandId} tone={n === 3 ? 'green' : 'yellow'}>{brandById(db, m.brandId)!.name} {n}/3</Tag>;
         })}
       </div>
+      <div className="mb-1.5 font-bold text-sm">지금까지 모인 팀 무드</div>
+      <div className="grid grid-cols-9 gap-0.5 rounded-xl overflow-hidden mb-4">
+        {team.members.flatMap((m) => {
+          const picks = mb.picks[m.brandId] ?? [];
+          const b = brandById(db, m.brandId)!;
+          return [0, 1, 2].map((i) => {
+            const im = db.lookbookImages.find((x) => x.id === picks[i]);
+            return im ? (
+              <Swatch key={m.brandId + i} hue={im.hue} pattern={im.pattern} rounded="" className="aspect-square" />
+            ) : (
+              <div key={m.brandId + i} className="aspect-square bg-ink-100 flex items-center justify-center text-[10px] text-ink-500">{i === 0 ? b.name[0] : ''}</div>
+            );
+          });
+        })}
+      </div>
       <Button full variant="dark" onClick={() => setPreview(true)}>팀 소개 페이지 미리보기</Button>
       <Sheet open={preview} onClose={() => setPreview(false)} title="팀 소개 페이지">
         <TeamIntroPage db={db} team={team} compact />
