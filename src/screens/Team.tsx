@@ -489,7 +489,12 @@ function ShiftTab({ team }: { team: Team }) {
         </div>
       )}
       <div className="flex items-center justify-between mb-2">
-        <p className="text-[13px] text-ink-500">칸을 누를 때마다 담당 브랜드가 바뀌어요.</p>
+        <p className="text-[13px] text-ink-500">
+          {(() => {
+            const empty = sh.dates.length * sh.timeSlots.length - Object.values(sh.assign).filter(Boolean).length;
+            return empty > 0 && !ended ? <><b className="text-red-600">빈 칸 {empty}개</b> · 칸을 누르면 담당이 바뀌어요</> : '칸을 누를 때마다 담당 브랜드가 바뀌어요.';
+          })()}
+        </p>
         {!ended && <Button size="sm" variant="secondary" onClick={() => autoFillShifts(team.id)}>자동 배정</Button>}
       </div>
       <div className="overflow-x-auto -mx-4 px-4">
