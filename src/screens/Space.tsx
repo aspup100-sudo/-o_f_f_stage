@@ -326,6 +326,27 @@ export function SpaceDetail({ id }: { id: string }) {
             )}
           </div>
         )}
+        {(() => {
+          const similar = db.spaces
+            .filter((x) => x.id !== s.id)
+            .sort((a, b) => Number(b.region === s.region) - Number(a.region === s.region) || Math.abs(a.dailyFee - s.dailyFee) - Math.abs(b.dailyFee - s.dailyFee))
+            .slice(0, 4);
+          return similar.length ? (
+            <div className="mt-6">
+              <h3 className="font-bold mb-2">다른 공간도 비교해 보세요</h3>
+              <div className="flex gap-2.5 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
+                {similar.map((x) => (
+                  <button key={x.id} onClick={() => navigate({ name: 'space', id: x.id })} className="w-[150px] shrink-0 text-left">
+                    <Swatch hue={x.photoHues[0] ?? 30} pattern="solid" className="w-full h-24" rounded="rounded-xl" />
+                    <div className="text-[13px] font-bold mt-1.5 truncate">{x.name}</div>
+                    <div className="text-[11px] text-ink-500">{x.region} · {x.areaM2}㎡</div>
+                    <div className="text-[12px] font-bold text-brand-600">1일 {manwon(x.dailyFee)}{x.lastMinutePct ? <span className="text-rose-500"> · {x.lastMinutePct}%↓</span> : null}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null;
+        })()}
       </div>
       {role === 'brand' && (
         <div className="sticky bottom-0 bg-white border-t border-ink-100 p-3 flex gap-2">
