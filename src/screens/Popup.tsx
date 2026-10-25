@@ -361,7 +361,7 @@ export function StampsTab() {
       <ScreenTitle>스탬프</ScreenTitle>
       <div className="px-4">
         <div className="rounded-3xl bg-ink-900 text-white p-5">
-          <div className="text-sm text-white/70">서로 다른 공동 팝업 {STAMP_GOAL}곳을 방문하면 혜택 배지 <Demo /></div>
+          <div className="text-sm text-white/70">서로 다른 공동 팝업 {STAMP_GOAL}곳 방문하면 혜택 배지 <Demo /></div>
           <div className="text-3xl font-extrabold mt-1">{Math.min(n, STAMP_GOAL)} / {STAMP_GOAL}</div>
           <div className="grid grid-cols-3 gap-3 mt-4">
             {Array.from({ length: STAMP_GOAL }).map((_, i) => {
@@ -454,7 +454,15 @@ function StampLevels({ n }: { n: number }) {
           <span key={l.at} className={cx(i === 1 && 'text-center', i === 2 && 'text-right', n >= l.at ? 'font-bold text-ink-900' : 'text-ink-500')}>{l.name}<br />{l.at}곳</span>
         ))}
       </div>
-      <p className="text-[13px] text-ink-700 mt-3">
+      {next && (() => {
+        const prev = STAMP_LEVELS[STAMP_LEVELS.indexOf(next) - 1]?.at ?? 0;
+        return (
+          <div className="mt-3 h-2 rounded-full bg-ink-100 overflow-hidden">
+            <div className="h-full bg-brand-500 rounded-full" style={{ width: `${Math.round(((n - prev) / (next.at - prev)) * 100)}%` }} />
+          </div>
+        );
+      })()}
+      <p className="text-[13px] text-ink-700 mt-2">
         {next ? <>다음 등급 <b>{next.name}</b>까지 <b className="text-brand-600">{next.at - n}곳</b> 남았어요 · {next.perk}</> : '모든 등급을 달성했어요! 👑'}
       </p>
     </div>
