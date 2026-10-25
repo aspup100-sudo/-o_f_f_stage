@@ -61,7 +61,7 @@ export function QnaList() {
                 const first = db.qnaAnswers.filter((x) => x.postId === p.id).sort((x, y) => x.createdAt.localeCompare(y.createdAt))[0];
                 const l = landlordOfUser(db, first.authorId);
                 return (
-                  <div className="mt-2 rounded-xl bg-emerald-50/70 px-3 py-2">
+                  <div className="mt-2 rounded-md bg-emerald-50/70 px-3 py-2">
                     <div className="text-[11px] font-semibold text-emerald-700">A. {displayName(db, first.authorId)}{l ? ' · 임대인' : brandOfUser(db, first.authorId) ? ' · 브랜드' : ''}{n > 1 ? ` 외 답변 ${n - 1}개` : ''}</div>
                     <p className="text-[13px] text-ink-700 line-clamp-2 mt-0.5">{first.body}</p>
                   </div>

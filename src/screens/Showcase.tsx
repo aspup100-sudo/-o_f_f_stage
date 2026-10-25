@@ -17,7 +17,7 @@ export function ShowcaseList() {
     <div className="px-4 pt-4 space-y-3">
       <p className="text-[13px] text-ink-500">팀이 함께 연 팝업의 기록이에요. 운영 팁과 방문객 조합 리뷰를 같이 볼 수 있어요.</p>
       {untold.map((t) => (
-        <div key={t.id} className="rounded border border-dashed border-brand-200 bg-brand-50 p-4 flex items-center gap-3">
+        <div key={t.id} className="rounded border border-dashed border-ink-300 bg-brand-50 p-4 flex items-center gap-3">
           <div className="flex-1 min-w-0">
             <div className="font-bold text-[14px]">{t.name} 팝업, 자랑해 볼까요?</div>
             <p className="text-[12px] text-ink-700 mt-0.5">사진 몇 장과 운영 팁 한 줄이면 돼요. 다음 팀원을 찾을 때 신뢰가 쌓여요.</p>
@@ -131,7 +131,7 @@ export function ShowcaseNew({ teamId }: { teamId: string }) {
         <Field label="사진" hint="데모에서는 예시 사진이 추가돼요">
           <div className="flex gap-1.5 flex-wrap">
             {hues.map((h, i) => <Swatch key={i} hue={h} className="w-16 h-16" />)}
-            <button type="button" onClick={() => setHues([...hues, Math.floor(Math.random() * 360)])} className="w-16 h-16 rounded-xl border-2 border-dashed border-ink-300 text-ink-500 text-xs">+ <Demo /></button>
+            <button type="button" onClick={() => setHues([...hues, Math.floor(Math.random() * 360)])} className="w-16 h-16 rounded-md border-2 border-dashed border-ink-300 text-ink-500 text-xs">+ <Demo /></button>
           </div>
         </Field>
         <Field label="제목" required><input className={inputCls} value={title} onChange={(e) => setTitle(e.target.value)} /></Field>

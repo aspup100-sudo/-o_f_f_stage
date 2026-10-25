@@ -155,7 +155,7 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
           {!list.length && <Empty icon="search" action={{ label: '필터 초기화', onClick: () => { setMoods([]); setCats([]); setPrice(null); } }}>조건에 맞는 브랜드가 없어요</Empty>}
         </div>
         {!showAll && list.length > 6 && (
-          <button onClick={() => setShowAll(true)} className="w-full h-11 mt-3 rounded-xl border border-ink-200 bg-white text-sm font-semibold">
+          <button onClick={() => setShowAll(true)} className="w-full h-11 mt-3 rounded-md border border-ink-200 bg-white text-sm font-semibold">
             브랜드 {list.length - 6}곳 더 보기
           </button>
         )}

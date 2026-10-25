@@ -67,7 +67,7 @@ export function NextRoundCard({ team }: { team: Team }) {
   if (!brand) return null;
   const next = db.teams.find((t) => t.name === team.name && t.round === team.round + 1);
   return (
-    <div className="rounded border-2 border-dashed border-brand-200 p-4">
+    <div className="rounded border-2 border-dashed border-ink-300 p-4">
       <div className="font-bold">{team.round + 1}회차도 같이 열까요?</div>
       <p className="text-[13px] text-ink-700 mt-1">같은 멤버로 다시 열면 약속서·분담 방식·무드보드를 그대로 가져가요. 공간과 날짜만 새로 정하면 돼요.</p>
       {next ? (

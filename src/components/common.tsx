@@ -48,7 +48,7 @@ export function BrandCard({ db, brand, right, reasons, compact }: { db: DB; bran
     const live = db.popups.find((p) => p.status === '진행 중' && teamById(db, p.teamId)?.members.some((m) => m.brandId === brand.id));
     return (
       <div className="flex gap-3 py-3">
-        <button aria-label={`${brand.name} 프로필`} onClick={() => navigate({ name: 'brand', id: brand.id })} className="w-[84px] h-[104px] shrink-0 rounded-xl overflow-hidden">
+        <button aria-label={`${brand.name} 프로필`} onClick={() => navigate({ name: 'brand', id: brand.id })} className="w-[84px] h-[104px] shrink-0 rounded-md overflow-hidden">
           {im ? <Swatch hue={im.hue} pattern={im.pattern} rounded="" className="w-full h-full" /> : <Swatch hue={brand.logoHue} rounded="" className="w-full h-full" />}
         </button>
         <div className="flex-1 min-w-0">

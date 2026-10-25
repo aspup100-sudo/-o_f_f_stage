@@ -84,7 +84,7 @@ export function ChatScreen({ id }: { id: string }) {
         right={<ReportButton targetType="chat" targetId={room.id} targetLabel={`채팅: ${room.title}`} />}
       />
       {ctx && (
-        <button onClick={() => navigate(ctx)} className="mx-4 mt-3 text-left text-[13px] bg-white rounded-xl px-3 py-2 border border-ink-100 flex items-center gap-2">
+        <button onClick={() => navigate(ctx)} className="mx-4 mt-3 text-left text-[13px] bg-white rounded-md px-3 py-2 border border-ink-100 flex items-center gap-2">
           <Icon name="sparkle" className="w-4 h-4 text-brand-500" />
           <span className="flex-1">{prep ? `팀 공간 · 오픈 ${dday(team!.period.start)} · 준비 ${prep.done}/${prep.steps.length}` : room.context?.type === 'team' ? '팀 공간 열기' : room.context?.type === 'space' ? '공간 상세 보기' : room.context?.type === 'interest' ? '상대 브랜드 프로필 보기' : '관련 글 보기'}</span>›
         </button>
@@ -94,7 +94,7 @@ export function ChatScreen({ id }: { id: string }) {
           if (m.senderId === 'system')
             return (
               <div key={m.id} className="text-center">
-                <span className="inline-block text-[12px] bg-ink-300/40 text-ink-700 rounded-xl px-3 py-1.5 whitespace-pre-line max-w-[90%]">{m.text}</span>
+                <span className="inline-block text-[12px] bg-ink-300/40 text-ink-700 rounded-md px-3 py-1.5 whitespace-pre-line max-w-[90%]">{m.text}</span>
               </div>
             );
           const mine = m.senderId === userId;
@@ -119,8 +119,8 @@ export function ChatScreen({ id }: { id: string }) {
           </div>
         )}
         <div className="p-2.5 flex gap-2">
-        <input className="flex-1 h-11 px-3 rounded-xl bg-ink-100 text-sm outline-none" placeholder="메시지 입력" value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && !e.nativeEvent.isComposing && send()} />
-        <button onClick={send} className="h-11 px-4 rounded-xl bg-ink-900 text-white text-sm font-bold">전송</button>
+        <input className="flex-1 h-11 px-3 rounded-md bg-ink-100 text-sm outline-none" placeholder="메시지 입력" value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && !e.nativeEvent.isComposing && send()} />
+        <button onClick={send} className="h-11 px-4 rounded-md bg-ink-900 text-white text-sm font-bold">전송</button>
         </div>
       </div>
     </div>

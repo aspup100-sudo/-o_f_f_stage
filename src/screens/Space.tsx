@@ -22,7 +22,7 @@ function SaveSpaceButton({ spaceId, inline }: { spaceId: string; inline?: boolea
     <button
       aria-label={on ? '공간 찜 해제' : '공간 찜하기'}
       onClick={(e) => { e.stopPropagation(); guard(() => toggleSaveSpace(brand.id, spaceId)); }}
-      className={inline ? 'w-12 h-12 shrink-0 rounded-xl border border-ink-300 flex items-center justify-center' : 'absolute z-10 top-2 right-2 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center'}
+      className={inline ? 'w-12 h-12 shrink-0 rounded-md border border-ink-300 flex items-center justify-center' : 'absolute z-10 top-2 right-2 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center'}
     >
       <Icon name="heart" filled={on} className={cx('w-[18px] h-[18px]', on ? 'text-red-500' : 'text-ink-700')} />
     </button>
@@ -249,7 +249,7 @@ export function SpaceDetail({ id }: { id: string }) {
           <div className="py-2.5"><div className="text-[11px] text-ink-500">최소 대관</div><div className="font-bold">{s.minDays}일</div></div>
         </div>
         {s.fashionOnly && (
-          <div className="mt-3 rounded-xl bg-violet-50 text-violet-800 text-[13px] p-3">
+          <div className="mt-3 rounded-md bg-violet-50 text-violet-800 text-[13px] p-3">
             <Ic n="shirt" />업종 고정(패션) 공간이에요. 이전 팀의 집기·연출을 이어 쓸 수 있는지 채팅으로 확인해 보세요.
           </div>
         )}
@@ -280,7 +280,7 @@ export function SpaceDetail({ id }: { id: string }) {
         {past.length === 0 && <div className="text-sm text-ink-500">아직 이력이 없어요</div>}
         <div className="space-y-1.5">
           {past.map((p) => (
-            <button key={p!.id} onClick={() => navigate({ name: 'popup', id: p!.id })} className="w-full text-left rounded-xl border border-ink-100 px-3 py-2.5 text-sm flex items-center justify-between">
+            <button key={p!.id} onClick={() => navigate({ name: 'popup', id: p!.id })} className="w-full text-left rounded-md border border-ink-100 px-3 py-2.5 text-sm flex items-center justify-between">
               <span><b>{p!.title}</b> <span className="text-ink-500">· {period(p!.period)}</span></span>
               <StatusPill status={p!.status} />
             </button>
@@ -304,7 +304,7 @@ export function SpaceDetail({ id }: { id: string }) {
         <h3 className="font-bold mt-6 mb-2">공간 Q&A <span className="text-ink-500 font-normal text-sm">{qnas.length}</span></h3>
         <div className="space-y-2">
           {qnas.map((x) => (
-            <div key={x.id} className="rounded-xl border border-ink-100 p-3 text-sm">
+            <div key={x.id} className="rounded-md border border-ink-100 p-3 text-sm">
               <div><b className="text-brand-600">Q</b> {x.question} <span className="text-[11px] text-ink-500">· {displayName(db, x.authorId)}</span></div>
               {x.answer ? (
                 <div className="mt-1.5 text-ink-700"><b className="text-emerald-600">A</b> {x.answer}</div>
@@ -343,7 +343,7 @@ export function SpaceDetail({ id }: { id: string }) {
               <div className="flex gap-2.5 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
                 {similar.map((x) => (
                   <button key={x.id} onClick={() => navigate({ name: 'space', id: x.id })} className="w-[150px] shrink-0 text-left">
-                    <Swatch hue={x.photoHues[0] ?? 30} pattern="solid" className="w-full h-24" rounded="rounded-xl" />
+                    <Swatch hue={x.photoHues[0] ?? 30} pattern="solid" className="w-full h-24" rounded="rounded-md" />
                     <div className="text-[13px] font-bold mt-1.5 truncate">{x.name}</div>
                     <div className="text-[11px] text-ink-500">{x.region} · {x.areaM2}㎡</div>
                     <div className="text-[12px] font-bold text-brand-600">1일 {manwon(x.dailyFee)}{x.lastMinutePct ? <span className="text-rose-500"> · {x.lastMinutePct}%↓</span> : null}</div>
@@ -390,7 +390,7 @@ function ApplySheet({ open, onClose, space, brandId }: { open: boolean; onClose:
           <Field label="지원할 팀">
             <div className="space-y-1.5">
               {teams.map((t) => (
-                <button key={t.id} disabled={!t.confirmed} onClick={() => { setTeamId(t.id); setStart(''); setEnd(''); }} className={cx('w-full text-left rounded-xl border p-3 text-sm disabled:opacity-50', team?.id === t.id ? 'border-ink-900 bg-ink-100' : 'border-ink-300')}>
+                <button key={t.id} disabled={!t.confirmed} onClick={() => { setTeamId(t.id); setStart(''); setEnd(''); }} className={cx('w-full text-left rounded-md border p-3 text-sm disabled:opacity-50', team?.id === t.id ? 'border-ink-900 bg-ink-100' : 'border-ink-300')}>
                   <b>{t.name}</b> · {t.members.length}개 브랜드
                   {!t.confirmed && <div className="text-[11px] text-red-500">약속서 전원 동의 후 지원할 수 있어요</div>}
                 </button>

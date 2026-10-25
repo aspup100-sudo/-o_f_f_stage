@@ -98,7 +98,7 @@ export function RecruitsTab({ initial }: { initial?: '찜' }) {
       {brand && region !== '전체' && (() => {
         const on = !!brand.recruitAlertRegions?.includes(region);
         return (
-          <div className="mx-4 mb-2 mt-1 flex items-center gap-2 rounded-xl bg-white border border-ink-100 px-3 py-2.5">
+          <div className="mx-4 mb-2 mt-1 flex items-center gap-2 rounded-md bg-white border border-ink-100 px-3 py-2.5">
             <span className="text-[13px] flex-1">{on ? `${region} 새 모집글 알림 받는 중` : `${region}에 새 모집글이 올라오면 알려 드릴까요?`}</span>
             <button onClick={() => toggleRecruitAlert(brand.id, region)} className={cx('h-8 px-3 rounded-md text-[12px] font-bold shrink-0', on ? 'bg-ink-100 text-ink-700' : 'bg-brand-500 text-white')}>{on ? '끄기' : '알림 받기'}</button>
           </div>
@@ -164,7 +164,7 @@ export function RecruitDetail({ id }: { id: string }) {
           <Info label="총 예산" value={manwon(r.totalBudget)} />
           <Info label={r.slotMode === 'hanger' ? '행거 1개 분담금' : '1자리 분담금'} value={manwon(slotShare(r.totalBudget, r.slots, 1, r.slotMode))} accent />
         </div>
-        <div className="mt-3 rounded-xl border border-ink-100 p-3 text-sm">
+        <div className="mt-3 rounded-md border border-ink-100 p-3 text-sm">
           <div className="text-[12px] text-ink-500 mb-0.5">공간</div>
           {r.spaceConfirmed && sp ? (
             <button className="font-semibold underline underline-offset-2" onClick={() => navigate({ name: 'space', id: sp.id })}><Ic n="check" />확정: {sp.name} ›</button>
@@ -200,7 +200,7 @@ export function RecruitDetail({ id }: { id: string }) {
           {r.slots.map((s) => {
             const b = brandById(db, s.brandId);
             return (
-              <div key={s.id} className={cx('rounded-xl border p-2.5 min-h-[72px] flex flex-col justify-between', SLOT_STYLE[s.status])}>
+              <div key={s.id} className={cx('rounded-md border p-2.5 min-h-[72px] flex flex-col justify-between', SLOT_STYLE[s.status])}>
                 <div className="text-[12px] font-bold">{r.slotMode === 'hanger' ? <><Ic n="hanger" />{s.label}</> : s.label}</div>
                 <div>
                   <div className="text-[11px] opacity-80">{s.status}</div>
@@ -402,7 +402,7 @@ export function RecruitNew() {
           {d.spaceConfirmed && (
             <div className="mt-2 space-y-1.5">
               {regionSpaces.map((s) => (
-                <button key={s.id} type="button" onClick={() => setD({ ...d, spaceId: s.id })} className={cx('w-full text-left rounded-xl border p-3 text-sm', d.spaceId === s.id ? 'border-ink-900 bg-ink-100' : 'border-ink-300')}>
+                <button key={s.id} type="button" onClick={() => setD({ ...d, spaceId: s.id })} className={cx('w-full text-left rounded-md border p-3 text-sm', d.spaceId === s.id ? 'border-ink-900 bg-ink-100' : 'border-ink-300')}>
                   <b>{s.name}</b> <span className="text-ink-500">· 1일 {manwon(s.dailyFee)} · {s.areaM2}㎡</span>
                 </button>
               ))}

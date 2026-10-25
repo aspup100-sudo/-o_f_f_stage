@@ -37,8 +37,8 @@ export function MySpacesTab() {
               </div>
               <div className="h-1 bg-ink-100 mt-2 overflow-hidden"><div className="h-full bg-ink-900" style={{ width: `${pct}%` }} /></div>
               <div className="flex gap-2 mt-3 text-[12px]">
-                <span className="rounded-full border border-ink-300 px-2.5 py-1"><Ic n="heart" />찜한 브랜드 {savers}곳</span>
-                {open > 0 && <button onClick={() => navigate({ name: 'tab', tab: 'inbox', filter: 'offer' })} className="rounded-full bg-brand-500 text-white px-2.5 py-1 font-semibold">빈 날 채우러 팀에게 제안 ›</button>}
+                <span className="rounded border border-ink-300 px-2.5 py-1"><Ic n="heart" />찜한 브랜드 {savers}곳</span>
+                {open > 0 && <button onClick={() => navigate({ name: 'tab', tab: 'inbox', filter: 'offer' })} className="rounded bg-brand-500 text-white px-2.5 py-1 font-semibold">빈 날 채우러 팀에게 제안 ›</button>}
               </div>
             </div>
           );
@@ -100,7 +100,7 @@ export function SpaceEdit({ id }: { id?: string }) {
                 <span className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white text-xs">✕</span>
               </button>
             ))}
-            <button type="button" onClick={() => setD({ ...d, photoHues: [...d.photoHues, Math.floor(Math.random() * 360)] })} className="w-20 h-20 rounded-xl border-2 border-dashed border-ink-300 text-ink-500 text-xs">+ 사진 (데모)</button>
+            <button type="button" onClick={() => setD({ ...d, photoHues: [...d.photoHues, Math.floor(Math.random() * 360)] })} className="w-20 h-20 rounded-md border-2 border-dashed border-ink-300 text-ink-500 text-xs">+ 사진 (데모)</button>
           </div>
         </Field>
         <Field label="공간 이름" required><input className={inputCls} value={d.name} onChange={(e) => setD({ ...d, name: e.target.value })} placeholder="예) 망원 골목창고" /></Field>
@@ -281,7 +281,7 @@ function OfferToTeam({ teamId }: { teamId: string }) {
       <Sheet open={open} onClose={() => setOpen(false)} title="어떤 공간을 제안할까요?">
         <div className="space-y-2">
           {spaces.map((s) => (
-            <button key={s.id} onClick={() => { proposeSpaceToTeam(teamId, s.id); setOpen(false); }} className="w-full text-left rounded-xl border border-ink-300 p-3 text-sm">
+            <button key={s.id} onClick={() => { proposeSpaceToTeam(teamId, s.id); setOpen(false); }} className="w-full text-left rounded-md border border-ink-300 p-3 text-sm">
               <b>{s.name}</b> · 1일 {manwon(s.dailyFee)}
             </button>
           ))}
@@ -303,7 +303,7 @@ export function ProposeSpaceButton({ recruitmentId }: { recruitmentId: string })
         {spaces.length === 0 && <Empty>먼저 공간을 등록해 주세요</Empty>}
         <div className="space-y-2">
           {spaces.map((s) => (
-            <button key={s.id} onClick={() => { const rid = proposeSpaceToRecruitment(recruitmentId, s.id); setOpen(false); navigate({ name: 'chat', id: rid }); }} className={cx('w-full text-left rounded-xl border border-ink-300 p-3 text-sm')}>
+            <button key={s.id} onClick={() => { const rid = proposeSpaceToRecruitment(recruitmentId, s.id); setOpen(false); navigate({ name: 'chat', id: rid }); }} className={cx('w-full text-left rounded-md border border-ink-300 p-3 text-sm')}>
               <b>{s.name}</b> · {s.region} · 1일 {manwon(s.dailyFee)}
             </button>
           ))}

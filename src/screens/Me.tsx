@@ -193,11 +193,11 @@ function BrandSection() {
         </div>
         <p className="text-[11px] text-ink-500 mt-2">받은 제안 대기 {recv}건 · 보낸 제안 {sent}건</p>
         <div className="grid grid-cols-2 gap-2 mt-3">
-          <button onClick={() => navigate({ name: 'tab', tab: 'recruits', filter: '찜' })} className="rounded-xl border border-ink-100 px-3 py-2.5 text-left">
+          <button onClick={() => navigate({ name: 'tab', tab: 'recruits', filter: '찜' })} className="rounded-md border border-ink-100 px-3 py-2.5 text-left">
             <span className="block text-[11px] text-ink-500">찜한 모집글</span>
             <span className="block font-bold">{b.savedRecruits?.length ?? 0}</span>
           </button>
-          <button onClick={() => navigate({ name: 'tab', tab: 'spaces', filter: '찜' })} className="rounded-xl border border-ink-100 px-3 py-2.5 text-left">
+          <button onClick={() => navigate({ name: 'tab', tab: 'spaces', filter: '찜' })} className="rounded-md border border-ink-100 px-3 py-2.5 text-left">
             <span className="block text-[11px] text-ink-500">찜한 공간</span>
             <span className="block font-bold">{b.savedSpaces?.length ?? 0}</span>
           </button>
@@ -278,7 +278,7 @@ function VisitorSection() {
         {!mine.length && <Empty icon="star">방문 인증한 팝업에서 리뷰를 남겨 보세요</Empty>}
         <div className="space-y-2">
           {mine.map((r) => (
-            <button key={r.id} onClick={() => { setReviewsOpen(false); navigate({ name: 'popup', id: r.popupId }); }} className="w-full text-left rounded-xl border border-ink-100 p-3">
+            <button key={r.id} onClick={() => { setReviewsOpen(false); navigate({ name: 'popup', id: r.popupId }); }} className="w-full text-left rounded-md border border-ink-100 p-3">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[13px] font-semibold truncate">{popupById(db, r.popupId)?.title ?? '팝업'}{r.about && <span className="text-ink-500 font-normal"> · {r.about}</span>}</span>
                 <Stars value={r.rating} size="w-3 h-3" />

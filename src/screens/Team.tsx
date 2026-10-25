@@ -147,7 +147,7 @@ export function TeamScreen({ id, sub = 'members' }: { id: string; sub?: string }
         {team.stage === '준비 중' && (() => {
           const prep = teamPrep(db, team, brand!.id);
           return (
-            <button onClick={() => setPrepOpen(true)} className="w-full mt-3 rounded bg-white border border-brand-100 px-3.5 py-3 text-left">
+            <button onClick={() => setPrepOpen(true)} className="w-full mt-3 rounded bg-white border border-ink-300 px-3.5 py-3 text-left">
               <div className="flex items-center justify-between text-[13px]">
                 <span className="font-bold">오픈 {dday(team.period.start)} · 준비 {prep.done}/{prep.steps.length}</span>
                 <span className="text-brand-600 text-[12px] font-semibold">체크리스트 ›</span>
@@ -210,7 +210,7 @@ function MembersTab({ team, isLeader }: { team: Team; isLeader: boolean }) {
   const shift = db.shifts.find((x) => x.teamId === team.id);
   const [nudged, setNudged] = useState<string[]>([]);
   const chip = (ok: boolean, label: string) => (
-    <span className={cx('text-[11px] px-2 h-6 inline-flex items-center rounded-md font-semibold', ok ? 'bg-emerald-50 text-emerald-700' : 'bg-ink-100 text-ink-500')}>{ok ? '✓' : '…'} {label}</span>
+    <span className={cx('text-[11px] px-2 h-6 inline-flex items-center rounded-md font-semibold', ok ? 'border border-emerald-600 text-emerald-700' : 'border border-ink-300 text-ink-500')}>{ok ? '✓' : '…'} {label}</span>
   );
   return (
     <div className="space-y-2.5">
@@ -226,11 +226,11 @@ function MembersTab({ team, isLeader }: { team: Team; isLeader: boolean }) {
               </button>
             </div>
             <div className="grid grid-cols-2 gap-2 mt-3 text-sm">
-              <div className="rounded-lg bg-ink-100/60 px-3 py-2">
+              <div className="border-l-2 border-ink-900 pl-2.5 py-0.5">
                 <div className="text-[11px] text-ink-500">자리</div>
                 <div className="font-semibold">{m.slotLabel} · 행거 {m.hangers}개</div>
               </div>
-              <div className="rounded-lg bg-ink-100/60 px-3 py-2">
+              <div className="border-l-2 border-ink-900 pl-2.5 py-0.5">
                 <div className="text-[11px] text-ink-500">역할</div>
                 {isLeader ? (
                   <input className="w-full bg-transparent font-semibold outline-none" defaultValue={m.role} onBlur={(e) => setMemberRole(team.id, m.brandId, e.target.value)} />
@@ -510,7 +510,7 @@ function MoodboardTab({ team, myBrandId }: { team: Team; myBrandId: string }) {
         })}
       </div>
       <div className="mb-1.5 font-bold text-sm">지금까지 모인 팀 무드</div>
-      <div className="grid grid-cols-9 gap-0.5 rounded-xl overflow-hidden mb-4">
+      <div className="grid grid-cols-9 gap-0.5 rounded-md overflow-hidden mb-4">
         {team.members.flatMap((m) => {
           const picks = mb.picks[m.brandId] ?? [];
           const b = brandById(db, m.brandId)!;
