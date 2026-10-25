@@ -3,7 +3,7 @@ import { useMe } from '@/store/hooks';
 import { navigate, update } from '@/store/store';
 import { STAMP_LEVELS } from './Popup';
 import { importInstagram, isValidBizNumber, requestVerification, sendFollowerNews, updateBrandProfile } from '@/store/actions';
-import { brandById, period, popupById, trustScore } from '@/store/logic';
+import { brandById, manwon, period, popupById, trustScore } from '@/store/logic';
 import { BrandLogo, ScreenTitle, TagPicker, ThemeTagList, TrustLine } from '@/components/common';
 import { Avatar, Button, Card, Demo, Field, GradeBadge, Icon, inputCls, Sheet, Tag, textareaCls } from '@/components/ui';
 import type { ThemeTags } from '@/types';
@@ -43,6 +43,23 @@ export default function MeScreen() {
           <Card className="p-4">
             <div className="font-bold mb-1">운영 공간 {landlord.spaceIds.length}곳</div>
             <p className="text-sm text-ink-500 mb-3">{landlord.intro}</p>
+            {(() => {
+              const mine = db.spaces.filter((sp) => landlord.spaceIds.includes(sp.id));
+              const acc = db.spaceApplications.filter((a) => a.status === 'accepted' && landlord.spaceIds.includes(a.spaceId));
+              const income = acc.reduce((sum, a) => {
+                const sp = mine.find((x) => x.id === a.spaceId)!;
+                const days = Math.round((new Date(a.dates.end).getTime() - new Date(a.dates.start).getTime()) / 86400000) + 1;
+                return sum + sp.dailyFee * days;
+              }, 0);
+              const saves = db.brands.filter((b) => b.savedSpaces?.some((id) => landlord.spaceIds.includes(id))).length;
+              return (
+                <div className="grid grid-cols-3 text-center rounded-xl bg-ink-100/70 py-2.5 mb-3">
+                  <div><div className="font-extrabold">{acc.length}팀</div><div className="text-[11px] text-ink-500">받은 팀</div></div>
+                  <div className="border-x border-ink-300/60"><div className="font-extrabold">{manwon(income)}</div><div className="text-[11px] text-ink-500">대관 매출</div></div>
+                  <div><div className="font-extrabold">♥ {saves}</div><div className="text-[11px] text-ink-500">공간 찜</div></div>
+                </div>
+              );
+            })()}
             <Button variant="secondary" full onClick={() => navigate({ name: 'tab', tab: 'myspaces' })}>내 공간 관리</Button>
           </Card>
         )}
