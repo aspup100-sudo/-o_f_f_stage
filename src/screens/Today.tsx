@@ -1,4 +1,6 @@
 // 둘러보기 맨 위 '오늘' 영역: 내 팝업까지 남은 날과 지금 해야 할 일을 모아 보여 준다.
+import type { LookbookImage } from '@/types';
+import { lookbookSrc } from '@/data/photos';
 import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { navigate } from '@/store/store';
@@ -77,7 +79,7 @@ export function TodayBrand() {
       {(() => {
         // 매거진 표지처럼: 멤버 브랜드 룩북 사진이 먼저, 그 아래 큰 제목과 날짜. 색은 거의 쓰지 않는다.
         const members = t.members.map((m) => brandById(db, m.brandId)).filter(Boolean) as NonNullable<ReturnType<typeof brandById>>[];
-        const shots = members.map((b) => db.lookbookImages.find((i) => i.id === b.lookbook[0])).filter(Boolean) as { id: string; hue: number; pattern: 'solid' | 'stripe' | 'dot' | 'grid' | 'wave' | 'circle' }[];
+        const shots = members.map((b) => db.lookbookImages.find((i) => i.id === b.lookbook[0])).filter(Boolean) as LookbookImage[];
         const pp = popupById(db, t.popupId);
         const waiting = pp && pp.status === '예정' ? waitCount(pp) : 0;
         const room = db.chatRooms.find((r) => r.context?.type === 'team' && r.context.refId === t.id);
@@ -88,8 +90,8 @@ export function TodayBrand() {
           <div className="bg-white border border-ink-900">
             <button onClick={() => navigate({ name: 'team', id: t.id })} className="block w-full text-left">
               <div className="flex h-32">
-                {(shots.length ? shots : members.map((b) => ({ id: b.id, hue: b.logoHue, pattern: 'solid' as const }))).map((im) => (
-                  <Swatch key={im.id} hue={im.hue} pattern={im.pattern} rounded="" className="flex-1" />
+                {(shots.length ? shots : members.map((b) => ({ id: b.lookbook[0] ?? `${b.id}_img1`, brandId: b.id, hue: b.logoHue, pattern: 'solid' as const }))).map((im) => (
+                  <Swatch key={im.id} src={lookbookSrc(im)} hue={im.hue} pattern={im.pattern} rounded="" className="flex-1" />
                 ))}
               </div>
               <div className="px-4 pt-3.5 pb-4 border-t border-ink-900">

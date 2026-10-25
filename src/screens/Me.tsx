@@ -1,8 +1,9 @@
+import { pickPhotos } from '@/components/photoPick';
 import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { navigate, update } from '@/store/store';
 import { STAMP_LEVELS } from './Popup';
-import { importInstagram, isValidBizNumber, requestVerification, sendFollowerNews, toggleVisitorRegion, updateBrandProfile } from '@/store/actions';
+import { addLookbookPhotos, importInstagram, isValidBizNumber, requestVerification, sendFollowerNews, toggleVisitorRegion, updateBrandProfile } from '@/store/actions';
 import { brandById, dday, manwon, period, popupById, teamsOfBrand, trustScore } from '@/store/logic';
 import { BrandLogo, ScreenTitle, TagPicker, ThemeTagList, TrustLine } from '@/components/common';
 import { Avatar, Button, Card, Chip, Demo, Empty, Field, GradeBadge, Icon, inputCls, Sheet, Stars, Tag, textareaCls, Ic } from '@/components/ui';
@@ -123,7 +124,7 @@ function TrustRulesSheet() {
         <div className="flex items-center gap-1.5"><GradeBadge grade="실버" /> 55점 이상</div>
         <div className="flex items-center gap-1.5"><GradeBadge grade="골드" /> 58점 이상</div>
       </div>
-      <p className="text-xs text-lime-700 mt-4"><Ic n="leaf" />새싹은 불이익이 아니에요. 처음 시작하는 브랜드라는 뜻이에요.</p>
+      <p className="text-xs text-ink-700 mt-4"><Ic n="leaf" />새싹은 불이익이 아니에요. 처음 시작하는 브랜드라는 뜻이에요.</p>
     </Sheet>
   );
 }
@@ -236,6 +237,9 @@ function BrandSection() {
           <textarea className={textareaCls} value={intro} onChange={(e) => setIntro(e.target.value)} />
         </Field>
         <TagPicker value={tags} onChange={setTags} />
+        <Field label="룩북 사진" hint="제품·착용컷·작업실 사진을 올리면 룩북 맨 앞에 보여요">
+          <Button full variant="secondary" onClick={async () => { const urls = await pickPhotos(9); if (urls.length) addLookbookPhotos(b.id, urls); }}><Icon name="camera" className="w-4 h-4" />휴대폰에서 사진 올리기</Button>
+        </Field>
         <Field label={<>인스타그램 연동 <Demo /></>} hint="아이디를 입력하면 예시 사진 9장을 룩북 앞쪽에 추가해요">
           <div className="flex gap-2">
             <input className={inputCls} value={ig} onChange={(e) => setIg(e.target.value.replace(/\s/g, ''))} placeholder="instagram_id" />

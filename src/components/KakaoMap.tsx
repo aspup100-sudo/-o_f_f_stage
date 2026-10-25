@@ -24,8 +24,8 @@ function loadSdk(): Promise<any> {
   sdk = new Promise((resolve, reject) => {
     const s = document.createElement('script');
     s.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KEY}&autoload=false`;
-    s.onload = () => (window.kakao?.maps ? window.kakao.maps.load(() => resolve(window.kakao)) : reject(new Error('no kakao')));
-    s.onerror = () => reject(new Error('kakao sdk'));
+    s.onload = () => (window.kakao?.maps ? window.kakao.maps.load(() => resolve(window.kakao)) : reject(new Error('카카오가 지도 코드를 주지 않았어요 (도메인 미등록 또는 카카오맵 사용 설정 꺼짐)')));
+    s.onerror = () => reject(new Error('카카오 지도 서버에 연결하지 못했어요 (키 또는 도메인 확인 필요)'));
     document.head.appendChild(s);
   });
   sdk.catch(() => { sdk = null; });
@@ -57,6 +57,7 @@ export function KakaoMap({ pins, onSelect, className, fallback }: { pins: MapPin
   const map = useRef<any>(null);
   const overlays = useRef<any[]>([]);
   const [state, setState] = useState<'loading' | 'ready' | 'failed'>(KEY ? 'loading' : 'failed');
+  const [why, setWhy] = useState('');
 
   useEffect(() => {
     if (!KEY) return;
@@ -69,7 +70,7 @@ export function KakaoMap({ pins, onSelect, className, fallback }: { pins: MapPin
         map.current = m;
         setState('ready');
       })
-      .catch(() => alive && setState('failed'));
+      .catch((e: Error) => { if (alive) { setWhy(e.message); setState('failed'); } });
     return () => { alive = false; };
   }, []);
 
@@ -97,7 +98,7 @@ export function KakaoMap({ pins, onSelect, className, fallback }: { pins: MapPin
     }
   }, [state, pins, onSelect]);
 
-  if (state === 'failed') return <>{fallback}</>;
+  if (state === 'failed') return <>{fallback}{KEY && why && <p className="text-[12px] text-red-600 mt-1 text-center">지도 오류: {why} · 접속 주소 {location.origin}</p>}</>;
   return (
     <div className={className} style={{ position: 'relative' }}>
       <div ref={box} className="absolute inset-0" />

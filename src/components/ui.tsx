@@ -126,10 +126,10 @@ export function Demo({ children = '데모' }: { children?: ReactNode }) {
 }
 
 const gradeStyle: Record<Grade, { cls: string; icon: string }> = {
-  새싹: { cls: 'bg-lime-50 text-lime-700 border-lime-200', icon: 'leaf' },
-  브론즈: { cls: 'bg-orange-50 text-orange-800 border-orange-200', icon: 'medal' },
-  실버: { cls: 'bg-slate-50 text-slate-700 border-slate-300', icon: 'medal' },
-  골드: { cls: 'bg-yellow-50 text-yellow-800 border-yellow-300', icon: 'medal' },
+  새싹: { cls: 'bg-white text-ink-700 border-ink-300', icon: 'leaf' },
+  브론즈: { cls: 'bg-white text-ink-700 border-ink-300', icon: 'medal' },
+  실버: { cls: 'bg-white text-ink-700 border-ink-300', icon: 'medal' },
+  골드: { cls: 'bg-white text-ink-700 border-ink-300', icon: 'medal' },
 };
 export function GradeBadge({ grade, small }: { grade: Grade; small?: boolean }) {
   const g = gradeStyle[grade];
@@ -142,7 +142,8 @@ export function GradeBadge({ grade, small }: { grade: Grade; small?: boolean }) 
 }
 
 /** 실제 사진 대신 색과 패턴으로 그리는 이미지 자리 */
-export function Swatch({ hue, pattern = 'solid', label, className, rounded = 'rounded-xl' }: { hue: number; pattern?: LookbookImage['pattern']; label?: string; className?: string; rounded?: string }) {
+export function Swatch({ hue, pattern = 'solid', label, className, rounded = 'rounded-xl', src }: { hue: number; pattern?: LookbookImage['pattern']; label?: string; className?: string; rounded?: string; src?: string }) {
+  const [broken, setBroken] = useState<string | null>(null);
   const c1 = `hsl(${hue} 45% 82%)`;
   const c2 = `hsl(${hue} 40% 68%)`;
   const c3 = `hsl(${hue} 35% 38%)`;
@@ -156,6 +157,7 @@ export function Swatch({ hue, pattern = 'solid', label, className, rounded = 'ro
   };
   return (
     <div className={cx('relative overflow-hidden', rounded, className)} style={{ background: bg[pattern] }}>
+      {src && broken !== src && <img src={src} alt={label ?? ''} loading="lazy" onError={() => setBroken(src)} className="absolute inset-0 w-full h-full object-cover" />}
       {label && (
         <span className="absolute left-1.5 bottom-1.5 px-1.5 py-0.5 rounded bg-white/80 text-[11px] font-medium" style={{ color: c3 }}>
           {label}
@@ -165,10 +167,12 @@ export function Swatch({ hue, pattern = 'solid', label, className, rounded = 'ro
   );
 }
 
-export function Avatar({ name, hue = 20, size = 40 }: { name: string; hue?: number; size?: number }) {
+export function Avatar({ name, hue = 20, size = 40, src }: { name: string; hue?: number; size?: number; src?: string }) {
+  const [broken, setBroken] = useState<string | null>(null);
   return (
-    <div className="rounded-full flex items-center justify-center font-bold text-white shrink-0" style={{ width: size, height: size, background: `hsl(${hue} 45% 55%)`, fontSize: size * 0.4 }}>
+    <div className="relative overflow-hidden rounded-full flex items-center justify-center font-bold text-white shrink-0" style={{ width: size, height: size, background: `hsl(${hue} 45% 55%)`, fontSize: size * 0.4 }}>
       {name.slice(0, 1)}
+      {src && broken !== src && <img src={src} alt="" loading="lazy" onError={() => setBroken(src)} className="absolute inset-0 w-full h-full object-cover" />}
     </div>
   );
 }

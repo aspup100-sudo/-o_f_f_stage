@@ -1,3 +1,4 @@
+import { lookbookSrc, brandCoverSrc } from '@/data/photos';
 import { RENTAL_ON } from '@/config';
 import { useState } from 'react';
 import { useMe } from '@/store/hooks';
@@ -317,7 +318,7 @@ function AgreementTab({ team, myBrandId }: { team: Team; myBrandId: string }) {
                     {!ag.locked && <button className="text-[12px] text-brand-600 font-semibold" onClick={() => { setDraft(v); setEditing(it.key); }}>{v ? '수정' : '작성'}</button>}
                   </div>
                   <div className="text-[12px] text-ink-500">{it.hint}</div>
-                  {v ? <p className="text-sm text-ink-700 mt-1.5 leading-relaxed">{v}</p> : <p className="text-sm text-red-400 mt-1.5">아직 비어 있어요</p>}
+                  {v ? <p className="text-sm text-ink-700 mt-1.5 leading-relaxed">{v}</p> : <p className="text-sm text-red-500 mt-1.5">아직 비어 있어요</p>}
                 </div>
               </div>
             </Card>
@@ -416,7 +417,7 @@ function CostTab({ team, myBrandId, isLeader }: { team: Team; myBrandId: string;
                 </div>
                 <div className="text-right">
                   <div className="font-bold text-sm">{won(shares[m.brandId] ?? 0)}</div>
-                  <div className={cx('text-[12px]', paid ? 'text-emerald-600' : 'text-ink-500')}>{paid ? '납부 완료' : '미납'}</div>
+                  <div className={cx('text-[12px]', paid ? 'text-emerald-700' : 'text-ink-500')}>{paid ? '납부 완료' : '미납'}</div>
                 </div>
               </div>
             );
@@ -442,7 +443,7 @@ export function TeamIntroPage({ db, team, compact }: { db: DB; team: Team; compa
         <div className="grid grid-cols-3 gap-0.5">
           {team.members.flatMap((m) => (mb?.picks[m.brandId] ?? []).slice(0, 1)).concat(team.members.flatMap((m) => (mb?.picks[m.brandId] ?? []).slice(1, 2))).slice(0, 6).map((id) => {
             const im = db.lookbookImages.find((i) => i.id === id);
-            return im ? <Swatch key={id} hue={im.hue} pattern={im.pattern} className="aspect-square" rounded="" /> : null;
+            return im ? <Swatch key={id} src={lookbookSrc(im)} hue={im.hue} pattern={im.pattern} className="aspect-square" rounded="" /> : null;
           })}
         </div>
         <div className="p-4 bg-ink-900 text-white">
@@ -469,7 +470,7 @@ export function TeamIntroPage({ db, team, compact }: { db: DB; team: Team; compa
               <div className="grid grid-cols-3 gap-1">
                 {(mb?.picks[m.brandId] ?? []).map((id) => {
                   const im = db.lookbookImages.find((i) => i.id === id);
-                  return im ? <Swatch key={id} hue={im.hue} pattern={im.pattern} label={im.label} className="aspect-square" rounded="rounded-lg" /> : null;
+                  return im ? <Swatch key={id} src={lookbookSrc(im)} hue={im.hue} pattern={im.pattern} className="aspect-square" rounded="rounded-lg" /> : null;
                 })}
               </div>
               {!compact && <div className="mt-2"><ThemeTagList tags={b.tags} limit={5} /></div>}
@@ -499,7 +500,7 @@ function MoodboardTab({ team, myBrandId }: { team: Team; myBrandId: string }) {
         <input className={inputCls} defaultValue={mb.headline} onBlur={(e) => setMoodHeadline(team.id, e.target.value)} />
       </div>
       <div className="flex items-center justify-between mb-2">
-        <div className="font-bold text-sm">내 룩북에서 고르기 <span className={cx(mine.length === 3 ? 'text-emerald-600' : 'text-brand-600')}>{mine.length}/3</span></div>
+        <div className="font-bold text-sm">내 룩북에서 고르기 <span className={cx(mine.length === 3 ? 'text-emerald-700' : 'text-brand-600')}>{mine.length}/3</span></div>
       </div>
       {me.lookbook.length ? <LookbookGrid db={db} ids={me.lookbook} picked={mine} onPick={(id) => toggleMoodPick(team.id, myBrandId, id)} /> : <Empty>룩북 사진이 없어요. 내 정보에서 인스타그램을 연동해 보세요.</Empty>}
       <div className="mt-4 mb-2 font-bold text-sm">멤버별 선택 현황</div>
@@ -517,7 +518,7 @@ function MoodboardTab({ team, myBrandId }: { team: Team; myBrandId: string }) {
           return [0, 1, 2].map((i) => {
             const im = db.lookbookImages.find((x) => x.id === picks[i]);
             return im ? (
-              <Swatch key={m.brandId + i} hue={im.hue} pattern={im.pattern} rounded="" className="aspect-square" />
+              <Swatch key={m.brandId + i} src={lookbookSrc(im)} hue={im.hue} pattern={im.pattern} rounded="" className="aspect-square" />
             ) : (
               <div key={m.brandId + i} className="aspect-square bg-ink-100 flex items-center justify-center text-[11px] text-ink-500">{i === 0 ? b.name[0] : ''}</div>
             );
@@ -553,7 +554,7 @@ function downloadShiftIcs(teamName: string, place: string, keys: string[]) {
 function ShiftTab({ team }: { team: Team }) {
   const { db, brand } = useMe();
   const sh = db.shifts.find((s) => s.teamId === team.id)!;
-  const colors = ['bg-orange-100 text-orange-800', 'bg-sky-100 text-sky-800', 'bg-emerald-100 text-emerald-800', 'bg-violet-100 text-violet-800', 'bg-rose-100 text-rose-800', 'bg-amber-100 text-amber-800'];
+  const colors = ['bg-ink-100 text-ink-700', 'bg-ink-100 text-ink-700', 'bg-emerald-100 text-emerald-700', 'bg-ink-100 text-ink-700', 'bg-red-50 text-red-600', 'bg-amber-100 text-amber-800'];
   const colorOf = (bid?: string) => colors[team.members.findIndex((m) => m.brandId === bid) % colors.length];
   const counts = team.members.map((m) => ({ m, n: Object.values(sh.assign).filter((x) => x === m.brandId).length }));
   const ended = team.stage === '종료';
@@ -655,7 +656,7 @@ ${hashtags.join(' ')}`;
       <div className="rounded overflow-hidden border border-ink-100 mb-3">
         <div className="relative h-40">
           <div className="absolute inset-0 flex">
-            {brands.map((b) => <Swatch key={b.id} hue={b.logoHue} pattern="stripe" rounded="" className="flex-1" />)}
+            {brands.map((b) => <Swatch key={b.id} src={brandCoverSrc(b)} hue={b.logoHue} pattern="stripe" rounded="" className="flex-1" />)}
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/10" />
           <div className="absolute left-4 right-4 bottom-3 text-white">
@@ -694,7 +695,7 @@ ${hashtags.join(' ')}`;
             <button key={b.id} disabled={b.id !== myBrandId} onClick={() => togglePromo(team.id, b.id)} className="w-full flex items-center gap-3 px-3.5 py-3 text-left">
               <span className={cx('w-6 h-6 rounded-md border-2 flex items-center justify-center', on ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-ink-300')}>{on && <Icon name="check" className="w-4 h-4" />}</span>
               <span className="flex-1 text-sm font-semibold">{b.name}{b.id === myBrandId && <span className="text-ink-500 font-normal"> (나)</span>}</span>
-              <span className={cx('text-xs', on ? 'text-emerald-600' : 'text-ink-500')}>{on ? '게시 완료' : '대기'}</span>
+              <span className={cx('text-xs', on ? 'text-emerald-700' : 'text-ink-500')}>{on ? '게시 완료' : '대기'}</span>
             </button>
           );
         })}

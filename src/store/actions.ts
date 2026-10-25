@@ -102,6 +102,17 @@ export function finishOnboarding(input: { brand?: BrandDraft; landlord?: { name:
 }
 
 // ───────── 브랜드 프로필 ─────────
+/** 휴대폰에서 고른 사진을 룩북 앞쪽에 넣는다 */
+export function addLookbookPhotos(brandId: string, photos: string[]) {
+  update((s) => {
+    const b = s.db.brands.find((x) => x.id === brandId)!;
+    const imgs = photos.map((photo) => ({ id: newId('img'), brandId, hue: b.logoHue, pattern: 'solid' as const, label: '', photo }));
+    s.db.lookbookImages.push(...imgs);
+    b.lookbook = [...imgs.map((i) => i.id), ...b.lookbook];
+  });
+  toast(`사진 ${photos.length}장을 룩북에 올렸어요`);
+}
+
 export function importInstagram(brandId: string, account: string) {
   update((s) => {
     const b = s.db.brands.find((x) => x.id === brandId)!;
@@ -617,7 +628,7 @@ export function togglePromo(teamId: string, brandId: string) {
 // ───────── 공간 ─────────
 export interface SpaceDraft {
   name: string; region: import('@/types').Region; address: string; intro: string; areaM2: number; dailyFee: number; minDays: number;
-  facilities: import('@/types').Facility[]; electricKw?: number; teamRental: boolean; fashionOnly: boolean; photoHues: number[];
+  facilities: import('@/types').Facility[]; electricKw?: number; teamRental: boolean; fashionOnly: boolean; photoHues: number[]; photos?: string[];
 }
 
 export function saveSpace(landlordId: string, d: SpaceDraft, id?: string) {

@@ -174,7 +174,7 @@ export function StatsTab() {
                       <span className="text-ink-700">{WEIGHT_LABEL[k]}</span>
                       <span className="tabular-nums">
                         <span className="text-ink-500">{BASE_WEIGHTS[k]} → </span><b>{L.weights[k]}</b>
-                        {d !== 0 && <span className={d > 0 === BASE_WEIGHTS[k] > 0 ? 'text-emerald-600 ml-1' : 'text-rose-500 ml-1'}>{d > 0 ? '▲' : '▼'}</span>}
+                        {d !== 0 && <span className={d > 0 === BASE_WEIGHTS[k] > 0 ? 'text-emerald-700 ml-1' : 'text-red-500 ml-1'}>{d > 0 ? '▲' : '▼'}</span>}
                       </span>
                     </div>
                   );

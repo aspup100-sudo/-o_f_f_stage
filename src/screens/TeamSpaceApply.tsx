@@ -26,7 +26,7 @@ export function TeamSpaceTab({ team }: { team: Team }) {
     <div className="space-y-4">
       {accepted && sp ? (
         <div>
-          <div className="rounded bg-emerald-50 border border-emerald-200 p-3.5 mb-3 text-sm text-emerald-800">
+          <div className="rounded bg-emerald-50 border border-emerald-200 p-3.5 mb-3 text-sm text-emerald-700">
             <Ic n="check" /><b>{sp.name}</b> 이용이 확정됐어요 · {period(accepted.dates)}
           </div>
           <SpaceCard db={db} s={sp} />

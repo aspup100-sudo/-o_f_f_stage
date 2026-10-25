@@ -1,3 +1,4 @@
+import { brandCoverSrc } from '@/data/photos';
 import { useCallback, useMemo, useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { shareLink } from '@/store/share';
@@ -63,7 +64,7 @@ export function PopupDetail({ id }: { id: string }) {
       <SubHeader title={p.title} right={<button className="text-[13px] font-semibold text-ink-700" onClick={() => shareLink(p.title, `${p.title} · ${sp.name} ${md(p.period.start)}~${md(p.period.end)} · OFF STAGE에서 같이 가요`)}>공유</button>} />
       <div className="relative h-44">
         <div className="absolute inset-0 flex">
-          {brands.map((b) => <Swatch key={b.id} hue={b.logoHue} pattern="stripe" rounded="" className="flex-1" />)}
+          {brands.map((b) => <Swatch key={b.id} src={brandCoverSrc(b)} hue={b.logoHue} pattern="stripe" rounded="" className="flex-1" />)}
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
         <div className="absolute left-4 right-4 bottom-3 flex items-end justify-between gap-3">
@@ -87,7 +88,7 @@ export function PopupDetail({ id }: { id: string }) {
         <div className="text-[13px] text-ink-500">팀 <button className="underline underline-offset-2" onClick={() => navigate({ name: 'team', id: team.id })}>{team.name}</button> · 방문 인증 {visitorsCount}명</div>
         <div className="mt-4 rounded border border-ink-100 divide-y divide-ink-100 text-sm">
           <div className="flex px-3.5 py-2.5"><span className="w-20 text-ink-500">일정</span><span className="font-semibold">{p.period.start} ~ {p.period.end}</span></div>
-          <div className="flex px-3.5 py-2.5"><span className="w-20 text-ink-500">운영 시간</span><span className="font-semibold">{p.hours}</span>{p.status === '진행 중' && (() => { const o = openNow(p.hours); return o ? <span className={cx('ml-auto text-[12px] font-bold', o.open ? 'text-emerald-600' : 'text-ink-500')}>{o.open && '● '}{o.text}</span> : null; })()}</div>
+          <div className="flex px-3.5 py-2.5"><span className="w-20 text-ink-500">운영 시간</span><span className="font-semibold">{p.hours}</span>{p.status === '진행 중' && (() => { const o = openNow(p.hours); return o ? <span className={cx('ml-auto text-[12px] font-bold', o.open ? 'text-emerald-700' : 'text-ink-500')}>{o.open && '● '}{o.text}</span> : null; })()}</div>
           <button className="flex px-3.5 py-2.5 w-full text-left" onClick={() => navigate({ name: 'space', id: sp.id })}><span className="w-20 text-ink-500 shrink-0">위치</span><span className="font-semibold">{sp.name} <span className="font-normal text-ink-500">· {sp.address}</span> ›</span></button>
         </div>
 
@@ -111,7 +112,7 @@ export function PopupDetail({ id }: { id: string }) {
         {role === 'visitor' && p.status !== '예정' && (
           <div className="mt-4">
             {visited ? (
-              <div className="rounded bg-emerald-50 border border-emerald-200 p-4 text-emerald-800">
+              <div className="rounded bg-emerald-50 border border-emerald-200 p-4 text-emerald-700">
                 <div className="font-bold"><Ic n="check" />방문 인증 완료</div>
                 <div className="text-sm mt-0.5">스탬프가 적립됐어요. 이제 리뷰를 남길 수 있어요.</div>
                 {(() => {
@@ -332,7 +333,7 @@ export function MapTab() {
               <rect x="56" y="18" width="12" height="10" rx="2" fill="#d5e5cc" />
               <rect x="80" y="62" width="14" height="10" rx="2" fill="#d5e5cc" />
             </svg>
-            <span className="absolute text-[11px] text-sky-700 font-semibold" style={{ left: '40%', top: '84%' }}>한강</span>
+            <span className="absolute text-[11px] text-ink-700 font-semibold" style={{ left: '40%', top: '84%' }}>한강</span>
             {REGION_LABELS.map((r) => (
               <span key={r.name} className="absolute text-[12px] font-bold text-ink-500 -translate-x-1/2" style={{ left: `${r.x}%`, top: `${r.y}%` }}>{r.name}</span>
             ))}

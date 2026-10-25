@@ -1,4 +1,5 @@
 // 여러 화면에서 쓰는 도메인 컴포넌트
+import { lookbookSrc, brandCoverSrc } from '@/data/photos';
 import type { BrandProfile, Popup, ThemeTags } from '@/types';
 import { AGE_GROUPS, CATEGORIES, MOODS, PRICE_RANGES } from '@/types';
 import type { DB } from '@/data/mock';
@@ -37,7 +38,7 @@ export function ThemeTagList({ tags, limit }: { tags: ThemeTags; limit?: number 
 }
 
 export function BrandLogo({ brand, size = 40 }: { brand: BrandProfile; size?: number }) {
-  return <Avatar name={brand.name} hue={brand.logoHue} size={size} />;
+  return <Avatar name={brand.name} hue={brand.logoHue} size={size} src={brandCoverSrc(brand)} />;
 }
 
 export function BrandCard({ db, brand, right, reasons, compact }: { db: DB; brand: BrandProfile; right?: React.ReactNode; reasons?: string[]; compact?: boolean }) {
@@ -49,7 +50,7 @@ export function BrandCard({ db, brand, right, reasons, compact }: { db: DB; bran
     return (
       <div className="flex gap-3 py-3">
         <button aria-label={`${brand.name} 프로필`} onClick={() => navigate({ name: 'brand', id: brand.id })} className="w-[84px] h-[104px] shrink-0 rounded-md overflow-hidden">
-          {im ? <Swatch hue={im.hue} pattern={im.pattern} rounded="" className="w-full h-full" /> : <Swatch hue={brand.logoHue} rounded="" className="w-full h-full" />}
+          {im ? <Swatch src={lookbookSrc(im)} hue={im.hue} pattern={im.pattern} rounded="" className="w-full h-full" /> : <Swatch hue={brand.logoHue} rounded="" className="w-full h-full" />}
         </button>
         <div className="flex-1 min-w-0">
           <div className="flex items-start gap-2">
@@ -77,7 +78,7 @@ export function BrandCard({ db, brand, right, reasons, compact }: { db: DB; bran
       <button className="w-full text-left" onClick={() => navigate({ name: 'brand', id: brand.id })}>
         <div className="grid grid-cols-3 gap-0.5 h-36">
           {imgs.length ? (
-            imgs.map((im, i) => <Swatch key={im.id} hue={im.hue} pattern={im.pattern} label={i === 0 ? im.label : undefined} rounded="" className="h-full" />)
+            imgs.map((im, i) => <Swatch key={im.id} src={lookbookSrc(im)} hue={im.hue} pattern={im.pattern} label={i === 0 ? im.label : undefined} rounded="" className="h-full" />)
           ) : (
             <Swatch hue={brand.logoHue} className="col-span-3 h-full" rounded="" label="룩북 준비 중" />
           )}
@@ -152,7 +153,7 @@ export function PopupBannerCard({ db, popup, wide }: { db: DB; popup: Popup; wid
     <button onClick={() => navigate({ name: 'popup', id: popup.id })} className={cx('text-left shrink-0 rounded overflow-hidden bg-ink-900 text-white relative', wide ? 'w-full' : 'w-[280px]')}>
       <div className="flex h-24">
         {brands.slice(0, 4).map((b) => (
-          <Swatch key={b.id} hue={b.logoHue} pattern="stripe" rounded="" className="flex-1 opacity-90" />
+          <Swatch key={b.id} src={brandCoverSrc(b)} hue={b.logoHue} pattern="stripe" rounded="" className="flex-1 opacity-90" />
         ))}
       </div>
       <div className="p-3.5">
@@ -183,7 +184,7 @@ export function LookbookGrid({ db, ids, onPick, picked }: { db: DB; ids: string[
         const on = picked?.includes(id);
         return (
           <button key={id} onClick={() => onPick?.(id)} disabled={!onPick} className="relative aspect-square">
-            <Swatch hue={im.hue} pattern={im.pattern} label={im.label} className="w-full h-full" rounded="rounded-lg" />
+            <Swatch src={lookbookSrc(im)} hue={im.hue} pattern={im.pattern} className="w-full h-full" rounded="rounded-md" />
             {im.fromInstagram && <span className="absolute top-1 right-1 text-[9px] bg-white/85 rounded px-1">IG</span>}
             {on && (
               <span className="absolute inset-0 rounded-lg ring-4 ring-brand-500 ring-inset flex items-start justify-start p-1">

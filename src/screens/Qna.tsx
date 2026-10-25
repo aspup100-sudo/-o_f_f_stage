@@ -128,7 +128,7 @@ export function QnaNew() {
         </Field>
         <Field label="제목" required><input className={inputCls} value={title} onChange={(e) => setTitle(e.target.value)} /></Field>
         <Field label="내용" required><textarea className={textareaCls + ' min-h-[140px]'} value={body} onChange={(e) => setBody(e.target.value)} /></Field>
-        {tag === '비용' && <p className="text-[12px] text-amber-700 bg-amber-50 rounded-lg p-2.5 mb-3">특정 공간의 가격 협상은 공간 상세의 "비공개로 묻기"(채팅)를 이용해 주세요.</p>}
+        {tag === '비용' && <p className="text-[12px] text-ink-700 border-l-2 border-amber-500 pl-2.5 py-1 mb-3">특정 공간의 가격 협상은 공간 상세의 "비공개로 묻기"(채팅)를 이용해 주세요.</p>}
         <Button full size="lg" disabled={!title.trim() || !body.trim()} onClick={() => { const id = createQna(userId, title, body, tag); replace({ name: 'qna', id }); }}>올리기</Button>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { brandCoverSrc } from '@/data/photos';
 import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { guard } from '@/store/hooks';
@@ -31,14 +32,14 @@ export default function BrandProfileScreen({ id }: { id: string }) {
           </div>
         }
       />
-      <Swatch hue={brand.logoHue} pattern="stripe" rounded="" className="h-24 w-full" />
+      <Swatch src={brandCoverSrc(brand, db.lookbookImages)} hue={brand.logoHue} pattern="stripe" rounded="" className="h-40 w-full" />
       <div className="px-4">
         <div className="relative flex flex-col items-start gap-2 -mt-9">
           <span className="rounded-full ring-4 ring-white bg-white shrink-0"><BrandLogo brand={brand} size={72} /></span>
           <div className="w-full min-w-0">
             <div className="flex items-center gap-1.5">
               <h1 className="text-xl font-extrabold truncate">{brand.name}</h1>
-              {owner?.verifyStatus === 'verified' && <Icon name="shield" className="w-4 h-4 text-emerald-500" />}
+              {owner?.verifyStatus === 'verified' && <Icon name="shield" className="w-4 h-4 text-emerald-700" />}
             </div>
             <div className="flex items-center gap-1.5 mt-1">
               <GradeBadge grade={t.grade} />
@@ -60,7 +61,7 @@ export default function BrandProfileScreen({ id }: { id: string }) {
             <div className="text-[12px] text-ink-500">팔로워</div>
           </div>
         </div>
-        {t.grade === '새싹' && <p className="text-[12px] text-lime-700 mt-2"><Ic n="leaf" />OFF STAGE에서 첫 공동 팝업을 준비 중인 새싹 브랜드예요.</p>}
+        {t.grade === '새싹' && <p className="text-[12px] text-ink-700 mt-2"><Ic n="leaf" />OFF STAGE에서 첫 공동 팝업을 준비 중인 새싹 브랜드예요.</p>}
         <p className="text-sm text-ink-700 leading-relaxed mt-4">{brand.intro}</p>
         <div className="mt-3">
           <ThemeTagList tags={brand.tags} />
@@ -184,7 +185,7 @@ function ReviewsTab({ brandId }: { brandId: string }) {
           {events.map((e) => (
             <div key={e.id} className="flex justify-between px-3.5 py-2.5 text-sm">
               <span className="text-ink-700">{e.note} <span className="text-ink-500 text-xs">{e.at}</span></span>
-              <span className={e.delta >= 0 ? 'text-emerald-600 font-semibold' : 'text-red-500 font-semibold'}>{e.delta > 0 ? '+' : ''}{e.delta}</span>
+              <span className={e.delta >= 0 ? 'text-emerald-700 font-semibold' : 'text-red-500 font-semibold'}>{e.delta > 0 ? '+' : ''}{e.delta}</span>
             </div>
           ))}
           <div className="flex justify-between px-3.5 py-2.5 text-sm font-bold bg-ink-100/50">
@@ -260,7 +261,7 @@ function MatchCard({ me, other }: { me: import('@/types').BrandProfile; other: i
           {m.parts.map((x) => (
             <div key={x.label} className="flex justify-between py-0.5">
               <span className="text-ink-700">{x.label}</span>
-              <span className={x.pts > 0 ? 'font-bold text-brand-600' : x.pts < 0 ? 'font-bold text-rose-500' : 'text-ink-500'}>{x.pts > 0 ? '+' : ''}{x.pts}</span>
+              <span className={x.pts > 0 ? 'font-bold text-brand-600' : x.pts < 0 ? 'font-bold text-red-500' : 'text-ink-500'}>{x.pts > 0 ? '+' : ''}{x.pts}</span>
             </div>
           ))}
           <div className="flex justify-between border-t border-ink-100 mt-1.5 pt-1.5 font-bold"><span>합계 {m.score}점</span><span>40 + {m.score}×4 = {pct}%</span></div>

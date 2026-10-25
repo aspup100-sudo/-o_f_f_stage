@@ -1,3 +1,4 @@
+import { spaceSrc } from '@/data/photos';
 import { RENTAL_ON } from '@/config';
 import { useState } from 'react';
 import { useMe, guard } from '@/store/hooks';
@@ -36,10 +37,10 @@ export function SpaceCard({ db, s, onClick }: { db: DB; s: Space; onClick?: () =
     <Card className="overflow-hidden" onClick={onClick ?? (() => navigate({ name: 'space', id: s.id }))}>
       <div className="relative flex h-32 gap-0.5">
         <SaveSpaceButton spaceId={s.id} />
-        <Swatch hue={s.photoHues[0] ?? 30} pattern="solid" rounded="" className="flex-[2]" label={`${s.areaM2}㎡`} />
+        <Swatch src={spaceSrc(s, 0)} hue={s.photoHues[0] ?? 30} pattern="solid" rounded="" className="flex-[2]" label={`${s.areaM2}㎡`} />
         <div className="flex-1 flex flex-col gap-0.5">
-          <Swatch hue={s.photoHues[1] ?? 60} pattern="grid" rounded="" className="flex-1" />
-          <Swatch hue={s.photoHues[2] ?? 90} pattern="stripe" rounded="" className="flex-1" />
+          <Swatch src={spaceSrc(s, 1)} hue={s.photoHues[1] ?? 60} pattern="grid" rounded="" className="flex-1" />
+          <Swatch src={spaceSrc(s, 2)} hue={s.photoHues[2] ?? 90} pattern="stripe" rounded="" className="flex-1" />
         </div>
       </div>
       <div className="p-3.5">
@@ -221,11 +222,11 @@ export function SpaceDetail({ id }: { id: string }) {
     <div className="bg-white min-h-screen">
       <SubHeader title={s.name} right={isOwner && <Button size="sm" variant="secondary" onClick={() => navigate({ name: 'spaceEdit', id: s.id })}>수정</Button>} />
       <div className="relative">
-        <Swatch hue={s.photoHues[photo] ?? 30} pattern={(['solid', 'grid', 'stripe'] as const)[photo % 3]} rounded="" className="h-56" label={`사진 ${photo + 1}/${s.photoHues.length} · 실제 사진 자리`} />
+        <Swatch src={spaceSrc(s, photo, 900)} hue={s.photoHues[photo] ?? 30} pattern={(['solid', 'grid', 'stripe'] as const)[photo % 3]} rounded="" className="h-56" label={`사진 ${photo + 1}/${s.photoHues.length}${s.photos?.[photo] ? "" : " · 예시 사진"}`} />
         <div className="absolute bottom-2 right-2 flex gap-1">
           {s.photoHues.map((h, i) => (
             <button key={i} onClick={() => setPhoto(i)} className={cx('w-10 h-10 rounded-lg border-2', photo === i ? 'border-white' : 'border-transparent opacity-70')}>
-              <Swatch hue={h} className="w-full h-full" rounded="rounded-md" />
+              <Swatch src={spaceSrc(s, i)} hue={h} className="w-full h-full" rounded="rounded-md" />
             </button>
           ))}
         </div>
@@ -307,7 +308,7 @@ export function SpaceDetail({ id }: { id: string }) {
             <div key={x.id} className="rounded-md border border-ink-100 p-3 text-sm">
               <div><b className="text-brand-600">Q</b> {x.question} <span className="text-[12px] text-ink-500">· {displayName(db, x.authorId)}</span></div>
               {x.answer ? (
-                <div className="mt-1.5 text-ink-700"><b className="text-emerald-600">A</b> {x.answer}</div>
+                <div className="mt-1.5 text-ink-700"><b className="text-emerald-700">A</b> {x.answer}</div>
               ) : isOwner ? (
                 <div className="flex gap-1.5 mt-2">
                   <input className={inputCls + ' h-9'} placeholder="답변 입력" value={answers[x.id] ?? ''} onChange={(e) => setAnswers({ ...answers, [x.id]: e.target.value })} />
@@ -343,10 +344,10 @@ export function SpaceDetail({ id }: { id: string }) {
               <div className="flex gap-2.5 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
                 {similar.map((x) => (
                   <button key={x.id} onClick={() => navigate({ name: 'space', id: x.id })} className="w-[150px] shrink-0 text-left">
-                    <Swatch hue={x.photoHues[0] ?? 30} pattern="solid" className="w-full h-24" rounded="rounded-md" />
+                    <Swatch src={spaceSrc(x, 0)} hue={x.photoHues[0] ?? 30} pattern="solid" className="w-full h-24" rounded="rounded-md" />
                     <div className="text-[13px] font-bold mt-1.5 truncate">{x.name}</div>
                     <div className="text-[12px] text-ink-500">{x.region} · {x.areaM2}㎡</div>
-                    <div className="text-[12px] font-bold text-brand-600">1일 {manwon(x.dailyFee)}{x.lastMinutePct ? <span className="text-rose-500"> · {x.lastMinutePct}%↓</span> : null}</div>
+                    <div className="text-[12px] font-bold text-brand-600">1일 {manwon(x.dailyFee)}{x.lastMinutePct ? <span className="text-red-500"> · {x.lastMinutePct}%↓</span> : null}</div>
                   </button>
                 ))}
               </div>

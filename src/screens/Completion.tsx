@@ -54,7 +54,7 @@ export function PopupReportCard({ popupId }: { popupId: string }) {
       {r.bestPair && (
         <div className="mt-3 border-t border-ink-300 pt-3">
           <div className="text-[12px] text-ink-500">방문객이 가장 좋아한 조합</div>
-          <div className="font-bold mt-0.5"><Ic n="heart" className="text-rose-500" />{brandById(db, r.bestPair[0])?.name} × {brandById(db, r.bestPair[1])?.name} <span className="text-[12px] text-ink-500 font-normal">· {r.bestPairCount}명</span></div>
+          <div className="font-bold mt-0.5"><Ic n="heart" className="text-red-500" />{brandById(db, r.bestPair[0])?.name} × {brandById(db, r.bestPair[1])?.name} <span className="text-[12px] text-ink-500 font-normal">· {r.bestPairCount}명</span></div>
         </div>
       )}
       <p className="text-[12px] text-ink-500 mt-3">OFF STAGE 안에서 모인 기록만 보여요. 매출은 팝업자랑에 직접 공개할 수 있어요.</p>
@@ -277,7 +277,7 @@ export function LandlordCompletions() {
               ) : (
                 <Card className={cx('p-3.5 flex items-center justify-between')}>
                   <div>
-                    <div className="text-sm font-semibold flex items-center gap-1"><Icon name="check" className="w-4 h-4 text-emerald-600" /> 인증 공동 팝업</div>
+                    <div className="text-sm font-semibold flex items-center gap-1"><Icon name="check" className="w-4 h-4 text-emerald-700" /> 인증 공동 팝업</div>
                     <div className="text-[12px] text-ink-500">공간 → 팀 · 약속 이행, 이용 규칙, 원상복구, 일정 준수</div>
                   </div>
                   <Button size="sm" disabled={done} variant={done ? 'secondary' : 'primary'} onClick={() => setForm({ teamId: t.id, popupId: p.id, label: t.name })}>{done ? '작성 완료' : '팀 후기 쓰기'}</Button>

@@ -21,7 +21,7 @@ function Price({ it, big }: { it: RentalItem; big?: boolean }) {
     <div className="text-right">
       <div className="text-[12px] text-ink-500 line-through tabular-nums">{won(it.dailyPrice)}</div>
       <div className={cx('font-extrabold text-brand-600 tabular-nums', big ? 'text-lg' : 'text-[15px]')}>
-        <span className="text-[12px] mr-0.5 text-rose-500">{discountPct(it)}%</span>
+        <span className="text-[12px] mr-0.5 text-red-500">{discountPct(it)}%</span>
         {won(it.partnerPrice)}
       </div>
       <div className="text-[11px] text-ink-500">1일 · OFF STAGE 제휴가</div>
@@ -285,7 +285,7 @@ function OrderSheet({ open, onClose, partnerId, lines, defaultTeamId, onDone }: 
         <div className="flex justify-between"><span>OFF STAGE 제휴가</span><span>{won(q.partnerSum)}</span></div>
         <div className="flex justify-between"><span>배송·설치비</span><span>{q.deliveryFee ? won(q.deliveryFee) : '무료'}</span></div>
         <div className="flex justify-between font-extrabold text-base pt-1 border-t border-ink-300/60"><span>합계</span><span>{won(q.total)}</span></div>
-        <div className="text-right text-[12px] font-bold text-rose-500">{won(q.list - q.partnerSum)} 절약</div>
+        <div className="text-right text-[12px] font-bold text-red-500">{won(q.list - q.partnerSum)} 절약</div>
       </div>
       <Button full size="lg" className="mt-4" onClick={() => {
         requestRental({ partnerId, teamId: team?.id, brandId: brand!.id, spaceId: team?.spaceId, lines, dates, delivery, addToTeamCost: !!team && split, memo });
@@ -314,7 +314,7 @@ export function OrderSummary({ db, o, right }: { db: DB; o: RentalOrder; right?:
         })}
       </div>
       <div className="flex justify-between items-end mt-2">
-        <span className="text-[12px] text-rose-500 font-semibold">{won(q.saved)} 절약</span>
+        <span className="text-[12px] text-red-500 font-semibold">{won(q.saved)} 절약</span>
         <span className="font-extrabold tabular-nums">{won(q.total)}</span>
       </div>
       {o.memo && <p className="text-[12px] text-ink-500 mt-1">메모: {o.memo}</p>}
@@ -334,7 +334,7 @@ export function TeamRentalTab({ team }: { team: Team }) {
   return (
     <div>
       {orders.length > 0 && (
-        <div className="rounded bg-rose-50 text-rose-700 p-3.5 mb-3 text-sm">
+        <div className="rounded bg-red-50 text-red-600 p-3.5 mb-3 text-sm">
           우리 팀은 렌탈 제휴로 <b>{won(spent)}</b>을 아꼈어요.
         </div>
       )}
@@ -465,7 +465,7 @@ export function RentalItemEdit({ id }: { id?: string }) {
           <Field label="제휴가(1일)"><input type="number" className={inputCls} value={d.partnerPrice} onChange={(e) => setD({ ...d, partnerPrice: Number(e.target.value) })} /></Field>
           <Field label="재고"><input type="number" className={inputCls} value={d.stock} onChange={(e) => setD({ ...d, stock: Number(e.target.value) })} /></Field>
         </div>
-        <div className={cx('rounded-md p-3 text-sm mb-4', pct >= 20 ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800')}>
+        <div className={cx('rounded-md p-3 text-sm mb-4', pct >= 20 ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-800')}>
           제휴 할인율 <b>{pct}%</b> · {pct >= 20 ? '브랜드에게 잘 보여요' : '20% 이상이면 추천 목록에 더 잘 노출돼요'}
         </div>
         <Button full size="lg" disabled={!ok} onClick={() => { saveRentalItem(rental.id, d, id); back(); }}>{ex ? '저장' : '등록'}</Button>

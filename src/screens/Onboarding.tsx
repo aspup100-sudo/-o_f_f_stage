@@ -133,7 +133,7 @@ function BizVerify({ status, role }: { status: string; role: Role }) {
             <div className="w-10 h-10 mx-auto rounded-full bg-emerald-500 text-white flex items-center justify-center mb-3">
               <Icon name="check" />
             </div>
-            <div className="font-bold text-emerald-800">인증 완료</div>
+            <div className="font-bold text-emerald-700">인증 완료</div>
             <div className="text-sm text-emerald-700 mt-1">이제 모든 기능을 쓸 수 있어요.</div>
           </div>
           <Button full size="lg" onClick={() => goOnboardingStep(3)}>프로필 작성하기</Button>

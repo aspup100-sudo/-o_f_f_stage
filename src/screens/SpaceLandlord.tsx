@@ -1,10 +1,12 @@
+import { pickPhotos } from '@/components/photoPick';
+import { spaceSrc } from '@/data/photos';
 import { useState } from 'react';
 import { useMe, guard } from '@/store/hooks';
 import { back, navigate, replace } from '@/store/store';
 import { setLastMinute, decideSpaceApplication, proposeSpaceToRecruitment, proposeSpaceToTeam, saveSpace, simulateTeamApplication, type SpaceDraft } from '@/store/actions';
 import { brandById, daysUntil, manwon, period, soonOpenDays, spaceById, teamById } from '@/store/logic';
 import { ScreenTitle, TrustLine } from '@/components/common';
-import { Button, Card, Chip, cx, Demo, Empty, Field, inputCls, Segmented, Sheet, StatusPill, SubHeader, Swatch, Tag, textareaCls, Ic } from '@/components/ui';
+import { Button, Card, Chip, cx, Demo, Empty, Field, inputCls, Segmented, Sheet, StatusPill, SubHeader, Swatch, Tag, textareaCls, Ic , Icon } from '@/components/ui';
 import { FACILITIES, REGIONS } from '@/types';
 import { SpaceCard, AvailabilityCalendar } from './Space';
 import { TeamIntroPage } from './Team';
@@ -83,7 +85,7 @@ export function SpaceEdit({ id }: { id?: string }) {
   const ex = spaceById(db, id);
   const [d, setD] = useState<SpaceDraft>(
     ex
-      ? { name: ex.name, region: ex.region, address: ex.address, intro: ex.intro, areaM2: ex.areaM2, dailyFee: ex.dailyFee, minDays: ex.minDays, facilities: ex.facilities, electricKw: ex.electricKw, teamRental: ex.teamRental, fashionOnly: ex.fashionOnly, photoHues: ex.photoHues }
+      ? { name: ex.name, region: ex.region, address: ex.address, intro: ex.intro, areaM2: ex.areaM2, dailyFee: ex.dailyFee, minDays: ex.minDays, facilities: ex.facilities, electricKw: ex.electricKw, teamRental: ex.teamRental, fashionOnly: ex.fashionOnly, photoHues: ex.photoHues, photos: ex.photos }
       : { name: '', region: '마포구', address: '', intro: '', areaM2: 33, dailyFee: 500000, minDays: 2, facilities: ['행거', '조명'], electricKw: 5, teamRental: true, fashionOnly: true, photoHues: [] },
   );
   if (!landlord) return <Empty>임대인 계정에서 볼 수 있어요</Empty>;
@@ -92,15 +94,20 @@ export function SpaceEdit({ id }: { id?: string }) {
     <div className="bg-white min-h-screen">
       <SubHeader title={ex ? '공간 수정' : '공간 등록'} />
       <div className="p-4">
-        <Field label="실제 사진" required hint="데모에서는 버튼을 누르면 예시 사진이 추가돼요">
+        <Field label="실제 사진" required hint="휴대폰 사진을 골라 올려요. 첫 사진이 대표 사진이 돼요. 누르면 빠져요">
           <div className="flex gap-1.5 flex-wrap">
             {d.photoHues.map((h, i) => (
-              <button key={i} onClick={() => setD({ ...d, photoHues: d.photoHues.filter((_, j) => j !== i) })} className="relative">
-                <Swatch hue={h} className="w-20 h-20" />
+              <button key={i} onClick={() => setD({ ...d, photoHues: d.photoHues.filter((_, j) => j !== i), photos: d.photos?.filter((_, j) => j !== i) })} className="relative">
+                <Swatch src={spaceSrc({ id: id ?? 'new', photos: d.photos }, i)} hue={h} className="w-20 h-20" rounded="rounded-md" />
                 <span className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white text-xs">✕</span>
               </button>
             ))}
-            <button type="button" onClick={() => setD({ ...d, photoHues: [...d.photoHues, Math.floor(Math.random() * 360)] })} className="w-20 h-20 rounded-md border-2 border-dashed border-ink-300 text-ink-500 text-xs">+ 사진 (데모)</button>
+            <button type="button" onClick={async () => {
+              const urls = await pickPhotos(8 - d.photoHues.length);
+              if (!urls.length) return;
+              const base = Array.from({ length: d.photoHues.length }, (_, i) => d.photos?.[i] ?? '');
+              setD({ ...d, photoHues: [...d.photoHues, ...urls.map(() => Math.floor(Math.random() * 360))], photos: [...base, ...urls] });
+            }} className="w-20 h-20 rounded-md border-2 border-dashed border-ink-300 text-ink-500 text-xs flex flex-col items-center justify-center gap-1"><Icon name="camera" className="w-5 h-5" />사진 올리기</button>
           </div>
         </Field>
         <Field label="공간 이름" required><input className={inputCls} value={d.name} onChange={(e) => setD({ ...d, name: e.target.value })} placeholder="예) 망원 골목창고" /></Field>

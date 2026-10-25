@@ -1,3 +1,4 @@
+import { spaceSrc } from '@/data/photos';
 import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { navigate, replace } from '@/store/store';
@@ -31,7 +32,7 @@ export function ShowcaseList() {
         return (
           <Card key={s.id} className="overflow-hidden" onClick={() => navigate({ name: 'showcase', id: s.id })}>
             <div className="flex h-28 gap-0.5">
-              {s.photoHues.slice(0, 3).map((h, i) => <Swatch key={i} hue={h} pattern={(['solid', 'dot', 'grid'] as const)[i]} rounded="" className="flex-1" />)}
+              {s.photoHues.slice(0, 3).map((h, i) => <Swatch key={i} src={spaceSrc({ id: s.spaceId ?? s.id }, i)} hue={h} pattern={(['solid', 'dot', 'grid'] as const)[i]} rounded="" className="flex-1" />)}
             </div>
             <div className="p-3.5">
               <div className="font-bold">{s.title}</div>
@@ -58,7 +59,7 @@ export function ShowcaseDetail({ id }: { id: string }) {
     <div className="bg-white min-h-screen">
       <SubHeader title="팝업자랑" right={<ReportButton targetType="post" targetId={s.id} targetLabel={`팝업자랑: ${s.title}`} />} />
       <div className="flex gap-0.5 overflow-x-auto no-scrollbar">
-        {s.photoHues.map((h, i) => <Swatch key={i} hue={h} pattern={(['solid', 'dot', 'grid', 'stripe'] as const)[i % 4]} rounded="" className="w-72 h-56 shrink-0" label={`현장 사진 ${i + 1}`} />)}
+        {s.photoHues.map((h, i) => <Swatch key={i} src={spaceSrc({ id: s.spaceId ?? s.id }, i, 900)} hue={h} pattern={(['solid', 'dot', 'grid', 'stripe'] as const)[i % 4]} rounded="" className="w-72 h-56 shrink-0" label={`현장 사진 ${i + 1}`} />)}
       </div>
       <div className="p-4">
         <h1 className="text-xl font-extrabold">{s.title}</h1>
@@ -80,13 +81,13 @@ export function ShowcaseDetail({ id }: { id: string }) {
           })}
         </div>
         <p className="text-[15px] leading-relaxed mt-5 whitespace-pre-line">{s.body}</p>
-        <div className="mt-4 rounded bg-amber-50 p-4">
-          <div className="font-bold text-amber-900 mb-1"><Ic n="bulb" />운영 팁</div>
-          <p className="text-sm text-amber-900 leading-relaxed">{s.tips}</p>
+        <div className="mt-4 border-l-2 border-ink-900 pl-3 py-1">
+          <div className="font-bold text-ink-900 mb-1"><Ic n="bulb" />운영 팁</div>
+          <p className="text-sm text-ink-900 leading-relaxed">{s.tips}</p>
           {(() => {
             const on = !!s.helpful?.includes(userId);
             return (
-              <button onClick={() => toggleShowcaseHelpful(s.id, userId)} className={cx('mt-3 h-9 px-3.5 rounded-md text-[13px] font-semibold flex items-center gap-1.5', on ? 'bg-amber-900 text-white' : 'bg-white text-amber-900 border border-amber-200')}>
+              <button onClick={() => toggleShowcaseHelpful(s.id, userId)} className={cx('mt-3 h-9 px-3.5 rounded-md text-[13px] font-semibold flex items-center gap-1.5', on ? 'bg-amber-900 text-white' : 'bg-white text-ink-900 border border-amber-200')}>
                 <Icon name="heart" filled={on} className="w-4 h-4" /> 팁이 도움됐어요 {s.helpful?.length ?? 0}
               </button>
             );

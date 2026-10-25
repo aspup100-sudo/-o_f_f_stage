@@ -148,7 +148,7 @@ function MatchModal() {
     <Sheet open onClose={close} title="서로 관심을 표시했어요">
       <div className="flex items-center justify-center gap-3 py-4">
         <span className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl" style={{ background: `hsl(${brand.logoHue} 45% 55%)` }}>{brand.name[0]}</span>
-        <Icon name="heart" className="w-7 h-7 text-rose-500" filled />
+        <Icon name="heart" className="w-7 h-7 text-red-500" filled />
         <span className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl" style={{ background: `hsl(${t.logoHue} 45% 55%)` }}>{t.name[0]}</span>
       </div>
       <p className="text-center text-sm text-ink-700 mb-5">{josa(brand.name, '과', '와')} {josa(t.name, '이', '가')} 서로에게 관심을 눌렀어요. 먼저 인사해 볼까요?</p>
