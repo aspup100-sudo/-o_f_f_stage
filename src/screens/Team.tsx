@@ -388,7 +388,7 @@ function CostTab({ team, myBrandId, isLeader }: { team: Team; myBrandId: string;
       )}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <h3 className="font-bold">각자 분담금</h3>
+          <h3 className="text-[17px] font-extrabold tracking-tight">각자 분담금</h3>
           <span className="text-xs text-ink-500">납부 기한 {md(split.dueDate)}</span>
         </div>
         <div className="flex items-center gap-2 mb-2">

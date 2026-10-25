@@ -110,7 +110,7 @@ export default function BrandProfileScreen({ id }: { id: string }) {
       {tab === 'history' && (
         <div className="px-4 py-4 space-y-6">
           <div>
-            <h3 className="font-bold text-[15px] mb-2">팝업 가능 일정</h3>
+            <h3 className="text-[17px] font-extrabold tracking-tight mb-3">팝업 가능 일정</h3>
             <div className="flex flex-wrap gap-1.5">
               {brand.availability.map((a) => (
                 <Tag key={a.start} tone="green"><Ic n="calendar" />{a.start.slice(0, 4)}. {period(a)}</Tag>
@@ -118,7 +118,7 @@ export default function BrandProfileScreen({ id }: { id: string }) {
             </div>
           </div>
           <div>
-            <h3 className="font-bold text-[15px] mb-2">공동 팝업 이력</h3>
+            <h3 className="text-[17px] font-extrabold tracking-tight mb-3">공동 팝업 이력</h3>
             {teams.length === 0 && <Empty>아직 함께한 팝업이 없어요</Empty>}
             <div className="space-y-2">
               {teams.map((tm) => {
@@ -175,7 +175,7 @@ function ReviewsTab({ brandId }: { brandId: string }) {
       <ReviewGroup title="공간 운영자가 남긴 후기" reviews={fromSpaces} />
       <ReviewGroup title="방문객 후기" reviews={fromVisitors} />
       <div>
-        <h3 className="font-bold text-[15px] mb-1">신뢰 지수 내역</h3>
+        <h3 className="text-[17px] font-extrabold tracking-tight mb-1">신뢰 지수 내역</h3>
         <p className="text-xs text-ink-500 mb-2">50점에서 시작해요. 같은 상대와 반복된 후기는 두 번째부터 절반만 반영돼요.</p>
         <Card className="divide-y divide-ink-100">
           <div className="flex justify-between px-3.5 py-2.5 text-sm">
@@ -202,7 +202,7 @@ export function ReviewGroup({ title, reviews }: { title: string; reviews: Review
   const { db } = useMe();
   return (
     <div>
-      <h3 className="font-bold text-[15px] mb-2">
+      <h3 className="text-[17px] font-extrabold tracking-tight mb-3">
         {title} <span className="text-ink-500 font-normal text-sm">{reviews.length}</span>
       </h3>
       {reviews.length === 0 && <div className="text-sm text-ink-500 py-2">아직 없어요</div>}

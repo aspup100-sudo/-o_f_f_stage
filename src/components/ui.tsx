@@ -191,10 +191,10 @@ export function SubHeader({ title, right, onBack }: { title: ReactNode; right?: 
 
 export function Section({ title, right, children, className }: { title?: ReactNode; right?: ReactNode; children: ReactNode; className?: string }) {
   return (
-    <section className={cx('px-4 py-4', className)}>
+    <section className={cx('px-4 py-6', className)}>
       {(title || right) && (
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-bold text-[15px]">{title}</h3>
+          <h3 className="text-[17px] font-extrabold tracking-tight">{title}</h3>
           {right}
         </div>
       )}

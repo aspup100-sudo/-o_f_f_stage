@@ -106,14 +106,14 @@ export function RecruitsTab({ initial }: { initial?: '찜' }) {
       })()}
       {brand && picks.length > 0 && st === '전체' && region === '전체' && (
         <section className="mt-2 mb-4">
-          <h2 className="px-4 font-bold text-[15px]">내 브랜드와 맞는 모집글</h2>
+          <h2 className="px-4 text-[17px] font-extrabold tracking-tight">내 브랜드와 맞는 모집글</h2>
           <p className="px-4 text-xs text-ink-500 mt-0.5 mb-2.5">빈자리 카테고리, 팝업 가능 기간, 모집자와의 무드로 골랐어요</p>
           <div className="flex gap-2.5 overflow-x-auto no-scrollbar px-4 pb-1">
             {picks.map((x) => (
               <div key={x.r.id} className={picks.length === 1 ? 'w-full' : 'w-[300px] shrink-0'}><RecruitCard db={db} r={x.r} reasons={x.reasons} /></div>
             ))}
           </div>
-          <h2 className="px-4 font-bold text-[15px] mt-5">전체 모집글</h2>
+          <h2 className="px-4 text-[17px] font-extrabold tracking-tight mt-8">전체 모집글</h2>
         </section>
       )}
       <div className="px-4 space-y-3 mt-2">
@@ -195,7 +195,7 @@ export function RecruitDetail({ id }: { id: string }) {
           );
         })()}
 
-        <h3 className="font-bold mt-6 mb-2">자리 구성 <span className="text-ink-500 text-sm font-normal">{r.slots.length - empties.length}/{r.slots.length}</span></h3>
+        <h3 className="text-[17px] font-extrabold tracking-tight mt-9 mb-3">자리 구성 <span className="text-ink-500 text-sm font-normal">{r.slots.length - empties.length}/{r.slots.length}</span></h3>
         <div className={cx('grid gap-2', r.slotMode === 'hanger' ? 'grid-cols-3' : 'grid-cols-2')}>
           {r.slots.map((s) => {
             const b = brandById(db, s.brandId);
@@ -212,7 +212,7 @@ export function RecruitDetail({ id }: { id: string }) {
         </div>
         {r.slotMode === 'hanger' && <p className="text-[12px] text-ink-500 mt-2">분담금은 행거 수에 비례해요 (총 {totalHangers}개).</p>}
 
-        <h3 className="font-bold mt-6 mb-2">모집자</h3>
+        <h3 className="text-[17px] font-extrabold tracking-tight mt-9 mb-3">모집자</h3>
         <Card className="p-3 flex items-center gap-3" onClick={() => navigate({ name: 'brand', id: host.id })}>
           <BrandLogo brand={host} size={44} />
           <div className="flex-1">
@@ -225,7 +225,7 @@ export function RecruitDetail({ id }: { id: string }) {
         {isHost && (
           <>
             <div className="flex items-center justify-between mt-6 mb-2">
-              <h3 className="font-bold">지원자 {apps.length}</h3>
+              <h3 className="text-[17px] font-extrabold tracking-tight">지원자 {apps.length}</h3>
               {empties.length > 0 && (
                 <Button size="sm" variant="secondary" onClick={() => simulateApplicants(r.id)}>지원자 불러오기 <Demo /></Button>
               )}

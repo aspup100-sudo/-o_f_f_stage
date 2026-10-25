@@ -71,7 +71,7 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
       {brand && recs.length > 0 && (
         <section className="pt-6">
           <div className="px-4 mb-2.5">
-            <h2 className="font-bold text-[15px]">
+            <h2 className="text-[17px] font-extrabold tracking-tight">
               궁합이 높은 브랜드
             </h2>
             <p className="text-xs text-ink-500 mt-0.5">무드·가격대·고객층은 비슷하고, 카테고리는 다를수록 잘 맞아요</p>
@@ -100,7 +100,7 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
 
       <section className="pt-6">
         <div className="px-4 flex items-center justify-between mb-2.5">
-          <h2 className="font-bold text-[15px]">진행 중·예정 공동 팝업</h2>
+          <h2 className="text-[17px] font-extrabold tracking-tight">진행 중·예정 공동 팝업</h2>
           <span className="text-xs text-ink-500">{popups.length}곳</span>
         </div>
         <div className="flex gap-2.5 overflow-x-auto no-scrollbar px-4 pb-1">
@@ -112,7 +112,7 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
 
       <section className="pt-6">
         <div className="px-4 flex items-center justify-between mb-2.5">
-          <h2 className="font-bold text-[15px]">매거진 · 팝업 트렌드</h2>
+          <h2 className="text-[17px] font-extrabold tracking-tight">매거진 · 팝업 트렌드</h2>
           <button onClick={onMore} className="text-xs text-ink-500">전체 보기 ›</button>
         </div>
         <div className="flex gap-3 overflow-x-auto no-scrollbar px-4 pb-1">
@@ -123,7 +123,7 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
       <section className="pt-6 px-4">
         <div className="flex items-center justify-between mb-2.5">
           <div className="flex items-center gap-2">
-            <h2 className="font-bold text-[15px]">브랜드 둘러보기</h2>
+            <h2 className="text-[17px] font-extrabold tracking-tight">브랜드 둘러보기</h2>
             <select value={sort} onChange={(e) => setSort(e.target.value as typeof sort)} className="text-[12px] text-ink-700 bg-transparent border border-ink-300 rounded-md h-7 px-2" aria-label="정렬">
               <option value="base">기본순</option>
               {brand && <option value="match">궁합 높은 순</option>}

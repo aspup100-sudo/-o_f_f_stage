@@ -166,7 +166,7 @@ export function TeamWrapUp({ team }: { team: Team }) {
 
       {comp?.verified && brand && (
         <div>
-          <h3 className="font-bold mb-2">후기 남기기</h3>
+          <h3 className="text-[17px] font-extrabold tracking-tight mb-3">후기 남기기</h3>
           <div className="space-y-2">
             {team.members.filter((m) => m.brandId !== brand.id).map((m) => {
               const b = brandById(db, m.brandId)!;
@@ -211,7 +211,7 @@ export function TeamWrapUp({ team }: { team: Team }) {
 
       {popups.length > 1 && (
         <div>
-          <h3 className="font-bold mb-2">지난 회차</h3>
+          <h3 className="text-[17px] font-extrabold tracking-tight mb-3">지난 회차</h3>
           {popups.filter((p) => p.id !== current.id).map((p) => (
             <Card key={p.id} className="p-3 mb-1.5 flex justify-between items-center" onClick={() => navigate({ name: 'popup', id: p.id })}>
               <span className="text-sm font-semibold">{p.title}</span>
@@ -246,7 +246,7 @@ export function LandlordCompletions() {
     <div className="mb-5">
       {running.length > 0 && (
         <>
-          <h3 className="font-bold mb-2">내 공간의 팝업</h3>
+          <h3 className="text-[17px] font-extrabold tracking-tight mb-3">내 공간의 팝업</h3>
           <div className="space-y-2 mb-5">
             {running.map((p) => (
               <Card key={p.id} className="p-3.5">
@@ -263,7 +263,7 @@ export function LandlordCompletions() {
           </div>
         </>
       )}
-      {items.length > 0 && <h3 className="font-bold mb-2">끝난 팝업 · 성사 확인</h3>}
+      {items.length > 0 && <h3 className="text-[17px] font-extrabold tracking-tight mb-3">끝난 팝업 · 성사 확인</h3>}
       <div className="space-y-3">
         {items.map((c) => {
           const p = popupById(db, c.popupId)!;
