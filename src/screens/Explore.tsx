@@ -22,7 +22,7 @@ export default function Explore() {
           <button
             key={it.key}
             onClick={() => { setView(it.key); window.scrollTo?.(0, 0); }}
-            className={cx('h-11 text-[16px] font-extrabold border-b-2 -mb-px', view === it.key ? 'border-ink-900 text-ink-900' : 'border-transparent text-ink-300')}
+            className={cx('h-11 text-[16px] font-extrabold border-b-2 -mb-px', view === it.key ? 'border-ink-900 text-ink-900' : 'border-transparent text-ink-500/70')}
           >
             {it.label}
           </button>

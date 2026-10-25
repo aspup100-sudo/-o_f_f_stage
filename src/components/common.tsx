@@ -47,7 +47,7 @@ export function BrandCard({ db, brand, right, reasons, compact }: { db: DB; bran
     const im = imgs[0];
     return (
       <div className="flex gap-3 py-3">
-        <button onClick={() => navigate({ name: 'brand', id: brand.id })} className="w-[84px] h-[104px] shrink-0 rounded-xl overflow-hidden">
+        <button aria-label={`${brand.name} 프로필`} onClick={() => navigate({ name: 'brand', id: brand.id })} className="w-[84px] h-[104px] shrink-0 rounded-xl overflow-hidden">
           {im ? <Swatch hue={im.hue} pattern={im.pattern} rounded="" className="w-full h-full" /> : <Swatch hue={brand.logoHue} rounded="" className="w-full h-full" />}
         </button>
         <div className="flex-1 min-w-0">
