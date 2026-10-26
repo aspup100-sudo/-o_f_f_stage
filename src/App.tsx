@@ -170,7 +170,7 @@ export default function App() {
   const isOnboarding = route.name === 'onboarding';
   return (
     <div className="min-h-screen flex justify-center">
-      <div className="relative w-full max-w-[430px] min-h-screen bg-paper shadow-xl">
+      <div className="relative w-full max-w-[430px] min-h-screen bg-white shadow-xl">
         {isTab && <TopBar />}
         <main className={cx((isTab || !isOnboarding) && 'main-safe')}>{renderRoute(route)}</main>
         {isTab && <BottomTabs current={route.name === 'tab' ? route.tab : undefined} />}

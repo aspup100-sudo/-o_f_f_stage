@@ -446,7 +446,7 @@ export function TeamIntroPage({ db, team, compact }: { db: DB; team: Team; compa
             return im ? <Swatch key={id} src={lookbookSrc(im)} hue={im.hue} pattern={im.pattern} className="aspect-square" rounded="" /> : null;
           })}
         </div>
-        <div className="p-4 bg-band text-white">
+        <div className="p-4 bg-ink-900 text-white">
           <div className="text-[12px] text-white/60">팀 소개 · {team.members.length}개 브랜드</div>
           <div className="text-lg font-extrabold">{team.name}</div>
           <div className="text-sm text-white/80 mt-0.5">"{mb?.headline}"</div>
