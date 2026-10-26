@@ -499,6 +499,8 @@ export interface MagazinePost {
   category: MagazineCategory;
   cards: MagazineCard[];
   hue: number;
+  coverImage?: string; // 인스타에 올린 표지 이미지 (있으면 자동 생성 표지 대신 표시)
+  instagramUrl?: string; // 이 글의 인스타그램 게시물 주소
   headline?: string; // 표지 큰 영문 제목 (비우면 카테고리 영문명)
   issue?: number; // 호수 (표지 우측 상단 ISSUE 02)
   region?: Region;
@@ -510,6 +512,20 @@ export interface MagazinePost {
 }
 
 export const OFFICIAL_INSTAGRAM = 'o_f_f_stage';
+
+/** 인스타그램 게시물 주소만 통과시킨다 (다른 주소·javascript: 는 버림). 통과하면 정리된 주소를, 아니면 undefined. */
+export function normalizeInstagramUrl(raw?: string): string | undefined {
+  const t = (raw ?? '').trim();
+  if (!t) return undefined;
+  try {
+    const u = new URL(/^https?:\/\//i.test(t) ? t : `https://${t}`);
+    const host = u.hostname.replace(/^www\./, '');
+    if (u.protocol !== 'https:' || (host !== 'instagram.com' && host !== 'instagr.am')) return undefined;
+    return `https://www.instagram.com${u.pathname}`;
+  } catch {
+    return undefined;
+  }
+}
 
 // ───────── 채팅 / 알림 / 신고 ─────────
 export interface ChatRoom {

@@ -5,8 +5,9 @@ import { navigate, replace } from '@/store/store';
 import { markMagazineRead, publishMagazine, toggleMagazineHidden, toggleMagazineLike } from '@/store/actions';
 import { daysUntil } from '@/store/logic';
 import { ScreenTitle } from '@/components/common';
+import { pickPhotos } from '@/components/photoPick';
 import { Button, Card, Chip, cx, Empty, Field, Icon, inputCls, SubHeader, Tag, textareaCls } from '@/components/ui';
-import { MAGAZINE_CATEGORIES, MAGAZINE_FOOTERS, MAGAZINE_HEADLINES, OFFICIAL_INSTAGRAM, REGIONS, type MagazineCard, type MagazineCategory, type MagazinePost, type Region } from '@/types';
+import { MAGAZINE_CATEGORIES, MAGAZINE_FOOTERS, MAGAZINE_HEADLINES, OFFICIAL_INSTAGRAM, REGIONS, normalizeInstagramUrl, type MagazineCard, type MagazineCategory, type MagazinePost, type Region } from '@/types';
 
 /** 공식 인스타그램 링크 */
 export function OfficialInsta({ compact }: { compact?: boolean }) {
@@ -27,10 +28,18 @@ export function OfficialInsta({ compact }: { compact?: boolean }) {
   );
 }
 
-type CoverPost = Pick<MagazinePost, 'hue' | 'category' | 'title'> & Partial<Pick<MagazinePost, 'subtitle' | 'headline' | 'issue'>>;
+type CoverPost = Pick<MagazinePost, 'hue' | 'category' | 'title'> & Partial<Pick<MagazinePost, 'subtitle' | 'headline' | 'issue' | 'coverImage'>>;
 
 /** 표지: 단색 배경 + 큰 영문 제목 + 한글 제목 (글자 크기는 카드 너비에 비례) */
 function CoverFace({ post, className }: { post: CoverPost; className?: string }) {
+  // 인스타에 올린 표지 이미지가 있으면 그대로 보여 준다
+  if (post.coverImage) {
+    return (
+      <div className={cx('relative aspect-square w-full overflow-hidden bg-ink-100', className)}>
+        <img src={post.coverImage} alt={post.title} draggable={false} className="w-full h-full object-cover block" />
+      </div>
+    );
+  }
   const h = post.hue;
   const headline = (post.headline?.trim() || MAGAZINE_HEADLINES[post.category]).toUpperCase();
   return (
@@ -172,6 +181,7 @@ export function MagazineDetail({ id }: { id: string }) {
             <Icon name="heart" filled={liked} className="w-4 h-4" /> 도움이 됐어요 {m.likes.length}
           </Button>
           <Button variant="secondary" aria-label="공유" onClick={() => shareMagazine(m)}>공유</Button>
+          {m.instagramUrl && <a href={m.instagramUrl} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded border border-ink-200 px-3 text-sm font-semibold text-ink-900">인스타에서 보기 ↗</a>}
           {m.link && <Button variant="secondary" onClick={() => navigate(m.link!)}>{m.link.name === 'tab' ? '이 지역 공간 보기' : m.link.name === 'showcase' ? '팝업자랑 원문 보기' : '관련 글 보기'} ›</Button>}
         </div>
         {(() => {
@@ -223,9 +233,13 @@ export function MagazineNew() {
   const [subtitle, setSubtitle] = useState('');
   const [region, setRegion] = useState<Region | undefined>();
   const [hue, setHue] = useState(18);
+  const [coverImage, setCoverImage] = useState<string | undefined>();
+  const [instaRaw, setInstaRaw] = useState('');
+  const instagramUrl = normalizeInstagramUrl(instaRaw);
+  const instaBad = instaRaw.trim() !== '' && !instagramUrl;
   const [cards, setCards] = useState<MagazineCard[]>([{ heading: '표지', body: '' }, { heading: '', body: '', stat: '' }]);
   const set = (i: number, patch: Partial<MagazineCard>) => setCards(cards.map((c, j) => (j === i ? { ...c, ...patch } : c)));
-  const ok = title.trim() && cards.length >= 2 && cards.slice(1).every((c) => c.heading.trim() && c.body.trim());
+  const ok = title.trim() && !instaBad && cards.length >= 2 && cards.slice(1).every((c) => c.heading.trim() && c.body.trim());
   return (
     <div className="bg-white min-h-screen">
       <SubHeader title="카드뉴스 쓰기" />
@@ -240,6 +254,25 @@ export function MagazineNew() {
         </Field>
         <Field label="표지 색">
           <div className="flex gap-2">{[18, 150, 220, 75, 330, 260].map((h) => <button key={h} onClick={() => setHue(h)} className={cx('w-9 h-9 rounded-full border-2', hue === h ? 'border-ink-900' : 'border-transparent')} style={{ background: `hsl(${h} 55% 42%)` }} aria-label={`색 ${h}`} />)}</div>
+        </Field>
+        <Field label="표지 이미지 (선택)">
+          {coverImage ? (
+            <div className="flex items-center gap-3">
+              <img src={coverImage} alt="표지 미리보기" className="w-20 h-20 object-cover rounded" />
+              <div className="flex gap-2">
+                <Button size="sm" variant="secondary" onClick={async () => { const u = await pickPhotos(1, 1080); if (u[0]) setCoverImage(u[0]); }}>바꾸기</Button>
+                <Button size="sm" variant="secondary" onClick={() => setCoverImage(undefined)}>지우기</Button>
+              </div>
+            </div>
+          ) : (
+            <Button size="sm" variant="secondary" onClick={async () => { const u = await pickPhotos(1, 1080); if (u[0]) setCoverImage(u[0]); }}>+ 인스타에 올린 표지 이미지 올리기</Button>
+          )}
+          <p className="text-[12px] text-ink-500 mt-1.5">올리면 아래 자동 표지 대신 이 이미지가 표지로 보여요. 정사각형(1:1) 이미지가 가장 잘 맞아요.</p>
+        </Field>
+        <Field label="인스타그램 게시물 링크 (선택)">
+          <input className={inputCls} value={instaRaw} onChange={(e) => setInstaRaw(e.target.value)} inputMode="url" placeholder="https://www.instagram.com/p/..." />
+          {instaBad && <p className="text-[12px] text-red-600 mt-1">인스타그램 게시물 주소(instagram.com)만 넣을 수 있어요</p>}
+          {!instaBad && <p className="text-[12px] text-ink-500 mt-1">글 하단에 "인스타에서 보기" 버튼이 생겨요.</p>}
         </Field>
         <Field label="표지 설명"><textarea className={textareaCls} value={cards[0].body} onChange={(e) => set(0, { body: e.target.value })} placeholder="표지에 들어갈 한두 줄" /></Field>
         {cards.slice(1).map((c, k) => {
@@ -261,12 +294,12 @@ export function MagazineNew() {
         <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 mb-4">
           {cards.map((c, i) => (
             <div key={i} className="w-48 shrink-0">
-              <CardFace post={{ hue, category, title: title || '제목', subtitle }} card={i === 0 ? c : { ...c, heading: c.heading || '소제목', body: c.body || '본문이 여기에 들어가요' }} index={i} total={cards.length} />
+              <CardFace post={{ hue, category, title: title || '제목', subtitle, coverImage }} card={i === 0 ? c : { ...c, heading: c.heading || '소제목', body: c.body || '본문이 여기에 들어가요' }} index={i} total={cards.length} />
             </div>
           ))}
         </div>
         <Button full size="lg" disabled={!ok} onClick={() => {
-          const id = publishMagazine({ category, title, subtitle, region, hue, cards: cards.map((c) => ({ ...c, stat: c.stat?.trim() || undefined })) });
+          const id = publishMagazine({ category, title, subtitle, region, hue, coverImage, instagramUrl, cards: cards.map((c) => ({ ...c, stat: c.stat?.trim() || undefined })) });
           replace({ name: 'magazine', id });
         }}>발행하기</Button>
         <p className="text-[12px] text-ink-500 text-center mt-2">발행하면 브랜드와 방문객에게 알림이 가요. 같은 카드를 공식 인스타그램 @{OFFICIAL_INSTAGRAM}에도 올려 보세요.</p>
