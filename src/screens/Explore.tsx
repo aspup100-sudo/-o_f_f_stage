@@ -12,6 +12,7 @@ import { BrandActions } from './BrandActions';
 import { ShowcaseList } from './Showcase';
 import { QnaList } from './Qna';
 import { MagazineList, MagazineThumb } from './Magazine';
+import { InstaThumb, instaFeed } from './Insta';
 import { TodayBrand, TodayLandlord, TodayRental, TodayVisitor } from './Today';
 
 type View = 'brand' | 'magazine' | 'showcase' | 'qna';
@@ -118,6 +119,7 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
           <button onClick={onMore} className="text-xs text-ink-500">전체 보기 ›</button>
         </div>
         <div className="flex gap-3 overflow-x-auto no-scrollbar px-4 pb-1">
+          {(() => { const f = instaFeed(db); return f.posts.slice(0, 6).map((p) => <InstaThumb key={p.id} post={p} demo={f.demo} />); })()}
           {db.magazines.filter((m) => !m.hidden).slice(0, 4).map((m) => <MagazineThumb key={m.id} post={m} />)}
         </div>
       </section>

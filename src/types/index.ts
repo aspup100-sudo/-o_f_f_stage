@@ -482,6 +482,16 @@ export interface MagazineCard {
   stat?: string; // 큰 숫자 강조 (예: '3.4팀')
 }
 
+/** 공식 인스타(@o_f_f_stage) 피드. 서버 함수(ig-sync)가 몇 분마다 가져와 records에 넣는다 */
+export interface InstaPost {
+  id: ID; // 인스타 미디어 id
+  imageUrl: string; // 사진 (영상이면 썸네일)
+  caption: string;
+  permalink: string; // 인스타 원본 글 주소
+  mediaType: 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM';
+  postedAt: string; // ISO 시각
+}
+
 export interface MagazinePost {
   id: ID;
   title: string;

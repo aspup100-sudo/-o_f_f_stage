@@ -36,7 +36,7 @@ import type {
   RentalItem,
   RentalOrder,
   RentalPartner,
-  MagazinePost,
+  MagazinePost, InstaPost,
 } from '@/types';
 
 export const DEMO_TODAY = '2026-10-25';
@@ -671,6 +671,7 @@ export function createSeed() {
     spaceApplications, popups, visits, stamps, completions, reviews, comboReviews, trustEvents: trustSeedEvents,
     showcases, qnaPosts, qnaAnswers, chatRooms, messages, notifications, reports,
     rentalPartners, rentalItems, rentalOrders, magazines,
+    instaPosts: [] as InstaPost[], // 서버 함수가 채운다. 비어 있으면 화면은 데모 글을 보여 준다
   });
 }
 export type DB = ReturnType<typeof createSeed>;
