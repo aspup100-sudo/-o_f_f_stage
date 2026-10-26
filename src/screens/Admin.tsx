@@ -119,7 +119,7 @@ export function StatsTab() {
       <ScreenTitle>운영 지표</ScreenTitle>
       <div className="px-4 space-y-4 pb-6">
         {(pending > 0 || openReports > 0) && (
-          <Card className="p-3.5 border-ink-300 bg-brand-50" onClick={() => navigate({ name: 'tab', tab: pending ? 'verify' : 'reports' })}>
+          <Card className="p-3.5 border-ink-900" onClick={() => navigate({ name: 'tab', tab: pending ? 'verify' : 'reports' })}>
             <div className="text-sm font-bold">처리할 일: 인증 대기 {pending}건 · 신고 {openReports}건 ›</div>
           </Card>
         )}

@@ -150,7 +150,7 @@ export function TeamWrapUp({ team }: { team: Team }) {
           ].map(([e, t, d], i) => (
             <div key={t} className="flex gap-3 pb-3 last:pb-0">
               <div className="flex flex-col items-center">
-                <span className="w-8 h-8 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center"><Icon name={e} className="w-4 h-4" /></span>
+                <span className="w-8 h-8 rounded-full border border-ink-300 text-ink-700 flex items-center justify-center"><Icon name={e} className="w-4 h-4" /></span>
                 {i < 3 && <span className="flex-1 w-px bg-ink-100 mt-1" />}
               </div>
               <div className="pb-1">

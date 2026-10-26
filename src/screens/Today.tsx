@@ -308,7 +308,7 @@ export function TodayVisitor() {
                   <span className="block text-[14px] font-bold truncate">{p.title}</span>
                   <span className="block text-[12px] text-ink-500">{waitCount(p)}명이 기다려요</span>
                 </button>
-                <button onClick={() => toggleWaitlist(p.id, userId)} className={cx('h-8 px-3 rounded-md text-[12px] font-bold shrink-0', on ? 'bg-brand-50 text-brand-600' : 'bg-ink-900 text-white')}>
+                <button onClick={() => toggleWaitlist(p.id, userId)} className={cx('h-8 px-3 rounded-md text-[12px] font-bold shrink-0', on ? 'border border-ink-300 text-ink-500' : 'bg-brand-500 text-white')}>
                   {on ? '알림 켜짐' : '알림 받기'}
                 </button>
               </div>
@@ -446,7 +446,7 @@ export function TodayRental() {
             const who = o.teamId ? teamById(db, o.teamId)?.name : brandById(db, o.brandId)?.name;
             return (
               <button key={o.id} onClick={() => navigate({ name: 'tab', tab: 'orders' })} className="w-full flex items-center gap-3 py-2 text-left border-t border-ink-100 first:border-t-0">
-                <span className="w-12 shrink-0 text-center rounded-lg bg-brand-50 text-brand-600 text-[12px] font-extrabold py-1">{dday(started ? o.dates.end : o.dates.start)}</span>
+                <span className="w-12 shrink-0 text-center border border-ink-300 text-ink-900 text-[12px] font-extrabold py-1">{dday(started ? o.dates.end : o.dates.start)}</span>
                 <span className="flex-1 min-w-0">
                   <span className="block text-[13px] font-semibold truncate">{who}</span>
                   <span className="block text-[12px] text-ink-500">{started ? `${o.delivery ? '회수' : '반납'} ${md(o.dates.end)}` : `${o.delivery ? '배송' : '수령'} ${md(o.dates.start)}`} · 장비 {o.lines.reduce((n, l) => n + l.qty, 0)}개</span>

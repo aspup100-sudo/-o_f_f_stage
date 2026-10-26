@@ -32,7 +32,7 @@ export function ChatListScreen() {
                 <div className="flex items-center gap-1.5">
                   <span className="font-bold truncate">{r.title}</span>
                   <span className="text-xs text-ink-500 shrink-0">{r.memberIds.length > 2 ? r.memberIds.length : ''}</span>
-                  {team && team.popupId && <span className="text-[11px] font-bold text-brand-600 bg-brand-50 rounded px-1.5 py-0.5 shrink-0">{dday(team.period.start)}</span>}
+                  {team && team.popupId && <span className="text-[11px] font-bold text-brand-600 shrink-0 shrink-0">{dday(team.period.start)}</span>}
                   <span className="ml-auto text-[12px] text-ink-500 shrink-0">{last ? ago(last.at) : ''}</span>
                 </div>
                 <div className="flex items-center gap-2">

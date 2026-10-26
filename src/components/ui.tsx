@@ -87,7 +87,7 @@ export function Button({
     secondary: 'bg-white text-ink-900 border border-ink-300 active:bg-ink-100 disabled:text-ink-400',
     ghost: 'text-ink-700 active:bg-ink-100',
     danger: 'bg-red-50 text-red-600 border border-red-200 active:bg-red-100',
-    dark: 'bg-ink-900 text-white active:bg-ink-700 disabled:bg-ink-300',
+    dark: 'bg-white text-ink-900 border border-ink-900 active:bg-ink-100 disabled:border-ink-300 disabled:text-ink-400',
   };
   const s = { sm: 'h-8 px-3 text-xs', md: 'h-10 px-4 text-sm', lg: 'h-12 px-5 text-base' }[size];
   return (
@@ -208,7 +208,7 @@ export function Empty({ children, icon = 'inbox', action }: { children: ReactNod
     <div className="py-10 flex flex-col items-center text-ink-500 text-sm gap-2 text-center">
       <Icon name={icon} className="w-8 h-8 text-ink-400" />
       {children}
-      {action && <button onClick={action.onClick} className="mt-1 h-9 px-4 rounded-md bg-ink-900 text-white text-[13px] font-semibold">{action.label}</button>}
+      {action && <button onClick={action.onClick} className="mt-1 h-9 px-4 rounded-md border border-ink-900 text-ink-900 text-[13px] font-semibold">{action.label}</button>}
     </div>
   );
 }

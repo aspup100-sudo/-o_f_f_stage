@@ -16,9 +16,8 @@ export function ShowcaseList() {
   const untold = brand ? teamsOfBrand(db, brand.id).filter((t) => t.stage === '종료' && t.popupId && !db.showcases.some((s) => s.teamId === t.id)) : [];
   return (
     <div className="px-4 pt-4 space-y-3">
-      <p className="text-[13px] text-ink-500">팀이 함께 연 팝업의 기록이에요. 운영 팁과 방문객 조합 리뷰를 같이 볼 수 있어요.</p>
       {untold.map((t) => (
-        <div key={t.id} className="rounded border border-dashed border-ink-300 bg-brand-50 p-4 flex items-center gap-3">
+        <div key={t.id} className="rounded border border-ink-300 bg-white p-4 flex items-center gap-3">
           <div className="flex-1 min-w-0">
             <div className="font-bold text-[14px]">{t.name} 팝업 기록 남기기</div>
             <p className="text-[12px] text-ink-700 mt-0.5">사진 몇 장과 운영 팁 한 줄이면 돼요. 다음 팀원을 찾을 때 신뢰가 쌓여요.</p>
@@ -37,7 +36,7 @@ export function ShowcaseList() {
             <div className="p-3.5">
               <div className="font-bold">{s.title}</div>
               <div className="text-[12px] text-ink-500 mt-0.5">{period(s.period)} · {sp?.name} · {teamById(db, s.teamId)?.name}</div>
-              <div className="flex flex-wrap gap-1 mt-2">{s.brandIds.map((b) => <Tag key={b}>@{brandById(db, b)?.name}</Tag>)}</div>
+              <div className="text-[12px] font-semibold text-ink-700 mt-1.5">{s.brandIds.map((b) => `@${brandById(db, b)?.name}`).join('  ')}</div>
               <p className="text-[13px] text-ink-700 mt-2 line-clamp-2"><Ic n="bulb" className="text-amber-600" />{s.tips}</p>
               <div className="text-[12px] text-ink-500 mt-2 flex items-center gap-1"><Icon name="heart" filled={!!s.helpful?.length} className="w-3.5 h-3.5 text-brand-500" /> 팁이 도움됐어요 {s.helpful?.length ?? 0}</div>
             </div>
@@ -127,7 +126,7 @@ export function ShowcaseNew({ teamId }: { teamId: string }) {
       <div className="p-4">
         <div className="rounded border border-ink-300 p-3 text-sm mb-4">
           <b>{team.name}</b> · {period(pop.period)} · {spaceById(db, pop.spaceId)?.name}
-          <div className="flex flex-wrap gap-1 mt-1.5">{team.members.map((m) => <Tag key={m.brandId}>@{brandById(db, m.brandId)!.name}</Tag>)}</div>
+          <div className="text-[12px] font-semibold text-ink-700 mt-1.5">{team.members.map((m) => `@${brandById(db, m.brandId)!.name}`).join('  ')}</div>
         </div>
         <Field label="사진" hint="데모에서는 예시 사진이 추가돼요">
           <div className="flex gap-1.5 flex-wrap">
