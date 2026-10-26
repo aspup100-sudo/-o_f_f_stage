@@ -56,7 +56,7 @@ export function TodayBrand() {
             <div className="mt-3 text-[13px] font-bold">리포트 보기 ›</div>
           </button>
         )}
-        <div className="bg-white border border-ink-900 p-5">
+        <div className="bg-white rounded border border-ink-300 p-5">
           <div className="text-[13px] text-ink-500">{brand.name}님, 반가워요</div>
           <div className="text-xl font-extrabold leading-snug mt-1">아직 함께할 팀이 없어요</div>
           <button onClick={() => navigate({ name: 'tab', tab: 'recruits' })} className="mt-4 h-10 px-4 bg-ink-900 text-white font-bold text-sm">같이 열 팀 찾기</button>
@@ -87,14 +87,14 @@ export function TodayBrand() {
         const unread = room ? chatUnread(db, room.id, brand.userId) : 0;
         const dot = (iso: string) => iso.slice(5).replace('-', '.');
         return (
-          <div className="bg-white border border-ink-900">
+          <div className="bg-white rounded overflow-hidden border border-ink-300">
             <button onClick={() => navigate({ name: 'team', id: t.id })} className="block w-full text-left">
               <div className="flex h-32">
                 {(shots.length ? shots : members.map((b) => ({ id: b.lookbook[0] ?? `${b.id}_img1`, brandId: b.id, hue: b.logoHue, pattern: 'solid' as const }))).map((im) => (
                   <Swatch key={im.id} src={lookbookSrc(im)} hue={im.hue} pattern={im.pattern} rounded="" className="flex-1" />
                 ))}
               </div>
-              <div className="px-4 pt-3.5 pb-4 border-t border-ink-900">
+              <div className="px-4 pt-3.5 pb-4 border-t border-ink-100">
                 <div className="flex items-baseline justify-between text-[12px] tracking-[0.14em] font-semibold text-ink-500">
                   <span>NEXT POPUP</span>
                   <span>{dot(t.period.start)} — {dot(t.period.end)}</span>
@@ -227,7 +227,7 @@ export function TodayVisitor() {
 
   return (
     <section className="px-4 pt-4">
-      <div className="bg-white border border-ink-900 p-5">
+      <div className="bg-white rounded border border-ink-300 p-5">
         <div className="text-[13px] text-ink-500">{visitor.nickname} · 오늘의 팝업</div>
         <div className="text-xl font-extrabold leading-snug mt-1">
           지금 열린 공동 팝업 <span className="text-brand-500">{open.length}곳</span>
@@ -334,7 +334,7 @@ export function TodayLandlord() {
 
   return (
     <section className="px-4 pt-4">
-      <div className="bg-white border border-ink-900 p-5">
+      <div className="bg-white rounded border border-ink-300 p-5">
         <div className="text-[13px] text-ink-500">{landlord.name}님의 11월 · 공간 {landlord.spaceIds.length}곳 합계</div>
         <div className="text-xl font-extrabold leading-snug mt-1">
           비는 날 <span className="text-brand-500">{open.length}일</span>
@@ -419,7 +419,7 @@ export function TodayRental() {
 
   return (
     <section className="px-4 pt-4">
-      <div className="bg-white border border-ink-900 p-5">
+      <div className="bg-white rounded border border-ink-300 p-5">
         <div className="text-[13px] text-ink-500">{rental.name} · 지금까지 제휴 매출</div>
         <div className="text-2xl font-extrabold mt-1">{won(earned)}</div>
         <div className="text-[12px] text-ink-500 mt-1">완료 {r.done}건{r.avg !== null ? ` · 평점 ★ ${r.avg.toFixed(1)}` : ''} · 수수료 0원</div>

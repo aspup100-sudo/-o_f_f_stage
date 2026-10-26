@@ -72,7 +72,7 @@ function RoleSwitcher() {
   const accounts = (r: Role) => db.users.filter((u) => u.role === r && (r !== 'brand' || db.brands.some((b) => b.userId === u.id)) && (r !== 'landlord' || db.landlords.some((l) => l.userId === u.id)));
   return (
     <>
-      <button onClick={() => setOpen(true)} title="역할 전환(데모)" className="h-8 pl-2 pr-2.5 mr-1 ml-2 shrink-0 whitespace-nowrap rounded-full bg-ink-900 text-white text-[11px] font-bold flex items-center gap-1">
+      <button onClick={() => setOpen(true)} title="역할 전환(데모)" className="h-8 pl-2 pr-2.5 mr-1 ml-2 shrink-0 whitespace-nowrap rounded-md border border-ink-300 text-ink-700 text-[11px] font-semibold flex items-center gap-1">
         <Icon name="swap" className="w-3.5 h-3.5" />
         {ROLE_LABEL[role]} · 전환(데모)
       </button>
