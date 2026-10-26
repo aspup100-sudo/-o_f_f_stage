@@ -24,10 +24,7 @@ export default function MeScreen() {
             {brand ? <BrandLogo brand={brand} size={52} /> : <Avatar name={user.name || '?'} size={52} hue={200} />}
             <div className="flex-1 min-w-0">
               <div className="font-extrabold text-lg truncate">{user.name}</div>
-              <div className="flex gap-1 mt-0.5">
-                <Tag>{ROLE_LABEL[role]}</Tag>
-                <Tag tone={user.provider === 'kakao' ? 'yellow' : 'green'}>{user.provider === 'kakao' ? '카카오' : '네이버'} 로그인</Tag>
-              </div>
+              <div className="text-[12px] text-ink-500 mt-0.5">{ROLE_LABEL[role]} · {user.provider === 'kakao' ? '카카오' : '네이버'} 로그인</div>
             </div>
           </div>
           {(brand || landlord) && (
