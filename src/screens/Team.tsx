@@ -562,7 +562,7 @@ function ShiftTab({ team }: { team: Team }) {
   return (
     <div>
       {brand && (
-        <div className="mb-4 border border-ink-900 p-4">
+        <div className="mb-4 border border-ink-300 rounded p-4">
           <div className="flex items-center justify-between">
             <span className="text-[13px] font-bold">내 근무 {mine.length}회</span>
             {mine.length > 0 && <button className="text-[12px] font-semibold text-brand-600" onClick={() => downloadShiftIcs(team.name, sp?.name ?? team.region, mine)}><Ic n="calendar" />내 캘린더에 넣기</button>}
@@ -615,8 +615,8 @@ function ShiftTab({ team }: { team: Team }) {
         </table>
       </div>
       <div className="mt-4 font-bold text-sm mb-2">근무 횟수</div>
-      <div className="flex flex-wrap gap-1.5">
-        {counts.map(({ m, n }) => <span key={m.brandId} className={cx('text-[12px] px-2 h-6 inline-flex items-center rounded-md font-medium', colorOf(m.brandId))}>{brandById(db, m.brandId)!.name} {n}회</span>)}
+      <div className="text-[13px] text-ink-700">
+        {counts.map(({ m, n }, i) => <span key={m.brandId}>{i > 0 && <span className="text-ink-300 mx-2">|</span>}{brandById(db, m.brandId)!.name} <b className={n ? 'text-ink-900' : 'text-red-600'}>{n}회</b></span>)}
       </div>
     </div>
   );
