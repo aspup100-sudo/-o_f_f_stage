@@ -59,7 +59,7 @@ export function TodayBrand() {
         <div className="bg-white rounded border border-ink-300 p-5">
           <div className="text-[13px] text-ink-500">{brand.name}님, 반가워요</div>
           <div className="text-xl font-extrabold leading-snug mt-1">아직 함께할 팀이 없어요</div>
-          <button onClick={() => navigate({ name: 'tab', tab: 'recruits' })} className="mt-4 h-10 px-4 bg-ink-900 text-white font-bold text-sm">같이 열 팀 찾기</button>
+          <button onClick={() => navigate({ name: 'tab', tab: 'recruits' })} className="mt-4 h-10 px-4 rounded bg-brand-500 text-white font-bold text-sm">같이 열 팀 찾기</button>
         </div>
         <ProfileProgress />
         {extra.length > 0 && <ExtraList items={extra} />}

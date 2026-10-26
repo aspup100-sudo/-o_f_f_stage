@@ -121,7 +121,7 @@ export function ChatScreen({ id }: { id: string }) {
         )}
         <div className="p-2.5 flex gap-2">
         <input className="flex-1 h-11 px-3 rounded bg-ink-100 text-sm outline-none" placeholder="메시지 입력" value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && !e.nativeEvent.isComposing && send()} />
-        <button onClick={send} className="h-11 px-4 rounded bg-ink-900 text-white text-sm font-bold">전송</button>
+        <button onClick={send} className="h-11 px-4 rounded bg-brand-500 text-white text-sm font-bold">전송</button>
         </div>
       </div>
     </div>

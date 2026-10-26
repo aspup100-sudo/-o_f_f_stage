@@ -47,7 +47,7 @@ export function InstallApp() {
         </span>
       </span>
       {deferred && (
-        <button onClick={install} className="h-8 px-3 rounded bg-ink-900 text-white text-xs font-bold">
+        <button onClick={install} className="h-8 px-3 rounded bg-brand-500 text-white text-xs font-bold">
           설치
         </button>
       )}

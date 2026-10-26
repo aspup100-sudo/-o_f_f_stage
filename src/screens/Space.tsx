@@ -89,7 +89,7 @@ const manLabel = (v: number) => `${v / 10000}만원`;
 
 function Pill({ active, onClick, children }: { active?: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
-    <button type="button" onClick={onClick} className={cx('h-9 px-3.5 rounded-full border text-[14px] whitespace-nowrap', active ? 'bg-ink-900 text-white border-ink-900 font-bold' : 'bg-white text-ink-700 border-ink-300')}>{children}</button>
+    <button type="button" onClick={onClick} className={cx('h-9 px-3.5 rounded-full border text-[14px] whitespace-nowrap', active ? 'bg-white text-ink-900 border-ink-900 font-bold' : 'bg-white text-ink-700 border-ink-300')}>{children}</button>
   );
 }
 
@@ -147,7 +147,7 @@ export function SpacesTab({ initial }: { initial?: '찜' }) {
         <RentalsBrowse />
       </div>
     );
-  const chip = (on: boolean) => cx('h-8 px-3 rounded border text-[13px] font-semibold shrink-0 whitespace-nowrap flex items-center gap-1', on ? 'bg-ink-900 text-white border-ink-900' : 'bg-ink-100 text-ink-700 border-transparent');
+  const chip = (on: boolean) => cx('h-8 px-3 rounded border text-[13px] font-semibold shrink-0 whitespace-nowrap flex items-center gap-1', on ? 'bg-white text-ink-900 border-ink-900' : 'bg-ink-100 text-ink-700 border-transparent');
   const feeText = !feeOn ? '전체' : fee[1] >= FEE_MAX ? `${manLabel(fee[0])} 이상` : fee[0] === 0 ? `${manLabel(fee[1])} 이하` : `${manLabel(fee[0])} ~ ${manLabel(fee[1])}`;
   const areaText = !areaOn ? '전체' : area[1] >= AREA_MAX ? `${area[0]}㎡ 이상` : area[0] === 0 ? `${area[1]}㎡ 이하` : `${area[0]} ~ ${area[1]}㎡`;
   return (
