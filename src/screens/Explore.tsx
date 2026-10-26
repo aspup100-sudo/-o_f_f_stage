@@ -12,17 +12,22 @@ import { BrandActions } from './BrandActions';
 import { ShowcaseList } from './Showcase';
 import { QnaList } from './Qna';
 import { MagazineList, MagazineThumb } from './Magazine';
+import { RentalDeals } from './Rental';
 import { InstaThumb, instaFeed } from './Insta';
 import { TodayBrand, TodayLandlord, TodayRental, TodayVisitor } from './Today';
 
-type View = 'brand' | 'magazine' | 'showcase' | 'qna';
+type View = 'brand' | 'magazine' | 'showcase' | 'rental' | 'qna';
 
 export default function Explore() {
-  const [view, setView] = useState<View>('brand');
+  const { role } = useMe();
+  const [picked, setView] = useState<View>('brand');
+  // 렌탈 탭은 공간을 빌리는 브랜드에게만 보인다
+  const view: View = picked === 'rental' && role !== 'brand' ? 'brand' : picked;
+  const tabs = ([{ key: 'brand', label: '홈' }, { key: 'magazine', label: '매거진' }, { key: 'showcase', label: '팝업자랑' }, { key: 'rental', label: '렌탈' }, { key: 'qna', label: 'Q&A' }] as { key: View; label: string }[]).filter((it) => it.key !== 'rental' || role === 'brand');
   return (
     <div>
       <div className="sticky top-14 z-20 bg-white px-4 flex gap-5 border-b border-ink-100">
-        {([{ key: 'brand', label: '홈' }, { key: 'magazine', label: '매거진' }, { key: 'showcase', label: '팝업자랑' }, { key: 'qna', label: 'Q&A' }] as { key: View; label: string }[]).map((it) => (
+        {tabs.map((it) => (
           <button
             key={it.key}
             onClick={() => { setView(it.key); window.scrollTo?.(0, 0); }}
@@ -35,6 +40,7 @@ export default function Explore() {
       {view === 'brand' && <BrandFeed onMore={() => setView('magazine')} />}
       {view === 'magazine' && <MagazineList />}
       {view === 'showcase' && <ShowcaseList />}
+      {view === 'rental' && <RentalDeals />}
       {view === 'qna' && <QnaList />}
     </div>
   );

@@ -32,10 +32,25 @@ function initialSession(): Session {
   };
 }
 
+/** 저장된 데이터에 없는 제휴 렌탈 업체·장비·업체 계정을 시드에서 채운다. 이미 있는 데이터는 건드리지 않는다 */
+function withSeedRental(db: DB): DB {
+  const seed = createSeed();
+  const next = { ...db, rentalPartners: [...(db.rentalPartners ?? [])], rentalItems: [...(db.rentalItems ?? [])], users: [...db.users] };
+  let changed = false;
+  for (const sp of seed.rentalPartners) {
+    const i = next.rentalPartners.findIndex((p) => p.id === sp.id);
+    if (i < 0) { next.rentalPartners.push(sp); changed = true; }
+    else if (!next.rentalPartners[i].perks && sp.perks) { next.rentalPartners[i] = { ...next.rentalPartners[i], perks: sp.perks }; changed = true; }
+  }
+  for (const si of seed.rentalItems) if (!next.rentalItems.some((x) => x.id === si.id)) { next.rentalItems.push(si); changed = true; }
+  for (const su of seed.users) if (su.role === 'rental' && !next.users.some((u) => u.id === su.id)) { next.users.push(su); changed = true; }
+  return changed ? next : db;
+}
+
 function load(): AppState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw) as AppState;
+    if (raw) { const saved = JSON.parse(raw) as AppState; return { ...saved, db: withSeedRental(saved.db) }; }
   } catch {
     /* 저장소를 못 쓰는 환경이면 시드로 시작 */
   }
@@ -91,8 +106,9 @@ function schedulePush() {
 if (remoteEnabled) {
   state = { ...state, session: { ...state.session, sync: 'loading' } };
   pullAll(createSeed())
-    .then((db) => {
-      if (!db) return;
+    .then((pulled) => {
+      if (!pulled) return;
+      const db = withSeedRental(pulled);
       state = { ...state, db, session: { ...state.session, sync: 'online' } };
       synced = db;
       persist();

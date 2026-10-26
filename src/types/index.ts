@@ -158,6 +158,7 @@ export interface RentalPartner {
   deliveryFee: number; // 왕복 배송·설치비
   freeDeliveryOver: number; // 이 금액 이상이면 배송 무료
   hue: number;
+  perks?: string[]; // 제휴 추가 혜택 문구 (예: '첫 대여 5,000원 쿠폰'). 업체와 협의해 확정
 }
 
 export interface RentalItem {

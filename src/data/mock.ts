@@ -587,9 +587,12 @@ const reports: Report[] = [
 
 // ───────── 렌탈 제휴 업체 (지어낸 예시) ─────────
 const rentalPartners: RentalPartner[] = [
-  { id: 'rp1', userId: 'u_r1', name: '행거앤코 렌탈', intro: '매장 집기 전문 렌탈. 팝업 철수한 행거·진열대를 놀리지 않고 다시 빌려드려요.', regions: ['성동구', '마포구', '용산구', '종로구'], deliveryFee: 60000, freeDeliveryOver: 300000, hue: 25 },
-  { id: 'rp2', userId: 'u_r2', name: '빛나는조명', intro: '전시·촬영용 조명과 사이니지를 빌려드려요. 설치까지 해 드립니다.', regions: ['성동구', '용산구', '종로구'], deliveryFee: 80000, freeDeliveryOver: 400000, hue: 48 },
-  { id: 'rp3', userId: 'u_r3', name: '팝업키트 서울', intro: '피팅룸 텐트, 거울, 카드 단말기까지 팝업에 필요한 것을 한 번에.', regions: ['마포구', '성동구'], deliveryFee: 50000, freeDeliveryOver: 250000, hue: 200 },
+  { id: 'rp1', userId: 'u_r1', name: '행거앤코 렌탈', intro: '매장 집기 전문 렌탈. 팝업 철수한 행거·진열대를 놀리지 않고 다시 빌려드려요.', regions: ['성동구', '마포구', '용산구', '종로구'], deliveryFee: 60000, freeDeliveryOver: 300000, hue: 25, perks: ['첫 대여 5,000원 쿠폰', '3일 이상 빌리면 10% 추가'] },
+  { id: 'rp2', userId: 'u_r2', name: '빛나는조명', intro: '전시·촬영용 조명과 사이니지를 빌려드려요. 설치까지 해 드립니다.', regions: ['성동구', '용산구', '종로구'], deliveryFee: 80000, freeDeliveryOver: 400000, hue: 48, perks: ['설치 무료', '2개 이상 빌리면 5,000원 할인'] },
+  { id: 'rp3', userId: 'u_r3', name: '팝업키트 서울', intro: '피팅룸 텐트, 거울, 카드 단말기까지 팝업에 필요한 것을 한 번에.', regions: ['마포구', '성동구'], deliveryFee: 50000, freeDeliveryOver: 250000, hue: 200, perks: ['팀 3곳 이상 빌리면 10% 추가', '결제 단말기 설치 지원'] },
+  { id: 'rp4', userId: 'u_r4', name: '무드월 스튜디오', intro: '마네킹·소품·진열대로 팝업 분위기를 맞춰 드려요. 철수까지 한 번에.', regions: ['성동구', '용산구'], deliveryFee: 70000, freeDeliveryOver: 350000, hue: 330, perks: ['첫 대여 10,000원 쿠폰', '철수 수거 무료'] },
+  { id: 'rp5', userId: 'u_r5', name: '스탠드온', intro: '입간판·배너·네온 사이니지를 당일 제작·대여해요.', regions: ['마포구', '성동구', '종로구'], deliveryFee: 40000, freeDeliveryOver: 200000, hue: 275, perks: ['디자인 시안 무료', '당일 제작 가능'] },
+  { id: 'rp6', userId: 'u_r6', name: '팝페이 POS', intro: '카드 단말기·영수증 프린터·재고 태블릿을 팝업 기간만 빌려드려요.', regions: ['성동구', '마포구', '용산구', '종로구'], deliveryFee: 30000, freeDeliveryOver: 150000, hue: 165, perks: ['단말기 사용법 전화 지원', '브랜드별 정산 안내'] },
 ];
 
 const ri = (id: string, partnerId: string, name: string, category: RentalItem['category'], desc: string, dailyPrice: number, partnerPrice: number, stock: number, hue: number): RentalItem => ({ id, partnerId, name, category, desc, dailyPrice, partnerPrice, stock, hue, active: true });
@@ -607,6 +610,14 @@ const rentalItems: RentalItem[] = [
   ri('ri10', 'rp3', '접이식 피팅룸 텐트', '피팅룸 텐트', '10분 설치, 커튼·거울 포함', 35000, 21000, 6, 200),
   ri('ri11', 'rp3', '대형 전신거울 (180cm)', '전신거울', '받침대 포함', 20000, 12000, 10, 210),
   ri('ri12', 'rp3', '카드 단말기 + 영수증 프린터', 'POS·결제', '브랜드별 매출 분리 정산 메뉴 지원', 25000, 15000, 5, 230),
+  ri('ri13', 'rp4', '전신 마네킹 3종 세트', '마네킹', '여성·남성·토르소 3종. 베이스 포함', 60000, 33000, 4, 340),
+  ri('ri14', 'rp4', '원형 디스플레이 테이블', '진열대', '지름 90cm, 높이 조절', 25000, 14000, 7, 310),
+  ri('ri15', 'rp4', '바닥 매트 + 포인트 러그', '진열대', '공간 분위기용 4㎡ 세트', 18000, 12000, 9, 300),
+  ri('ri16', 'rp5', '네온 문구 사이니지 (소형)', '사이니지', '문구 5자 이내, 3일 전 주문', 45000, 26000, 5, 285),
+  ri('ri17', 'rp5', 'X자 배너 스탠드 (출력 포함)', '사이니지', '60×160cm 배너 출력까지', 20000, 13000, 12, 265),
+  ri('ri18', 'rp6', '카드 단말기 (무선)', 'POS·결제', '브랜드별 정산 지원', 18000, 10000, 8, 170),
+  ri('ri19', 'rp6', '영수증 프린터 + 태블릿 POS', 'POS·결제', '재고 관리 앱 포함', 30000, 17000, 5, 160),
+  ri('ri20', 'rp6', '이동식 계산대', '진열대', '바퀴 달린 접이식 계산대', 22000, 15000, 6, 150),
 ];
 
 const rentalOrders: RentalOrder[] = [

@@ -79,6 +79,78 @@ export function PartnerCard({ db, partnerId, teamId }: { db: DB; partnerId: stri
   );
 }
 
+/** 홈 '렌탈' 탭: 제휴 렌탈 업체를 할인율 먼저 보여 준다 (쿠팡·배민 느낌) */
+export function RentalDeals() {
+  const { db } = useMe();
+  const [cat, setCat] = useState<RentalCategory | '전체'>('전체');
+  const [sort, setSort] = useState<'off' | 'rating' | 'done'>('off');
+  const rows = db.rentalPartners
+    .map((p) => {
+      const items = db.rentalItems.filter((i) => i.partnerId === p.id && i.active && (cat === '전체' || i.category === cat));
+      const r = partnerRating(db, p.id);
+      return { p, items, r, maxOff: Math.max(0, ...items.map(discountPct)) };
+    })
+    .filter((x) => x.items.length > 0)
+    .sort((a, b) => (sort === 'rating' ? (b.r.avg ?? 0) - (a.r.avg ?? 0) : sort === 'done' ? b.r.done - a.r.done : b.maxOff - a.maxOff));
+  const topOff = Math.max(0, ...db.rentalItems.filter((i) => i.active).map(discountPct));
+  return (
+    <div className="px-4 pt-4 pb-6">
+      <div className="rounded bg-brand-600 text-white p-4">
+        <div className="text-[12px] opacity-80">OFF STAGE 제휴 렌탈</div>
+        <div className="text-[22px] font-black leading-tight mt-1">최대 {topOff}% 할인</div>
+        <div className="text-[13px] opacity-90 mt-1">행거·조명·진열대는 사지 말고 제휴가로 빌려요</div>
+      </div>
+      <p className="text-[12px] text-ink-500 mt-2 flex items-center gap-1.5">제휴 조건과 추가 혜택은 업체와 협의해 확정돼요 <Demo>예시</Demo></p>
+      <div className="flex gap-1.5 overflow-x-auto no-scrollbar mt-4 pb-1">
+        {(['전체', ...RENTAL_CATEGORIES] as const).map((c) => <Chip key={c} active={cat === c} onClick={() => setCat(c)}>{c}</Chip>)}
+      </div>
+      <div className="flex items-center justify-between mt-3 mb-2">
+        <span className="text-[13px] text-ink-500">제휴 업체 <b className="text-ink-900">{rows.length}</b>곳</span>
+        <select aria-label="렌탈 정렬" value={sort} onChange={(e) => setSort(e.target.value as typeof sort)} className="h-8 rounded-full border border-ink-300 bg-white px-2.5 text-[12px]">
+          <option value="off">할인 큰 순</option>
+          <option value="rating">별점 높은 순</option>
+          <option value="done">대여 많은 순</option>
+        </select>
+      </div>
+      <div className="space-y-3">
+        {rows.map(({ p, items, r, maxOff }) => (
+          <Card key={p.id} className="p-3.5" onClick={() => navigate({ name: 'rentalPartner', id: p.id })}>
+            <div className="flex items-end gap-1.5">
+              <span className="text-[24px] font-black text-red-500 leading-none tabular-nums">최대 {maxOff}%</span>
+              <span className="text-[13px] font-bold text-red-500 leading-none pb-px">할인</span>
+            </div>
+            <div className="flex items-center gap-2.5 mt-2.5">
+              <Avatar name={p.name} hue={p.hue} size={40} />
+              <div className="flex-1 min-w-0">
+                <div className="font-bold truncate">{p.name}</div>
+                <div className="text-[12px] text-ink-500 truncate">
+                  {r.avg !== null ? `★ ${r.avg.toFixed(1)} · ` : ''}{r.done > 0 ? `팝업 대여 ${r.done}회` : '신규 제휴'} · {p.regions.join('·')}
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-1.5 mt-2.5">
+              <Tag tone="green">배송비 무료 {Math.round(p.freeDeliveryOver / 10000)}만원↑</Tag>
+              {(p.perks ?? []).slice(0, 2).map((x) => <Tag key={x} tone="purple">{x}</Tag>)}
+            </div>
+            <div className="flex gap-2 mt-3 overflow-x-auto no-scrollbar">
+              {items.slice(0, 4).map((it) => (
+                <div key={it.id} className="w-[104px] shrink-0">
+                  <Swatch hue={it.hue} pattern="grid" className="h-[72px]" rounded="rounded" />
+                  <div className="text-[12px] mt-1 truncate">{it.name}</div>
+                  <div className="text-[11px] text-ink-500 line-through tabular-nums">{won(it.dailyPrice)}</div>
+                  <div className="text-[13px] font-extrabold tabular-nums"><span className="text-red-500 mr-0.5">{discountPct(it)}%</span>{won(it.partnerPrice)}</div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 h-10 rounded bg-brand-600 text-white text-[14px] font-bold flex items-center justify-center">제휴가로 빌리기 ›</div>
+          </Card>
+        ))}
+        {!rows.length && <Empty icon="box">이 카테고리를 빌려주는 업체가 아직 없어요</Empty>}
+      </div>
+    </div>
+  );
+}
+
 /** 브랜드: 렌탈 제휴 둘러보기 */
 export function RentalsBrowse({ teamId, embedded }: { teamId?: string; embedded?: boolean }) {
   const { db, brand } = useMe();
