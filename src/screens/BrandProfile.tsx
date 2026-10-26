@@ -171,9 +171,18 @@ function ReviewsTab({ brandId }: { brandId: string }) {
   const t = trustScore(db, brandId);
   return (
     <div className="px-4 py-4 space-y-6">
-      <ReviewGroup title="함께한 브랜드가 남긴 후기" reviews={fromBrands} />
-      <ReviewGroup title="공간 운영자가 남긴 후기" reviews={fromSpaces} />
-      <ReviewGroup title="방문객 후기" reviews={fromVisitors} />
+      {fromBrands.length + fromSpaces.length + fromVisitors.length === 0 ? (
+        <div>
+          <h3 className="text-[17px] font-extrabold tracking-tight mb-1">후기</h3>
+          <p className="text-sm text-ink-500">아직 받은 후기가 없어요. 함께한 브랜드, 공간 운영자, 방문객이 남기면 여기에 보여요.</p>
+        </div>
+      ) : (
+        <>
+          <ReviewGroup title="함께한 브랜드가 남긴 후기" reviews={fromBrands} />
+          <ReviewGroup title="공간 운영자가 남긴 후기" reviews={fromSpaces} />
+          <ReviewGroup title="방문객 후기" reviews={fromVisitors} />
+        </>
+      )}
       <div>
         <h3 className="text-[17px] font-extrabold tracking-tight mb-1">신뢰 지수 내역</h3>
         <p className="text-xs text-ink-500 mb-2">50점에서 시작해요. 같은 상대와 반복된 후기는 두 번째부터 절반만 반영돼요.</p>
