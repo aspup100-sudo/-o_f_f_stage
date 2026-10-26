@@ -473,6 +473,8 @@ export interface QnaAnswer {
 // ───────── 매거진 (카드뉴스) ─────────
 export const MAGAZINE_CATEGORIES = ['팝업 동향', '뜨는 지역', '운영 팁', '팀 인터뷰'] as const;
 export type MagazineCategory = (typeof MAGAZINE_CATEGORIES)[number];
+export const MAGAZINE_HEADLINES: Record<MagazineCategory, string> = { '팝업 동향': 'POP-UP TRENDS', '뜨는 지역': 'RISING AREAS', '운영 팁': 'OPERATION TIPS', '팀 인터뷰': 'TEAM INTERVIEW' };
+export const MAGAZINE_FOOTERS: Record<MagazineCategory, string> = { '팝업 동향': 'MARKET NOTE FOR BRAND', '뜨는 지역': 'AREA GUIDE FOR BRAND', '운영 팁': 'HOW-TO FOR BRAND', '팀 인터뷰': 'TEAM STORY FOR BRAND' };
 
 export interface MagazineCard {
   heading: string;
@@ -487,6 +489,8 @@ export interface MagazinePost {
   category: MagazineCategory;
   cards: MagazineCard[];
   hue: number;
+  headline?: string; // 표지 큰 영문 제목 (비우면 카테고리 영문명)
+  issue?: number; // 호수 (표지 우측 상단 ISSUE 02)
   region?: Region;
   link?: Route; // 관련 화면 (공간, 팝업자랑 등)
   authorId: ID; // 운영팀

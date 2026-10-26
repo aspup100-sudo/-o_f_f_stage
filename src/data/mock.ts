@@ -625,7 +625,7 @@ notifications.push({ id: 'n6', userId: 'u_r1', type: 'rental', text: '가을 산
 // ───────── 매거진 카드뉴스 (수치는 데모용 예시) ─────────
 const magazines: MagazinePost[] = [
   {
-    id: 'mg1', category: '팝업 동향', title: '10월 팝업 동향: 혼자보다 팀으로', subtitle: '공동 팝업이 늘어난 이유를 숫자로 봤어요', hue: 18, authorId: 'u_admin', likes: ['u_v1', 'u_b2'], createdAt: '2026-10-24',
+    id: 'mg1', issue: 4, category: '팝업 동향', title: '10월 팝업 동향: 혼자보다 팀으로', subtitle: '공동 팝업이 늘어난 이유를 숫자로 봤어요', hue: 18, authorId: 'u_admin', likes: ['u_v1', 'u_b2'], createdAt: '2026-10-24',
     cards: [
       { heading: '10월 팝업 동향', body: 'OFF STAGE에 올라온 팝업을 정리했어요. (데모 데이터)' },
       { heading: '공동 팝업 비중', stat: '62%', body: '이번 달 열린 팝업 10곳 중 6곳은 2개 이상 브랜드가 함께 열었어요.' },
@@ -635,7 +635,7 @@ const magazines: MagazinePost[] = [
     ],
   },
   {
-    id: 'mg2', category: '뜨는 지역', title: '지금 뜨는 팝업 지역 TOP 4', subtitle: '성수만 있는 게 아니에요', hue: 150, authorId: 'u_admin', likes: ['u_b1'], createdAt: '2026-10-20', region: '용산구', link: { name: 'tab', tab: 'spaces' },
+    id: 'mg2', issue: 3, category: '뜨는 지역', title: '지금 뜨는 팝업 지역 TOP 4', subtitle: '성수만 있는 게 아니에요', hue: 150, authorId: 'u_admin', likes: ['u_b1'], createdAt: '2026-10-20', region: '용산구', link: { name: 'tab', tab: 'spaces' },
     cards: [
       { heading: '지금 뜨는 팝업 지역', body: 'OFF STAGE 공간 지원 수와 방문 인증 수로 골랐어요. (데모 데이터)' },
       { heading: '1. 해방촌 계단길 (용산구)', stat: '+48%', body: '지원 수가 한 달 새 크게 늘었어요. 1일 30만원대 작은 공간이 많아 3~4팀 공동 팝업에 딱이에요.' },
@@ -645,7 +645,7 @@ const magazines: MagazinePost[] = [
     ],
   },
   {
-    id: 'mg3', category: '운영 팁', title: '원상복구, 10분 만에 끝내는 법', subtitle: 'Q&A에서 가장 많이 나온 질문 정리', hue: 220, authorId: 'u_admin', likes: [], createdAt: '2026-10-15', link: { name: 'qna', id: 'q1' },
+    id: 'mg3', issue: 2, category: '운영 팁', title: '원상복구, 10분 만에 끝내는 법', subtitle: 'Q&A에서 가장 많이 나온 질문 정리', hue: 220, authorId: 'u_admin', likes: [], createdAt: '2026-10-15', link: { name: 'qna', id: 'q1' },
     cards: [
       { heading: '원상복구 10분 컷', body: '실무 Q&A에서 가장 많이 나온 질문을 모았어요.' },
       { heading: '입주 전 사진 찍기', body: '바닥, 벽, 조명을 같은 각도로 찍어 두면 분쟁이 없어요. 팀 채팅방에 올려 두세요.' },
@@ -654,7 +654,7 @@ const magazines: MagazinePost[] = [
     ],
   },
   {
-    id: 'mg4', category: '팀 인터뷰', title: '"서로의 손님이 서로의 손님이 됐어요"', subtitle: '오래된 것들의 시간 팀 인터뷰', hue: 75, authorId: 'u_admin', likes: ['u_v2', 'u_v3'], createdAt: '2026-10-16', link: { name: 'showcase', id: 'sc1' },
+    id: 'mg4', issue: 1, category: '팀 인터뷰', title: '"서로의 손님이 서로의 손님이 됐어요"', subtitle: '오래된 것들의 시간 팀 인터뷰', hue: 75, authorId: 'u_admin', likes: ['u_v2', 'u_v3'], createdAt: '2026-10-16', link: { name: 'showcase', id: 'sc1' },
     cards: [
       { heading: '오래된 것들의 시간', body: '두 번의 공동 팝업을 연 세 브랜드를 만났어요.' },
       { heading: '왜 팀이었나요?', body: '"혼자서는 엄두가 안 나던 한옥 대관을 셋이 나누니 가능했어요." — 오래된정원' },

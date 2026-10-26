@@ -1108,7 +1108,7 @@ export function toggleMagazineLike(id: string, userId: string) {
 export function publishMagazine(m: Omit<import('@/types').MagazinePost, 'id' | 'likes' | 'createdAt' | 'authorId'>) {
   const id = newId('mg');
   update((s) => {
-    s.db.magazines.unshift({ ...m, id, likes: [], authorId: 'u_admin', createdAt: DEMO_TODAY });
+    s.db.magazines.unshift({ ...m, issue: Math.max(0, ...s.db.magazines.map((x) => x.issue ?? 0)) + 1, id, likes: [], authorId: 'u_admin', createdAt: DEMO_TODAY });
     s.db.users.filter((u) => u.role === 'brand' || u.role === 'visitor').forEach((u) => notify(s.db, u.id, 'system', `새 매거진: ${m.title}`, { name: 'magazine', id }));
   });
   toast('매거진을 발행했어요. 브랜드와 방문객에게 알림을 보냈어요');

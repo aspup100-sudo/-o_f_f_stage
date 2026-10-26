@@ -6,7 +6,7 @@ import { markMagazineRead, publishMagazine, toggleMagazineHidden, toggleMagazine
 import { daysUntil } from '@/store/logic';
 import { ScreenTitle } from '@/components/common';
 import { Button, Card, Chip, cx, Empty, Field, Icon, inputCls, SubHeader, Tag, textareaCls } from '@/components/ui';
-import { MAGAZINE_CATEGORIES, OFFICIAL_INSTAGRAM, REGIONS, type MagazineCard, type MagazineCategory, type MagazinePost, type Region } from '@/types';
+import { MAGAZINE_CATEGORIES, MAGAZINE_FOOTERS, MAGAZINE_HEADLINES, OFFICIAL_INSTAGRAM, REGIONS, type MagazineCard, type MagazineCategory, type MagazinePost, type Region } from '@/types';
 
 /** 공식 인스타그램 링크 */
 export function OfficialInsta({ compact }: { compact?: boolean }) {
@@ -27,24 +27,58 @@ export function OfficialInsta({ compact }: { compact?: boolean }) {
   );
 }
 
+type CoverPost = Pick<MagazinePost, 'hue' | 'category' | 'title'> & Partial<Pick<MagazinePost, 'subtitle' | 'headline' | 'issue'>>;
+
+/** 표지: 단색 배경 + 큰 영문 제목 + 한글 제목 (글자 크기는 카드 너비에 비례) */
+function CoverFace({ post, className }: { post: CoverPost; className?: string }) {
+  const h = post.hue;
+  const headline = (post.headline?.trim() || MAGAZINE_HEADLINES[post.category]).toUpperCase();
+  return (
+    <div
+      className={cx('relative aspect-square w-full overflow-hidden text-white', className)}
+      style={{ containerType: 'inline-size', background: `hsl(${h} 54% 57%)` }}
+    >
+      {/* 하단 색 블록 */}
+      <div className="absolute" style={{ left: '43.5%', top: '73.1%', width: '44.4%', bottom: 0, background: `hsl(${h} 54% 45%)` }} />
+      <div className="absolute" style={{ left: '87.9%', top: '83.3%', right: 0, bottom: 0, background: `hsl(${h} 62% 70%)` }} />
+      <div className="absolute inset-0 flex flex-col" style={{ padding: '6.7cqw' }}>
+        <div className="flex items-center justify-between font-extrabold" style={{ fontSize: '2.1cqw', letterSpacing: '.22em' }}>
+          <span>OFFSTAGE MAGAZINE</span>
+          <span>{post.issue ? `ISSUE ${String(post.issue).padStart(2, '0')}` : post.category}</span>
+        </div>
+        <div style={{ height: '.25cqw', background: '#fff', marginTop: '3.6cqw' }} />
+        <div className="font-black" style={{ fontSize: '15.5cqw', lineHeight: 0.92, letterSpacing: '-.035em', marginTop: '3.4cqw' }}>
+          {headline.split(' ').map((w, i) => <div key={i}>{w}</div>)}
+        </div>
+        <div className="font-extrabold break-keep" style={{ fontSize: '4.6cqw', lineHeight: 1.3, marginTop: '5cqw', maxWidth: '78cqw', textWrap: 'balance' } as React.CSSProperties}>{post.title}</div>
+        {post.subtitle && <div className="break-keep" style={{ fontSize: '2.4cqw', marginTop: '2.4cqw', opacity: 0.88, maxWidth: '78cqw' }}>{post.subtitle}</div>}
+        <div className="mt-auto flex items-end justify-between font-bold" style={{ fontSize: '2.1cqw', letterSpacing: '.2em' }}>
+          <span className="relative">{MAGAZINE_FOOTERS[post.category]}</span>
+          <span className="relative">SWIPE →</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /** 카드뉴스 한 장 */
-function CardFace({ post, card, index, total }: { post: Pick<MagazinePost, 'hue' | 'category' | 'title'>; card: MagazineCard; index: number; total: number }) {
-  const cover = index === 0;
+function CardFace({ post, card, index, total }: { post: CoverPost; card: MagazineCard; index: number; total: number }) {
+  if (index === 0) return <CoverFace post={post} className="rounded" />;
   return (
     <div
       className="relative aspect-square w-full rounded overflow-hidden p-6 flex flex-col"
-      style={{ background: cover ? `hsl(${post.hue} 35% 28%)` : `hsl(${post.hue} 40% 96%)`, color: cover ? '#fff' : `hsl(${post.hue} 45% 18%)` }}
+      style={{ background: `hsl(${post.hue} 40% 96%)`, color: `hsl(${post.hue} 45% 18%)` }}
     >
       <div className="flex items-center justify-between text-[12px] font-bold opacity-80">
         <span>{post.category}</span>
         <span className="tabular-nums">{index + 1} / {total}</span>
       </div>
-      <div className={cx('flex-1 flex flex-col', cover ? 'justify-end' : 'justify-center')}>
+      <div className="flex-1 flex flex-col justify-center">
         {card.stat && <div className="text-5xl font-black tracking-tight mb-2" style={{ color: `hsl(${post.hue} 60% 40%)` }}>{card.stat}</div>}
-        <div className={cx('font-extrabold leading-snug', cover ? 'text-[26px]' : 'text-xl')} style={{ textWrap: 'balance' } as React.CSSProperties}>{cover ? post.title : card.heading}</div>
-        <p className={cx('mt-2 leading-relaxed', cover ? 'text-sm opacity-80' : 'text-[15px]')}>{card.body}</p>
+        <div className="font-extrabold leading-snug text-xl" style={{ textWrap: 'balance' } as React.CSSProperties}>{card.heading}</div>
+        <p className="mt-2 leading-relaxed text-[15px]">{card.body}</p>
       </div>
-      <div className="text-[12px] font-bold opacity-60">OFF STAGE 매거진 · @{OFFICIAL_INSTAGRAM}</div>
+      <div className="text-[12px] font-bold opacity-60">OFFSTAGE 매거진 · @{OFFICIAL_INSTAGRAM}</div>
     </div>
   );
 }
@@ -55,19 +89,10 @@ export function MagazineThumb({ post, wide }: { post: MagazinePost; wide?: boole
   const fresh = daysUntil(post.createdAt) >= -7 && !user?.readMagazines?.includes(post.id);
   return (
     <button onClick={() => navigate({ name: 'magazine', id: post.id })} className={cx('block text-left shrink-0 self-start align-top', wide ? 'w-full' : 'w-[200px]')}>
-      {/* 목록용 작은 표지: 제목만 크게 */}
-      <div
-        className="aspect-[4/5] rounded overflow-hidden p-3.5 flex flex-col text-white"
-        style={{ background: `hsl(${post.hue} 35% 28%)` }}
-      >
-        <div className="flex items-center justify-between text-[11px] font-bold opacity-80">
-          <span className="flex items-center gap-1">{fresh && <span className="bg-white text-ink-900 rounded px-1 py-px text-[9px] font-black">NEW</span>}{post.category}</span>
-          <span>{post.cards.length}장</span>
-        </div>
-        <div className="flex-1 flex items-end">
-          <div className="text-[19px] font-extrabold leading-tight line-clamp-4 break-keep">{post.title}</div>
-        </div>
-        <div className="text-[9px] font-bold opacity-60 mt-2">OFF STAGE 매거진</div>
+      {/* 목록용 표지: 상세 표지와 같은 디자인 */}
+      <div className="relative">
+        <CoverFace post={post} className="rounded" />
+        {fresh && <span className="absolute top-2 right-2 bg-white text-ink-900 rounded px-1 py-px text-[9px] font-black">NEW</span>}
       </div>
       <div className="mt-1.5 text-[12px] text-ink-500">{post.category} · {post.createdAt.slice(5).replace('-', '/')}</div>
       <div className="text-[13px] text-ink-700 leading-snug line-clamp-2">{post.subtitle}</div>
@@ -236,7 +261,7 @@ export function MagazineNew() {
         <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 mb-4">
           {cards.map((c, i) => (
             <div key={i} className="w-48 shrink-0">
-              <CardFace post={{ hue, category, title: title || '제목' }} card={i === 0 ? c : { ...c, heading: c.heading || '소제목', body: c.body || '본문이 여기에 들어가요' }} index={i} total={cards.length} />
+              <CardFace post={{ hue, category, title: title || '제목', subtitle }} card={i === 0 ? c : { ...c, heading: c.heading || '소제목', body: c.body || '본문이 여기에 들어가요' }} index={i} total={cards.length} />
             </div>
           ))}
         </div>
