@@ -289,11 +289,11 @@ function AgreementTab({ team, myBrandId }: { team: Team; myBrandId: string }) {
         <div className="h-1 bg-ink-100 overflow-hidden mb-3">
           <div className="h-full bg-emerald-500 transition-all" style={{ width: `${(ag.agreedBy.length / team.members.length) * 100}%` }} />
         </div>
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-x-3 gap-y-1 text-[13px]">
           {team.members.map((m) => {
             const b = brandById(db, m.brandId)!;
             const ok = ag.agreedBy.includes(m.brandId);
-            return <Tag key={m.brandId} tone={ok ? 'green' : 'gray'}>{ok && <Ic n="check" />}{b.name}</Tag>;
+            return <span key={m.brandId} className={ok ? 'font-semibold text-emerald-700' : 'text-ink-400'}>{ok ? <Ic n="check" /> : '· '}{b.name}</span>;
           })}
         </div>
         {ag.locked && <p className="text-sm text-emerald-700 font-semibold mt-3">전원 동의로 팀이 확정됐어요. 약속서는 이제 고칠 수 없어요.</p>}
@@ -503,10 +503,10 @@ function MoodboardTab({ team, myBrandId }: { team: Team; myBrandId: string }) {
       </div>
       {me.lookbook.length ? <LookbookGrid db={db} ids={me.lookbook} picked={mine} onPick={(id) => toggleMoodPick(team.id, myBrandId, id)} /> : <Empty>룩북 사진이 없어요. 내 정보에서 사진을 올려 주세요.</Empty>}
       <div className="mt-4 mb-2 font-bold text-sm">멤버별 선택 현황</div>
-      <div className="flex flex-wrap gap-1.5 mb-4">
+      <div className="flex flex-wrap gap-x-3 gap-y-1 mb-4 text-[13px]">
         {team.members.map((m) => {
           const n = (mb.picks[m.brandId] ?? []).length;
-          return <Tag key={m.brandId} tone={n === 3 ? 'green' : 'yellow'}>{brandById(db, m.brandId)!.name} {n}/3</Tag>;
+          return <span key={m.brandId} className="text-ink-700">{brandById(db, m.brandId)!.name} <b className={n === 3 ? 'text-emerald-700' : 'text-amber-700'}>{n}/3</b></span>;
         })}
       </div>
       <div className="mb-1.5 font-bold text-sm">지금까지 모인 팀 무드</div>

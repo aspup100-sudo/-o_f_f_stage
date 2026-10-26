@@ -47,7 +47,7 @@ export default function BrandProfileScreen({ id }: { id: string }) {
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-3 mt-4 border-y border-ink-900 py-3 text-center">
+        <div className="grid grid-cols-3 mt-4 border-y border-ink-200 py-3 text-center">
           <div>
             <div className="text-lg font-extrabold">{t.verifiedPopups}회</div>
             <div className="text-[12px] text-ink-500">인증 공동 팝업</div>
@@ -111,9 +111,9 @@ export default function BrandProfileScreen({ id }: { id: string }) {
         <div className="px-4 py-4 space-y-6">
           <div>
             <h3 className="text-[17px] font-extrabold tracking-tight mb-3">팝업 가능 일정</h3>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-x-3 gap-y-1">
               {brand.availability.map((a) => (
-                <Tag key={a.start} tone="green"><Ic n="calendar" />{a.start.slice(0, 4)}. {period(a)}</Tag>
+                <span key={a.start} className="text-[13px] font-semibold text-ink-900">{a.start.slice(0, 4)}. {period(a)}</span>
               ))}
             </div>
           </div>
@@ -226,9 +226,9 @@ export function ReviewGroup({ title, reviews }: { title: string; reviews: Review
               </div>
             </div>
             {Object.keys(r.scores).length > 1 && (
-              <div className="flex flex-wrap gap-1 mt-1.5">
+              <div className="flex flex-wrap gap-x-2 mt-1 text-[12px] text-ink-500">
                 {Object.entries(r.scores).map(([k, v]) => (
-                  <Tag key={k}>{k} {v}</Tag>
+                  <span key={k}>{k} <b className="text-ink-700">{v}</b></span>
                 ))}
               </div>
             )}
