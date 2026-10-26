@@ -35,7 +35,7 @@ function initialSession(): Session {
 /** 저장된 데이터에 없는 제휴 렌탈 업체·장비·업체 계정을 시드에서 채운다. 이미 있는 데이터는 건드리지 않는다 */
 function withSeedRental(db: DB): DB {
   const seed = createSeed();
-  const next = { ...db, rentalPartners: [...(db.rentalPartners ?? [])], rentalItems: [...(db.rentalItems ?? [])], users: [...db.users] };
+  const next = { ...db, spaces: [...db.spaces], rentalPartners: [...(db.rentalPartners ?? [])], rentalItems: [...(db.rentalItems ?? [])], users: [...db.users] };
   let changed = false;
   for (const sp of seed.rentalPartners) {
     const i = next.rentalPartners.findIndex((p) => p.id === sp.id);
@@ -43,6 +43,12 @@ function withSeedRental(db: DB): DB {
     else if (!next.rentalPartners[i].perks && sp.perks) { next.rentalPartners[i] = { ...next.rentalPartners[i], perks: sp.perks }; changed = true; }
   }
   for (const si of seed.rentalItems) if (!next.rentalItems.some((x) => x.id === si.id)) { next.rentalItems.push(si); changed = true; }
+  next.spaces = next.spaces.map((sp) => {
+    const ss = seed.spaces.find((x) => x.id === sp.id);
+    if (!ss || (sp.promos && sp.keywords)) return sp;
+    changed = true;
+    return { ...sp, promos: sp.promos ?? ss.promos, keywords: sp.keywords ?? ss.keywords };
+  });
   for (const su of seed.users) if (su.role === 'rental' && !next.users.some((u) => u.id === su.id)) { next.users.push(su); changed = true; }
   return changed ? next : db;
 }

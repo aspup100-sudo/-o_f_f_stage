@@ -10,7 +10,9 @@ export interface MapPin {
   lat: number;
   lng: number;
   label: string;
-  tone: 'live' | 'soon' | 'selected';
+  tone: 'live' | 'soon' | 'selected' | 'cluster';
+  count?: number; // cluster일 때 말풍선 안의 숫자
+  active?: boolean; // cluster가 선택된 상태
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -33,6 +35,22 @@ function loadSdk(): Promise<any> {
 }
 
 function pinEl(p: MapPin, onSelect: (id: string) => void) {
+  if (p.tone === 'cluster') {
+    const empty = !p.count;
+    const fill = p.active ? 'bg-ink-900' : empty ? 'bg-ink-300' : 'bg-brand-600';
+    const wrap = document.createElement('button');
+    wrap.type = 'button';
+    wrap.className = 'flex items-center';
+    const num = document.createElement('span');
+    num.className = `relative z-10 w-9 h-9 rounded-full ${fill} text-white text-[15px] font-extrabold flex items-center justify-center border-2 border-white shadow`;
+    num.textContent = String(p.count ?? 0);
+    const name = document.createElement('span');
+    name.className = `-ml-3 pl-4 pr-2.5 h-6 rounded-full ${p.active ? 'bg-ink-900' : empty ? 'bg-ink-400' : 'bg-brand-700'} text-white text-[12px] font-bold whitespace-nowrap flex items-center shadow`;
+    name.textContent = p.label;
+    wrap.append(num, name);
+    wrap.addEventListener('click', () => onSelect(p.id));
+    return wrap;
+  }
   const cls = p.tone === 'selected' ? 'bg-ink-900 text-white' : p.tone === 'live' ? 'bg-brand-500 text-white' : 'bg-white text-ink-900';
   const el = document.createElement('button');
   el.type = 'button';
@@ -82,7 +100,7 @@ export function KakaoMap({ pins, onSelect, className, fallback }: { pins: MapPin
     if (state !== 'ready' || !m || !kakao) return;
     overlays.current.forEach((o) => o.setMap(null));
     overlays.current = pins.map((p) => {
-      const o = new kakao.maps.CustomOverlay({ position: new kakao.maps.LatLng(p.lat, p.lng), content: pinEl(p, onSelect), yAnchor: 1, clickable: true, zIndex: p.tone === 'selected' ? 2 : 1 });
+      const o = new kakao.maps.CustomOverlay({ position: new kakao.maps.LatLng(p.lat, p.lng), content: pinEl(p, onSelect), yAnchor: p.tone === 'cluster' ? 0.5 : 1, clickable: true, zIndex: p.active || p.tone === 'selected' ? 3 : p.tone === 'cluster' ? 2 : 1 });
       o.setMap(m);
       return o;
     });

@@ -120,7 +120,16 @@ export interface Space {
   photos?: string[]; // 임대인이 올린 공간 사진 (photoHues와 같은 순서)
   lat?: number; // 지도 좌표. 없으면 동네 중심 근처에 찍는다
   lng?: number;
+  promos?: string[]; // 임대인이 고른 진행 중인 할인·프로모션 (SPACE_PROMOS에서 고름)
+  keywords?: string[]; // 공간 특징 키워드 (최대 6개)
 }
+
+/** 임대인이 고를 수 있는 할인·프로모션 */
+export const SPACE_PROMOS = ['첫 대관 할인', '연박 할인', '공동 팝업 할인', '평일 특가', '비수기 특가', '촬영·행사 무료 제공'] as const;
+/** 공간 특징 키워드 추천 목록 (직접 입력도 가능) */
+export const SPACE_KEYWORDS = ['통창', '자연광', '1층 코너', '골목 감성', '한옥', '화이트톤', '높은 층고', '주차 가능', '엘리베이터', '촬영하기 좋은', '야외 마당', '역세권', '주말 유동인구', '조용한 골목'] as const;
+/** 지역 지도 말풍선을 찍는 대표 좌표 [위도, 경도] */
+export const REGION_CENTER: Record<Region, [number, number]> = { 성동구: [37.5635, 127.0369], 마포구: [37.5663, 126.9019], 용산구: [37.5326, 126.9906], 종로구: [37.5735, 126.9788] };
 
 /** 이 면적 이하는 팀 대관 가능한 공간이라도 혼자 빌리기 알맞은 작은 공간으로 본다 */
 export const SOLO_MAX_M2 = 50;

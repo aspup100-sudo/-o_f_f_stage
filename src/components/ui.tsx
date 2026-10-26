@@ -45,6 +45,8 @@ const paths: Record<string, string> = {
   lock: 'M6 11h12v9H6zM9 11V8a3 3 0 016 0v3',
   bulb: 'M9 18h6M10 21h4M12 3a6 6 0 00-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0012 3z',
   bolt: 'M13 3L5 14h6l-1 7 8-11h-6z',
+  gift: 'M4 9h16v4H4zM6 13h12v8H6zM12 9v12M12 9c-2 0-4-1-4-3s3-2 4 1c1-3 4-3 4-1s-2 3-4 3z',
+  sliders: 'M4 7h9M17 7h3M4 17h3M11 17h9M15 5v4M9 15v4',
   flame: 'M12 21c-4 0-7-3-7-7 0-4 4-6 4-10 3 2 5 5 5 8 1-1 2-2 2-4 2 2 3 4 3 6 0 4-3 7-7 7z',
   megaphone: 'M4 10v4h3l8 4V6l-8 4zM18 9a4 4 0 010 6',
   camera: 'M4 8h4l2-3h4l2 3h4v11H4zM12 17a3.5 3.5 0 100-7 3.5 3.5 0 000 7z',

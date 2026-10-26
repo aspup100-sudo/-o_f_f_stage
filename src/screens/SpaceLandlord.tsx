@@ -8,7 +8,7 @@ import { setLastMinute, decideSpaceApplication, proposeSpaceToRecruitment, propo
 import { brandById, daysUntil, manwon, period, soonOpenDays, spaceById, teamById } from '@/store/logic';
 import { ScreenTitle, TrustLine } from '@/components/common';
 import { Button, Card, Chip, cx, Demo, Empty, Field, inputCls, Segmented, Sheet, StatusPill, SubHeader, Swatch, Tag, textareaCls, Ic , Icon } from '@/components/ui';
-import { FACILITIES, REGIONS, type Region } from '@/types';
+import { FACILITIES, REGIONS, SPACE_KEYWORDS, SPACE_PROMOS, type Region } from '@/types';
 import { SpaceCard, AvailabilityCalendar } from './Space';
 import { TeamIntroPage } from './Team';
 import { RecruitCard } from './Recruit';
@@ -86,8 +86,8 @@ export function SpaceEdit({ id }: { id?: string }) {
   const ex = spaceById(db, id);
   const [d, setD] = useState<SpaceDraft>(
     ex
-      ? { name: ex.name, region: ex.region, address: ex.address, intro: ex.intro, areaM2: ex.areaM2, dailyFee: ex.dailyFee, minDays: ex.minDays, facilities: ex.facilities, electricKw: ex.electricKw, teamRental: ex.teamRental, fashionOnly: ex.fashionOnly, photoHues: ex.photoHues, photos: ex.photos, lat: ex.lat, lng: ex.lng }
-      : { name: '', region: '마포구', address: '', intro: '', areaM2: 33, dailyFee: 500000, minDays: 2, facilities: ['행거', '조명'], electricKw: 5, teamRental: true, fashionOnly: true, photoHues: [] },
+      ? { name: ex.name, region: ex.region, address: ex.address, intro: ex.intro, areaM2: ex.areaM2, dailyFee: ex.dailyFee, minDays: ex.minDays, facilities: ex.facilities, electricKw: ex.electricKw, teamRental: ex.teamRental, fashionOnly: ex.fashionOnly, photoHues: ex.photoHues, photos: ex.photos, lat: ex.lat, lng: ex.lng, promos: ex.promos ?? [], keywords: ex.keywords ?? [] }
+      : { name: '', region: '마포구', address: '', intro: '', areaM2: 33, dailyFee: 500000, minDays: 2, facilities: ['행거', '조명'], electricKw: 5, teamRental: true, fashionOnly: true, photoHues: [], promos: [], keywords: [] },
   );
   const [addrOpen, setAddrOpen] = useState(false);
   const [geo, setGeo] = useState<'idle' | 'ok' | 'fail'>(ex?.lat ? 'ok' : 'idle');
@@ -160,6 +160,16 @@ export function SpaceEdit({ id }: { id?: string }) {
         </Field>
         <Field label="업종 고정(패션)" hint="패션 브랜드만 받으면 이전 팀의 집기·연출을 다음 팀이 이어 쓸 수 있어요">
           <Segmented items={[{ key: 'y', label: '패션 전용' }, { key: 'n', label: '업종 무관' }]} value={d.fashionOnly ? 'y' : 'n'} onChange={(k) => setD({ ...d, fashionOnly: k === 'y' })} />
+        </Field>
+        <Field label="공간 특징 키워드" hint="카드에 '통창 · 자연광'처럼 한 줄로 보여요. 최대 5개">
+          <div className="flex flex-wrap gap-1.5">
+            {SPACE_KEYWORDS.map((k) => { const cur = d.keywords ?? []; const on = cur.includes(k); return <Chip key={k} active={on} onClick={() => setD({ ...d, keywords: on ? cur.filter((x) => x !== k) : cur.length >= 5 ? cur : [...cur, k] })}>{k}</Chip>; })}
+          </div>
+        </Field>
+        <Field label="할인·프로모션" hint="진행하는 것만 골라 주세요. 공간 카드 아래에 빨간 선물 표시로 보여요">
+          <div className="flex flex-wrap gap-1.5">
+            {SPACE_PROMOS.map((k) => { const cur = d.promos ?? []; const on = cur.includes(k); return <Chip key={k} active={on} onClick={() => setD({ ...d, promos: on ? cur.filter((x) => x !== k) : [...cur, k] })}>{k}</Chip>; })}
+          </div>
         </Field>
         <Button full size="lg" disabled={!ok} onClick={() => { const sid = saveSpace(landlord.id, d, id); if (id) back(); else replace({ name: 'space', id: sid }); }}>{ex ? '저장' : '등록하고 비는 날 표시하기'}</Button>
         {!ok && missing.length > 0 && <p className="text-[12px] text-ink-500 text-center mt-2">남은 항목: {missing.join(', ')}</p>}

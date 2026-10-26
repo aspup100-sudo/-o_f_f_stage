@@ -8,7 +8,9 @@ import { displayName, manwon, soonOpenDays, period, popupById, spaceById, teamBy
 import { KakaoMap } from '@/components/KakaoMap';
 import { ScreenTitle, TrustLine } from '@/components/common';
 import { Avatar, Button, Card, Chip, Segmented, cx, Demo, Empty, Field, GradeBadge, Icon, inputCls, Sheet, StatusPill, SubHeader, Swatch, Tag, textareaCls, Ic } from '@/components/ui';
-import { canSoloRental, FACILITIES, REGIONS, type Region, type Space } from '@/types';
+import { canSoloRental, FACILITIES, REGIONS, SPACE_KEYWORDS, type Region, type Space } from '@/types';
+import { DualRange } from '@/components/DualRange';
+import { SpaceMap } from '@/components/SpaceMap';
 import type { DB } from '@/data/mock';
 import { ReviewGroup } from './BrandProfile';
 import { TeamIntroPage } from './Team';
@@ -27,6 +29,18 @@ function SaveSpaceButton({ spaceId, inline }: { spaceId: string; inline?: boolea
     >
       <Icon name="heart" filled={on} className={cx('w-[18px] h-[18px]', on ? 'text-red-500' : 'text-ink-700')} />
     </button>
+  );
+}
+
+/** 임대인이 고른 할인·프로모션 (빨간 선물 표시) */
+function PromoPills({ promos, all }: { promos?: string[]; all?: boolean }) {
+  if (!promos?.length) return null;
+  const shown = all ? promos : promos.slice(0, 2);
+  return (
+    <div className="flex flex-wrap gap-1.5 mt-2">
+      {shown.map((x) => <span key={x} className="inline-flex items-center h-6 px-2 rounded bg-red-50 border border-red-200 text-red-600 text-[12px] font-bold"><Ic n="gift" />{x}</span>)}
+      {!all && promos.length > shown.length && <span className="inline-flex items-center h-6 px-2 rounded bg-red-50 border border-red-200 text-red-600 text-[12px] font-bold">+{promos.length - shown.length}</span>}
+    </div>
   );
 }
 
@@ -52,6 +66,8 @@ export function SpaceCard({ db, s, onClick }: { db: DB; s: Space; onClick?: () =
           {canSoloRental(s) && <Tag tone="purple">단독 대관</Tag>}
           {s.fashionOnly && <Tag>패션 전용</Tag>}
         </div>
+        {!!s.keywords?.length && <div className="text-[12px] text-ink-500 mt-2 leading-snug line-clamp-2">{s.keywords.join(' · ')}</div>}
+        <PromoPills promos={s.promos} />
         <div className="flex items-end justify-between gap-3 mt-3 pt-3 border-t border-ink-100">
           <div className="text-[12px] text-ink-700 min-w-0">
             비는 날 <b className="text-ink-900">{openDays}일</b>
@@ -68,25 +84,61 @@ export function SpaceCard({ db, s, onClick }: { db: DB; s: Space; onClick?: () =
   );
 }
 
+const FEE_MAX = 2000000;
+const AREA_MAX = 100;
+type RentKind = 'all' | 'solo' | 'team';
+const manLabel = (v: number) => `${v / 10000}만원`;
+
+function Pill({ active, onClick, children }: { active?: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button type="button" onClick={onClick} className={cx('h-9 px-3.5 rounded-full border text-[14px] whitespace-nowrap', active ? 'bg-ink-900 text-white border-ink-900 font-bold' : 'bg-white text-ink-700 border-ink-300')}>{children}</button>
+  );
+}
+
+function FilterSection({ title, value, children }: { title: string; value?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <section className="py-4 border-b border-ink-100">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-[16px] font-extrabold">{title}</h3>
+        {value && <span className="text-[14px] font-bold text-brand-600">{value}</span>}
+      </div>
+      {children}
+    </section>
+  );
+}
+
 export function SpacesTab({ initial }: { initial?: '찜' }) {
   const { db, brand } = useMe();
-  const [region, setRegion] = useState<Region | '전체' | '찜' | '단독'>(initial ?? '전체');
-  const [maxFee, setMaxFee] = useState<number>(0);
-  const [minArea, setMinArea] = useState(0);
-  const [date, setDate] = useState('');
-  const [team, setTeam] = useState(false);
+  const [tab, setTab] = useState<'전체' | '찜' | '단독'>(initial ?? '전체');
+  const [region, setRegion] = useState<Region | null>(null);
+  const [fee, setFee] = useState<[number, number]>([0, FEE_MAX]);
+  const [area, setArea] = useState<[number, number]>([0, AREA_MAX]);
+  const [kind, setKind] = useState<RentKind>('all');
   const [fashion, setFashion] = useState(false);
+  const [promo, setPromo] = useState(false);
+  const [kw, setKw] = useState<string[]>([]);
+  const [date, setDate] = useState('');
   const [filterOpen, setFilterOpen] = useState(false);
+  const [showMap, setShowMap] = useState(true);
   const [sort, setSort] = useState<'base' | 'fee' | 'open' | 'deal'>('base');
   const openDays = (id: string) => db.availability.filter((a) => a.spaceId === id && a.status === 'open' && a.date > DEMO_TODAY).length;
-  const filterCount = (maxFee ? 1 : 0) + (minArea ? 1 : 0) + (team ? 1 : 0) + (fashion ? 1 : 0) + (date ? 1 : 0);
-  const list = db.spaces
-    .filter((s) => region === '전체' || (region === '찜' ? !!brand?.savedSpaces?.includes(s.id) : region === '단독' ? canSoloRental(s) : s.region === region))
-    .filter((s) => !maxFee || s.dailyFee <= maxFee)
-    .filter((s) => s.areaM2 >= minArea)
-    .filter((s) => !team || s.teamRental)
+  const feeOn = fee[0] > 0 || fee[1] < FEE_MAX;
+  const areaOn = area[0] > 0 || area[1] < AREA_MAX;
+  const filterCount = (region ? 1 : 0) + (feeOn ? 1 : 0) + (areaOn ? 1 : 0) + (kind !== 'all' ? 1 : 0) + (fashion ? 1 : 0) + (promo ? 1 : 0) + (kw.length ? 1 : 0) + (date ? 1 : 0);
+  const reset = () => { setRegion(null); setFee([0, FEE_MAX]); setArea([0, AREA_MAX]); setKind('all'); setFashion(false); setPromo(false); setKw([]); setDate(''); };
+  // 지역을 뺀 나머지 조건에 맞는 공간. 지도의 지역별 숫자는 이걸로 센다
+  const matched = db.spaces
+    .filter((s) => (tab === '찜' ? !!brand?.savedSpaces?.includes(s.id) : tab === '단독' ? canSoloRental(s) : true))
+    .filter((s) => s.dailyFee >= fee[0] && (fee[1] >= FEE_MAX || s.dailyFee <= fee[1]))
+    .filter((s) => s.areaM2 >= area[0] && (area[1] >= AREA_MAX || s.areaM2 <= area[1]))
+    .filter((s) => kind === 'all' || (kind === 'solo' ? canSoloRental(s) : s.teamRental))
     .filter((s) => !fashion || s.fashionOnly)
-    .filter((s) => !date || db.availability.some((a) => a.spaceId === s.id && a.date === date && a.status === 'open'))
+    .filter((s) => !promo || !!s.promos?.length || !!s.lastMinutePct)
+    .filter((s) => kw.every((k) => s.keywords?.includes(k)))
+    .filter((s) => !date || db.availability.some((a) => a.spaceId === s.id && a.date === date && a.status === 'open'));
+  const counts = Object.fromEntries(REGIONS.map((r) => [r, matched.filter((s) => s.region === r).length])) as Record<Region, number>;
+  const list = matched
+    .filter((s) => !region || s.region === region)
     .sort((a, b) => (sort === 'fee' ? a.dailyFee - b.dailyFee : sort === 'open' ? openDays(b.id) - openDays(a.id) : sort === 'deal' ? (b.lastMinutePct ?? 0) - (a.lastMinutePct ?? 0) : 0));
   const [mode, setMode] = useState<'space' | 'rental'>('space');
   if (mode === 'rental')
@@ -97,43 +149,88 @@ export function SpacesTab({ initial }: { initial?: '찜' }) {
         <RentalsBrowse />
       </div>
     );
+  const chip = (on: boolean) => cx('h-8 px-3 rounded border text-[13px] font-semibold shrink-0 whitespace-nowrap flex items-center gap-1', on ? 'bg-ink-900 text-white border-ink-900' : 'bg-ink-100 text-ink-700 border-transparent');
+  const feeText = !feeOn ? '전체' : fee[1] >= FEE_MAX ? `${manLabel(fee[0])} 이상` : fee[0] === 0 ? `${manLabel(fee[1])} 이하` : `${manLabel(fee[0])} ~ ${manLabel(fee[1])}`;
+  const areaText = !areaOn ? '전체' : area[1] >= AREA_MAX ? `${area[0]}㎡ 이상` : area[0] === 0 ? `${area[1]}㎡ 이하` : `${area[0]} ~ ${area[1]}㎡`;
   return (
     <div>
-      <ScreenTitle>{RENTAL_ON ? '공간·장비' : '공간'}</ScreenTitle>
+      <ScreenTitle
+        right={
+          <div className="flex items-center gap-1.5">
+            <button aria-label={showMap ? '지도 접기' : '지도 보기'} aria-pressed={showMap} onClick={() => setShowMap(!showMap)} className={cx('w-9 h-9 flex items-center justify-center rounded', showMap ? 'text-brand-600' : 'text-ink-700')}><Icon name="map" className="w-[22px] h-[22px]" /></button>
+            <button aria-label="공간 필터" onClick={() => setFilterOpen(true)} className="relative w-9 h-9 flex items-center justify-center rounded text-ink-700">
+              <Icon name="sliders" className="w-[22px] h-[22px]" />
+              {filterCount > 0 && <span className="absolute top-1 right-1 min-w-[14px] h-[14px] px-0.5 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">{filterCount}</span>}
+            </button>
+          </div>
+        }
+      >
+        {RENTAL_ON ? '공간·장비' : '공간'}
+      </ScreenTitle>
       {RENTAL_ON && <div className="px-4 mb-3"><Segmented items={[{ key: 'space', label: '공간 찾기' }, { key: 'rental', label: '장비 렌탈' }]} value={mode} onChange={setMode} /></div>}
-      <div className="px-4 mb-3 flex gap-1.5 overflow-x-auto no-scrollbar">
-        <button onClick={() => setFilterOpen(true)} className={cx('h-8 px-3 rounded border text-xs font-semibold shrink-0 flex items-center gap-1', filterCount ? 'bg-ink-900 text-white border-ink-900' : 'bg-white border-ink-300')}>
-          <Icon name="search" className="w-3.5 h-3.5" /> 조건{filterCount > 0 && ` ${filterCount}`}
-        </button>
-        {(['전체', ...(brand ? (['찜'] as const) : []), '단독', ...REGIONS] as const).map((r) => <Chip key={r} active={region === r} onClick={() => setRegion(r)}>{r === '찜' ? <><Ic n="heart" />찜 {brand?.savedSpaces?.length ?? 0}</> : r === '단독' ? '단독 대관 가능' : r}</Chip>)}
+      <div className="px-4 mb-2 flex gap-1.5 overflow-x-auto no-scrollbar">
+        {(['전체', ...(brand ? (['찜'] as const) : []), '단독'] as const).map((t) => (
+          <Chip key={t} active={tab === t} onClick={() => setTab(t)}>{t === '찜' ? <><Ic n="heart" />찜 {brand?.savedSpaces?.length ?? 0}</> : t === '단독' ? '단독 대관 가능' : t}</Chip>
+        ))}
       </div>
-      <Sheet open={filterOpen} onClose={() => setFilterOpen(false)} title="공간 조건">
-        <div className="text-[13px] font-semibold mb-2">1일 대관료</div>
-        <div className="flex flex-wrap gap-1.5 mb-4">
-          {[[0, '전체'], [500000, '50만원 이하'], [1000000, '100만원 이하'], [1500000, '150만원 이하']].map(([v, l]) => (
-            <Chip key={l} active={maxFee === v} onClick={() => setMaxFee(v as number)}>{l}</Chip>
-          ))}
+      <div className="px-4 mb-3 flex gap-1.5 overflow-x-auto no-scrollbar items-center">
+        <button onClick={() => setFilterOpen(true)} className={chip(!!region)}>{region ?? '지역'}</button>
+        <button onClick={() => setFilterOpen(true)} className={chip(feeOn)}>{feeOn ? feeText : '대관료'}</button>
+        <button onClick={() => setFilterOpen(true)} className={chip(areaOn)}>{areaOn ? areaText : '면적'}</button>
+        <button onClick={() => setFilterOpen(true)} className={chip(kind !== 'all' || fashion)}>{kind === 'solo' ? '단독 대관' : kind === 'team' ? '팀 대관' : '대관 방식'}</button>
+        <button onClick={() => setPromo(!promo)} className={chip(promo)}><Ic n="gift" />프로모션</button>
+        <button onClick={() => setFilterOpen(true)} className={chip(kw.length > 0)}>{kw.length ? `키워드 ${kw.length}` : '키워드'}</button>
+        {filterCount > 0 && <button onClick={reset} className="h-8 px-2 text-[13px] font-semibold text-ink-500 shrink-0 flex items-center border-l border-ink-300 ml-1 pl-3"><Ic n="repeat" />초기화</button>}
+      </div>
+      {showMap && (
+        <div className="px-4 mb-3">
+          <SpaceMap counts={counts} selected={region} onPick={setRegion} spaces={matched} className="h-[220px]" />
+          <p className="text-[12px] text-ink-500 mt-1.5">숫자는 지역별 공간 수예요. 지역을 누르면 그 지역 공간만 보여요{region ? <> · <button className="font-semibold text-ink-900 underline" onClick={() => setRegion(null)}>전체 지역 보기</button></> : null}</p>
         </div>
-        <div className="text-[13px] font-semibold mb-2">면적</div>
-        <div className="flex flex-wrap gap-1.5 mb-4">
-          {[[0, '전체'], [30, '30㎡ 이상'], [50, '50㎡ 이상']].map(([v, l]) => (
-            <Chip key={l} active={minArea === v} onClick={() => setMinArea(v as number)}>{l}</Chip>
-          ))}
-        </div>
-        <div className="text-[13px] font-semibold mb-2">조건</div>
-        <div className="flex flex-wrap gap-1.5 mb-4">
-          <Chip active={team} onClick={() => setTeam(!team)}>팀 단위 대관 가능</Chip>
-          <Chip active={fashion} onClick={() => setFashion(!fashion)}>업종 고정(패션)</Chip>
-        </div>
-        <div className="text-[13px] font-semibold mb-2">이 날 비어 있는 공간</div>
-        <input type="date" value={date} min="2026-10-26" onChange={(e) => setDate(e.target.value)} className={inputCls + ' mb-5'} />
-        <div className="flex gap-2">
-          <Button variant="secondary" onClick={() => { setMaxFee(0); setMinArea(0); setTeam(false); setFashion(false); setDate(''); }}>초기화</Button>
-          <Button full onClick={() => setFilterOpen(false)}>{list.length}곳 보기</Button>
+      )}
+      <Sheet open={filterOpen} onClose={() => setFilterOpen(false)} title="필터">
+        <FilterSection title="지역" value={region ?? '전체'}>
+          <div className="flex flex-wrap gap-2">
+            <Pill active={!region} onClick={() => setRegion(null)}>전체</Pill>
+            {REGIONS.map((r) => <Pill key={r} active={region === r} onClick={() => setRegion(region === r ? null : r)}>{r} {counts[r]}</Pill>)}
+          </div>
+        </FilterSection>
+        <FilterSection title="1일 대관료" value={feeText}>
+          <div className="px-1"><DualRange label="1일 대관료" min={0} max={FEE_MAX} step={100000} value={fee} onChange={setFee} /></div>
+          <div className="flex justify-between text-[12px] text-ink-500 mt-1.5"><span>최소</span><span>100만원</span><span>최대</span></div>
+        </FilterSection>
+        <FilterSection title="면적" value={areaText}>
+          <div className="px-1"><DualRange label="면적" min={0} max={AREA_MAX} step={5} value={area} onChange={setArea} /></div>
+          <div className="flex justify-between text-[12px] text-ink-500 mt-1.5"><span>최소</span><span>50㎡</span><span>최대</span></div>
+        </FilterSection>
+        <FilterSection title="대관 방식" value={kind === 'solo' ? '단독 대관 가능' : kind === 'team' ? '팀 단위 대관 가능' : '전체'}>
+          <div className="flex flex-wrap gap-2">
+            <Pill active={kind === 'all'} onClick={() => setKind('all')}>전체</Pill>
+            <Pill active={kind === 'solo'} onClick={() => setKind('solo')}>단독 대관 가능</Pill>
+            <Pill active={kind === 'team'} onClick={() => setKind('team')}>팀 단위 대관 가능</Pill>
+            <Pill active={fashion} onClick={() => setFashion(!fashion)}>업종 고정(패션)</Pill>
+          </div>
+        </FilterSection>
+        <FilterSection title="프로모션" value={promo ? '진행 중만' : '전체'}>
+          <div className="flex flex-wrap gap-2">
+            <Pill active={promo} onClick={() => setPromo(!promo)}>할인·프로모션 진행 중</Pill>
+          </div>
+        </FilterSection>
+        <FilterSection title="공간 특징" value={kw.length ? `${kw.length}개 선택` : '전체'}>
+          <div className="flex flex-wrap gap-2">
+            {[...new Set([...SPACE_KEYWORDS, ...db.spaces.flatMap((x) => x.keywords ?? [])])].map((k) => <Pill key={k} active={kw.includes(k)} onClick={() => setKw(kw.includes(k) ? kw.filter((x) => x !== k) : [...kw, k])}>{k}</Pill>)}
+          </div>
+        </FilterSection>
+        <FilterSection title="이 날 비어 있는 공간" value={date || undefined}>
+          <input type="date" value={date} min="2026-10-26" onChange={(e) => setDate(e.target.value)} className={inputCls} />
+        </FilterSection>
+        <div className="sticky bottom-0 bg-white pt-3 pb-1 flex gap-2">
+          <button onClick={reset} disabled={filterCount === 0} className="h-12 px-5 rounded bg-ink-100 text-ink-700 font-bold flex items-center gap-1.5 disabled:opacity-40"><Ic n="repeat" />초기화</button>
+          <Button full size="lg" onClick={() => setFilterOpen(false)}>{list.length}곳 보기</Button>
         </div>
       </Sheet>
       <div className="px-4 mb-2 flex items-center justify-between">
-        <span className="text-[13px] text-ink-500">공간 <b className="text-ink-900">{list.length}</b>곳</span>
+        <span className="text-[13px] text-ink-500">{region ? `${region} ` : ''}공간 <b className="text-ink-900">{list.length}</b>곳</span>
         <select aria-label="공간 정렬" value={sort} onChange={(e) => setSort(e.target.value as typeof sort)} className="h-8 rounded-full border border-ink-300 bg-white px-2.5 text-[12px]">
           <option value="base">기본순</option>
           <option value="fee">대관료 낮은 순</option>
@@ -143,7 +240,7 @@ export function SpacesTab({ initial }: { initial?: '찜' }) {
       </div>
       <div className="px-4 space-y-3">
         {list.map((s) => <SpaceCard key={s.id} db={db} s={s} />)}
-        {!list.length && <Empty icon="building" action={{ label: '조건 초기화', onClick: () => { setRegion('전체'); setMaxFee(0); setMinArea(0); setTeam(false); setFashion(false); setDate(''); } }}>{region === '찜' ? '찜한 공간이 없어요. 마음에 드는 공간의 하트를 눌러 두세요' : '조건에 맞는 공간이 없어요'}</Empty>}
+        {!list.length && <Empty icon="building" action={{ label: '조건 초기화', onClick: () => { reset(); setTab('전체'); } }}>{tab === '찜' ? '찜한 공간이 없어요. 마음에 드는 공간의 하트를 눌러 두세요' : '조건에 맞는 공간이 없어요'}</Empty>}
       </div>
     </div>
   );
@@ -246,6 +343,14 @@ export function SpaceDetail({ id }: { id: string }) {
           return <KakaoMap pins={[{ id: s.id, lat, lng, label: s.name, tone: 'selected' }]} onSelect={() => {}} className="mt-3 w-full h-40 overflow-hidden border border-ink-300" fallback={null} />;
         })()}
         <p className="text-sm text-ink-700 mt-3 leading-relaxed">{s.intro}</p>
+        {!!s.keywords?.length && <div className="flex flex-wrap gap-1.5 mt-3">{s.keywords.map((k) => <Tag key={k}>#{k}</Tag>)}</div>}
+        {!!s.promos?.length && (
+          <div className="mt-3 rounded border border-red-200 bg-red-50 p-3">
+            <div className="text-[13px] font-bold text-red-600"><Ic n="gift" />진행 중인 할인·프로모션</div>
+            <PromoPills promos={s.promos} all />
+            <p className="text-[12px] text-ink-500 mt-2">자세한 조건은 채팅으로 임대인에게 확인해 보세요.</p>
+          </div>
+        )}
         <div className="grid grid-cols-3 mt-4 text-center border border-ink-300 divide-x divide-ink-300">
           <div className="py-2.5"><div className="text-[12px] text-ink-500">실측 면적</div><div className="font-bold">{s.areaM2}㎡ <span className="text-[12px] text-ink-500 font-normal">({(s.areaM2 / 3.3).toFixed(0)}평)</span></div></div>
           <div className="py-2.5"><div className="text-[12px] text-ink-500">1일 대관료</div><div className="font-bold text-brand-600">{manwon(s.dailyFee)}</div>{s.lastMinutePct && soonOpenDays(db, s.id) > 0 && <div className="text-[11px] text-red-600 font-bold">2주 안 {manwon(s.dailyFee * (1 - s.lastMinutePct / 100))}</div>}</div>
