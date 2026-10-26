@@ -180,7 +180,7 @@ export function AvailabilityCalendar({ db, spaceId, editable }: { db: DB; spaceI
               onClick={() => toggleAvailability(spaceId, d)}
               className={cx(
                 'aspect-square rounded-lg text-[12px] font-semibold flex items-center justify-center',
-                past ? 'text-ink-400' : st === 'open' ? 'bg-white border border-ink-900 text-ink-900 font-bold' : st === 'booked' ? 'bg-ink-100 text-ink-400 line-through' : 'bg-white border border-ink-100 text-ink-700',
+                past ? 'text-ink-300' : st === 'open' ? 'bg-white border border-ink-300 text-ink-900 font-bold' : st === 'booked' ? 'bg-ink-100 text-ink-400 line-through' : 'text-ink-400',
               )}
             >
               {Number(d.slice(8))}
@@ -189,9 +189,9 @@ export function AvailabilityCalendar({ db, spaceId, editable }: { db: DB; spaceI
         })}
       </div>
       <div className="flex gap-3 text-[12px] text-ink-500 mt-2">
-        <span><span className="inline-block w-2.5 h-2.5 border border-ink-900 mr-1" />비는 날</span>
-        <span><span className="inline-block w-2.5 h-2.5 rounded bg-ink-300 mr-1" />예약됨</span>
-        <span><span className="inline-block w-2.5 h-2.5 rounded border border-ink-300 mr-1" />미정</span>
+        <span><span className="inline-block w-2.5 h-2.5 border border-ink-300 mr-1" />비는 날</span>
+        <span><span className="inline-block w-2.5 h-2.5 bg-ink-100 border border-ink-100 mr-1" />예약됨</span>
+        <span className="text-ink-400">흐린 날짜는 미정</span>
       </div>
       {editable && (
         <div className="flex items-center justify-between mt-2">
