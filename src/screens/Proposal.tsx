@@ -89,11 +89,8 @@ export function ProposalsScreen() {
                   const pct = matchPct(m.score);
                   return <div className="mt-2 text-[12px] text-brand-700 border-l-2 border-brand-500 px-2.5 py-1.5">궁합 {pct}%{m.reasons[0] ? ` · ${m.reasons[0]}` : ''}</div>;
                 })()}
-                <div className="flex flex-wrap gap-1 mt-2">
-                  <Tag><Ic n="calendar" />{p.period}</Tag>
-                  <Tag><Ic n="pin" />{p.region}</Tag>
-                  <Tag tone="blue">1인 {manwon(p.budgetPerBrand)}</Tag>
-                  <Tag tone="purple">{p.teamSize}팀</Tag>
+                <div className="text-[13px] text-ink-700 mt-2.5">
+                  {p.period} · {p.region} · {p.teamSize}개 브랜드 · <b className="text-ink-900">1곳당 {manwon(p.budgetPerBrand)}</b>
                 </div>
                 <p className="text-sm text-ink-700 mt-2 leading-relaxed">"{p.reason}"</p>
                 {p.status === 'sent' && tab === 'recv' && (
