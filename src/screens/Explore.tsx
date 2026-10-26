@@ -17,12 +17,12 @@ export default function Explore() {
   const [view, setView] = useState<View>('brand');
   return (
     <div>
-      <div className="sticky top-14 z-20 bg-white px-4 flex gap-5 border-b border-ink-100">
+      <div className="sticky top-14 z-20 bg-band px-4 flex gap-5">
         {([{ key: 'brand', label: '홈' }, { key: 'magazine', label: '매거진' }, { key: 'showcase', label: '팝업자랑' }, { key: 'qna', label: 'Q&A' }] as { key: View; label: string }[]).map((it) => (
           <button
             key={it.key}
             onClick={() => { setView(it.key); window.scrollTo?.(0, 0); }}
-            className={cx('h-11 text-[16px] font-extrabold border-b-2 -mb-px', view === it.key ? 'border-ink-900 text-ink-900' : 'border-transparent text-ink-500/70')}
+            className={cx('h-11 text-[16px] font-extrabold border-b-2 -mb-px', view === it.key ? 'border-white text-white' : 'border-transparent text-white/70')}
           >
             {it.label}
           </button>
