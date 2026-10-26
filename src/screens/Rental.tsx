@@ -31,7 +31,7 @@ function Price({ it, big }: { it: RentalItem; big?: boolean }) {
 
 function WinWinBanner() {
   return (
-    <div className="bg-white border border-ink-900 p-4">
+    <div className="bg-white rounded border border-ink-300 p-4">
       <div className="text-[12px] text-ink-500">렌탈 제휴</div>
       <div className="font-extrabold text-lg leading-snug mt-0.5">집기는 사지 말고, 제휴가로 빌려요</div>
       <div className="grid grid-cols-2 gap-2 mt-3 text-[12px]">
@@ -93,7 +93,7 @@ export function RentalsBrowse({ teamId, embedded }: { teamId?: string; embedded?
     <div className={embedded ? '' : 'px-4'}>
       <WinWinBanner />
       {team && missing.length > 0 && (
-        <div className="mt-3 border border-ink-900 p-3.5">
+        <div className="mt-3 rounded border border-ink-300 p-3.5">
           <div className="text-[13px] font-bold text-brand-700">{team.name} 공간 · {spaceById(db, team.spaceId)?.name}에 없는 설비</div>
           <div className="flex flex-wrap gap-1.5 mt-2">
             {missing.map((m) => <Chip key={m.facility} active={cat === m.category} onClick={() => setCat(m.category)}>{m.facility} → {m.category} 빌리기</Chip>)}

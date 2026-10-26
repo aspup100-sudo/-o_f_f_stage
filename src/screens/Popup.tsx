@@ -93,7 +93,7 @@ export function PopupDetail({ id }: { id: string }) {
         </div>
 
         {p.status === '예정' && (
-          <div className="mt-4 border border-ink-900 p-4 flex items-center gap-3">
+          <div className="mt-4 rounded border border-ink-300 p-4 flex items-center gap-3">
             <div className="flex-1">
               <div className="font-bold text-[15px]">오픈 {dday(p.period.start)} · <span className="text-brand-600">{waitCount(p)}명</span>이 기다려요</div>
               <div className="text-[12px] text-ink-500 mt-0.5">알림을 켜 두면 전날 저녁과 오픈 당일에 알려 드려요</div>
@@ -127,7 +127,7 @@ export function PopupDetail({ id }: { id: string }) {
                 })()}
               </div>
             ) : (
-              <div className="bg-white border border-ink-900 p-4">
+              <div className="bg-white rounded border border-ink-300 p-4">
                 <div className="font-bold">현장에서 방문 인증하기</div>
                 <div className="text-[13px] text-ink-500 mt-0.5">QR 대신 매장에 붙은 6자리 코드를 입력해요 <Demo /></div>
                 <div className="flex gap-2 mt-3">
@@ -372,7 +372,7 @@ export function StampsTab() {
     <div>
       <ScreenTitle>스탬프</ScreenTitle>
       <div className="px-4">
-        <div className="bg-white border border-ink-900 p-5">
+        <div className="bg-white rounded border border-ink-300 p-5">
           <div className="text-sm text-ink-500">서로 다른 공동 팝업 {STAMP_GOAL}곳 방문하면 혜택 배지 <Demo /></div>
           <div className="text-3xl font-extrabold mt-1">{Math.min(n, STAMP_GOAL)} / {STAMP_GOAL}</div>
           <div className="grid grid-cols-3 gap-3 mt-4">

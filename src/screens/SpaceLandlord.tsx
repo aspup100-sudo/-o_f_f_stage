@@ -32,7 +32,7 @@ export function MySpacesTab() {
           const savers = db.brands.filter((b) => b.savedSpaces?.some((id) => landlord.spaceIds.includes(id))).length;
           const pct = booked + open ? Math.round((booked / (booked + open)) * 100) : 0;
           return (
-            <div className="bg-white border border-ink-900 p-4">
+            <div className="bg-white rounded border border-ink-300 p-4">
               <div className="text-[12px] text-ink-500">앞으로 30일 내 공간 현황</div>
               <div className="flex items-end gap-2 mt-0.5">
                 <span className="text-2xl font-extrabold">{pct}%</span>

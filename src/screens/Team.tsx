@@ -380,7 +380,7 @@ function CostTab({ team, myBrandId, isLeader }: { team: Team; myBrandId: string;
         </div>
       </Card>
       {shares[myBrandId] !== undefined && total > 0 && (
-        <div className="bg-white border border-ink-900 p-4">
+        <div className="bg-white rounded border border-ink-300 p-4">
           <div className="text-[12px] text-ink-500">혼자 열었다면 {won(total)}</div>
           <div className="text-lg font-extrabold mt-0.5">같이 열어서 내 몫은 <span className="text-brand-500">{won(shares[myBrandId])}</span></div>
           <div className="text-[12px] text-ink-500 mt-0.5">{Math.round((1 - shares[myBrandId] / total) * 100)}% 아꼈어요 · {won(total - shares[myBrandId])} 절약</div>
