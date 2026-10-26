@@ -475,7 +475,7 @@ function StampLevels({ n }: { n: number }) {
         );
       })()}
       <p className="text-[13px] text-ink-700 mt-2">
-        {next ? <>다음 등급 <b>{next.name}</b>까지 <b className="text-brand-600">{next.at - n}곳</b> 남았어요 · {next.perk}</> : '모든 등급을 달성했어요!'}
+        {next ? <>다음 등급 <b>{next.name}</b>까지 <b className="text-brand-600">{next.at - n}곳</b> 남았어요 · {next.perk}</> : '모든 등급 달성'}
       </p>
     </div>
   );

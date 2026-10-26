@@ -551,7 +551,7 @@ export function agreeAgreement(teamId: string, brandId: string) {
       );
     }
   });
-  toast(locked ? '전원 동의 완료! 팀이 확정됐어요' : '동의했어요. 다른 팀원에게 알림을 보냈어요');
+  toast(locked ? '모두 동의했어요. 팀이 확정됐어요' : '동의했어요. 다른 팀원에게 알림을 보냈어요');
 }
 
 export function simulateOthersAgree(teamId: string, myBrandId: string) {
@@ -562,7 +562,7 @@ export function simulateOthersAgree(teamId: string, myBrandId: string) {
     t.members.forEach((m) => { if (m.brandId !== myBrandId && !a.agreedBy.includes(m.brandId)) a.agreedBy.push(m.brandId); });
     locked = lockIfAllAgreed(s.db, teamId);
   });
-  toast(locked ? '전원 동의 완료! 팀이 확정됐어요' : '다른 팀원들이 동의했어요. 내 동의만 남았어요');
+  toast(locked ? '모두 동의했어요. 팀이 확정됐어요' : '다른 팀원들이 동의했어요. 내 동의만 남았어요');
 }
 
 export function updateCost(teamId: string, patch: Partial<import('@/types').CostSplit>) {
@@ -812,7 +812,7 @@ export function checkIn(popupId: string, userId: string, code: string): boolean 
       notify(s.db, userId, 'system', `서로 다른 공동 팝업 ${STAMP_GOAL}곳을 방문했어요. 스탬프 탭에서 혜택 배지를 받아 가세요.`, { name: 'tab', tab: 'stamps' });
     }
   });
-  toast(reached ? `방문 인증 완료! 스탬프 ${STAMP_GOAL}개를 모아 혜택 배지가 열렸어요` : '방문 인증 완료! 스탬프 1개를 적립했어요');
+  toast(reached ? `방문 인증됐어요. 스탬프 ${STAMP_GOAL}개를 모아 혜택 배지가 열렸어요` : '방문 인증됐어요. 스탬프 1개 적립');
   return true;
 }
 

@@ -568,7 +568,7 @@ const messages: Message[] = [
 const notifications: Notification[] = [
   { id: 'n1', userId: 'u_b1', type: 'agreement_request', text: '가을 산책단 공동 약속서에 동의해 주세요. (1/3 동의)', link: { name: 'team', id: 't1', sub: 'agreement' }, read: false, at: '2026-10-20T12:00:00' },
   { id: 'n2', userId: 'u_b1', type: 'proposal', text: '반짝임이 같이 해요 제안을 보냈어요.', link: { name: 'proposals' }, read: false, at: '2026-10-24T09:00:00' },
-  { id: 'n3', userId: 'u_v1', type: 'follow_popup', text: '팔로우한 크랙스튜디오의 공동 팝업 "골목 옷장"이 진행 중이에요!', link: { name: 'popup', id: 'p1' }, read: false, at: '2026-10-22T09:00:00' },
+  { id: 'n3', userId: 'u_v1', type: 'follow_popup', text: '팔로우한 크랙스튜디오의 공동 팝업 "골목 옷장"이 진행 중이에요.', link: { name: 'popup', id: 'p1' }, read: false, at: '2026-10-22T09:00:00' },
   { id: 'n4', userId: 'u_l1', type: 'space_application', text: '성수 오픈룸 A 이용 확정: 가을 산책단 (11/7~11/9)', link: { name: 'tab', tab: 'inbox' }, read: true, at: '2026-10-05T12:00:00' },
   { id: 'n5', userId: 'u_admin', type: 'system', text: '사업자 인증 대기 2건이 있어요.', link: { name: 'tab', tab: 'verify' }, read: false, at: '2026-10-24T09:00:00' },
 ];
