@@ -350,6 +350,7 @@ export function RecruitNew() {
   const slotsPreview = d.slotMode === 'category' ? d.categorySlots.reduce((s, c) => s + c.count, 0) : d.hangerCount;
   const share = slotsPreview ? d.totalBudget / slotsPreview : 0;
   const ok = d.title.trim() && slotsPreview >= 2 && (!d.spaceConfirmed || d.spaceId) && (d.slotMode === 'hanger' || d.categorySlots.some((c) => c.category === d.hostCategory && c.count > 0));
+  const missing = ([!d.title.trim() && '제목', slotsPreview < 2 && '자리 2개 이상', d.spaceConfirmed && !d.spaceId && '공간 선택', d.slotMode !== 'hanger' && !d.categorySlots.some((c) => c.category === d.hostCategory && c.count > 0) && '내가 쓸 자리']).filter(Boolean) as string[];
   const regionSpaces = db.spaces.filter((s) => s.region === d.region);
   const days = Math.max(1, Math.round((new Date(d.period.end).getTime() - new Date(d.period.start).getTime()) / 86400000) + 1);
   const avgFee = regionSpaces.length ? regionSpaces.reduce((sum, x) => sum + x.dailyFee, 0) / regionSpaces.length : 0;
@@ -471,6 +472,7 @@ export function RecruitNew() {
           {d.slotMode === 'hanger' && <div className="text-[12px] text-brand-700/80 mt-0.5">내 부담: {manwon(share * d.hostHangers)} (행거 {d.hostHangers}개)</div>}
         </div>
         <Button full size="lg" disabled={!ok} onClick={() => createRecruitment(brand!.id, d)}>모집글 올리기</Button>
+        {!ok && missing.length > 0 && <p className="text-[12px] text-ink-500 text-center mt-2">남은 항목: {missing.join(', ')}</p>}
       </div>
     </div>
   );

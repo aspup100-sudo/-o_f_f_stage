@@ -107,6 +107,7 @@ export function SpaceEdit({ id }: { id?: string }) {
   }, [addrOpen]);
   if (!landlord) return <Empty>임대인 계정에서 볼 수 있어요</Empty>;
   const ok = d.name.trim() && d.address.trim() && d.photoHues.length > 0;
+  const missing = ([d.photoHues.length === 0 && '사진', !d.name.trim() && '공간 이름', !d.address.trim() && '주소']).filter(Boolean) as string[];
   return (
     <div className="bg-white min-h-screen">
       <SubHeader title={ex ? '공간 수정' : '공간 등록'} />
@@ -161,6 +162,7 @@ export function SpaceEdit({ id }: { id?: string }) {
           <Segmented items={[{ key: 'y', label: '패션 전용' }, { key: 'n', label: '업종 무관' }]} value={d.fashionOnly ? 'y' : 'n'} onChange={(k) => setD({ ...d, fashionOnly: k === 'y' })} />
         </Field>
         <Button full size="lg" disabled={!ok} onClick={() => { const sid = saveSpace(landlord.id, d, id); if (id) back(); else replace({ name: 'space', id: sid }); }}>{ex ? '저장' : '등록하고 비는 날 표시하기'}</Button>
+        {!ok && missing.length > 0 && <p className="text-[12px] text-ink-500 text-center mt-2">남은 항목: {missing.join(', ')}</p>}
       </div>
     </div>
   );

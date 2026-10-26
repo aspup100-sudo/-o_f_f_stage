@@ -173,6 +173,7 @@ function BrandForm() {
   });
   const [ig, setIg] = useState('');
   const ok = d.name.trim() && d.tags.categories.length > 0 && d.tags.moods.length > 0;
+  const missing = ([!d.name.trim() && '브랜드 이름', d.tags.categories.length === 0 && '카테고리', d.tags.moods.length === 0 && '무드']).filter(Boolean) as string[];
   return (
     <div className="pt-6">
       <h1 className="text-2xl font-extrabold mb-1">브랜드 프로필</h1>
@@ -215,6 +216,7 @@ function BrandForm() {
         </p>
       )}
       <Button full size="lg" disabled={!ok} onClick={() => finishOnboarding({ brand: d })}>시작하기</Button>
+      {!ok && missing.length > 0 && <p className="text-[12px] text-ink-500 text-center mt-2">남은 항목: {missing.join(', ')}</p>}
       {!ok && <p className="text-center text-xs text-ink-500 mt-2">이름, 무드 1개 이상, 카테고리 1개 이상이 필요해요</p>}
     </div>
   );
