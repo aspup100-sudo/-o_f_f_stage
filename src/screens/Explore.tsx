@@ -12,6 +12,7 @@ import { BrandActions } from './BrandActions';
 import { ShowcaseList } from './Showcase';
 import { QnaList } from './Qna';
 import { MagazineList, MagazineThumb } from './Magazine';
+import { RENTAL_ON } from '@/config';
 import { RentalDeals } from './Rental';
 import { InstaThumb, instaFeed } from './Insta';
 import { TodayBrand, TodayLandlord, TodayRental, TodayVisitor } from './Today';
@@ -22,8 +23,8 @@ export default function Explore() {
   const { role } = useMe();
   const [picked, setView] = useState<View>('brand');
   // 렌탈 탭은 공간을 빌리는 브랜드에게만 보인다
-  const view: View = picked === 'rental' && role !== 'brand' ? 'brand' : picked;
-  const tabs = ([{ key: 'brand', label: '홈' }, { key: 'magazine', label: '매거진' }, { key: 'showcase', label: '팝업자랑' }, { key: 'rental', label: '렌탈' }, { key: 'qna', label: 'Q&A' }] as { key: View; label: string }[]).filter((it) => it.key !== 'rental' || role === 'brand');
+  const view: View = picked === 'rental' && !(RENTAL_ON && role === 'brand') ? 'brand' : picked;
+  const tabs = ([{ key: 'brand', label: '홈' }, { key: 'magazine', label: '매거진' }, { key: 'showcase', label: '팝업자랑' }, { key: 'rental', label: '렌탈' }, { key: 'qna', label: 'Q&A' }] as { key: View; label: string }[]).filter((it) => it.key !== 'rental' || (RENTAL_ON && role === 'brand'));
   return (
     <div>
       <div className="sticky top-14 z-20 bg-white px-4 flex gap-5 border-b border-ink-100">
