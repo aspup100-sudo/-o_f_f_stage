@@ -37,7 +37,7 @@ export function ShowcaseList() {
               <div className="font-bold">{s.title}</div>
               <div className="text-[12px] text-ink-500 mt-0.5">{period(s.period)} · {sp?.name} · {teamById(db, s.teamId)?.name}</div>
               <div className="text-[12px] font-semibold text-ink-700 mt-1.5">{s.brandIds.map((b) => `@${brandById(db, b)?.name}`).join('  ')}</div>
-              <p className="text-[13px] text-ink-700 mt-2 line-clamp-2"><Ic n="bulb" className="text-amber-600" />{s.tips}</p>
+              <p className="text-[13px] text-ink-700 mt-2 line-clamp-2"><Ic n="bulb" className="text-ink-500" />{s.tips}</p>
               <div className="text-[12px] text-ink-500 mt-2 flex items-center gap-1"><Icon name="heart" filled={!!s.helpful?.length} className="w-3.5 h-3.5 text-brand-500" /> 팁이 도움됐어요 {s.helpful?.length ?? 0}</div>
             </div>
           </Card>
@@ -86,7 +86,7 @@ export function ShowcaseDetail({ id }: { id: string }) {
           {(() => {
             const on = !!s.helpful?.includes(userId);
             return (
-              <button onClick={() => toggleShowcaseHelpful(s.id, userId)} className={cx('mt-3 h-9 px-3.5 rounded text-[13px] font-semibold flex items-center gap-1.5', on ? 'bg-amber-900 text-white' : 'bg-white text-ink-900 border border-amber-200')}>
+              <button onClick={() => toggleShowcaseHelpful(s.id, userId)} className={cx('mt-3 h-9 px-3.5 rounded text-[13px] font-semibold flex items-center gap-1.5', on ? 'bg-brand-500 text-white' : 'bg-white text-ink-900 border border-ink-300')}>
                 <Icon name="heart" filled={on} className="w-4 h-4" /> 팁이 도움됐어요 {s.helpful?.length ?? 0}
               </button>
             );

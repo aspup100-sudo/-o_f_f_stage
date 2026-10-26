@@ -552,7 +552,7 @@ function downloadShiftIcs(teamName: string, place: string, keys: string[]) {
 function ShiftTab({ team }: { team: Team }) {
   const { db, brand } = useMe();
   const sh = db.shifts.find((s) => s.teamId === team.id)!;
-  const colors = ['bg-ink-100 text-ink-700', 'bg-ink-100 text-ink-700', 'bg-emerald-100 text-emerald-700', 'bg-ink-100 text-ink-700', 'bg-red-50 text-red-600', 'bg-amber-100 text-amber-800'];
+  const colors = ['bg-ink-100 text-ink-700', 'bg-ink-100 text-ink-700', 'bg-ink-100 text-ink-700', 'bg-ink-100 text-ink-700', 'bg-ink-100 text-ink-700', 'bg-ink-100 text-ink-700'];
   const colorOf = (bid?: string) => colors[team.members.findIndex((m) => m.brandId === bid) % colors.length];
   const counts = team.members.map((m) => ({ m, n: Object.values(sh.assign).filter((x) => x === m.brandId).length }));
   const ended = team.stage === '종료';

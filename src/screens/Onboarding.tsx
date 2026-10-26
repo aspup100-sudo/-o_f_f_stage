@@ -115,10 +115,10 @@ function BizVerify({ status, role }: { status: string; role: Role }) {
         </>
       )}
       {status === 'pending' && (
-        <div className="rounded bg-amber-50 border border-amber-200 p-5 text-center">
-          <div className="w-10 h-10 mx-auto rounded-full border-4 border-amber-300 border-t-amber-600 animate-spin mb-3" />
-          <div className="font-bold text-amber-800">인증 대기 중</div>
-          <div className="text-sm text-amber-700 mt-1">국세청 정보와 대조하고 있어요 (데모: 2초 뒤 완료)</div>
+        <div className="rounded border border-ink-300 p-5 text-center">
+          <div className="w-10 h-10 mx-auto rounded-full border-4 border-ink-100 border-t-brand-500 animate-spin mb-3" />
+          <div className="font-bold text-ink-900">인증 대기 중</div>
+          <div className="text-sm text-ink-500 mt-1">국세청 정보와 대조하고 있어요 (데모: 2초 뒤 완료)</div>
         </div>
       )}
       {status === 'verified' && (

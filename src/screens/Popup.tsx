@@ -399,7 +399,7 @@ export function StampsTab() {
           </div>
           {n >= STAMP_GOAL && (
             st.rewardClaimed ? (
-              <div className="mt-4 rounded bg-amber-300 text-amber-950 p-3 text-center font-bold"><Ic n="medal" />공동 팝업 탐험가 배지 보유 중</div>
+              <div className="mt-4 rounded border border-ink-900 p-3 text-center font-bold"><Ic n="medal" />공동 팝업 탐험가 배지 보유 중</div>
             ) : (
               <Button full className="mt-4" onClick={() => claimStampReward(userId)}>혜택 배지 받기</Button>
             )
