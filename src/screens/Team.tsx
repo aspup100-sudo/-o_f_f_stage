@@ -135,10 +135,11 @@ export function TeamScreen({ id, sub = 'members' }: { id: string; sub?: string }
         )}
       />
       <div className="px-4 pt-3 pb-3 bg-white border-b border-ink-100">
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2 text-[12px]">
           <StatusPill status={team.stage} />
-          {team.confirmed ? <Tag tone="green">팀 확정</Tag> : <Tag tone="yellow">약속서 {ag.agreedBy.length}/{team.members.length} 동의</Tag>}
-          <Tag>{team.round}회차</Tag>
+          <span className="text-ink-500">{team.round}회차</span>
+          <span className="text-ink-300">|</span>
+          {team.confirmed ? <span className="font-semibold text-emerald-700">팀 확정</span> : <span className="font-semibold text-amber-700">약속서 {ag.agreedBy.length}/{team.members.length} 동의</span>}
         </div>
         <div className="flex items-center gap-2 mt-1.5">
           <h1 className="text-xl font-extrabold">{team.name}</h1>
@@ -492,7 +493,7 @@ function MoodboardTab({ team, myBrandId }: { team: Team; myBrandId: string }) {
   const [preview, setPreview] = useState(false);
   return (
     <div>
-      <p className="text-[13px] text-ink-500 mb-3">각 멤버가 룩북에서 3장씩 고르면 팀 소개 페이지가 자동으로 만들어져요. 공간에 지원할 때 이 페이지가 함께 첨부돼요.</p>
+      <p className="text-[13px] text-ink-500 mb-3">멤버마다 룩북에서 3장씩 고르면 팀 소개 페이지가 만들어지고, 공간 지원 때 함께 보내져요.</p>
       <div className="mb-3">
         <div className="text-[13px] font-semibold mb-1">한 줄 소개</div>
         <input className={inputCls} defaultValue={mb.headline} onBlur={(e) => setMoodHeadline(team.id, e.target.value)} />
