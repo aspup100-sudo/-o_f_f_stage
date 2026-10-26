@@ -3,8 +3,11 @@ import { useMe } from '@/store/hooks';
 import { isListedBrand, josa, matchPct, matchScore, recommendations, trustScore } from '@/store/logic';
 import { navigate } from '@/store/store';
 import { BrandCard, BrandLogo, PopupBannerCard } from '@/components/common';
-import { Chip, cx, Empty, Sheet, Button, Icon, Tag, Ic } from '@/components/ui';
-import { CATEGORIES, MOODS, PRICE_RANGES, type Category, type Mood, type PriceRange } from '@/types';
+import { Chip, cx, Empty, Sheet, Button, Icon, Tag, Ic, Swatch } from '@/components/ui';
+import { brandCoverSrc } from '@/data/photos';
+import { guard } from '@/store/hooks';
+import { toggleFollow, toggleHeart } from '@/store/actions';
+import { CATEGORIES, MOODS, PRICE_RANGES, type BrandProfile, type Category, type Mood, type PriceRange } from '@/types';
 import { BrandActions } from './BrandActions';
 import { ShowcaseList } from './Showcase';
 import { QnaList } from './Qna';
@@ -147,12 +150,10 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
             {price && <Tag tone="blue">{price}</Tag>}
           </div>
         )}
-        <div className="rounded bg-white px-3.5 divide-y divide-ink-100">
-          {(showAll ? list : list.slice(0, 6)).map((b) => (
-            <BrandCard key={b.id} compact db={db} brand={b} right={<BrandActions brandId={b.id} />} />
-          ))}
-          {!list.length && <Empty icon="search" action={{ label: '필터 초기화', onClick: () => { setMoods([]); setCats([]); setPrice(null); } }}>조건에 맞는 브랜드가 없어요</Empty>}
+        <div className="grid grid-cols-2 gap-x-3 gap-y-5">
+          {(showAll ? list : list.slice(0, 6)).map((b) => <BrandTile key={b.id} brand={b} />)}
         </div>
+        {!list.length && <Empty icon="search" action={{ label: '필터 초기화', onClick: () => { setMoods([]); setCats([]); setPrice(null); } }}>조건에 맞는 브랜드가 없어요</Empty>}
         {!showAll && list.length > 6 && (
           <button onClick={() => setShowAll(true)} className="w-full h-11 mt-3 rounded border border-ink-200 bg-white text-sm font-semibold">
             브랜드 {list.length - 6}곳 더 보기
@@ -179,6 +180,35 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
           <Button full onClick={() => setFilterOpen(false)}>{list.length}개 브랜드 보기</Button>
         </div>
       </Sheet>
+    </div>
+  );
+}
+
+/** 29CM 상품 카드처럼: 사진, 작은 카테고리, 이름, 무드 */
+function BrandTile({ brand: b }: { brand: BrandProfile }) {
+  const { db, role, visitor, brand, userId } = useMe();
+  const t = trustScore(db, b.id);
+  const live = db.popups.some((p) => p.status === '진행 중' && db.teams.find((x) => x.id === p.teamId)?.members.some((m) => m.brandId === b.id));
+  const on = role === 'visitor' ? !!visitor?.following.includes(b.id) : !!brand?.hearts.includes(b.id);
+  const canHeart = (role === 'visitor' && visitor) || (role === 'brand' && brand && brand.id !== b.id);
+  return (
+    <div className="min-w-0">
+      <div className="relative">
+        <button className="block w-full" onClick={() => navigate({ name: 'brand', id: b.id })}>
+          <Swatch src={brandCoverSrc(b, db.lookbookImages)} hue={b.logoHue} pattern="stripe" rounded="" className="aspect-square w-full" />
+        </button>
+        {live && <span className="absolute top-2 left-2 bg-white text-[11px] font-bold px-1.5 py-0.5">팝업 중</span>}
+        {canHeart && (
+          <button aria-label={role === 'visitor' ? '팔로우' : '관심 표시'} onClick={() => guard(() => (role === 'visitor' ? toggleFollow(userId, b.id) : toggleHeart(brand!.id, b.id)))} className={cx('absolute bottom-2 right-2', on ? 'text-red-500' : 'text-white drop-shadow')}>
+            <Icon name="heart" filled={on} className="w-6 h-6" />
+          </button>
+        )}
+      </div>
+      <button className="block w-full text-left mt-2" onClick={() => navigate({ name: 'brand', id: b.id })}>
+        <div className="text-[11px] text-ink-500">{b.tags.categories.join('·')} · {t.grade}</div>
+        <div className="text-[14px] font-bold truncate">{b.name}</div>
+        <div className="text-[12px] text-ink-700 truncate">{b.tags.moods.map((m) => `#${m}`).join(' ')}</div>
+      </button>
     </div>
   );
 }
