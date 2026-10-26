@@ -211,7 +211,7 @@ function MembersTab({ team, isLeader }: { team: Team; isLeader: boolean }) {
   const shift = db.shifts.find((x) => x.teamId === team.id);
   const [nudged, setNudged] = useState<string[]>([]);
   const chip = (ok: boolean, label: string) => (
-    <span className={cx('text-[12px] px-2 h-6 inline-flex items-center rounded-md font-semibold', ok ? 'border border-emerald-600 text-emerald-700' : 'border border-ink-300 text-ink-500')}>{ok && <Ic n="check" />}{label}</span>
+    <span className={cx('text-[12px] inline-flex items-center gap-0.5', ok ? 'text-emerald-700 font-semibold' : 'text-ink-400')}>{ok ? <Ic n="check" /> : <span className="w-1 h-1 rounded-full bg-ink-300 mx-1" />}{label}</span>
   );
   return (
     <div className="space-y-2.5">
@@ -241,7 +241,7 @@ function MembersTab({ team, isLeader }: { team: Team; isLeader: boolean }) {
               </div>
             </div>
             {team.stage !== '종료' && (
-              <div className="flex flex-wrap gap-1 mt-2.5">
+              <div className="flex flex-wrap gap-x-3 gap-y-1 mt-3 pt-2.5 border-t border-ink-100">
                 {chip(!!ag?.agreedBy.includes(m.brandId), '약속서')}
                 {chip(!!split?.paid.includes(m.brandId), '분담금')}
                 {chip(!!shift && Object.values(shift.assign).includes(m.brandId), `근무 ${shift ? Object.values(shift.assign).filter((x) => x === m.brandId).length : 0}회`)}
@@ -258,8 +258,8 @@ function MembersTab({ team, isLeader }: { team: Team; isLeader: boolean }) {
               if (!todo.length) return null;
               const sent = nudged.includes(m.brandId);
               return (
-                <button disabled={sent} onClick={() => { nudgeMember(team.id, m.brandId, todo); setNudged([...nudged, m.brandId]); }} className="mt-2.5 w-full h-9 rounded-lg border border-ink-300 text-[12px] font-semibold disabled:text-ink-500 disabled:bg-ink-100/60">
-                  {sent ? '✓ 알림 보냈어요' : <><Ic n="bell" />{todo.length}가지 남았다고 알려 주기</>}
+                <button disabled={sent} onClick={() => { nudgeMember(team.id, m.brandId, todo); setNudged([...nudged, m.brandId]); }} className="mt-2.5 w-full h-9 rounded-md border border-ink-300 text-[12px] font-semibold disabled:text-ink-500 disabled:bg-ink-100/60">
+                  {sent ? '알림 보냈어요' : <><Ic n="bell" />{todo.length}가지 남았다고 알려 주기</>}
                 </button>
               );
             })()}
