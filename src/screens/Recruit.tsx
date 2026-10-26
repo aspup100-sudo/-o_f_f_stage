@@ -93,8 +93,11 @@ export function RecruitsTab({ initial }: { initial?: '찜' }) {
         {(['전체', ...(brand ? (['찜'] as const) : []), '모집 중', '협의 중', '마감'] as const).map((s) => (
           <Chip key={s} active={st === s} onClick={() => setSt(s)}>{s === '찜' ? <><Ic n="heart" />찜 {saved.length}</> : s}</Chip>
         ))}
-        <span className="w-px bg-ink-300 mx-1" />
-        {(['전체', ...REGIONS] as const).map((r) => <Chip key={'r' + r} active={region === r} onClick={() => setRegion(r)}>{r === '전체' ? '모든 지역' : r}</Chip>)}
+      </div>
+      <div className="flex gap-4 overflow-x-auto no-scrollbar px-4 pb-2 text-[13px]">
+        {(['전체', ...REGIONS] as const).map((r) => (
+          <button key={'r' + r} onClick={() => setRegion(r)} className={cx('h-8 shrink-0 border-b-2', region === r ? 'border-ink-900 text-ink-900 font-bold' : 'border-transparent text-ink-500')}>{r === '전체' ? '모든 지역' : r}</button>
+        ))}
       </div>
       {brand && region !== '전체' && (() => {
         const on = !!brand.recruitAlertRegions?.includes(region);
