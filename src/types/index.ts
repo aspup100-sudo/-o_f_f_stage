@@ -122,6 +122,13 @@ export interface Space {
   lng?: number;
 }
 
+/** 이 면적 이하는 팀 대관 가능한 공간이라도 혼자 빌리기 알맞은 작은 공간으로 본다 */
+export const SOLO_MAX_M2 = 50;
+/** 단독 대관 가능 여부: 팀 대관이 안 되는 공간이거나, 면적이 크지 않은 공간 */
+export function canSoloRental(s: Pick<Space, 'teamRental' | 'areaM2'>): boolean {
+  return !s.teamRental || s.areaM2 <= SOLO_MAX_M2;
+}
+
 export interface SpaceAvailability {
   spaceId: ID;
   date: ISODate;

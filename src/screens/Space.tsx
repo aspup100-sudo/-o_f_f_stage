@@ -8,7 +8,7 @@ import { displayName, manwon, soonOpenDays, period, popupById, spaceById, teamBy
 import { KakaoMap } from '@/components/KakaoMap';
 import { ScreenTitle, TrustLine } from '@/components/common';
 import { Avatar, Button, Card, Chip, Segmented, cx, Demo, Empty, Field, GradeBadge, Icon, inputCls, Sheet, StatusPill, SubHeader, Swatch, Tag, textareaCls, Ic } from '@/components/ui';
-import { FACILITIES, REGIONS, type Region, type Space } from '@/types';
+import { canSoloRental, FACILITIES, REGIONS, type Region, type Space } from '@/types';
 import type { DB } from '@/data/mock';
 import { ReviewGroup } from './BrandProfile';
 import { TeamIntroPage } from './Team';
@@ -49,6 +49,7 @@ export function SpaceCard({ db, s, onClick }: { db: DB; s: Space; onClick?: () =
         <div className="flex items-center gap-1 flex-wrap mt-1.5">
           {s.lastMinutePct && soonOpenDays(db, s.id) > 0 && <Tag tone="red"><Ic n="bolt" />2주 안 {s.lastMinutePct}% 할인</Tag>}
           {s.teamRental && <Tag tone="green">팀 단위 대관</Tag>}
+          {canSoloRental(s) && <Tag tone="purple">단독 대관</Tag>}
           {s.fashionOnly && <Tag>패션 전용</Tag>}
         </div>
         <div className="flex items-end justify-between gap-3 mt-3 pt-3 border-t border-ink-100">
@@ -69,7 +70,7 @@ export function SpaceCard({ db, s, onClick }: { db: DB; s: Space; onClick?: () =
 
 export function SpacesTab({ initial }: { initial?: '찜' }) {
   const { db, brand } = useMe();
-  const [region, setRegion] = useState<Region | '전체' | '찜'>(initial ?? '전체');
+  const [region, setRegion] = useState<Region | '전체' | '찜' | '단독'>(initial ?? '전체');
   const [maxFee, setMaxFee] = useState<number>(0);
   const [minArea, setMinArea] = useState(0);
   const [date, setDate] = useState('');
@@ -80,7 +81,7 @@ export function SpacesTab({ initial }: { initial?: '찜' }) {
   const openDays = (id: string) => db.availability.filter((a) => a.spaceId === id && a.status === 'open' && a.date > DEMO_TODAY).length;
   const filterCount = (maxFee ? 1 : 0) + (minArea ? 1 : 0) + (team ? 1 : 0) + (fashion ? 1 : 0) + (date ? 1 : 0);
   const list = db.spaces
-    .filter((s) => region === '전체' || (region === '찜' ? !!brand?.savedSpaces?.includes(s.id) : s.region === region))
+    .filter((s) => region === '전체' || (region === '찜' ? !!brand?.savedSpaces?.includes(s.id) : region === '단독' ? canSoloRental(s) : s.region === region))
     .filter((s) => !maxFee || s.dailyFee <= maxFee)
     .filter((s) => s.areaM2 >= minArea)
     .filter((s) => !team || s.teamRental)
@@ -104,7 +105,7 @@ export function SpacesTab({ initial }: { initial?: '찜' }) {
         <button onClick={() => setFilterOpen(true)} className={cx('h-8 px-3 rounded border text-xs font-semibold shrink-0 flex items-center gap-1', filterCount ? 'bg-ink-900 text-white border-ink-900' : 'bg-white border-ink-300')}>
           <Icon name="search" className="w-3.5 h-3.5" /> 조건{filterCount > 0 && ` ${filterCount}`}
         </button>
-        {(['전체', ...(brand ? (['찜'] as const) : []), ...REGIONS] as const).map((r) => <Chip key={r} active={region === r} onClick={() => setRegion(r)}>{r === '찜' ? <><Ic n="heart" />찜 {brand?.savedSpaces?.length ?? 0}</> : r}</Chip>)}
+        {(['전체', ...(brand ? (['찜'] as const) : []), '단독', ...REGIONS] as const).map((r) => <Chip key={r} active={region === r} onClick={() => setRegion(r)}>{r === '찜' ? <><Ic n="heart" />찜 {brand?.savedSpaces?.length ?? 0}</> : r === '단독' ? '단독 대관 가능' : r}</Chip>)}
       </div>
       <Sheet open={filterOpen} onClose={() => setFilterOpen(false)} title="공간 조건">
         <div className="text-[13px] font-semibold mb-2">1일 대관료</div>
@@ -235,6 +236,7 @@ export function SpaceDetail({ id }: { id: string }) {
         <div className="flex items-center gap-1 flex-wrap mb-1.5">
           <Tag>{s.region}</Tag>
           {s.teamRental && <Tag tone="green">팀 단위 대관 가능</Tag>}
+          {canSoloRental(s) && <Tag tone="purple">단독 대관 가능</Tag>}
           {s.fashionOnly && <Tag tone="purple">업종 고정(패션)</Tag>}
         </div>
         <h1 className="text-xl font-extrabold">{s.name}</h1>
@@ -359,9 +361,12 @@ export function SpaceDetail({ id }: { id: string }) {
         <div className="sticky bottom-0 bg-white border-t border-ink-100 p-3 pb-safe flex gap-2">
           <SaveSpaceButton spaceId={s.id} inline />
           {s.teamRental ? (
-            <Button full size="lg" onClick={() => guard(() => setApplyOpen(true))}>우리 팀으로 지원하기</Button>
+            <>
+              {canSoloRental(s) && <Button size="lg" variant="secondary" onClick={() => guard(() => openDirectChat(ll.userId, `${s.name} 단독 대관 문의`, { type: 'space', refId: s.id }))}>단독 문의</Button>}
+              <Button full size="lg" onClick={() => guard(() => setApplyOpen(true))}>우리 팀으로 지원하기</Button>
+            </>
           ) : (
-            <Button full size="lg" variant="secondary" onClick={() => guard(() => openDirectChat(ll.userId, `${s.name} 문의`, { type: 'space', refId: s.id }))}>팀 단위 대관 불가 · 채팅으로 문의하기</Button>
+            <Button full size="lg" variant="secondary" onClick={() => guard(() => openDirectChat(ll.userId, `${s.name} 문의`, { type: 'space', refId: s.id }))}>단독 대관 · 채팅으로 문의하기</Button>
           )}
         </div>
       )}
