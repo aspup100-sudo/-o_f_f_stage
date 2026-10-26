@@ -38,8 +38,8 @@ function PromoPills({ promos, all }: { promos?: string[]; all?: boolean }) {
   const shown = all ? promos : promos.slice(0, 2);
   return (
     <div className="flex flex-wrap gap-1.5 mt-2">
-      {shown.map((x) => <span key={x} className="inline-flex items-center h-6 px-2 rounded bg-red-50 border border-red-200 text-red-600 text-[12px] font-bold"><Ic n="gift" />{x}</span>)}
-      {!all && promos.length > shown.length && <span className="inline-flex items-center h-6 px-2 rounded bg-red-50 border border-red-200 text-red-600 text-[12px] font-bold">+{promos.length - shown.length}</span>}
+      {shown.map((x) => <span key={x} className="inline-flex items-center h-6 px-2 border border-red-500 text-red-600 bg-white text-[12px] font-bold"><Ic n="gift" />{x}</span>)}
+      {!all && promos.length > shown.length && <span className="inline-flex items-center h-6 px-2 border border-red-500 text-red-600 bg-white text-[12px] font-bold">+{promos.length - shown.length}</span>}
     </div>
   );
 }
@@ -345,7 +345,7 @@ export function SpaceDetail({ id }: { id: string }) {
         <p className="text-sm text-ink-700 mt-3 leading-relaxed">{s.intro}</p>
         {!!s.keywords?.length && <div className="flex flex-wrap gap-1.5 mt-3">{s.keywords.map((k) => <Tag key={k}>#{k}</Tag>)}</div>}
         {!!s.promos?.length && (
-          <div className="mt-3 rounded border border-red-200 bg-red-50 p-3">
+          <div className="mt-3 rounded border border-red-500 p-3">
             <div className="text-[13px] font-bold text-red-600"><Ic n="gift" />진행 중인 할인·프로모션</div>
             <PromoPills promos={s.promos} all />
             <p className="text-[12px] text-ink-500 mt-2">자세한 조건은 채팅으로 임대인에게 확인해 보세요.</p>

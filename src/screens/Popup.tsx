@@ -112,7 +112,7 @@ export function PopupDetail({ id }: { id: string }) {
         {role === 'visitor' && p.status !== '예정' && (
           <div className="mt-4">
             {visited ? (
-              <div className="rounded bg-emerald-50 border border-emerald-200 p-4 text-emerald-700">
+              <div className="rounded border border-emerald-600 p-4 text-emerald-800">
                 <div className="font-bold"><Ic n="check" />방문 인증 완료</div>
                 <div className="text-sm mt-0.5">스탬프가 적립됐어요. 이제 리뷰를 남길 수 있어요.</div>
                 {(() => {
