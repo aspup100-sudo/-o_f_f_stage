@@ -228,7 +228,7 @@ export function TodayVisitor() {
   return (
     <section className="px-4 pt-4">
       <div className="bg-white border border-ink-900 p-5">
-        <div className="text-[13px] text-ink-500">{visitor.nickname}님, 오늘은 어디 갈까요?</div>
+        <div className="text-[13px] text-ink-500">{visitor.nickname} · 오늘의 팝업</div>
         <div className="text-xl font-extrabold leading-snug mt-1">
           지금 열린 공동 팝업 <span className="text-brand-500">{open.length}곳</span>
           {soon.length > 0 && <>,<br />곧 열릴 팝업 {soon.length}곳</>}
@@ -266,7 +266,7 @@ export function TodayVisitor() {
           <button onClick={() => navigate({ name: 'popup', id: p.id })} className="mt-3 w-full bg-white border border-ink-300 p-4 text-left flex items-center gap-3">
             <Icon name="pencil" className="w-6 h-6 shrink-0 text-brand-600" />
             <span className="flex-1 min-w-0">
-              <span className="block text-[14px] font-bold truncate">{p.title} 어땠나요?</span>
+              <span className="block text-[14px] font-bold truncate">{p.title} 후기 남기기</span>
               <span className="block text-[12px] text-ink-700">어떤 브랜드 조합이 좋았는지 남기면 다음 팝업 구성에 반영돼요</span>
             </span>
             <span className="text-ink-400">›</span>

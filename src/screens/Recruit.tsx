@@ -11,10 +11,18 @@ import type { DB } from '@/data/mock';
 import { ProposeSpaceButton } from './SpaceLandlord';
 
 const SLOT_STYLE: Record<SlotStatus, string> = {
-  모집자: 'bg-ink-900 text-white border-ink-900',
-  확정: 'bg-emerald-500 text-white border-emerald-500',
-  '협의 중': 'bg-amber-100 text-amber-800 border-amber-300',
+  모집자: 'bg-ink-100 text-ink-900 border-ink-300',
+  확정: 'bg-white text-emerald-800 border-emerald-600',
+  '협의 중': 'bg-white text-amber-800 border-amber-400',
   '비어 있음': 'bg-white text-ink-500 border-dashed border-ink-300',
+};
+
+// 카드의 자리 막대는 색으로 채워 한눈에 보이게
+const BAR_STYLE: Record<SlotStatus, string> = {
+  모집자: 'bg-ink-900 border-ink-900',
+  확정: 'bg-emerald-500 border-emerald-500',
+  '협의 중': 'bg-amber-200 border-amber-300',
+  '비어 있음': 'bg-white border-dashed border-ink-300',
 };
 
 export function SaveRecruitButton({ r }: { r: Recruitment }) {
@@ -59,7 +67,7 @@ export function RecruitCard({ db, r, reasons }: { db: DB; r: Recruitment; reason
           <div className="text-[12px] text-ink-700 mb-1.5">남은 자리 <b className="text-ink-900">{empty}</b> / {r.slots.length} · {r.slotMode === 'hanger' ? '행거 단위' : '카테고리 슬롯'}</div>
           <div className="flex items-center gap-1">
             {r.slots.map((s) => (
-              <span key={s.id} className={cx('h-1.5 flex-1 border', SLOT_STYLE[s.status])} />
+              <span key={s.id} className={cx('h-1.5 flex-1 border', BAR_STYLE[s.status])} />
             ))}
           </div>
         </div>
