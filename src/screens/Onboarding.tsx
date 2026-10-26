@@ -6,6 +6,7 @@ import { Button, Demo, Field, Icon, inputCls, textareaCls, cx, Swatch } from '@/
 import { TagPicker } from '@/components/common';
 import { INSTAGRAM_SAMPLE_LABELS } from '@/data/mock';
 import type { BrandProfile, Role, ThemeTags } from '@/types';
+import { lookbookSrc } from '@/data/photos';
 import { isListedBrand, matchPct, matchScore } from '@/store/logic';
 
 const STEPS = ['로그인', '역할', '인증', '프로필'];
@@ -37,7 +38,6 @@ function Login() {
   const db = useApp((s) => s.db);
   const recruiting = db.recruitments.filter((r) => r.status === '모집 중').length;
   const popups = db.popups.filter((p) => p.status !== '종료').length;
-  const maxOff = Math.max(0, ...db.rentalItems.map((i) => Math.round((1 - i.partnerPrice / i.dailyPrice) * 100)));
   return (
     <div className="flex flex-col h-full pt-16">
       <img src="./logo.png" alt="OFF STAGE" className="w-16 h-16 rounded mb-6" />
@@ -49,18 +49,12 @@ function Login() {
       <p className="text-ink-500 mt-3 text-[15px] leading-relaxed break-keep">
         작은 패션 브랜드끼리 팀을 짜고, 공간을 나눠 빌리고, 함께 연 경험을 기록하세요. 거래 수수료는 없어요.
       </p>
-      <div className="grid grid-cols-3 gap-2 mt-8">
-        {[
-          [`${recruiting}팀`, '지금 팀원 모집 중'],
-          [`${popups}곳`, '열렸거나 곧 열릴 팝업'],
-          RENTAL_ON ? [`최대 ${maxOff}%`, '제휴 장비 렌탈 할인'] : ['0원', '거래 수수료'],
-        ].map(([v, l]) => (
-          <div key={l} className="border-t-2 border-ink-900 pt-2.5">
-            <div className="text-2xl font-black">{v}</div>
-            <div className="text-[12px] text-ink-700 leading-tight mt-0.5 break-keep">{l}</div>
-          </div>
+      <div className="grid grid-cols-3 gap-0.5 mt-8">
+        {db.lookbookImages.filter((im) => ['b1', 'b2', 'b3'].includes(im.brandId)).filter((im, i, a) => a.findIndex((x) => x.brandId === im.brandId) === i).map((im) => (
+          <Swatch key={im.id} src={lookbookSrc(im)} hue={im.hue} pattern={im.pattern} className="aspect-[3/4]" rounded="" />
         ))}
       </div>
+      <p className="text-[12px] text-ink-500 mt-2">지금 {recruiting}팀이 팀원을 모으고, {popups}곳에서 팝업이 열려요</p>
       <div className="mt-auto pt-12 space-y-2.5">
         <button onClick={() => socialLogin('kakao')} className="w-full h-12 rounded-md bg-[#FEE500] text-[#191600] font-bold text-[15px]">
           카카오로 시작하기 <Demo />
