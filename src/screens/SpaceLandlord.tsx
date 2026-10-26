@@ -116,7 +116,7 @@ export function SpaceEdit({ id }: { id?: string }) {
           <div className="flex gap-1.5 flex-wrap">
             {d.photoHues.map((h, i) => (
               <button key={i} onClick={() => setD({ ...d, photoHues: d.photoHues.filter((_, j) => j !== i), photos: d.photos?.filter((_, j) => j !== i) })} className="relative">
-                <Swatch src={spaceSrc({ id: id ?? 'new', photos: d.photos }, i)} hue={h} className="w-20 h-20" rounded="rounded-md" />
+                <Swatch src={spaceSrc({ id: id ?? 'new', photos: d.photos }, i)} hue={h} className="w-20 h-20" rounded="rounded" />
                 <span className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white text-xs">✕</span>
               </button>
             ))}
@@ -125,7 +125,7 @@ export function SpaceEdit({ id }: { id?: string }) {
               if (!urls.length) return;
               const base = Array.from({ length: d.photoHues.length }, (_, i) => d.photos?.[i] ?? '');
               setD({ ...d, photoHues: [...d.photoHues, ...urls.map(() => Math.floor(Math.random() * 360))], photos: [...base, ...urls] });
-            }} className="w-20 h-20 rounded-md border-2 border-dashed border-ink-300 text-ink-500 text-xs flex flex-col items-center justify-center gap-1"><Icon name="camera" className="w-5 h-5" />사진 올리기</button>
+            }} className="w-20 h-20 rounded border-2 border-dashed border-ink-300 text-ink-500 text-xs flex flex-col items-center justify-center gap-1"><Icon name="camera" className="w-5 h-5" />사진 올리기</button>
           </div>
         </Field>
         <Field label="공간 이름" required><input className={inputCls} value={d.name} onChange={(e) => setD({ ...d, name: e.target.value })} placeholder="예) 망원 골목창고" /></Field>
@@ -315,7 +315,7 @@ function OfferToTeam({ teamId }: { teamId: string }) {
       <Sheet open={open} onClose={() => setOpen(false)} title="어떤 공간을 제안할까요?">
         <div className="space-y-2">
           {spaces.map((s) => (
-            <button key={s.id} onClick={() => { proposeSpaceToTeam(teamId, s.id); setOpen(false); }} className="w-full text-left rounded-md border border-ink-300 p-3 text-sm">
+            <button key={s.id} onClick={() => { proposeSpaceToTeam(teamId, s.id); setOpen(false); }} className="w-full text-left rounded border border-ink-300 p-3 text-sm">
               <b>{s.name}</b> · 1일 {manwon(s.dailyFee)}
             </button>
           ))}
@@ -337,7 +337,7 @@ export function ProposeSpaceButton({ recruitmentId }: { recruitmentId: string })
         {spaces.length === 0 && <Empty>먼저 공간을 등록해 주세요</Empty>}
         <div className="space-y-2">
           {spaces.map((s) => (
-            <button key={s.id} onClick={() => { const rid = proposeSpaceToRecruitment(recruitmentId, s.id); setOpen(false); navigate({ name: 'chat', id: rid }); }} className={cx('w-full text-left rounded-md border border-ink-300 p-3 text-sm')}>
+            <button key={s.id} onClick={() => { const rid = proposeSpaceToRecruitment(recruitmentId, s.id); setOpen(false); navigate({ name: 'chat', id: rid }); }} className={cx('w-full text-left rounded border border-ink-300 p-3 text-sm')}>
               <b>{s.name}</b> · {s.region} · 1일 {manwon(s.dailyFee)}
             </button>
           ))}

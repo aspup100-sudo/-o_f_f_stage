@@ -17,7 +17,7 @@ export function OfficialInsta({ compact }: { compact?: boolean }) {
       rel="noreferrer"
       className={cx('flex items-center gap-2.5 rounded border border-ink-100 bg-white', compact ? 'px-3 py-2' : 'p-3.5')}
     >
-      <span className="w-9 h-9 rounded-md flex items-center justify-center text-white font-black text-sm" style={{ background: 'linear-gradient(135deg,#f9a03f,#e1306c 55%,#833ab4)' }}>IG</span>
+      <span className="w-9 h-9 rounded flex items-center justify-center text-white font-black text-sm" style={{ background: 'linear-gradient(135deg,#f9a03f,#e1306c 55%,#833ab4)' }}>IG</span>
       <span className="flex-1 min-w-0">
         <span className="block text-sm font-bold">@{OFFICIAL_INSTAGRAM}</span>
         <span className="block text-[12px] text-ink-500">공식 인스타그램 · 매거진 카드뉴스를 먼저 받아 보세요</span>
@@ -202,7 +202,7 @@ export function MagazineAdminTab() {
         <OfficialInsta compact />
         {db.magazines.map((m) => (
           <Card key={m.id} className={cx('p-3 flex gap-3 items-center', m.hidden && 'opacity-50')}>
-            <div className="w-16 shrink-0 rounded-md overflow-hidden" onClick={() => navigate({ name: 'magazine', id: m.id })}>
+            <div className="w-16 shrink-0 rounded overflow-hidden" onClick={() => navigate({ name: 'magazine', id: m.id })}>
               <CardFace post={m} card={m.cards[0]} index={0} total={m.cards.length} />
             </div>
             <div className="flex-1 min-w-0">

@@ -123,7 +123,7 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
         <div className="flex items-center justify-between mb-2.5">
           <div className="flex items-center gap-2">
             <h2 className="text-[17px] font-extrabold tracking-tight">브랜드 둘러보기</h2>
-            <select value={sort} onChange={(e) => setSort(e.target.value as typeof sort)} className="text-[12px] text-ink-700 bg-transparent border border-ink-300 rounded-md h-7 px-2" aria-label="정렬">
+            <select value={sort} onChange={(e) => setSort(e.target.value as typeof sort)} className="text-[12px] text-ink-700 bg-transparent border border-ink-300 rounded h-7 px-2" aria-label="정렬">
               <option value="base">기본순</option>
               {brand && <option value="match">궁합 높은 순</option>}
               <option value="exp">공동 팝업 많은 순</option>
@@ -154,7 +154,7 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
           {!list.length && <Empty icon="search" action={{ label: '필터 초기화', onClick: () => { setMoods([]); setCats([]); setPrice(null); } }}>조건에 맞는 브랜드가 없어요</Empty>}
         </div>
         {!showAll && list.length > 6 && (
-          <button onClick={() => setShowAll(true)} className="w-full h-11 mt-3 rounded-md border border-ink-200 bg-white text-sm font-semibold">
+          <button onClick={() => setShowAll(true)} className="w-full h-11 mt-3 rounded border border-ink-200 bg-white text-sm font-semibold">
             브랜드 {list.length - 6}곳 더 보기
           </button>
         )}

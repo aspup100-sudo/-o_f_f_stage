@@ -48,7 +48,7 @@ export function BrandCard({ db, brand, right, reasons, compact }: { db: DB; bran
     const live = db.popups.find((p) => p.status === '진행 중' && teamById(db, p.teamId)?.members.some((m) => m.brandId === brand.id));
     return (
       <div className="flex gap-3 py-3">
-        <button aria-label={`${brand.name} 프로필`} onClick={() => navigate({ name: 'brand', id: brand.id })} className="w-[84px] h-[104px] shrink-0 rounded-md overflow-hidden">
+        <button aria-label={`${brand.name} 프로필`} onClick={() => navigate({ name: 'brand', id: brand.id })} className="w-[84px] h-[104px] shrink-0 rounded overflow-hidden">
           {im ? <Swatch src={lookbookSrc(im)} hue={im.hue} pattern={im.pattern} rounded="" className="w-full h-full" /> : <Swatch hue={brand.logoHue} rounded="" className="w-full h-full" />}
         </button>
         <div className="flex-1 min-w-0">
@@ -183,10 +183,10 @@ export function LookbookGrid({ db, ids, onPick, picked }: { db: DB; ids: string[
         const on = picked?.includes(id);
         return (
           <button key={id} onClick={() => onPick?.(id)} disabled={!onPick} className="relative aspect-square">
-            <Swatch src={lookbookSrc(im)} hue={im.hue} pattern={im.pattern} className="w-full h-full" rounded="rounded-md" />
+            <Swatch src={lookbookSrc(im)} hue={im.hue} pattern={im.pattern} className="w-full h-full" rounded="rounded" />
             {im.fromInstagram && <span className="absolute top-1 right-1 text-[9px] bg-white/85 rounded px-1">IG</span>}
             {on && (
-              <span className="absolute inset-0 rounded-lg ring-4 ring-brand-500 ring-inset flex items-start justify-start p-1">
+              <span className="absolute inset-0 rounded ring-4 ring-brand-500 ring-inset flex items-start justify-start p-1">
                 <span className="w-5 h-5 rounded-full bg-brand-500 text-white flex items-center justify-center">
                   <Icon name="check" className="w-3.5 h-3.5" />
                 </span>

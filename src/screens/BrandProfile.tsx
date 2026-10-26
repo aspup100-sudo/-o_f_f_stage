@@ -266,7 +266,7 @@ function MatchCard({ me, other }: { me: import('@/types').BrandProfile; other: i
       )}
       <button onClick={() => setOpen(!open)} className="mt-2 text-[12px] font-semibold text-ink-500">{open ? '접기 ▴' : '이렇게 계산했어요 ▾'}</button>
       {open && (
-        <div className="mt-2 rounded-md bg-white p-3 text-[12px]">
+        <div className="mt-2 rounded bg-white p-3 text-[12px]">
           {m.parts.map((x) => (
             <div key={x.label} className="flex justify-between py-0.5">
               <span className="text-ink-700">{x.label}</span>

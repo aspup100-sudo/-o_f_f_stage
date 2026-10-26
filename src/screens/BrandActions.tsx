@@ -18,7 +18,7 @@ export function BrandActions({ brandId, big }: { brandId: string; big?: boolean 
     return (
       <button
         onClick={() => guard(() => toggleHeart(brand.id, brandId))}
-        className={cx('rounded-md border flex items-center justify-center shrink-0', big ? 'w-10 h-10' : 'w-9 h-9', on ? 'border-red-200 bg-red-50 text-red-500' : 'border-ink-300 text-ink-500')}
+        className={cx('rounded border flex items-center justify-center shrink-0', big ? 'w-10 h-10' : 'w-9 h-9', on ? 'border-red-200 bg-red-50 text-red-500' : 'border-ink-300 text-ink-500')}
         aria-label="관심 표시"
       >
         <Icon name="heart" filled={on} className="w-5 h-5" />

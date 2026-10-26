@@ -35,7 +35,7 @@ export function InstallApp() {
 
   return (
     <div className="flex items-center gap-2.5 rounded border border-ink-100 bg-white p-3.5">
-      <span className="w-9 h-9 rounded-md bg-brand-500 text-white flex items-center justify-center"><Icon name="download" className="w-5 h-5" /></span>
+      <span className="w-9 h-9 rounded bg-brand-500 text-white flex items-center justify-center"><Icon name="download" className="w-5 h-5" /></span>
       <span className="flex-1 min-w-0">
         <span className="block text-sm font-bold">OFF STAGE 앱으로 쓰기</span>
         <span className="block text-[12px] text-ink-500">
@@ -47,7 +47,7 @@ export function InstallApp() {
         </span>
       </span>
       {deferred && (
-        <button onClick={install} className="h-8 px-3 rounded-md bg-ink-900 text-white text-xs font-bold">
+        <button onClick={install} className="h-8 px-3 rounded bg-ink-900 text-white text-xs font-bold">
           설치
         </button>
       )}

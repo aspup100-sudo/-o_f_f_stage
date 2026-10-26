@@ -86,7 +86,7 @@ export function ShowcaseDetail({ id }: { id: string }) {
           {(() => {
             const on = !!s.helpful?.includes(userId);
             return (
-              <button onClick={() => toggleShowcaseHelpful(s.id, userId)} className={cx('mt-3 h-9 px-3.5 rounded-md text-[13px] font-semibold flex items-center gap-1.5', on ? 'bg-amber-900 text-white' : 'bg-white text-ink-900 border border-amber-200')}>
+              <button onClick={() => toggleShowcaseHelpful(s.id, userId)} className={cx('mt-3 h-9 px-3.5 rounded text-[13px] font-semibold flex items-center gap-1.5', on ? 'bg-amber-900 text-white' : 'bg-white text-ink-900 border border-amber-200')}>
                 <Icon name="heart" filled={on} className="w-4 h-4" /> 팁이 도움됐어요 {s.helpful?.length ?? 0}
               </button>
             );
@@ -131,7 +131,7 @@ export function ShowcaseNew({ teamId }: { teamId: string }) {
         <Field label="사진" hint="데모에서는 예시 사진이 추가돼요">
           <div className="flex gap-1.5 flex-wrap">
             {hues.map((h, i) => <Swatch key={i} hue={h} className="w-16 h-16" />)}
-            <button type="button" onClick={() => setHues([...hues, Math.floor(Math.random() * 360)])} className="w-16 h-16 rounded-md border-2 border-dashed border-ink-300 text-ink-500 text-xs">+ <Demo /></button>
+            <button type="button" onClick={() => setHues([...hues, Math.floor(Math.random() * 360)])} className="w-16 h-16 rounded border-2 border-dashed border-ink-300 text-ink-500 text-xs">+ <Demo /></button>
           </div>
         </Field>
         <Field label="제목" required><input className={inputCls} value={title} onChange={(e) => setTitle(e.target.value)} /></Field>

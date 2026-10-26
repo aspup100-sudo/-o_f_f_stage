@@ -258,7 +258,7 @@ function MembersTab({ team, isLeader }: { team: Team; isLeader: boolean }) {
               if (!todo.length) return null;
               const sent = nudged.includes(m.brandId);
               return (
-                <button disabled={sent} onClick={() => { nudgeMember(team.id, m.brandId, todo); setNudged([...nudged, m.brandId]); }} className="mt-2.5 w-full h-9 rounded-md border border-ink-300 text-[12px] font-semibold disabled:text-ink-500 disabled:bg-ink-100/60">
+                <button disabled={sent} onClick={() => { nudgeMember(team.id, m.brandId, todo); setNudged([...nudged, m.brandId]); }} className="mt-2.5 w-full h-9 rounded border border-ink-300 text-[12px] font-semibold disabled:text-ink-500 disabled:bg-ink-100/60">
                   {sent ? '알림 보냈어요' : <><Ic n="bell" />{todo.length}가지 남았다고 알려 주기</>}
                 </button>
               );
@@ -358,7 +358,7 @@ function CostTab({ team, myBrandId, isLeader }: { team: Team; myBrandId: string;
         <div className="flex justify-between items-center text-sm mb-2">
           <span>대관료</span>
           <div className="flex items-center gap-1">
-            <input type="number" className="w-24 h-8 px-2 rounded-lg border border-ink-300 text-right text-sm" value={split.spaceFee / 10000} step={10} onChange={(e) => updateCost(team.id, { spaceFee: Number(e.target.value) * 10000 })} />
+            <input type="number" className="w-24 h-8 px-2 rounded border border-ink-300 text-right text-sm" value={split.spaceFee / 10000} step={10} onChange={(e) => updateCost(team.id, { spaceFee: Number(e.target.value) * 10000 })} />
             <span>만원</span>
           </div>
         </div>
@@ -401,7 +401,7 @@ function CostTab({ team, myBrandId, isLeader }: { team: Team; myBrandId: string;
             const paid = split.paid.includes(m.brandId);
             return (
               <div key={m.brandId} className="flex items-center gap-2.5 px-3.5 py-3">
-                <button onClick={() => (m.brandId === myBrandId || isLeader) && togglePaid(team.id, m.brandId)} className={cx('w-6 h-6 rounded-md border-2 flex items-center justify-center shrink-0', paid ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-ink-300')}>
+                <button onClick={() => (m.brandId === myBrandId || isLeader) && togglePaid(team.id, m.brandId)} className={cx('w-6 h-6 rounded border-2 flex items-center justify-center shrink-0', paid ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-ink-300')}>
                   {paid && <Icon name="check" className="w-4 h-4" />}
                 </button>
                 <div className="flex-1 min-w-0">
@@ -468,7 +468,7 @@ export function TeamIntroPage({ db, team, compact }: { db: DB; team: Team; compa
               <div className="grid grid-cols-3 gap-1">
                 {(mb?.picks[m.brandId] ?? []).map((id) => {
                   const im = db.lookbookImages.find((i) => i.id === id);
-                  return im ? <Swatch key={id} src={lookbookSrc(im)} hue={im.hue} pattern={im.pattern} className="aspect-square" rounded="rounded-lg" /> : null;
+                  return im ? <Swatch key={id} src={lookbookSrc(im)} hue={im.hue} pattern={im.pattern} className="aspect-square" rounded="rounded" /> : null;
                 })}
               </div>
               {!compact && <div className="mt-2"><ThemeTagList tags={b.tags} limit={5} /></div>}
@@ -509,7 +509,7 @@ function MoodboardTab({ team, myBrandId }: { team: Team; myBrandId: string }) {
         })}
       </div>
       <div className="mb-1.5 font-bold text-sm">지금까지 모인 팀 무드</div>
-      <div className="grid grid-cols-9 gap-0.5 rounded-md overflow-hidden mb-4">
+      <div className="grid grid-cols-9 gap-0.5 rounded overflow-hidden mb-4">
         {team.members.flatMap((m) => {
           const picks = mb.picks[m.brandId] ?? [];
           const b = brandById(db, m.brandId)!;
@@ -569,7 +569,7 @@ function ShiftTab({ team }: { team: Team }) {
           </div>
           {mine.length ? (
             <div className="flex flex-wrap gap-1.5 mt-2">
-              {mine.map((k) => { const [d, t] = k.split('|'); return <span key={k} className="text-[12px] font-semibold bg-white rounded-lg px-2 py-1">{md(d)}({dow(d)}) {t}</span>; })}
+              {mine.map((k) => { const [d, t] = k.split('|'); return <span key={k} className="text-[12px] font-semibold bg-white rounded px-2 py-1">{md(d)}({dow(d)}) {t}</span>; })}
             </div>
           ) : (
             <p className="text-[12px] text-ink-500 mt-1">아직 배정된 근무가 없어요. 빈칸을 눌러 내 근무를 정해 보세요.</p>
@@ -603,7 +603,7 @@ function ShiftTab({ team }: { team: Team }) {
                   const b = brandById(db, bid);
                   return (
                     <td key={t}>
-                      <button disabled={ended} onClick={() => cycleShift(team.id, k)} className={cx('w-full h-10 rounded-lg font-semibold', b ? colorOf(bid) : 'border border-dashed border-ink-300 text-ink-400', bid && bid === brand?.id && 'ring-2 ring-brand-500')}>
+                      <button disabled={ended} onClick={() => cycleShift(team.id, k)} className={cx('w-full h-10 rounded font-semibold', b ? colorOf(bid) : 'border border-dashed border-ink-300 text-ink-400', bid && bid === brand?.id && 'ring-2 ring-brand-500')}>
                         {b ? b.name : '+ 배정'}
                       </button>
                     </td>
@@ -691,7 +691,7 @@ ${hashtags.join(' ')}`;
           const on = team.promoChecked.includes(b.id);
           return (
             <button key={b.id} disabled={b.id !== myBrandId} onClick={() => togglePromo(team.id, b.id)} className="w-full flex items-center gap-3 px-3.5 py-3 text-left">
-              <span className={cx('w-6 h-6 rounded-md border-2 flex items-center justify-center', on ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-ink-300')}>{on && <Icon name="check" className="w-4 h-4" />}</span>
+              <span className={cx('w-6 h-6 rounded border-2 flex items-center justify-center', on ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-ink-300')}>{on && <Icon name="check" className="w-4 h-4" />}</span>
               <span className="flex-1 text-sm font-semibold">{b.name}{b.id === myBrandId && <span className="text-ink-500 font-normal"> (나)</span>}</span>
               <span className={cx('text-xs', on ? 'text-emerald-700' : 'text-ink-500')}>{on ? '게시 완료' : '대기'}</span>
             </button>

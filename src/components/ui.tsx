@@ -91,7 +91,7 @@ export function Button({
   };
   const s = { sm: 'h-8 px-3 text-xs', md: 'h-10 px-4 text-sm', lg: 'h-12 px-5 text-base' }[size];
   return (
-    <button type={type} disabled={disabled} onClick={onClick} className={cx('rounded-md font-semibold transition-colors inline-flex items-center justify-center gap-1.5 whitespace-nowrap', v[variant], s, full && 'w-full', className)}>
+    <button type={type} disabled={disabled} onClick={onClick} className={cx('rounded font-semibold transition-colors inline-flex items-center justify-center gap-1.5 whitespace-nowrap', v[variant], s, full && 'w-full', className)}>
       {children}
     </button>
   );
@@ -142,7 +142,7 @@ export function GradeBadge({ grade, small }: { grade: Grade; small?: boolean }) 
 }
 
 /** 실제 사진 대신 색과 패턴으로 그리는 이미지 자리 */
-export function Swatch({ hue, pattern = 'solid', label, className, rounded = 'rounded-xl', src }: { hue: number; pattern?: LookbookImage['pattern']; label?: string; className?: string; rounded?: string; src?: string }) {
+export function Swatch({ hue, pattern = 'solid', label, className, rounded = 'rounded', src }: { hue: number; pattern?: LookbookImage['pattern']; label?: string; className?: string; rounded?: string; src?: string }) {
   const [broken, setBroken] = useState<string | null>(null);
   const c1 = `hsl(${hue} 45% 82%)`;
   const c2 = `hsl(${hue} 40% 68%)`;
@@ -208,7 +208,7 @@ export function Empty({ children, icon = 'inbox', action }: { children: ReactNod
     <div className="py-10 flex flex-col items-center text-ink-500 text-sm gap-2 text-center">
       <Icon name={icon} className="w-8 h-8 text-ink-400" />
       {children}
-      {action && <button onClick={action.onClick} className="mt-1 h-9 px-4 rounded-md border border-ink-900 text-ink-900 text-[13px] font-semibold">{action.label}</button>}
+      {action && <button onClick={action.onClick} className="mt-1 h-9 px-4 rounded border border-ink-900 text-ink-900 text-[13px] font-semibold">{action.label}</button>}
     </div>
   );
 }
@@ -219,7 +219,7 @@ export function Sheet({ open, onClose, title, children }: { open: boolean; onClo
     <div className="fixed inset-0 z-50 flex justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="relative w-full max-w-[430px] h-full flex flex-col justify-end pointer-events-none">
-        <div className="pointer-events-auto bg-white rounded-t-xl max-h-[88vh] overflow-y-auto pb-safe-lg">
+        <div className="pointer-events-auto bg-white rounded-t max-h-[88vh] overflow-y-auto pb-safe-lg">
           <div className="sticky top-0 bg-white flex items-center px-4 pt-4 pb-2 z-10">
             <div className="flex-1 font-bold text-base">{title}</div>
             <button onClick={onClose} className="w-8 h-8 flex items-center justify-center text-ink-500" aria-label="닫기">
@@ -247,8 +247,8 @@ export function Field({ label, children, hint, required }: { label: ReactNode; c
   );
 }
 
-export const inputCls = 'w-full h-11 px-3 rounded-md border border-ink-300 bg-white text-sm outline-none focus:border-ink-900';
-export const textareaCls = 'w-full min-h-[88px] p-3 rounded-md border border-ink-300 bg-white text-sm outline-none focus:border-ink-900';
+export const inputCls = 'w-full h-11 px-3 rounded border border-ink-300 bg-white text-sm outline-none focus:border-ink-900';
+export const textareaCls = 'w-full min-h-[88px] p-3 rounded border border-ink-300 bg-white text-sm outline-none focus:border-ink-900';
 
 export function Stars({ value, onChange, size = 'w-6 h-6' }: { value: number; onChange?: (n: number) => void; size?: string }) {
   return (
@@ -284,7 +284,7 @@ export function Tabs<T extends string>({ items, value, onChange, className }: { 
 
 export function Segmented<T extends string>({ items, value, onChange }: { items: { key: T; label: ReactNode }[]; value: T; onChange: (k: T) => void }) {
   return (
-    <div className="flex bg-ink-100 p-0.5 rounded-md">
+    <div className="flex bg-ink-100 p-0.5 rounded">
       {items.map((it) => (
         <button key={it.key} onClick={() => onChange(it.key)} className={cx('flex-1 h-8 text-sm rounded', value === it.key ? 'bg-white text-ink-900 font-bold border border-ink-300' : 'text-ink-500 font-medium')}>
           {it.label}

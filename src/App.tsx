@@ -15,7 +15,7 @@ function TopBar() {
   return (
     <header className="sticky top-0 z-30 bg-white border-b border-ink-100 h-14 flex items-center px-4">
       <button onClick={() => navigate({ name: 'tab', tab: role === 'admin' ? 'stats' : 'explore' })} className="flex items-center gap-1.5">
-        <img src="./logo.png" alt="OFF STAGE 로고" className="w-7 h-7 rounded-lg object-cover" />
+        <img src="./logo.png" alt="OFF STAGE 로고" className="w-7 h-7 rounded object-cover" />
         <span className="font-black text-[16px] tracking-tight whitespace-nowrap">OFF STAGE</span>
       </button>
       <div className="flex-1" />
@@ -72,7 +72,7 @@ function RoleSwitcher() {
   const accounts = (r: Role) => db.users.filter((u) => u.role === r && (r !== 'brand' || db.brands.some((b) => b.userId === u.id)) && (r !== 'landlord' || db.landlords.some((l) => l.userId === u.id)));
   return (
     <>
-      <button onClick={() => setOpen(true)} title="역할 전환(데모)" className="h-8 pl-2 pr-2.5 mr-1 ml-2 shrink-0 whitespace-nowrap rounded-md border border-ink-300 text-ink-700 text-[11px] font-semibold flex items-center gap-1">
+      <button onClick={() => setOpen(true)} title="역할 전환(데모)" className="h-8 pl-2 pr-2.5 mr-1 ml-2 shrink-0 whitespace-nowrap rounded border border-ink-300 text-ink-700 text-[11px] font-semibold flex items-center gap-1">
         <Icon name="swap" className="w-3.5 h-3.5" />
         {ROLE_LABEL[role]} · 전환(데모)
       </button>
@@ -80,7 +80,7 @@ function RoleSwitcher() {
         <p className="text-xs text-ink-500 mb-3">실제 서비스에서는 한 계정이 하나의 역할만 가집니다. 데모에서는 시점을 바로 바꿔 볼 수 있어요.</p>
         <div className="grid grid-cols-3 gap-2 mb-4">
           {(['brand', 'landlord', 'visitor', 'rental', 'admin'] as Role[]).filter(roleOn).map((r) => (
-            <button key={r} onClick={() => { switchRole(r); setOpen(false); }} className={cx('h-14 rounded-xl border text-sm font-bold', role === r ? 'bg-ink-900 text-white border-ink-900' : 'bg-white border-ink-300')}>
+            <button key={r} onClick={() => { switchRole(r); setOpen(false); }} className={cx('h-14 rounded border text-sm font-bold', role === r ? 'bg-ink-900 text-white border-ink-900' : 'bg-white border-ink-300')}>
               {ROLE_LABEL[r]}
             </button>
           ))}
@@ -115,7 +115,7 @@ function Toast() {
   const t = useApp((s) => s.session.toast);
   if (!t) return null;
   return (
-    <div className="fixed z-[60] top-16 left-1/2 -translate-x-1/2 max-w-[400px] w-[calc(100%-32px)] bg-ink-900 text-white text-sm rounded-md px-4 py-3 shadow-lg text-center">
+    <div className="fixed z-[60] top-16 left-1/2 -translate-x-1/2 max-w-[400px] w-[calc(100%-32px)] bg-ink-900 text-white text-sm rounded px-4 py-3 shadow-lg text-center">
       {t.text}
     </div>
   );

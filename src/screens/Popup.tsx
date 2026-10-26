@@ -101,7 +101,7 @@ export function PopupDetail({ id }: { id: string }) {
             {role === 'visitor' && (() => {
               const on = !!p.waiters?.includes(userId);
               return (
-                <button onClick={() => toggleWaitlist(p.id, userId)} className={cx('h-10 px-3.5 rounded-md text-sm font-bold shrink-0', on ? 'bg-white border border-ink-300 text-brand-600' : 'bg-brand-500 text-white')}>
+                <button onClick={() => toggleWaitlist(p.id, userId)} className={cx('h-10 px-3.5 rounded text-sm font-bold shrink-0', on ? 'bg-white border border-ink-300 text-brand-600' : 'bg-brand-500 text-white')}>
                   <Ic n="bell" />{on ? '알림 켜짐' : '알림 받기'}
                 </button>
               );
@@ -120,7 +120,7 @@ export function PopupDetail({ id }: { id: string }) {
                   const rest = brands.filter((b) => !me?.following.includes(b.id));
                   if (!me || !rest.length) return null;
                   return (
-                    <button onClick={() => followAll(userId, rest.map((b) => b.id))} className="mt-3 w-full h-10 rounded-md bg-emerald-600 text-white text-sm font-bold">
+                    <button onClick={() => followAll(userId, rest.map((b) => b.id))} className="mt-3 w-full h-10 rounded bg-emerald-600 text-white text-sm font-bold">
                       오늘 본 브랜드 {rest.length}곳 한 번에 팔로우
                     </button>
                   );
@@ -131,7 +131,7 @@ export function PopupDetail({ id }: { id: string }) {
                 <div className="font-bold">현장에서 방문 인증하기</div>
                 <div className="text-[13px] text-ink-500 mt-0.5">QR 대신 매장에 붙은 6자리 코드를 입력해요 <Demo /></div>
                 <div className="flex gap-2 mt-3">
-                  <input className="flex-1 min-w-0 h-11 px-3 rounded-md border border-ink-300 text-ink-900 text-lg tracking-[0.3em] font-bold outline-none" inputMode="numeric" maxLength={6} placeholder="000000" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} />
+                  <input className="flex-1 min-w-0 h-11 px-3 rounded border border-ink-300 text-ink-900 text-lg tracking-[0.3em] font-bold outline-none" inputMode="numeric" maxLength={6} placeholder="000000" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} />
                   <Button disabled={code.length !== 6} onClick={() => checkIn(p.id, userId, code) && setCode('')}>인증</Button>
                 </div>
                 <button className="text-[12px] text-amber-700 mt-2 underline underline-offset-2" onClick={() => setCode(p.code)}>(데모) 현장 코드 {p.code} 자동 입력</button>
@@ -399,7 +399,7 @@ export function StampsTab() {
           </div>
           {n >= STAMP_GOAL && (
             st.rewardClaimed ? (
-              <div className="mt-4 rounded-md bg-amber-300 text-amber-950 p-3 text-center font-bold"><Ic n="medal" />공동 팝업 탐험가 배지 보유 중</div>
+              <div className="mt-4 rounded bg-amber-300 text-amber-950 p-3 text-center font-bold"><Ic n="medal" />공동 팝업 탐험가 배지 보유 중</div>
             ) : (
               <Button full className="mt-4" onClick={() => claimStampReward(userId)}>혜택 배지 받기</Button>
             )

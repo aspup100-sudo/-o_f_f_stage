@@ -190,7 +190,7 @@ function WeekStrip() {
       <div className="text-[14px] font-bold">날짜별 팝업 캘린더</div>
       <div className="flex gap-1.5 overflow-x-auto no-scrollbar mt-2.5 -mx-1 px-1">
         {days.map((d) => (
-          <button key={d.iso} onClick={() => setSel(d.iso)} className={cx('w-11 shrink-0 rounded-md py-1.5 flex flex-col items-center', sel === d.iso ? 'bg-ink-900 text-white' : 'bg-ink-100/70')}>
+          <button key={d.iso} onClick={() => setSel(d.iso)} className={cx('w-11 shrink-0 rounded py-1.5 flex flex-col items-center', sel === d.iso ? 'bg-ink-900 text-white' : 'bg-ink-100/70')}>
             <span className={cx('text-[11px]', sel !== d.iso && (d.dow === 0 ? 'text-red-500' : d.dow === 6 ? 'text-blue-500' : 'text-ink-500'))}>{d.iso === DEMO_TODAY ? '오늘' : '일월화수목금토'[d.dow]}</span>
             <span className="text-[15px] font-bold leading-tight">{d.date}</span>
             <span className={cx('w-1.5 h-1.5 rounded-full mt-0.5', d.list.length ? 'bg-brand-500' : 'bg-transparent')} />
@@ -308,7 +308,7 @@ export function TodayVisitor() {
                   <span className="block text-[14px] font-bold truncate">{p.title}</span>
                   <span className="block text-[12px] text-ink-500">{waitCount(p)}명이 기다려요</span>
                 </button>
-                <button onClick={() => toggleWaitlist(p.id, userId)} className={cx('h-8 px-3 rounded-md text-[12px] font-bold shrink-0', on ? 'border border-ink-300 text-ink-500' : 'bg-brand-500 text-white')}>
+                <button onClick={() => toggleWaitlist(p.id, userId)} className={cx('h-8 px-3 rounded text-[12px] font-bold shrink-0', on ? 'border border-ink-300 text-ink-500' : 'bg-brand-500 text-white')}>
                   {on ? '알림 켜짐' : '알림 받기'}
                 </button>
               </div>

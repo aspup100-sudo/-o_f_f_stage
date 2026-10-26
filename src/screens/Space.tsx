@@ -23,7 +23,7 @@ function SaveSpaceButton({ spaceId, inline }: { spaceId: string; inline?: boolea
     <button
       aria-label={on ? '공간 찜 해제' : '공간 찜하기'}
       onClick={(e) => { e.stopPropagation(); guard(() => toggleSaveSpace(brand.id, spaceId)); }}
-      className={inline ? 'w-12 h-12 shrink-0 rounded-md border border-ink-300 flex items-center justify-center' : 'absolute z-10 top-2 right-2 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center'}
+      className={inline ? 'w-12 h-12 shrink-0 rounded border border-ink-300 flex items-center justify-center' : 'absolute z-10 top-2 right-2 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center'}
     >
       <Icon name="heart" filled={on} className={cx('w-[18px] h-[18px]', on ? 'text-red-500' : 'text-ink-700')} />
     </button>
@@ -101,7 +101,7 @@ export function SpacesTab({ initial }: { initial?: '찜' }) {
       <ScreenTitle>{RENTAL_ON ? '공간·장비' : '공간'}</ScreenTitle>
       {RENTAL_ON && <div className="px-4 mb-3"><Segmented items={[{ key: 'space', label: '공간 찾기' }, { key: 'rental', label: '장비 렌탈' }]} value={mode} onChange={setMode} /></div>}
       <div className="px-4 mb-3 flex gap-1.5 overflow-x-auto no-scrollbar">
-        <button onClick={() => setFilterOpen(true)} className={cx('h-8 px-3 rounded-md border text-xs font-semibold shrink-0 flex items-center gap-1', filterCount ? 'bg-ink-900 text-white border-ink-900' : 'bg-white border-ink-300')}>
+        <button onClick={() => setFilterOpen(true)} className={cx('h-8 px-3 rounded border text-xs font-semibold shrink-0 flex items-center gap-1', filterCount ? 'bg-ink-900 text-white border-ink-900' : 'bg-white border-ink-300')}>
           <Icon name="search" className="w-3.5 h-3.5" /> 조건{filterCount > 0 && ` ${filterCount}`}
         </button>
         {(['전체', ...(brand ? (['찜'] as const) : []), ...REGIONS] as const).map((r) => <Chip key={r} active={region === r} onClick={() => setRegion(r)}>{r === '찜' ? <><Ic n="heart" />찜 {brand?.savedSpaces?.length ?? 0}</> : r}</Chip>)}
@@ -179,7 +179,7 @@ export function AvailabilityCalendar({ db, spaceId, editable }: { db: DB; spaceI
               disabled={!editable || past || st === 'booked'}
               onClick={() => toggleAvailability(spaceId, d)}
               className={cx(
-                'aspect-square rounded-lg text-[12px] font-semibold flex items-center justify-center',
+                'aspect-square rounded text-[12px] font-semibold flex items-center justify-center',
                 past ? 'text-ink-300' : st === 'open' ? 'bg-white border border-ink-300 text-ink-900 font-bold' : st === 'booked' ? 'bg-ink-100 text-ink-400 line-through' : 'text-ink-400',
               )}
             >
@@ -225,8 +225,8 @@ export function SpaceDetail({ id }: { id: string }) {
         <Swatch src={spaceSrc(s, photo, 900)} hue={s.photoHues[photo] ?? 30} pattern={(['solid', 'grid', 'stripe'] as const)[photo % 3]} rounded="" className="h-56" label={`사진 ${photo + 1}/${s.photoHues.length}${s.photos?.[photo] ? "" : " · 예시 사진"}`} />
         <div className="absolute bottom-2 right-2 flex gap-1">
           {s.photoHues.map((h, i) => (
-            <button key={i} onClick={() => setPhoto(i)} className={cx('w-10 h-10 rounded-lg border-2', photo === i ? 'border-white' : 'border-transparent opacity-70')}>
-              <Swatch src={spaceSrc(s, i)} hue={h} className="w-full h-full" rounded="rounded-md" />
+            <button key={i} onClick={() => setPhoto(i)} className={cx('w-10 h-10 rounded border-2', photo === i ? 'border-white' : 'border-transparent opacity-70')}>
+              <Swatch src={spaceSrc(s, i)} hue={h} className="w-full h-full" rounded="rounded" />
             </button>
           ))}
         </div>
@@ -281,7 +281,7 @@ export function SpaceDetail({ id }: { id: string }) {
         {past.length === 0 && <div className="text-sm text-ink-500">아직 이력이 없어요</div>}
         <div className="space-y-1.5">
           {past.map((p) => (
-            <button key={p!.id} onClick={() => navigate({ name: 'popup', id: p!.id })} className="w-full text-left rounded-md border border-ink-100 px-3 py-2.5 text-sm flex items-center justify-between">
+            <button key={p!.id} onClick={() => navigate({ name: 'popup', id: p!.id })} className="w-full text-left rounded border border-ink-100 px-3 py-2.5 text-sm flex items-center justify-between">
               <span><b>{p!.title}</b> <span className="text-ink-500">· {period(p!.period)}</span></span>
               <StatusPill status={p!.status} />
             </button>
@@ -305,7 +305,7 @@ export function SpaceDetail({ id }: { id: string }) {
         <h3 className="text-[17px] font-extrabold tracking-tight mt-9 mb-3">공간 Q&A <span className="text-ink-500 font-normal text-sm">{qnas.length}</span></h3>
         <div className="space-y-2">
           {qnas.map((x) => (
-            <div key={x.id} className="rounded-md border border-ink-100 p-3 text-sm">
+            <div key={x.id} className="rounded border border-ink-100 p-3 text-sm">
               <div><b className="text-brand-600">Q</b> {x.question} <span className="text-[12px] text-ink-500">· {displayName(db, x.authorId)}</span></div>
               {x.answer ? (
                 <div className="mt-1.5 text-ink-700"><b className="text-emerald-700">A</b> {x.answer}</div>
@@ -344,7 +344,7 @@ export function SpaceDetail({ id }: { id: string }) {
               <div className="flex gap-2.5 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
                 {similar.map((x) => (
                   <button key={x.id} onClick={() => navigate({ name: 'space', id: x.id })} className="w-[150px] shrink-0 text-left">
-                    <Swatch src={spaceSrc(x, 0)} hue={x.photoHues[0] ?? 30} pattern="solid" className="w-full h-24" rounded="rounded-md" />
+                    <Swatch src={spaceSrc(x, 0)} hue={x.photoHues[0] ?? 30} pattern="solid" className="w-full h-24" rounded="rounded" />
                     <div className="text-[13px] font-bold mt-1.5 truncate">{x.name}</div>
                     <div className="text-[12px] text-ink-500">{x.region} · {x.areaM2}㎡</div>
                     <div className="text-[12px] font-bold text-brand-600">1일 {manwon(x.dailyFee)}{x.lastMinutePct ? <span className="text-red-500"> · {x.lastMinutePct}%↓</span> : null}</div>
@@ -391,7 +391,7 @@ function ApplySheet({ open, onClose, space, brandId }: { open: boolean; onClose:
           <Field label="지원할 팀">
             <div className="space-y-1.5">
               {teams.map((t) => (
-                <button key={t.id} disabled={!t.confirmed} onClick={() => { setTeamId(t.id); setStart(''); setEnd(''); }} className={cx('w-full text-left rounded-md border p-3 text-sm disabled:opacity-50', team?.id === t.id ? 'border-ink-900 bg-ink-100' : 'border-ink-300')}>
+                <button key={t.id} disabled={!t.confirmed} onClick={() => { setTeamId(t.id); setStart(''); setEnd(''); }} className={cx('w-full text-left rounded border p-3 text-sm disabled:opacity-50', team?.id === t.id ? 'border-ink-900 bg-ink-100' : 'border-ink-300')}>
                   <b>{t.name}</b> · {t.members.length}개 브랜드
                   {!t.confirmed && <div className="text-[12px] text-red-500">약속서 전원 동의 후 지원할 수 있어요</div>}
                 </button>

@@ -35,11 +35,11 @@ function WinWinBanner() {
       <div className="text-[12px] text-ink-500">렌탈 제휴</div>
       <div className="font-extrabold text-lg leading-snug mt-0.5">집기는 사지 말고, 제휴가로 빌려요</div>
       <div className="grid grid-cols-2 gap-2 mt-3 text-[12px]">
-        <div className="rounded-md border border-ink-300 p-2.5">
+        <div className="rounded border border-ink-300 p-2.5">
           <div className="font-bold">소규모 브랜드</div>
           <div className="text-ink-500 mt-0.5">일반 대여가보다 30~40% 싸게, 팀이 나눠 내면 더 가볍게</div>
         </div>
-        <div className="rounded-md border border-ink-300 p-2.5">
+        <div className="rounded border border-ink-300 p-2.5">
           <div className="font-bold">렌탈 업체</div>
           <div className="text-ink-500 mt-0.5">놀고 있는 행거·조명이 매주 팝업에서 다시 돌아가요</div>
         </div>
@@ -69,7 +69,7 @@ export function PartnerCard({ db, partnerId, teamId }: { db: DB; partnerId: stri
       <div className="flex gap-1.5 mt-3 overflow-x-auto no-scrollbar">
         {items.slice(0, 4).map((it) => (
           <div key={it.id} className="w-24 shrink-0">
-            <Swatch hue={it.hue} pattern="grid" className="h-16" rounded="rounded-lg" />
+            <Swatch hue={it.hue} pattern="grid" className="h-16" rounded="rounded" />
             <div className="text-[12px] mt-1 truncate">{it.name}</div>
             <div className="text-[12px] font-bold text-brand-600 tabular-nums">{won(it.partnerPrice)}</div>
           </div>
@@ -113,7 +113,7 @@ export function RentalsBrowse({ teamId, embedded }: { teamId?: string; embedded?
             const p = db.rentalPartners.find((x) => x.id === it.partnerId)!;
             return (
               <Card key={it.id} className="p-3 flex gap-3 items-center" onClick={() => navigate({ name: 'rentalPartner', id: p.id, teamId })}>
-                <Swatch hue={it.hue} pattern="grid" className="w-16 h-16 shrink-0" rounded="rounded-lg" />
+                <Swatch hue={it.hue} pattern="grid" className="w-16 h-16 shrink-0" rounded="rounded" />
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-sm truncate">{it.name}</div>
                   <div className="text-[12px] text-ink-500 truncate">{p.name}</div>
@@ -177,7 +177,7 @@ export function RentalPartnerScreen({ id, teamId }: { id: string; teamId?: strin
             return (
               <Card key={it.id} className="p-3">
                 <div className="flex gap-3">
-                  <Swatch hue={it.hue} pattern="grid" className="w-20 h-20 shrink-0" rounded="rounded-lg" label={it.category} />
+                  <Swatch hue={it.hue} pattern="grid" className="w-20 h-20 shrink-0" rounded="rounded" label={it.category} />
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold text-sm">{it.name}</div>
                     <div className="text-[12px] text-ink-500 mt-0.5">{it.desc}</div>
@@ -187,9 +187,9 @@ export function RentalPartnerScreen({ id, teamId }: { id: string; teamId?: strin
                 </div>
                 {role === 'brand' && (
                   <div className="flex items-center justify-end gap-2 mt-2">
-                    <button className="w-8 h-8 rounded-lg border border-ink-300" onClick={() => setQty(it.id, n - 1, it.stock)}>−</button>
+                    <button className="w-8 h-8 rounded border border-ink-300" onClick={() => setQty(it.id, n - 1, it.stock)}>−</button>
                     <span className="w-6 text-center font-bold tabular-nums">{n}</span>
-                    <button className="w-8 h-8 rounded-lg border border-ink-300" onClick={() => setQty(it.id, n + 1, it.stock)}>+</button>
+                    <button className="w-8 h-8 rounded border border-ink-300" onClick={() => setQty(it.id, n + 1, it.stock)}>+</button>
                   </div>
                 )}
               </Card>
@@ -389,9 +389,9 @@ export function MyItemsTab() {
       <ScreenTitle right={<Button size="sm" onClick={() => navigate({ name: 'rentalItemEdit' })}>+ 장비 등록</Button>}>내 장비</ScreenTitle>
       <div className="px-4">
         <div className="grid grid-cols-3 gap-2 mb-4 text-center">
-          <div className="rounded-md bg-white border border-ink-100 py-3"><div className="text-[12px] text-ink-500">팝업 예약</div><div className="font-extrabold">{orders.length}건</div></div>
-          <div className="rounded-md bg-white border border-ink-100 py-3"><div className="text-[12px] text-ink-500">예약 매출</div><div className="font-extrabold tabular-nums">{Math.round(revenue / 10000)}만원</div></div>
-          <div className="rounded-md bg-white border border-ink-100 py-3"><div className="text-[12px] text-ink-500">30일 가동률</div><div className="font-extrabold">{capacity ? Math.min(100, Math.round((rentedDays / capacity) * 100)) : 0}%</div></div>
+          <div className="rounded bg-white border border-ink-100 py-3"><div className="text-[12px] text-ink-500">팝업 예약</div><div className="font-extrabold">{orders.length}건</div></div>
+          <div className="rounded bg-white border border-ink-100 py-3"><div className="text-[12px] text-ink-500">예약 매출</div><div className="font-extrabold tabular-nums">{Math.round(revenue / 10000)}만원</div></div>
+          <div className="rounded bg-white border border-ink-100 py-3"><div className="text-[12px] text-ink-500">30일 가동률</div><div className="font-extrabold">{capacity ? Math.min(100, Math.round((rentedDays / capacity) * 100)) : 0}%</div></div>
         </div>
         <p className="text-[12px] text-ink-500 mb-3">
           제휴가는 일반가보다 낮지만, 창고에 있던 장비가 팝업 일정마다 다시 나가요. {r.avg !== null && `브랜드 평점 ★ ${r.avg.toFixed(1)}`}
@@ -404,8 +404,8 @@ export function MyItemsTab() {
               {idle.map((it) => {
                 const n = demand(it);
                 return (
-                  <div key={it.id} className="flex items-center gap-2.5 bg-white rounded-md p-2.5">
-                    <Swatch hue={it.hue} pattern="grid" className="w-10 h-10 shrink-0" rounded="rounded-lg" />
+                  <div key={it.id} className="flex items-center gap-2.5 bg-white rounded p-2.5">
+                    <Swatch hue={it.hue} pattern="grid" className="w-10 h-10 shrink-0" rounded="rounded" />
                     <div className="flex-1 min-w-0">
                       <div className="text-[13px] font-semibold truncate">{it.name}</div>
                       <div className="text-[12px] text-ink-500">{n > 0 ? `곧 열 팝업 ${n}곳 공간에 ${josa(it.category, "이", "가")} 없어요` : `지금 제휴가 ${won(it.partnerPrice)} · ${discountPct(it)}% 할인 중`}</div>
@@ -421,7 +421,7 @@ export function MyItemsTab() {
           {items.map((it) => (
             <Card key={it.id} className={cx('p-3', !it.active && 'opacity-50')}>
               <div className="flex gap-3">
-                <Swatch hue={it.hue} pattern="grid" className="w-16 h-16 shrink-0" rounded="rounded-lg" />
+                <Swatch hue={it.hue} pattern="grid" className="w-16 h-16 shrink-0" rounded="rounded" />
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-sm">{it.name}</div>
                   <div className="text-[12px] text-ink-500">{it.category} · 재고 {it.stock}개</div>
@@ -465,7 +465,7 @@ export function RentalItemEdit({ id }: { id?: string }) {
           <Field label="제휴가(1일)"><input type="number" className={inputCls} value={d.partnerPrice} onChange={(e) => setD({ ...d, partnerPrice: Number(e.target.value) })} /></Field>
           <Field label="재고"><input type="number" className={inputCls} value={d.stock} onChange={(e) => setD({ ...d, stock: Number(e.target.value) })} /></Field>
         </div>
-        <div className={cx('rounded-md p-3 text-sm mb-4', pct >= 20 ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-800')}>
+        <div className={cx('rounded p-3 text-sm mb-4', pct >= 20 ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-800')}>
           제휴 할인율 <b>{pct}%</b> · {pct >= 20 ? '브랜드에게 잘 보여요' : '20% 이상이면 추천 목록에 더 잘 노출돼요'}
         </div>
         <Button full size="lg" disabled={!ok} onClick={() => { saveRentalItem(rental.id, d, id); back(); }}>{ex ? '저장' : '등록'}</Button>

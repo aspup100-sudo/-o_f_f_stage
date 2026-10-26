@@ -56,10 +56,10 @@ function Login() {
       </div>
       <p className="text-[12px] text-ink-500 mt-2">지금 {recruiting}팀이 팀원을 모으고, {popups}곳에서 팝업이 열려요</p>
       <div className="mt-auto pt-12 space-y-2.5">
-        <button onClick={() => socialLogin('kakao')} className="w-full h-12 rounded-md bg-[#FEE500] text-[#191600] font-bold text-[15px]">
+        <button onClick={() => socialLogin('kakao')} className="w-full h-12 rounded bg-[#FEE500] text-[#191600] font-bold text-[15px]">
           카카오로 시작하기 <Demo />
         </button>
-        <button onClick={() => socialLogin('naver')} className="w-full h-12 rounded-md bg-[#03C75A] text-white font-bold text-[15px]">
+        <button onClick={() => socialLogin('naver')} className="w-full h-12 rounded bg-[#03C75A] text-white font-bold text-[15px]">
           네이버로 시작하기 <Demo />
         </button>
         <p className="text-center text-[12px] text-ink-500 pt-1">데모에서는 버튼을 누르면 바로 로그인돼요.</p>
@@ -82,7 +82,7 @@ function RolePick() {
       <div className="space-y-2.5">
         {options.map((o) => (
           <button key={o.role} onClick={() => chooseRole(o.role)} className="w-full text-left p-4 rounded border border-ink-300 flex gap-3 items-center active:bg-ink-100">
-            <span className="w-11 h-11 rounded-md bg-ink-100 flex items-center justify-center shrink-0"><Icon name={o.emoji} className="w-6 h-6" /></span>
+            <span className="w-11 h-11 rounded bg-ink-100 flex items-center justify-center shrink-0"><Icon name={o.emoji} className="w-6 h-6" /></span>
             <span className="flex-1">
               <span className="block font-bold">{o.title}</span>
               <span className="block text-[13px] text-ink-500 mt-0.5">{o.desc}</span>
@@ -196,7 +196,7 @@ function BrandForm() {
       {d.igImported && (
         <div className="grid grid-cols-3 gap-1 mb-4 -mt-1">
           {INSTAGRAM_SAMPLE_LABELS.map((l, i) => (
-            <Swatch key={l} hue={(i * 40) % 360} pattern={(['stripe', 'dot', 'grid', 'wave', 'solid', 'circle'] as const)[i % 6]} label={l} className="aspect-square" rounded="rounded-lg" />
+            <Swatch key={l} hue={(i * 40) % 360} pattern={(['stripe', 'dot', 'grid', 'wave', 'solid', 'circle'] as const)[i % 6]} label={l} className="aspect-square" rounded="rounded" />
           ))}
         </div>
       )}
