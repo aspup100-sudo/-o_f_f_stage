@@ -381,8 +381,8 @@ export function StampsTab() {
               return (
                 <div
                   key={i}
-                  className={cx('aspect-square rounded-full border-2 flex flex-col items-center justify-center text-center p-1', p ? 'border-white/80 text-white' : 'border-dashed border-ink-300 text-ink-400')}
-                  style={p ? { background: `hsl(${brandById(db, teamById(db, p.teamId)?.members[0]?.brandId ?? '')?.logoHue ?? 250} 45% 45%)`, transform: `rotate(${(i % 2 ? 1 : -1) * (6 + i * 3)}deg)` } : undefined}
+                  className={cx('aspect-square rounded-full border-2 flex flex-col items-center justify-center text-center p-1', p ? 'border-double border-[5px] border-brand-500 text-brand-600 bg-white' : 'border-dashed border-ink-300 text-ink-400')}
+                  style={p ? { transform: `rotate(${(i % 2 ? 1 : -1) * (6 + i * 3)}deg)` } : undefined}
                 >
                   {p ? (
                     <>
