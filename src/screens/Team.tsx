@@ -587,7 +587,7 @@ function ShiftTab({ team }: { team: Team }) {
         </p>
         {!ended && <Button size="sm" variant="secondary" onClick={() => autoFillShifts(team.id)}>자동 배정</Button>}
       </div>
-      <div className="overflow-x-auto -mx-4 px-4">
+      <div className="overflow-x-auto overflow-y-hidden -mx-4 px-4">
         <table className="text-[12px] border-separate border-spacing-1">
           <thead>
             <tr>

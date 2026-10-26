@@ -22,17 +22,16 @@ export function TrustLine({ db, subjectId, compact }: { db: DB; subjectId: strin
 }
 
 export function ThemeTagList({ tags, limit }: { tags: ThemeTags; limit?: number }) {
-  const all = [
-    ...tags.moods.map((m) => ({ t: `#${m}`, tone: 'orange' as const })),
-    ...tags.categories.map((c) => ({ t: c, tone: 'gray' as const })),
-    { t: tags.price, tone: 'blue' as const },
-    ...tags.ages.map((a) => ({ t: a, tone: 'purple' as const })),
-  ];
+  // 박스 태그 대신 한 줄 글자로. 무드는 진하게, 나머지는 회색
+  const moods = tags.moods.map((m) => `#${m}`);
+  const rest = [...tags.categories, tags.price, ...tags.ages];
+  const n = limit ?? moods.length + rest.length;
+  const m = moods.slice(0, n);
+  const r = rest.slice(0, Math.max(0, n - m.length));
   return (
-    <div className="flex flex-wrap gap-1">
-      {(limit ? all.slice(0, limit) : all).map((x) => (
-        <Tag key={x.t} tone={x.tone}>{x.t}</Tag>
-      ))}
+    <div className="text-[12px] leading-snug">
+      {m.length > 0 && <span className="font-semibold text-ink-900">{m.join(' ')}</span>}
+      {r.length > 0 && <span className="text-ink-500">{m.length > 0 && ' · '}{r.join(' · ')}</span>}
     </div>
   );
 }

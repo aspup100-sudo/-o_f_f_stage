@@ -5,7 +5,8 @@
 html, body { background: #e7e5e4; }
 body { font-family: 'Pretendard Variable', Pretendard, 'Apple SD Gothic Neo', 'Noto Sans KR', system-ui, sans-serif; color: #1c1917; -webkit-font-smoothing: antialiased; word-break: keep-all; line-height: 1.5; letter-spacing: -0.01em; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { scrollbar-width: none; }
+/* 가로로만 넘기는 줄: 세로로 끌려 내려가지 않게 */
+.no-scrollbar { scrollbar-width: none; overflow-y: hidden; overscroll-behavior-x: contain; touch-action: pan-x pan-y; }
 button { -webkit-tap-highlight-color: transparent; }
 /* 홈 화면 앱(아이폰)에서 아래 홈 바에 가리지 않게 */
 .pb-safe { padding-bottom: calc(0.75rem + env(safe-area-inset-bottom)); }

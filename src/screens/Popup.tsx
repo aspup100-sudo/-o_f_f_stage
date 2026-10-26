@@ -205,7 +205,7 @@ export function PopupDetail({ id }: { id: string }) {
           const stamped = db.stamps.find((x) => x.userId === userId)?.popupIds ?? [];
           return (
             <>
-              <h3 className="text-[17px] font-extrabold tracking-tight mt-9 mb-1">다른 공동 팝업도 가 보세요</h3>
+              <h3 className="text-[17px] font-extrabold tracking-tight mt-9 mb-1">다른 공동 팝업</h3>
               {role === 'visitor' && <p className="text-[12px] text-ink-500 mb-2">아직 안 간 곳에서 인증하면 스탬프가 하나 더 쌓여요</p>}
               <div className="flex gap-2.5 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
                 {others.map((x) => (
