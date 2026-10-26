@@ -107,7 +107,7 @@ export function Card({ children, className, onClick }: { children: ReactNode; cl
 
 export function Chip({ children, active, onClick, className }: { children: ReactNode; active?: boolean; onClick?: () => void; className?: string }) {
   return (
-    <button type="button" onClick={onClick} className={cx('px-3 h-8 rounded text-xs font-medium border whitespace-nowrap transition-colors', active ? 'bg-ink-900 text-white border-ink-900' : 'bg-white text-ink-700 border-ink-300', className)}>
+    <button type="button" onClick={onClick} className={cx('px-3 h-8 rounded text-xs border whitespace-nowrap transition-colors', active ? 'bg-white text-ink-900 border-ink-900 font-bold' : 'bg-white text-ink-700 border-ink-300 font-medium', className)}>
       {children}
     </button>
   );
@@ -284,9 +284,9 @@ export function Tabs<T extends string>({ items, value, onChange, className }: { 
 
 export function Segmented<T extends string>({ items, value, onChange }: { items: { key: T; label: ReactNode }[]; value: T; onChange: (k: T) => void }) {
   return (
-    <div className="flex border border-ink-900">
+    <div className="flex bg-ink-100 p-0.5 rounded-md">
       {items.map((it) => (
-        <button key={it.key} onClick={() => onChange(it.key)} className={cx('flex-1 h-9 text-sm font-semibold border-l border-ink-900 first:border-l-0', value === it.key ? 'bg-ink-900 text-white' : 'bg-white text-ink-500')}>
+        <button key={it.key} onClick={() => onChange(it.key)} className={cx('flex-1 h-8 text-sm rounded', value === it.key ? 'bg-white text-ink-900 font-bold border border-ink-300' : 'text-ink-500 font-medium')}>
           {it.label}
         </button>
       ))}
