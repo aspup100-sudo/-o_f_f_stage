@@ -51,9 +51,9 @@ export default function MeScreen() {
                   pct = Math.max(5, Math.round(((t.score - 50) / (at - 50)) * 100));
                 }
                 return (
-                  <button onClick={() => setRulesOpen(true)} className="mt-2.5 w-full text-left rounded border border-ink-300 px-3 py-2.5">
+                  <button onClick={() => setRulesOpen(true)} className="mt-3 w-full text-left pt-3 border-t border-ink-100">
                     <div className="text-[12px] text-ink-700">{msg} <span className="text-ink-500">›</span></div>
-                    <div className="h-1 bg-ink-300 mt-2 overflow-hidden"><div className="h-full bg-ink-900" style={{ width: `${pct}%` }} /></div>
+                    <div className="h-1 bg-ink-100 mt-2 overflow-hidden"><div className="h-full bg-ink-900" style={{ width: `${pct}%` }} /></div>
                   </button>
                 );
               })()}
