@@ -42,10 +42,10 @@ export function ProposeScreen({ toBrandId }: { toBrandId: string }) {
             <span className="text-sm shrink-0">만원</span>
           </div>
         </Field>
-        <Field label="원하는 팀 규모">
+        <Field label="함께할 브랜드 수">
           <div className="flex items-center gap-3">
             <Button variant="secondary" onClick={() => setSize(Math.max(2, size - 1))}>−</Button>
-            <span className="font-bold text-lg w-16 text-center">{size}팀</span>
+            <span className="font-bold text-lg w-20 text-center">{size}곳</span>
             <Button variant="secondary" onClick={() => setSize(Math.min(8, size + 1))}>+</Button>
           </div>
         </Field>
