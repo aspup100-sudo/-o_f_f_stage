@@ -38,11 +38,11 @@ export function MyTeamTab() {
           const prep = teamPrep(db, t, brand.id);
           return (
             <Card key={t.id} className="p-4" onClick={() => navigate({ name: 'team', id: t.id })}>
-              <div className="flex items-center gap-1.5">
-                {t.stage === '준비 중' && <span className="text-[12px] font-black text-white bg-brand-500 px-2 py-0.5">{dday(t.period.start)}</span>}
-                <StatusPill status={t.stage} />
-                {t.confirmed ? <Tag tone="green">팀 확정</Tag> : <Tag tone="yellow">약속서 {ag?.agreedBy.length ?? 0}/{t.members.length} 동의</Tag>}
-                {t.leaderBrandId === brand.id && <Tag>내가 팀장</Tag>}
+              <div className="flex items-center gap-2 text-[12px]">
+                {t.stage === '준비 중' ? <span className="font-black text-brand-600">{dday(t.period.start)}</span> : <StatusPill status={t.stage} />}
+                <span className="text-ink-300">|</span>
+                {t.confirmed ? <span className="font-semibold text-emerald-700">팀 확정</span> : <span className="font-semibold text-amber-700">약속서 {ag?.agreedBy.length ?? 0}/{t.members.length} 동의</span>}
+                {t.leaderBrandId === brand.id && <span className="text-ink-500">· 내가 팀장</span>}
               </div>
               <div className="font-bold text-lg mt-1.5">{t.name}</div>
               <div className="text-[13px] text-ink-500 flex items-center flex-wrap"><Ic n="calendar" />{period(t.period)}<span className="mx-1">·</span><Ic n="pin" />{sp?.name ?? `${t.region} · 공간 미정`}</div>
