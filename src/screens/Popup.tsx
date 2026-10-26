@@ -7,7 +7,7 @@ import { checkIn, claimStampReward, followAll, STAMP_GOAL, toggleWaitlist, write
 import { avg, brandById, dday, md, displayName, openNow, period, popupById, spaceById, spaceLatLng, teamById, waitCount } from '@/store/logic';
 import { KakaoMap, kakaoMapEnabled, type MapPin } from '@/components/KakaoMap';
 import { BrandLogo, PopupBannerCard, ScreenTitle, ThemeTagList } from '@/components/common';
-import { Button, Card, Chip, cx, Demo, Empty, inputCls, Segmented, Sheet, Stars, StatusPill, SubHeader, Swatch, Tabs, Tag, textareaCls, Ic, Icon } from '@/components/ui';
+import { Button, Card, Chip, cx, Demo, Empty, inputCls, Segmented, Sheet, Stars, SubHeader, Swatch, Tabs, textareaCls, Ic, Icon } from '@/components/ui';
 import type { DB } from '@/data/mock';
 import type { Popup } from '@/types';
 import { BrandActions } from './BrandActions';
@@ -29,9 +29,9 @@ export function ComboReviewList({ db, popupIds, sort = 'new' }: { db: DB; popupI
             <span className="text-[13px] font-semibold">{displayName(db, c.authorId)} <span className="text-ink-500 font-normal">· 방문 인증</span></span>
             <Stars value={c.rating} size="w-3.5 h-3.5" />
           </div>
-          <div className="mt-1.5 flex flex-wrap gap-1">
-            <Tag tone={c.good ? 'orange' : 'gray'}>{c.good ? '이 조합 좋았어요' : '조금 아쉬웠어요'}</Tag>
-            {c.pairs.map(([a, b]) => <Tag key={a + b} tone="purple">{brandById(db, a)?.name} × {brandById(db, b)?.name}</Tag>)}
+          <div className="mt-1 text-[12px]">
+            <span className={cx('font-bold', c.good ? 'text-brand-600' : 'text-ink-500')}>{c.good ? '이 조합 좋았어요' : '조금 아쉬웠어요'}</span>
+            {c.pairs.map(([a, b]) => <span key={a + b} className="text-ink-500"> · {brandById(db, a)?.name} × {brandById(db, b)?.name}</span>)}
           </div>
           <p className="text-sm text-ink-700 mt-1.5">{c.comment}</p>
         </Card>
@@ -79,10 +79,11 @@ export function PopupDetail({ id }: { id: string }) {
         </div>
       </div>
       <div className="p-4">
-        <div className="flex items-center gap-1.5 mb-1">
-          <StatusPill status={p.status} />
-          <Tag>{team.round}회차</Tag>
-          {allRatings.length > 0 && <Tag tone="yellow">★ {avg(allRatings).toFixed(1)}</Tag>}
+        <div className="flex items-center gap-1.5 mb-1 text-[12px] font-bold">
+          <span className={p.status === '진행 중' ? 'text-emerald-700' : 'text-ink-500'}>{p.status}</span>
+          <span className="text-ink-300">|</span>
+          <span className="text-ink-700">{team.round}회차</span>
+          {allRatings.length > 0 && <><span className="text-ink-300">|</span><span className="text-ink-700">★ {avg(allRatings).toFixed(1)}</span></>}
         </div>
         <h1 className="text-xl font-extrabold">{p.title}</h1>
         <div className="text-[13px] text-ink-500">팀 <button className="underline underline-offset-2" onClick={() => navigate({ name: 'team', id: team.id })}>{team.name}</button> · 방문 인증 {visitorsCount}명</div>
@@ -141,16 +142,16 @@ export function PopupDetail({ id }: { id: string }) {
         )}
 
         <h3 className="text-[17px] font-extrabold tracking-tight mt-9 mb-3">참여 브랜드 {brands.length}</h3>
-        <div className="space-y-2">
+        <div className="border-y border-ink-100 divide-y divide-ink-100">
           {brands.map((b) => (
-            <Card key={b.id} className="p-3 flex items-center gap-3">
+            <div key={b.id} className="py-3 flex items-center gap-3">
               <BrandLogo brand={b} size={44} />
               <button className="flex-1 text-left min-w-0" onClick={() => navigate({ name: 'brand', id: b.id })}>
                 <div className="font-bold text-sm">{b.name}</div>
                 <ThemeTagList tags={b.tags} limit={3} />
               </button>
               <BrandActions brandId={b.id} />
-            </Card>
+            </div>
           ))}
         </div>
 
@@ -399,7 +400,7 @@ export function StampsTab() {
           </div>
           {n >= STAMP_GOAL && (
             st.rewardClaimed ? (
-              <div className="mt-4 rounded border border-ink-900 p-3 text-center font-bold"><Ic n="medal" />공동 팝업 탐험가 배지 보유 중</div>
+              <div className="mt-4 rounded border border-ink-300 p-3 text-center font-bold"><Ic n="medal" />공동 팝업 탐험가 배지 보유 중</div>
             ) : (
               <Button full className="mt-4" onClick={() => claimStampReward(userId)}>혜택 배지 받기</Button>
             )

@@ -37,9 +37,9 @@ function PromoPills({ promos, all }: { promos?: string[]; all?: boolean }) {
   if (!promos?.length) return null;
   const shown = all ? promos : promos.slice(0, 2);
   return (
-    <div className="flex flex-wrap gap-1.5 mt-2">
-      {shown.map((x) => <span key={x} className="inline-flex items-center h-6 px-2 border border-red-500 text-red-600 bg-white text-[12px] font-bold"><Ic n="gift" />{x}</span>)}
-      {!all && promos.length > shown.length && <span className="inline-flex items-center h-6 px-2 border border-red-500 text-red-600 bg-white text-[12px] font-bold">+{promos.length - shown.length}</span>}
+    <div className="flex flex-wrap gap-x-2.5 gap-y-1 mt-1.5">
+      {shown.map((x) => <span key={x} className="text-red-600 text-[12px] font-bold">{x}</span>)}
+      {!all && promos.length > shown.length && <span className="text-red-600 text-[12px] font-bold">+{promos.length - shown.length}</span>}
     </div>
   );
 }
@@ -330,11 +330,11 @@ export function SpaceDetail({ id }: { id: string }) {
         </div>
       </div>
       <div className="p-4">
-        <div className="flex items-center gap-1 flex-wrap mb-1.5">
-          <Tag>{s.region}</Tag>
-          {s.teamRental && <Tag tone="green">팀 단위 대관 가능</Tag>}
-          {canSoloRental(s) && <Tag tone="purple">단독 대관 가능</Tag>}
-          {s.fashionOnly && <Tag tone="purple">업종 고정(패션)</Tag>}
+        <div className="flex items-center gap-1.5 flex-wrap mb-1 text-[12px] font-bold">
+          <span className="text-ink-900">{s.region}</span>
+          {[s.teamRental && '팀 단위 대관 가능', canSoloRental(s) && '단독 대관 가능', s.fashionOnly && '업종 고정(패션)'].filter(Boolean).map((t) => (
+            <span key={t as string} className="contents"><span className="text-ink-300 font-normal">|</span><span className="text-ink-700">{t}</span></span>
+          ))}
         </div>
         <h1 className="text-xl font-extrabold">{s.name}</h1>
         <div className="text-[13px] text-ink-500 mt-0.5"><Ic n="pin" />{s.address}</div>
@@ -343,10 +343,10 @@ export function SpaceDetail({ id }: { id: string }) {
           return <KakaoMap pins={[{ id: s.id, lat, lng, label: s.name, tone: 'selected' }]} onSelect={() => {}} className="mt-3 w-full h-40 overflow-hidden border border-ink-300" fallback={null} />;
         })()}
         <p className="text-sm text-ink-700 mt-3 leading-relaxed">{s.intro}</p>
-        {!!s.keywords?.length && <div className="flex flex-wrap gap-1.5 mt-3">{s.keywords.map((k) => <Tag key={k}>#{k}</Tag>)}</div>}
+        {!!s.keywords?.length && <div className="flex flex-wrap gap-x-2 mt-3">{s.keywords.map((k) => <span key={k} className="text-[13px] font-semibold text-ink-700">#{k}</span>)}</div>}
         {!!s.promos?.length && (
-          <div className="mt-3 rounded border border-red-500 p-3">
-            <div className="text-[13px] font-bold text-red-600"><Ic n="gift" />진행 중인 할인·프로모션</div>
+          <div className="mt-4 border-l-2 border-red-500 pl-3 py-0.5">
+            <div className="text-[13px] font-bold text-ink-900">할인·프로모션</div>
             <PromoPills promos={s.promos} all />
             <p className="text-[12px] text-ink-500 mt-2">자세한 조건은 채팅으로 임대인에게 확인해 보세요.</p>
           </div>

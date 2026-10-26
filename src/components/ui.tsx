@@ -315,5 +315,6 @@ export function StatusPill({ status }: { status: string }) {
     pending: 'yellow', accepted: 'green', rejected: 'red', '준비 중': 'blue', '운영 중': 'orange',
   };
   const label: Record<string, string> = { pending: '대기', accepted: '수락', rejected: '거절' };
-  return <Tag tone={tone[status] ?? 'gray'}>{label[status] ?? status}</Tag>;
+  const color = { green: 'text-emerald-700', yellow: 'text-amber-700', gray: 'text-ink-500', orange: 'text-brand-600', blue: 'text-ink-900', red: 'text-red-600' }[tone[status] ?? 'gray'];
+  return <span className={cx('inline-flex items-center text-[12px] font-bold whitespace-nowrap', color)}>{label[status] ?? status}</span>;
 }
