@@ -441,18 +441,16 @@ export function TeamIntroPage({ db, team, compact }: { db: DB; team: Team; compa
     <div className={compact ? '' : 'p-4'}>
       <div className="rounded overflow-hidden border border-ink-100">
         <div className="grid grid-cols-3 gap-0.5">
-          {team.members.flatMap((m) => (mb?.picks[m.brandId] ?? []).slice(0, 1)).concat(team.members.flatMap((m) => (mb?.picks[m.brandId] ?? []).slice(1, 2))).slice(0, 6).map((id) => {
+          {team.members.flatMap((m) => (mb?.picks[m.brandId] ?? []).slice(0, 1)).concat(team.members.flatMap((m) => (mb?.picks[m.brandId] ?? []).slice(1, 2))).slice(0, 6).filter((_, i, a) => a.length < 3 || i < a.length - (a.length % 3)).map((id) => {
             const im = db.lookbookImages.find((i) => i.id === id);
             return im ? <Swatch key={id} src={lookbookSrc(im)} hue={im.hue} pattern={im.pattern} className="aspect-square" rounded="" /> : null;
           })}
         </div>
-        <div className="p-4 bg-ink-900 text-white">
-          <div className="text-[12px] text-white/60">팀 소개 · {team.members.length}개 브랜드</div>
-          <div className="text-lg font-extrabold">{team.name}</div>
-          <div className="text-sm text-white/80 mt-0.5">"{mb?.headline}"</div>
-          <div className="flex flex-wrap gap-1 mt-2">
-            {allMoods.map((m) => <span key={m} className="text-[12px] px-2 py-0.5 rounded bg-white/15">#{m}</span>)}
-          </div>
+        <div className="p-4 bg-white border-t border-ink-100">
+          <div className="text-[12px] text-ink-500">팀 소개 · {team.members.length}개 브랜드</div>
+          <div className="text-lg font-extrabold mt-0.5">{team.name}</div>
+          {mb?.headline && <div className="text-sm text-ink-700 mt-1">{mb.headline}</div>}
+          <div className="text-[12px] font-semibold text-ink-900 mt-2">{allMoods.map((m) => `#${m}`).join(' ')}</div>
         </div>
       </div>
       <div className="space-y-3 mt-3">
