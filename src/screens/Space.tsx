@@ -413,9 +413,9 @@ export function SpaceDetail({ id }: { id: string }) {
         <div className="space-y-2">
           {qnas.map((x) => (
             <div key={x.id} className="rounded border border-ink-100 p-3 text-sm">
-              <div><b className="text-brand-600">Q</b> {x.question} <span className="text-[12px] text-ink-500">· {displayName(db, x.authorId)}</span></div>
+              <div><b>Q.</b> {x.question} <span className="text-[12px] text-ink-500">· {displayName(db, x.authorId)}</span></div>
               {x.answer ? (
-                <div className="mt-1.5 text-ink-700"><b className="text-emerald-700">A</b> {x.answer}</div>
+                <div className="mt-1.5 text-ink-700 border-l-2 border-ink-300 pl-2.5"><b>A.</b> {x.answer}</div>
               ) : isOwner ? (
                 <div className="flex gap-1.5 mt-2">
                   <input className={inputCls + ' h-9'} placeholder="답변 입력" value={answers[x.id] ?? ''} onChange={(e) => setAnswers({ ...answers, [x.id]: e.target.value })} />
