@@ -70,7 +70,7 @@ export function MagazineThumb({ post, wide }: { post: MagazinePost; wide?: boole
         <div className="text-[9px] font-bold opacity-60 mt-2">OFF STAGE 매거진</div>
       </div>
       <div className="mt-1.5 text-[12px] text-ink-500">{post.category} · {post.createdAt.slice(5).replace('-', '/')}</div>
-      <div className="text-sm font-bold leading-snug line-clamp-2">{post.title}</div>
+      <div className="text-[13px] text-ink-700 leading-snug line-clamp-2">{post.subtitle}</div>
     </button>
   );
 }
@@ -81,7 +81,6 @@ export function MagazineList() {
   const list = db.magazines.filter((m) => !m.hidden && (cat === '전체' || m.category === cat));
   return (
     <div className="px-4 pt-4">
-      <p className="text-[13px] text-ink-500 mb-2">팝업 동향, 새로 뜨는 지역, 운영 팁을 카드뉴스로 정리해요.</p>
       <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-3">
         {(['전체', ...MAGAZINE_CATEGORIES] as const).map((c) => <Chip key={c} active={cat === c} onClick={() => setCat(c)}>{c}</Chip>)}
       </div>
