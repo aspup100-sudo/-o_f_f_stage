@@ -149,25 +149,25 @@ export function PopupBannerCard({ db, popup, wide }: { db: DB; popup: Popup; wid
   const space = spaceById(db, popup.spaceId);
   const brands = team?.members.map((m) => brandById(db, m.brandId)!).filter(Boolean) ?? [];
   return (
-    <button onClick={() => navigate({ name: 'popup', id: popup.id })} className={cx('text-left shrink-0 rounded overflow-hidden bg-ink-900 text-white relative', wide ? 'w-full' : 'w-[280px]')}>
-      <div className="flex h-24">
+    <button onClick={() => navigate({ name: 'popup', id: popup.id })} className={cx('text-left shrink-0 rounded overflow-hidden bg-white border border-ink-300 text-ink-900 relative', wide ? 'w-full' : 'w-[280px]')}>
+      <div className="flex h-32">
         {brands.slice(0, 4).map((b) => (
-          <Swatch key={b.id} src={brandCoverSrc(b)} hue={b.logoHue} pattern="stripe" rounded="" className="flex-1 opacity-90" />
+          <Swatch key={b.id} src={brandCoverSrc(b)} hue={b.logoHue} pattern="stripe" rounded="" className="flex-1" />
         ))}
       </div>
       <div className="p-3.5">
         <div className="flex items-center gap-1.5 mb-1">
           <StatusPill status={popup.status} />
-          <span className="text-[12px] text-white/70">{period(popup.period)} · {space?.region}</span>
+          <span className="text-[12px] text-ink-500">{period(popup.period)} · {space?.region}</span>
         </div>
         <div className="font-bold text-[15px]">{popup.title}</div>
-        <div className="text-[12px] text-white/70 mt-0.5 truncate">{brands.map((b) => b.name).join(' × ')}</div>
-        {popup.status === '예정' && waitCount(popup) > 0 && <div className="text-[12px] text-brand-200 mt-1.5 font-semibold"><Ic n="bell" />{waitCount(popup)}명이 오픈을 기다려요</div>}
+        <div className="text-[12px] text-ink-500 mt-0.5 truncate">{brands.map((b) => b.name).join(' × ')}</div>
+        {popup.status === '예정' && waitCount(popup) > 0 && <div className="text-[12px] text-brand-600 mt-1.5 font-semibold"><Ic n="bell" />{waitCount(popup)}명이 오픈을 기다려요</div>}
         {popup.status === '진행 중' && (() => {
           const n = db.visits.filter((v) => v.popupId === popup.id).length;
           const end = popup.period.end === DEMO_TODAY ? '오늘 마지막 날' : `${daysUntil(popup.period.end)}일 남음`;
           const o = openNow(popup.hours);
-          return <div className="text-[12px] text-brand-200 mt-1.5 font-semibold">{o?.open ? <span className="text-emerald-300">● 영업 중 · </span> : null}<Ic n="clock" />{end}{n > 0 ? ` · ${n}명 방문 인증` : ''}</div>;
+          return <div className="text-[12px] text-brand-600 mt-1.5 font-semibold">{o?.open ? <span className="text-emerald-700">● 영업 중 · </span> : null}<Ic n="clock" />{end}{n > 0 ? ` · ${n}명 방문 인증` : ''}</div>;
         })()}
       </div>
     </button>
