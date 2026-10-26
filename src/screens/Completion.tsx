@@ -67,8 +67,8 @@ export function NextRoundCard({ team }: { team: Team }) {
   if (!brand) return null;
   const next = db.teams.find((t) => t.name === team.name && t.round === team.round + 1);
   return (
-    <div className="rounded border-2 border-dashed border-ink-300 p-4">
-      <div className="font-bold">{team.round + 1}회차도 같이 열까요?</div>
+    <div className="rounded border border-ink-300 p-4">
+      <div className="font-bold">{team.round + 1}회차 준비</div>
       <p className="text-[13px] text-ink-700 mt-1">같은 멤버로 다시 열면 약속서·분담 방식·무드보드를 그대로 가져가요. 공간과 날짜만 새로 정하면 돼요.</p>
       {next ? (
         <Button className="mt-3" variant="secondary" onClick={() => navigate({ name: 'team', id: next.id })}>{team.round + 1}회차 팀으로 가기</Button>
@@ -172,26 +172,26 @@ export function TeamWrapUp({ team }: { team: Team }) {
               const b = brandById(db, m.brandId)!;
               const done = written('brand_to_brand', b.id);
               return (
-                <Card key={b.id} className="p-3.5 flex items-center justify-between">
-                  <div>
+                <Card key={b.id} className="p-3.5 flex items-center gap-3">
+                  <div className="flex-1 min-w-0">
                     <div className="text-sm font-semibold">{b.name}</div>
-                    <div className="text-[12px] text-ink-500">브랜드 → 브랜드 · 분담금 이행, 역할 이행, 소통</div>
+                    <div className="text-[12px] text-ink-500 mt-0.5">함께한 브랜드 · 분담금, 역할, 소통</div>
                   </div>
-                  <Button size="sm" variant={done ? 'secondary' : 'primary'} disabled={done} onClick={() => setForm({ kind: 'brand_to_brand', targetId: b.id, label: b.name })}>{done ? '작성 완료' : '후기 쓰기'}</Button>
+                  <Button size="sm" variant={done ? 'secondary' : 'primary'} className="shrink-0" disabled={done} onClick={() => setForm({ kind: 'brand_to_brand', targetId: b.id, label: b.name })}>{done ? '작성 완료' : '후기 쓰기'}</Button>
                 </Card>
               );
             })}
-            <Card className="p-3.5 flex items-center justify-between">
-              <div>
+            <Card className="p-3.5 flex items-center gap-3">
+              <div className="flex-1 min-w-0">
                 <div className="text-sm font-semibold">{sp.name}</div>
-                <div className="text-[12px] text-ink-500">브랜드 → 공간 · 정보 정확성, 소통, 조건 투명성, 인수인계</div>
+                <div className="text-[12px] text-ink-500 mt-0.5">공간 · 정보 정확성, 소통, 조건, 인수인계</div>
               </div>
-              <Button size="sm" variant={written('brand_to_space', sp.id) ? 'secondary' : 'primary'} disabled={written('brand_to_space', sp.id)} onClick={() => setForm({ kind: 'brand_to_space', targetId: sp.id, label: sp.name })}>{written('brand_to_space', sp.id) ? '작성 완료' : '후기 쓰기'}</Button>
+              <Button size="sm" variant={written('brand_to_space', sp.id) ? 'secondary' : 'primary'} className="shrink-0" disabled={written('brand_to_space', sp.id)} onClick={() => setForm({ kind: 'brand_to_space', targetId: sp.id, label: sp.name })}>{written('brand_to_space', sp.id) ? '작성 완료' : '후기 쓰기'}</Button>
             </Card>
           </div>
           {t && (
-            <div className="mt-4 rounded bg-ink-100/60 p-3.5 text-sm flex items-center justify-between">
-              <span>내 신뢰 지수 <b>{t.score}</b> · 인증 공동 팝업 {t.verifiedPopups}회</span>
+            <div className="mt-4 rounded border border-ink-300 p-3.5 text-sm flex items-center gap-3">
+              <span className="flex-1 min-w-0">내 신뢰 지수 <b>{t.score}</b> · 인증 공동 팝업 {t.verifiedPopups}회</span>
               <GradeBadge grade={t.grade} />
             </div>
           )}
@@ -275,12 +275,12 @@ export function LandlordCompletions() {
               {!c.verified ? (
                 <CompletionStatus popupId={p.id} />
               ) : (
-                <Card className={cx('p-3.5 flex items-center justify-between')}>
-                  <div>
+                <Card className="p-3.5 flex items-center gap-3">
+                  <div className="flex-1 min-w-0">
                     <div className="text-sm font-semibold flex items-center gap-1"><Icon name="check" className="w-4 h-4 text-emerald-700" /> 인증 공동 팝업</div>
-                    <div className="text-[12px] text-ink-500">공간 → 팀 · 약속 이행, 이용 규칙, 원상복구, 일정 준수</div>
+                    <div className="text-[12px] text-ink-500 mt-0.5">팀 · 약속 이행, 이용 규칙, 원상복구, 일정</div>
                   </div>
-                  <Button size="sm" disabled={done} variant={done ? 'secondary' : 'primary'} onClick={() => setForm({ teamId: t.id, popupId: p.id, label: t.name })}>{done ? '작성 완료' : '팀 후기 쓰기'}</Button>
+                  <Button size="sm" className="shrink-0" disabled={done} variant={done ? 'secondary' : 'primary'} onClick={() => setForm({ teamId: t.id, popupId: p.id, label: t.name })}>{done ? '작성 완료' : '팀 후기 쓰기'}</Button>
                 </Card>
               )}
             </div>
