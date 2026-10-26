@@ -57,10 +57,10 @@ export function RecruitCard({ db, r, reasons }: { db: DB; r: Recruitment; reason
       </div>
       <div className="font-bold text-[16px] leading-snug mt-1.5">{r.title}</div>
       <div className="text-[13px] text-ink-500 mt-1 flex items-center flex-wrap"><Ic n="pin" />{r.region}{sp ? ` · ${sp.name}` : ''}<span className="mx-1">·</span><Ic n="calendar" />{period(r.period)}</div>
-      <div className="flex items-center gap-1.5 mt-2">
+      <div className="flex items-center gap-1.5 mt-2 text-[12px] font-bold">
         <StatusPill status={r.status} />
-        {r.spaceConfirmed && <Tag tone="green">공간 확정</Tag>}
-        {urgent && <Tag tone="red"><Ic n="flame" />{urgent}</Tag>}
+        {r.spaceConfirmed && <><span className="text-ink-300 font-normal">|</span><span className="text-emerald-700">공간 확정</span></>}
+        {urgent && <><span className="text-ink-300 font-normal">|</span><span className="text-red-600">{urgent}</span></>}
       </div>
       <div className="flex items-end justify-between gap-4 mt-3 pt-3 border-t border-ink-100">
         <div className="flex-1 min-w-0">
@@ -166,7 +166,8 @@ export function RecruitDetail({ id }: { id: string }) {
       <div className="p-4">
         <div className="flex items-center gap-1.5 mb-2">
           <StatusPill status={r.status} />
-          <Tag>{r.slotMode === 'hanger' ? '행거 단위' : '카테고리 슬롯'}</Tag>
+          <span className="text-ink-300 font-normal">|</span>
+          <span className="text-[12px] font-bold text-ink-700">{r.slotMode === 'hanger' ? '행거 단위' : '카테고리 슬롯'}</span>
         </div>
         <h1 className="text-xl font-extrabold leading-snug">{r.title}</h1>
         <p className="text-sm text-ink-700 mt-2 leading-relaxed">{r.intro}</p>

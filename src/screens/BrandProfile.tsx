@@ -131,7 +131,7 @@ export default function BrandProfileScreen({ id }: { id: string }) {
                     <div className="flex items-center gap-1.5">
                       <span className="font-bold">{tm.name}</span>
                       <StatusPill status={tm.stage} />
-                      {pops.length > 1 && <Tag>{pops.length}회차</Tag>}
+                      {pops.length > 1 && <span className="text-[12px] font-semibold text-ink-500">{pops.length}회차</span>}
                     </div>
                     <div className="text-[13px] text-ink-700 mt-1">
                       함께한 브랜드:{' '}

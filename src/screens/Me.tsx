@@ -147,9 +147,9 @@ function VerifyCard() {
     <Card className="p-4">
       <div className="flex items-center justify-between">
         <div className="font-bold">사업자 인증 <Demo /></div>
-        {st === 'verified' && <Tag tone="green">인증 완료</Tag>}
-        {st === 'pending' && <Tag tone="yellow">인증 대기</Tag>}
-        {(st === 'none' || st === 'rejected') && <Tag tone="red">{st === 'rejected' ? '반려됨' : '미인증'}</Tag>}
+        {st === 'verified' && <span className="text-[12px] font-bold text-emerald-700">인증 완료</span>}
+        {st === 'pending' && <span className="text-[12px] font-bold text-amber-700">인증 대기</span>}
+        {(st === 'none' || st === 'rejected') && <span className="text-[12px] font-bold text-red-600">{st === 'rejected' ? '반려됨' : '미인증'}</span>}
       </div>
       {st === 'verified' && <p className="text-sm text-ink-500 mt-1">사업자등록번호 {user.bizNumber}</p>}
       {st === 'pending' && <p className="text-sm text-ink-500 mt-1">관리자 승인을 기다리고 있어요. 승인 전에는 둘러보기만 가능해요. (관리자 시점에서 승인해 볼 수 있어요)</p>}

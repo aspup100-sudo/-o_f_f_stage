@@ -60,11 +60,9 @@ export function SpaceCard({ db, s, onClick }: { db: DB; s: Space; onClick?: () =
       <div className="p-3.5">
         <div className="text-[12px] text-ink-500">{s.region} · {s.areaM2}㎡ · 최소 {s.minDays}일</div>
         <div className="font-bold text-[16px] mt-0.5">{s.name}</div>
-        <div className="flex items-center gap-1 flex-wrap mt-1.5">
-          {s.lastMinutePct && soonOpenDays(db, s.id) > 0 && <Tag tone="red"><Ic n="bolt" />2주 안 {s.lastMinutePct}% 할인</Tag>}
-          {s.teamRental && <Tag tone="green">팀 단위 대관</Tag>}
-          {canSoloRental(s) && <Tag tone="purple">단독 대관</Tag>}
-          {s.fashionOnly && <Tag>패션 전용</Tag>}
+        <div className="flex items-center gap-x-1.5 flex-wrap mt-1 text-[12px] font-semibold text-ink-700">
+          {s.lastMinutePct && soonOpenDays(db, s.id) > 0 && <span className="text-red-600 font-bold">2주 안 {s.lastMinutePct}% 할인</span>}
+          {[s.teamRental && '팀 단위 대관', canSoloRental(s) && '단독 대관', s.fashionOnly && '패션 전용'].filter(Boolean).join(' · ')}
         </div>
         {!!s.keywords?.length && <div className="text-[12px] text-ink-500 mt-2 leading-snug line-clamp-2">{s.keywords.join(' · ')}</div>}
         <PromoPills promos={s.promos} />

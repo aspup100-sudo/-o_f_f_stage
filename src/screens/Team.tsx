@@ -177,7 +177,7 @@ export function TeamScreen({ id, sub = 'members' }: { id: string; sub?: string }
             <button key={x.key} onClick={() => { setPrepOpen(false); replace({ name: 'team', id, sub: x.sub }); }} className="w-full flex items-center gap-3 py-3 text-left">
               <span className={cx('w-6 h-6 rounded-full flex items-center justify-center text-[12px] font-black shrink-0', x.done ? 'bg-emerald-500 text-white' : 'border-2 border-ink-300')}>{x.done ? '✓' : ''}</span>
               <span className={cx('flex-1 text-[14px]', x.done ? 'text-ink-500 line-through' : 'font-semibold')}>{x.label}</span>
-              {!x.done && x.mine && <Tag tone="orange">내 차례</Tag>}
+              {!x.done && x.mine && <span className="text-[12px] font-bold text-brand-600">내 차례</span>}
             </button>
           ))}
         </div>
@@ -223,7 +223,7 @@ function MembersTab({ team, isLeader }: { team: Team; isLeader: boolean }) {
             <div className="flex items-center gap-3">
               <BrandLogo brand={b} size={44} />
               <button className="flex-1 text-left min-w-0" onClick={() => navigate({ name: 'brand', id: b.id })}>
-                <div className="font-bold flex items-center gap-1">{b.name} {m.brandId === team.leaderBrandId && <Tag tone="orange">팀장</Tag>}</div>
+                <div className="font-bold flex items-center gap-1">{b.name} {m.brandId === team.leaderBrandId && <span className="text-[12px] font-semibold text-ink-500">팀장</span>}</div>
                 <TrustLine db={db} subjectId={b.id} compact />
               </button>
             </div>
