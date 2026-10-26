@@ -43,30 +43,30 @@ export function QnaList() {
           <Icon name="search" className="w-4 h-4 absolute left-3 top-3.5 text-ink-500" />
           <input className={inputCls + ' pl-9'} placeholder="원상복구, 신고, 비용…" value={q} onChange={(e) => setQ(e.target.value)} />
         </div>
-        <Button variant="dark" className="h-11" onClick={() => navigate({ name: 'qnaNew' })}>질문하기</Button>
+        <Button className="h-11" onClick={() => navigate({ name: 'qnaNew' })}>질문하기</Button>
       </div>
       <div className="flex gap-1.5 overflow-x-auto no-scrollbar px-4 pb-3">
-        {waitingCount > 0 && <Chip active={waiting} onClick={() => setWaiting(!waiting)}>답변 대기 {waitingCount}</Chip>}
         {(['전체', ...QNA_TAGS] as const).map((t) => <Chip key={t} active={tag === t} onClick={() => setTag(t)}>{t}</Chip>)}
+        {waitingCount > 0 && <Chip active={waiting} onClick={() => setWaiting(!waiting)}>답변 대기 {waitingCount}</Chip>}
       </div>
       <div className="px-4 space-y-2">
         {list.map((p) => {
           const n = answers(p.id);
           return (
             <Card key={p.id} className="p-3.5" onClick={() => navigate({ name: 'qna', id: p.id })}>
-              <div className="flex items-center gap-1.5 mb-1"><Tag tone="orange">{p.tag}</Tag><span className="text-[12px] text-ink-500">{p.createdAt}</span></div>
+              <div className="text-[12px] text-ink-500 mb-1"><b className="text-ink-900 font-semibold">{p.tag}</b> · {p.createdAt.slice(5).replace('-', '.')}</div>
               <div className="font-bold text-[15px]">Q. {p.title}</div>
               <p className="text-[13px] text-ink-500 line-clamp-1 mt-0.5">{p.body}</p>
               {n > 0 ? (() => {
                 const first = db.qnaAnswers.filter((x) => x.postId === p.id).sort((x, y) => x.createdAt.localeCompare(y.createdAt))[0];
                 const l = landlordOfUser(db, first.authorId);
                 return (
-                  <div className="mt-2 rounded-md bg-emerald-50/70 px-3 py-2">
-                    <div className="text-[12px] font-semibold text-emerald-700">A. {displayName(db, first.authorId)}{l ? ' · 임대인' : brandOfUser(db, first.authorId) ? ' · 브랜드' : ''}{n > 1 ? ` 외 답변 ${n - 1}개` : ''}</div>
+                  <div className="mt-2.5 border-l-2 border-ink-300 pl-3">
+                    <div className="text-[12px] font-semibold text-ink-700">A. {displayName(db, first.authorId)}{l ? ' · 임대인' : brandOfUser(db, first.authorId) ? ' · 브랜드' : ''}{n > 1 ? ` 외 답변 ${n - 1}개` : ''}</div>
                     <p className="text-[13px] text-ink-700 line-clamp-2 mt-0.5">{first.body}</p>
                   </div>
                 );
-              })() : <div className="text-[12px] mt-1.5 font-semibold text-brand-600"><Ic n="question" />답변을 기다려요 · 첫 답변을 남겨 주세요</div>}
+              })() : <div className="text-[12px] mt-2 font-semibold text-brand-600">아직 답변이 없어요 · 첫 답변 남기기</div>}
             </Card>
           );
         })}
