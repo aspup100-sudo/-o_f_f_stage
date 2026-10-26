@@ -119,7 +119,7 @@ export function SpacesTab({ initial }: { initial?: '찜' }) {
   const [kw, setKw] = useState<string[]>([]);
   const [date, setDate] = useState('');
   const [filterOpen, setFilterOpen] = useState(false);
-  const [showMap, setShowMap] = useState(true);
+  const [showMap, setShowMap] = useState(false);
   const [sort, setSort] = useState<'base' | 'fee' | 'open' | 'deal'>('base');
   const openDays = (id: string) => db.availability.filter((a) => a.spaceId === id && a.status === 'open' && a.date > DEMO_TODAY).length;
   const feeOn = fee[0] > 0 || fee[1] < FEE_MAX;
