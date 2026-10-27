@@ -16,7 +16,7 @@ export function ChatListScreen() {
     <div>
       <SubHeader title="채팅" />
       <div className="p-4 space-y-2">
-        {rooms.length === 0 && <Empty icon="chat">아직 채팅이 없어요. 제안이 수락되거나 서로 관심을 표시하면 채팅방이 열려요.</Empty>}
+        {rooms.length === 0 && <Empty icon="chat" action={{ label: '브랜드 둘러보기', onClick: () => navigate({ name: 'tab', tab: 'explore' }) }}>아직 채팅이 없어요. 제안이 수락되거나 서로 관심을 표시하면 채팅방이 열려요.</Empty>}
         {rooms.map((r) => {
           const msgs = db.messages.filter((m) => m.roomId === r.id);
           const last = msgs[msgs.length - 1];

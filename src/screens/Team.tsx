@@ -501,7 +501,7 @@ function MoodboardTab({ team, myBrandId }: { team: Team; myBrandId: string }) {
       <div className="flex items-center justify-between mb-2">
         <div className="font-bold text-sm">내 룩북에서 고르기 <span className={cx(mine.length === 3 ? 'text-emerald-700' : 'text-brand-600')}>{mine.length}/3</span></div>
       </div>
-      {me.lookbook.length ? <LookbookGrid db={db} ids={me.lookbook} picked={mine} onPick={(id) => toggleMoodPick(team.id, myBrandId, id)} /> : <Empty>룩북 사진이 없어요. 내 정보에서 사진을 올려 주세요.</Empty>}
+      {me.lookbook.length ? <LookbookGrid db={db} ids={me.lookbook} picked={mine} onPick={(id) => toggleMoodPick(team.id, myBrandId, id)} /> : <Empty icon="camera" action={{ label: '룩북 사진 올리기', onClick: () => navigate({ name: 'tab', tab: 'me', filter: 'edit' }) }}>룩북 사진이 없어요</Empty>}
       <div className="mt-4 mb-2 font-bold text-sm">멤버별 선택 현황</div>
       <div className="flex flex-wrap gap-x-3 gap-y-1 mb-4 text-[13px]">
         {team.members.map((m) => {

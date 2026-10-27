@@ -71,7 +71,7 @@ export function ProposalsScreen() {
       <div className="p-4">
         <Segmented items={[{ key: 'recv', label: '받은 제안' }, { key: 'sent', label: '보낸 제안' }]} value={tab} onChange={setTab} />
         <div className="space-y-3 mt-4">
-          {list.length === 0 && <Empty>아직 제안이 없어요</Empty>}
+          {list.length === 0 && <Empty action={{ label: '브랜드 둘러보기', onClick: () => navigate({ name: 'tab', tab: 'explore' }) }}>아직 제안이 없어요</Empty>}
           {list.map((p) => {
             const other = brandById(db, tab === 'recv' ? p.fromBrandId : p.toBrandId)!;
             return (

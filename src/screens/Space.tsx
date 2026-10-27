@@ -494,7 +494,7 @@ function ApplySheet({ open, onClose, space, brandId }: { open: boolean; onClose:
   const already = team && db.spaceApplications.some((a) => a.teamId === team.id && a.spaceId === space.id && a.status === 'pending');
   return (
     <Sheet open={open} onClose={onClose} title="우리 팀으로 지원하기">
-      {teams.length === 0 && <Empty icon="team">준비 중인 팀이 없어요. 같이 열기에서 팀을 먼저 꾸려 보세요.</Empty>}
+      {teams.length === 0 && <Empty icon="team" action={{ label: '같이 열 팀 찾기', onClick: () => navigate({ name: 'tab', tab: 'recruits' }) }}>준비 중인 팀이 없어요</Empty>}
       {teams.length > 0 && (
         <>
           <Field label="지원할 팀">

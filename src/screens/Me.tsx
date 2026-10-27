@@ -13,7 +13,7 @@ import { RentalMeCard } from './Rental';
 import { OfficialInsta } from './Magazine';
 import { InstallApp } from '@/components/InstallApp';
 
-export default function MeScreen() {
+export default function MeScreen({ initial }: { initial?: string } = {}) {
   const { db, user, role, brand, landlord, visitor } = useMe();
   return (
     <div>
@@ -60,7 +60,7 @@ export default function MeScreen() {
 
         {(role === 'brand' || role === 'landlord') && <VerifyCard />}
 
-        {brand && <BrandSection />}
+        {brand && <BrandSection openEdit={initial === 'edit'} />}
         {landlord && (
           <Card className="p-4">
             <div className="font-bold mb-1">운영 공간 {landlord.spaceIds.length}곳</div>
@@ -162,10 +162,10 @@ function VerifyCard() {
   );
 }
 
-function BrandSection() {
+function BrandSection({ openEdit }: { openEdit?: boolean }) {
   const { db, brand } = useMe();
   const b = brand!;
-  const [edit, setEdit] = useState(false);
+  const [edit, setEdit] = useState(!!openEdit);
   const [intro, setIntro] = useState(b.intro);
   const [tags, setTags] = useState<ThemeTags>(b.tags);
   const [avail, setAvail] = useState(b.availability);

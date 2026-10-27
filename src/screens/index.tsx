@@ -23,7 +23,7 @@ import { MyItemsTab, OrdersTab, RentalItemEdit, RentalPartnerScreen, RentalsScre
 function renderTab(tab: string, filter?: string): ReactNode {
   switch (tab) {
     case 'explore': return <Explore />;
-    case 'me': return <MeScreen />;
+    case 'me': return <MeScreen key={filter} initial={filter} />;
     case 'recruits': return <RecruitsTab key={filter} initial={filter === '찜' ? '찜' : undefined} />;
     case 'myteam': return <MyTeamTab />;
     case 'spaces': return <SpacesTab key={filter} initial={filter === '찜' ? '찜' : undefined} />;

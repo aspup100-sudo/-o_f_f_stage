@@ -104,7 +104,7 @@ export default function BrandProfileScreen({ id }: { id: string }) {
       />
       {tab === 'lookbook' && (
         <div className="p-1">
-          {brand.lookbook.length ? <LookbookGrid db={db} ids={brand.lookbook} /> : <Empty>아직 룩북이 없어요</Empty>}
+          {brand.lookbook.length ? <LookbookGrid db={db} ids={brand.lookbook} /> : <Empty action={isMe ? { label: '룩북 사진 올리기', onClick: () => navigate({ name: 'tab', tab: 'me', filter: 'edit' }) } : undefined}>아직 룩북이 없어요</Empty>}
         </div>
       )}
       {tab === 'history' && (
@@ -119,7 +119,7 @@ export default function BrandProfileScreen({ id }: { id: string }) {
           </div>
           <div>
             <h3 className="text-[17px] font-extrabold tracking-tight mb-3">공동 팝업 이력</h3>
-            {teams.length === 0 && <Empty>아직 함께한 팝업이 없어요</Empty>}
+            {teams.length === 0 && <Empty action={isMe ? { label: '같이 열 팀 찾기', onClick: () => navigate({ name: 'tab', tab: 'recruits' }) } : undefined}>아직 함께한 팝업이 없어요</Empty>}
             <div className="space-y-2">
               {teams.map((tm) => {
                 const others = tm.members.filter((m) => m.brandId !== brand.id).map((m) => brandById(db, m.brandId)!);
