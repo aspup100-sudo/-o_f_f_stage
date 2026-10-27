@@ -14,20 +14,23 @@ function TopBar() {
   const rooms = db.chatRooms.filter((r) => r.memberIds.includes(userId)).reduce((n, r) => n + chatUnread(db, r.id, userId), 0);
   return (
     <header className="sticky top-0 z-30 bg-white border-b border-ink-100 h-14 flex items-center px-4">
-      <button onClick={() => navigate({ name: 'tab', tab: role === 'admin' ? 'stats' : 'explore' })} className="flex items-center gap-1.5">
+      <button onClick={() => navigate({ name: 'tab', tab: role === 'admin' ? 'stats' : 'explore' })} className="flex items-center gap-1.5 shrink-0">
         <img src="./logo.png" alt="OFF STAGE 로고" className="w-7 h-7 rounded object-cover" />
         <span className="font-black text-[16px] tracking-tight whitespace-nowrap">OFF STAGE</span>
       </button>
       <div className="flex-1" />
       <SyncDot />
       <RoleSwitcher />
+      <button onClick={() => navigate({ name: 'search' })} className="w-9 h-10 flex items-center justify-center" aria-label="검색">
+        <Icon name="search" className="w-6 h-6" />
+      </button>
       {role !== 'admin' && (
-        <button onClick={() => navigate({ name: 'chatList' })} className="relative w-10 h-10 flex items-center justify-center" aria-label="채팅">
+        <button onClick={() => navigate({ name: 'chatList' })} className="relative w-9 h-10 flex items-center justify-center" aria-label="채팅">
           <Icon name="chat" className="w-6 h-6" />
           {rooms > 0 && <span className="absolute top-1 right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-brand-500 text-white text-[10px] font-bold flex items-center justify-center">{rooms}</span>}
         </button>
       )}
-      <button onClick={() => navigate({ name: 'notifications' })} className="relative w-10 h-10 flex items-center justify-center" aria-label="알림">
+      <button onClick={() => navigate({ name: 'notifications' })} className="relative w-9 h-10 flex items-center justify-center" aria-label="알림">
         <Icon name="bell" className="w-6 h-6" />
         {unread > 0 && (
           <span className="absolute top-1 right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-brand-500 text-white text-[10px] font-bold flex items-center justify-center">{unread}</span>
@@ -72,9 +75,9 @@ function RoleSwitcher() {
   const accounts = (r: Role) => db.users.filter((u) => u.role === r && (r !== 'brand' || db.brands.some((b) => b.userId === u.id)) && (r !== 'landlord' || db.landlords.some((l) => l.userId === u.id)));
   return (
     <>
-      <button onClick={() => setOpen(true)} title="역할 전환(데모)" className="h-8 pl-2 pr-2.5 mr-1 ml-2 shrink-0 whitespace-nowrap rounded border border-ink-300 text-ink-700 text-[11px] font-semibold flex items-center gap-1">
+      <button onClick={() => setOpen(true)} title="역할 전환(데모)" className="h-8 pl-2 pr-2.5 mr-0.5 ml-2 shrink-0 whitespace-nowrap rounded border border-ink-300 text-ink-700 text-[11px] font-semibold flex items-center gap-1">
         <Icon name="swap" className="w-3.5 h-3.5" />
-        {ROLE_LABEL[role]} · 전환(데모)
+        {ROLE_LABEL[role]} 전환
       </button>
       <Sheet open={open} onClose={() => setOpen(false)} title={<>역할 전환 <Demo /></>}>
         <p className="text-xs text-ink-500 mb-3">실제 서비스에서는 한 계정이 하나의 역할만 가집니다. 데모에서는 시점을 바로 바꿔 볼 수 있어요.</p>

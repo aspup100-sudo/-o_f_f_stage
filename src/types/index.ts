@@ -607,6 +607,7 @@ export type Route =
   | { name: 'chatList' }
   | { name: 'chat'; id: ID }
   | { name: 'notifications' }
+  | { name: 'search' }
   | { name: 'recruit'; id: ID }
   | { name: 'recruitNew' }
   | { name: 'team'; id: ID; sub?: string }

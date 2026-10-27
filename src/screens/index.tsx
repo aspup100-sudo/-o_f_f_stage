@@ -1,3 +1,4 @@
+import { SearchScreen } from './Search';
 import type { ReactNode } from 'react';
 import type { Route } from '@/types';
 import { Empty } from '@/components/ui';
@@ -56,6 +57,7 @@ export function renderRoute(route: Route): ReactNode {
     case 'spaceEdit': return <SpaceEdit key={route.id ?? 'new'} id={route.id} />;
     case 'popup': return <PopupDetail key={route.id} id={route.id} />;
     case 'notifications': return <NotificationsScreen />;
+    case 'search': return <SearchScreen />;
     case 'showcase': return <ShowcaseDetail key={route.id} id={route.id} />;
     case 'showcaseNew': return <ShowcaseNew teamId={route.teamId} />;
     case 'qna': return <QnaDetail key={route.id} id={route.id} />;
