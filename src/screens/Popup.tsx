@@ -61,7 +61,7 @@ export function PopupDetail({ id }: { id: string }) {
 
   return (
     <div className="bg-white min-h-screen">
-      <SubHeader title={p.title} right={<button className="text-[13px] font-semibold text-ink-700" onClick={() => shareLink(p.title, `${p.title} · ${sp.name} ${md(p.period.start)}~${md(p.period.end)} · OFF STAGE에서 같이 가요`)}>공유</button>} />
+      <SubHeader title={p.title} right={<button className="text-[13px] font-semibold text-ink-700" onClick={() => shareLink(p.title, `${p.title} · ${sp.name} ${md(p.period.start)}~${md(p.period.end)} · OFF STAGE에서 같이 가요`, { name: 'popup', id: p.id })}>공유</button>} />
       <div className="relative h-44">
         <div className="absolute inset-0 flex">
           {brands.map((b) => <Swatch key={b.id} src={brandCoverSrc(b)} hue={b.logoHue} pattern="stripe" rounded="" className="flex-1" />)}

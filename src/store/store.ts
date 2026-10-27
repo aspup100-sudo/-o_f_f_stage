@@ -63,7 +63,29 @@ function load(): AppState {
   return { db: createSeed(), session: initialSession() };
 }
 
-let state: AppState = load();
+/** 링크로 바로 열 수 있는 화면 */
+export const LINKABLE = ['popup', 'recruit', 'space', 'brand', 'magazine', 'showcase'] as const;
+export type LinkRoute = Extract<Route, { name: (typeof LINKABLE)[number] }>;
+
+/** 주소 해시를 화면으로 바꾼다. 모르는 모양이면 undefined */
+export function routeFromHash(hash: string): LinkRoute | undefined {
+  const m = /^#\/([a-z]+)\/([^/?#]+)$/.exec(hash);
+  if (!m || !(LINKABLE as readonly string[]).includes(m[1])) return undefined;
+  return { name: m[1], id: decodeURIComponent(m[2]) } as LinkRoute;
+}
+
+/** 공유 링크(#/popup/p1)로 들어오면 홈 위에 그 화면을 연다. 뒤로 가기는 홈으로 */
+function openFromLink(s: AppState): AppState {
+  if (typeof location === 'undefined') return s;
+  const r = routeFromHash(location.hash);
+  if (!r) return s;
+  try { history.replaceState(null, '', location.pathname + location.search); } catch { /* noop */ }
+  return { ...s, session: { ...s.session, onboarding: undefined, stack: [{ name: 'tab', tab: ROLE_HOME[s.session.role] }, r] } };
+}
+
+let state: AppState = openFromLink(load());
+// 앱이 열린 채로 다른 공유 링크를 누른 경우
+if (typeof window !== 'undefined') window.addEventListener('hashchange', () => { const next = openFromLink(state); if (next !== state) { state = next; listeners.forEach((l) => l()); } });
 const listeners = new Set<() => void>();
 
 function persist() {

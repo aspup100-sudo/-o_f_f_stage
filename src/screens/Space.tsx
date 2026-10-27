@@ -1,3 +1,4 @@
+import { shareLink } from '@/store/share';
 import { spaceSrc } from '@/data/photos';
 import { RENTAL_ON } from '@/config';
 import { useState } from 'react';
@@ -316,7 +317,7 @@ export function SpaceDetail({ id }: { id: string }) {
 
   return (
     <div className="bg-white min-h-screen">
-      <SubHeader title={s.name} right={isOwner && <Button size="sm" variant="secondary" onClick={() => navigate({ name: 'spaceEdit', id: s.id })}>수정</Button>} />
+      <SubHeader title={s.name} right={isOwner ? <Button size="sm" variant="secondary" onClick={() => navigate({ name: 'spaceEdit', id: s.id })}>수정</Button> : <button className="text-[13px] font-semibold text-ink-700" onClick={() => shareLink(s.name, `${s.name} · ${s.region} ${s.areaM2}㎡ · OFF STAGE 공간`, { name: 'space', id: s.id })}>공유</button>} />
       <div className="relative">
         <Swatch src={spaceSrc(s, photo, 900)} hue={s.photoHues[photo] ?? 30} pattern={(['solid', 'grid', 'stripe'] as const)[photo % 3]} rounded="" className="h-56" label={`사진 ${photo + 1}/${s.photoHues.length}${s.photos?.[photo] ? "" : " · 예시 사진"}`} />
         <div className="absolute bottom-2 right-2 flex gap-1">

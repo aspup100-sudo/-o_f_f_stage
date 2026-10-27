@@ -27,7 +27,7 @@ export default function BrandProfileScreen({ id }: { id: string }) {
         title={brand.name}
         right={
           <div className="flex items-center gap-3">
-            <button className="text-[13px] font-semibold text-ink-700" onClick={() => shareLink(brand.name, isMe ? `OFF STAGE에서 ${brand.name}${josa(brand.name, '과', '와').slice(brand.name.length)} 같이 팝업 열 브랜드를 찾아요` : `${brand.name} · OFF STAGE 브랜드`)}>공유</button>
+            <button className="text-[13px] font-semibold text-ink-700" onClick={() => shareLink(brand.name, isMe ? `OFF STAGE에서 ${brand.name}${josa(brand.name, '과', '와').slice(brand.name.length)} 같이 팝업 열 브랜드를 찾아요` : `${brand.name} · OFF STAGE 브랜드`, { name: 'brand', id: brand.id })}>공유</button>
             {!isMe && <ReportButton targetType="profile" targetId={brand.id} targetLabel={`브랜드: ${brand.name}`} />}
           </div>
         }

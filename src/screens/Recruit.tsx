@@ -158,7 +158,7 @@ export function RecruitDetail({ id }: { id: string }) {
         title="모집글"
         right={
           <div className="flex items-center gap-3 pr-2 pt-1">
-            {r.status !== '마감' && <button className="text-[13px] font-semibold text-ink-700" onClick={() => shareLink(r.title, `${r.title} · 빈자리 ${empties.length}개 · OFF STAGE에서 같이 열 브랜드를 찾아요`)}>공유</button>}
+            {r.status !== '마감' && <button className="text-[13px] font-semibold text-ink-700" onClick={() => shareLink(r.title, `${r.title} · 빈자리 ${empties.length}개 · OFF STAGE에서 같이 열 브랜드를 찾아요`, { name: 'recruit', id: r.id })}>공유</button>}
             <SaveRecruitButton r={r} />
           </div>
         }

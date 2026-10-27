@@ -310,5 +310,5 @@ export function MagazineNew() {
 
 /** 휴대폰이면 공유 시트를, 아니면 링크 복사를 쓴다. */
 function shareMagazine(m: MagazinePost) {
-  return shareLink(m.title, `${m.title} · OFF STAGE 매거진`);
+  return shareLink(m.title, `${m.title} · OFF STAGE 매거진`, { name: 'magazine', id: m.id });
 }
