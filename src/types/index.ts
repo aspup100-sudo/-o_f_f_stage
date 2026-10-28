@@ -344,7 +344,7 @@ export interface Team {
   layout?: TeamLayout; // 팀이 직접 고친 배치. 없으면 자동 배치
 }
 
-export type LayoutKind = 'hanger' | 'table' | 'fit' | 'counter' | 'mirror';
+export type LayoutKind = 'hanger' | 'table' | 'fit' | 'counter' | 'mirror' | 'photo';
 export interface LayoutBox {
   id: ID;
   kind: LayoutKind;
@@ -361,6 +361,7 @@ export interface TeamLayout {
   wallPhoto?: string;
   source?: 'ai' | 'example';
   tips?: string[];
+  path?: { x: number; y: number }[]; // 손님 동선(입구에서 계산대까지)
 }
 
 export interface SpaceApplication {

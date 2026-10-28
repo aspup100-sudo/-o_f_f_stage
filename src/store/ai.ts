@@ -13,7 +13,8 @@ export type RecruitDraftOut = { title: string; intro: string };
 export type PromoOut = { intro: string; caption: string; poster: string };
 export type SpaceOut = { keywords: string[]; moods: string[]; intro: string };
 export type LayoutZone = 'back' | 'left' | 'right' | 'center';
-export type LayoutOut = { zones: { brand: string; zone: LayoutZone }[]; tips: string[] };
+export type LayoutItemOut = { kind: 'hanger' | 'table' | 'photo'; brand: string; x: number; y: number; rotate: 0 | 90 };
+export type LayoutOut = { items: LayoutItemOut[]; path: { x: number; y: number }[]; tips: string[] };
 export type ReportOut = { good: string[]; improve: string[]; next: string[] };
 
 // 서버에 키가 없다는 걸 한 번 알면 그 뒤로는 바로 예시로 간다

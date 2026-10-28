@@ -19,7 +19,9 @@ const COUNTER = { w: 1.6, d: 0.6 };
 const DOOR = 1.4;
 const TABLE = { w: 1.1, d: 0.9 };
 // 3D에서 물건 높이(m)
-const HEIGHT: Record<LayoutKind, number> = { hanger: 1.5, table: 0.8, fit: 2.1, counter: 1.0, mirror: 1.8 };
+const HEIGHT: Record<LayoutKind, number> = { hanger: 1.5, table: 0.8, fit: 2.1, counter: 1.0, mirror: 1.8, photo: 2.2 };
+// AI가 놓을 수 있는 물건 크기(m, 회전 0일 때)
+const SIZE = { hanger: { w: HANGER, h: DEPTH }, table: { w: TABLE.w, h: TABLE.d }, photo: { w: 2.0, h: 0.3 } } as const;
 const WALL = 2.4;
 // 브랜드끼리 잘 구분되는 옅은 색
 const PALETTE = ['#cdd9ea', '#ecd5c3', '#d3e4cd', '#e7d0e2', '#ece2b8', '#cfe6e6'];
@@ -93,8 +95,45 @@ export function planLayout(area: number, members: Member[], round: number, zones
     boxes.push({ id: newId('lb'), kind: 'table', x: x0 + col * (TABLE.w + 0.4), y: H / 2 - TABLE.d - 0.1 + row * (TABLE.d + 0.4), w: TABLE.w, h: TABLE.d, brandId: b.id });
   });
 
+  // 남은 벽에 포토존 하나 (왼쪽 벽 아래쪽이 비어 있으면)
+  const free = slots.filter((x) => !x.used && x.zone === 'left');
+  if (free.length >= 2) boxes.push({ id: newId('lb'), kind: 'photo', x: 0, y: free[0].y - 0.8, w: 0.3, h: 2.0, label: '포토존' });
+
   const back = boxes.find((b) => b.kind === 'hanger' && b.y === 0);
-  return { W, H, boxes, overflow, facingBrandId: back?.brandId, wallFree: slots.filter((s) => !s.used).length, tableBrands };
+  return { W, H, boxes, overflow, facingBrandId: back?.brandId, wallFree: slots.filter((s) => !s.used).length, tableBrands, path: rulePath(W, H) };
+}
+
+/** 기본 동선: 입구 → 가운데 → 왼쪽 벽 → 맞은편 벽 → 피팅룸 → 계산대 */
+export function rulePath(W: number, H: number) {
+  return [
+    { x: W / 2, y: H - 0.3 }, { x: W / 2 - 0.4, y: H * 0.68 }, { x: 1.3, y: H * 0.45 }, { x: W * 0.35, y: 1.0 },
+    { x: W - FIT - 0.5, y: FIT + 0.4 }, { x: W - COUNTER.w / 2 - 0.3, y: H - COUNTER.d - 0.8 },
+  ];
+}
+
+const overlap = (a: { x: number; y: number; w: number; h: number }, b: { x: number; y: number; w: number; h: number }) =>
+  Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
+
+/** AI가 준 물건 목록을 방 안에 맞게 다듬는다. 고정물이나 앞 물건과 많이 겹치면 뺀다 */
+export function fromAiItems(W: number, H: number, fixed: LayoutBox[], members: Member[], out: LayoutOut) {
+  const boxes: LayoutBox[] = [...fixed];
+  out.items.forEach((it) => {
+    const size = SIZE[it.kind];
+    if (!size) return;
+    const [w, h] = it.rotate === 90 ? [size.h, size.w] : [size.w, size.h];
+    const x = Math.max(0, Math.min(W - w, Math.round(Number(it.x) * 10) / 10));
+    const y = Math.max(0, Math.min(H - h, Math.round(Number(it.y) * 10) / 10));
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+    const box = { x, y, w, h };
+    if (boxes.some((b) => overlap(b, box) > 0.25 * w * h)) return;
+    const m = members.find((mm) => mm.brand.name === it.brand.trim());
+    if (it.kind !== 'photo' && !m) return;
+    boxes.push({ id: newId('lb'), kind: it.kind, ...box, brandId: m?.brand.id, label: it.kind === 'photo' ? '포토존' : undefined });
+  });
+  const path = out.path.map((p) => ({ x: Math.max(0.1, Math.min(W - 0.1, Number(p.x))), y: Math.max(0.1, Math.min(H - 0.1, Number(p.y))) })).filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y));
+  // 모든 브랜드가 한 자리 이상 받았을 때만 쓴다
+  const ok = members.every((m) => boxes.some((b) => b.brandId === m.brand.id));
+  return ok ? { boxes, path: path.length >= 2 ? path : rulePath(W, H) } : null;
 }
 
 /** 가운데 통로에서 가장 좁은 폭(대략). 벽 행거 안쪽 선과 진열대 사이 */
@@ -183,6 +222,12 @@ function partsOf(b: LayoutBox, photo: string | undefined, color: string): Part[]
     out.push({ x: b.x, y: b.y + b.h - 0.03, z: 2.08, w: b.w, d: 0.03, h: 0.03, side: METAL });
   } else if (b.kind === 'mirror') {
     out.push({ ...b, d: b.h, z: 0.05, h: 1.75, side: { background: 'linear-gradient(135deg, #e9eef2, #b7c2cc 45%, #eef2f5 60%, #a9b4be)', border: '3px solid #2b2b2f' } });
+  } else if (b.kind === 'photo') {
+    // 포토존: 사진을 입힌 배경벽과 조명 하나
+    out.push({ ...b, d: b.h, z: 0, h: 2.2, side: photo ? { background: `url(${photo}) center/cover, ${color}` } : { background: 'linear-gradient(135deg, #efe7dc, #d9cbb8)' }, top: { background: '#f4f2ee' } });
+    const front = along ? { x: b.x + L / 2 - 0.05, y: b.y + D + 0.9 } : { x: b.x + D + 0.9, y: b.y + L / 2 - 0.05 };
+    out.push({ ...front, z: 0, w: 0.04, d: 0.04, h: 1.7, side: METAL });
+    out.push({ x: front.x - 0.12, y: front.y - 0.12, z: 1.7, w: 0.28, d: 0.28, h: 0.2, side: { background: '#f7f6f3', border: '1px solid rgba(0,0,0,.2)' } });
   } else if (b.kind === 'counter') {
     out.push({ ...b, d: b.h, z: 0, h: 0.95, side: WHITE, top: WOOD });
     out.push({ x: b.x + b.w - 0.45, y: b.y + 0.15, z: 0.95, w: 0.3, d: 0.25, h: 0.12, side: { background: '#3a3a3f' } });
@@ -190,8 +235,24 @@ function partsOf(b: LayoutBox, photo: string | undefined, color: string): Part[]
   return out;
 }
 
-function Room3D({ W, H, boxes, angle, wallPhoto, colorOf, photoOf, nameOf, selected, onPick }: {
-  W: number; H: number; boxes: LayoutBox[]; angle: number; wallPhoto: string;
+/** 손님 동선 화살표. 3D 바닥과 평면도에서 같이 쓴다 */
+function PathArrows({ path, scale }: { path: { x: number; y: number }[]; scale: number }) {
+  if (path.length < 2) return null;
+  const pts = path.map((p) => `${p.x * scale},${p.y * scale}`).join(' ');
+  return (
+    <>
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#e0482a" />
+        </marker>
+      </defs>
+      <polyline points={pts} fill="none" stroke="#e0482a" strokeWidth={2.5} strokeDasharray="7 5" strokeLinejoin="round" markerMid="url(#ah)" markerEnd="url(#ah)" />
+    </>
+  );
+}
+
+function Room3D({ W, H, boxes, angle, wallPhoto, colorOf, photoOf, nameOf, selected, onPick, path }: {
+  W: number; H: number; boxes: LayoutBox[]; angle: number; wallPhoto: string; path?: { x: number; y: number }[];
   colorOf: (id?: string) => string; photoOf: (b: LayoutBox) => string | undefined; nameOf: (id?: string) => string;
   selected: string | null; onPick: (id: string) => void;
 }) {
@@ -225,6 +286,8 @@ function Room3D({ W, H, boxes, angle, wallPhoto, colorOf, photoOf, nameOf, selec
       <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 45%, rgba(255,250,240,.55), rgba(120,90,60,.12) 75%), repeating-linear-gradient(90deg, #dcc8ad 0 22px, #cfb898 22px 23px, #e3d1b8 23px 45px, #cfb898 45px 46px)', border: '2px solid #4a4038' }} />
       {/* 입구 매트 */}
       <div style={{ position: 'absolute', left: (W / 2 - 0.6) * s, top: (H - 0.7) * s, width: 1.2 * s, height: 0.55 * s, background: '#5b5550', opacity: 0.85 }} />
+      {/* 손님 동선 */}
+      {path && <svg width={W * s} height={H * s} style={{ position: 'absolute', left: 0, top: 0, overflow: 'visible', transform: 'translateZ(1px)' }}><PathArrows path={path} scale={s} /></svg>}
       {/* 물건 그림자 */}
       {boxes.filter((b) => b.kind !== 'mirror').map((b) => (
         <div key={'sh' + b.id} style={{ position: 'absolute', left: (b.x + 0.06) * s, top: (b.y + 0.08) * s, width: b.w * s, height: b.h * s, background: 'rgba(60,40,20,.28)', filter: 'blur(5px)' }} />
@@ -245,7 +308,7 @@ function Room3D({ W, H, boxes, angle, wallPhoto, colorOf, photoOf, nameOf, selec
       <div style={{ position: 'absolute', left: (W / 2 - 1) * s, top: H * s + 6, width: 2 * s, textAlign: 'center', fontSize: 11, color: '#4a4a52' }}>입구</div>
       {walls}
       {boxes.map((b) => {
-        const pick = b.kind === 'hanger' || b.kind === 'table';
+        const pick = b.kind === 'hanger' || b.kind === 'table' || b.kind === 'photo';
         return (
           <div key={b.id} onClick={pick ? () => onPick(b.id) : undefined} style={{ position: 'absolute', inset: 0, transformStyle: 'preserve-3d', pointerEvents: 'none' }}>
             {/* 고른 물건은 바닥에 테두리 */}
@@ -269,8 +332,8 @@ function Room3D({ W, H, boxes, angle, wallPhoto, colorOf, photoOf, nameOf, selec
 
 // ───────── 평면(끌어서 옮기기) ─────────
 
-function Plan2D({ W, H, boxes, colorOf, initialOf, selected, onPick, onMove }: {
-  W: number; H: number; boxes: LayoutBox[]; colorOf: (id?: string) => string; initialOf: (id?: string) => string;
+function Plan2D({ W, H, boxes, colorOf, initialOf, selected, onPick, onMove, path }: {
+  W: number; H: number; boxes: LayoutBox[]; path?: { x: number; y: number }[]; colorOf: (id?: string) => string; initialOf: (id?: string) => string;
   selected: string | null; onPick: (id: string) => void; onMove: (id: string, x: number, y: number, done: boolean) => void;
 }) {
   const svg = useRef<SVGSVGElement>(null);
@@ -305,14 +368,15 @@ function Plan2D({ W, H, boxes, colorOf, initialOf, selected, onPick, onMove }: {
       <rect x={0} y={0} width={W * scale} height={H * scale} fill="#fafafa" stroke="#111" strokeWidth={2} />
       <line x1={(W / 2 - DOOR / 2) * scale} y1={H * scale} x2={(W / 2 + DOOR / 2) * scale} y2={H * scale} stroke="#fafafa" strokeWidth={4} />
       <text x={(W / 2) * scale} y={H * scale + 16} textAnchor="middle" fontSize={11} fill="#5d5d66">입구</text>
+      {path && <PathArrows path={path} scale={scale} />}
       {boxes.map((b) => {
-        const movable = b.kind === 'hanger' || b.kind === 'table';
+        const movable = b.kind === 'hanger' || b.kind === 'table' || b.kind === 'photo';
         return (
           <g key={b.id}
             onPointerDown={movable ? (e) => { (e.target as Element).setPointerCapture?.(e.pointerId); const p = toM(e); drag.current = { id: b.id, dx: p.x - b.x, dy: p.y - b.y, moved: false }; } : undefined}
             style={{ cursor: movable ? 'grab' : undefined }}>
             <rect x={b.x * scale} y={b.y * scale} width={b.w * scale} height={b.h * scale}
-              fill={b.kind === 'fit' ? '#fff' : b.kind === 'counter' ? '#e4e4e7' : b.kind === 'mirror' ? '#8e8e96' : colorOf(b.brandId)}
+              fill={b.kind === 'fit' ? '#fff' : b.kind === 'counter' ? '#e4e4e7' : b.kind === 'mirror' ? '#8e8e96' : b.kind === 'photo' && !b.brandId ? '#e8dfd2' : colorOf(b.brandId)}
               stroke={selected === b.id ? '#111' : b.kind === 'mirror' ? 'none' : '#33333a'} strokeWidth={selected === b.id ? 2.5 : 1} strokeDasharray={b.kind === 'fit' ? '4 3' : undefined} />
             {b.label && <text x={(b.x + b.w / 2) * scale} y={(b.y + b.h / 2) * scale + 4} textAnchor="middle" fontSize={10} fill="#33333a" pointerEvents="none">{b.label}</text>}
             {movable && <text x={(b.x + b.w / 2) * scale} y={(b.y + b.h / 2) * scale + 4} textAnchor="middle" fontSize={10} fontWeight={700} fill="#33333a" pointerEvents="none">{initialOf(b.brandId)}</text>}
@@ -338,6 +402,7 @@ export function TeamLayoutTab({ team }: { team: Team }) {
   const saved = team.layout;
   const [draft, setDraft] = useState<LayoutBox[] | null>(null); // 끄는 중인 배치
   const boxes = draft ?? saved?.boxes ?? auto.boxes;
+  const path = saved ? saved.path : auto.path;
   const [view, setView] = useState<'3d' | 'plan'>('3d');
   const [angle, setAngle] = useState(-24);
   const [sel, setSel] = useState<string | null>(null);
@@ -370,22 +435,24 @@ export function TeamLayoutTab({ team }: { team: Team }) {
     setSel(b.id);
     setView('plan');
   };
+  // AI가 물건 개수·위치·포토존·동선까지 정한다. 키가 없거나 결과가 맞지 않으면 규칙 배치로
   const askLayout = async () => {
     setAsking(true);
+    const fixed = auto.boxes.filter((b) => b.kind === 'fit' || b.kind === 'mirror' || b.kind === 'counter');
     const r = await askAi<LayoutOut>('layout', {
-      공간: { 가로m: W, 세로m: H, 면적: area }, 회차: team.round,
+      공간: { 가로m: W, 세로m: H, 면적: area, 입구: { x: W / 2, y: H, 폭: DOOR } },
+      고정물: fixed.map((b) => ({ 이름: b.label ?? '거울', x: b.x, y: b.y, 가로: b.w, 세로: b.h })),
+      회차: team.round,
       브랜드: members.map((m) => ({ 이름: m.brand.name, 카테고리: m.brand.tags.categories, 무드: m.brand.tags.moods, 행거수: m.hangers })),
-    }, () => ({
-      zones: auto.boxes.filter((b) => b.brandId).map((b) => ({ brand: nameOf(b.brandId), zone: (b.kind === 'table' ? 'center' : b.y === 0 ? 'back' : b.x < W / 2 ? 'left' : 'right') as LayoutZone })),
-      tips: [],
-    }));
-    const zones: Record<string, LayoutZone> = {};
-    r.result.zones.forEach((z) => {
-      const m = members.find((x) => x.brand.name === z.brand);
-      if (m && !zones[m.brand.id]) zones[m.brand.id] = z.zone;
-    });
-    const plan = planLayout(area, members, team.round, Object.keys(zones).length ? zones : undefined);
-    saveTeamLayout(team.id, { boxes: plan.boxes, wallPhoto: saved?.wallPhoto, source: r.source, tips: r.result.tips.length ? r.result.tips : undefined });
+    }, () => ({ items: [], path: [], tips: [] }));
+    const fromAi = r.source === 'ai' ? fromAiItems(W, H, fixed, members, r.result) : null;
+    if (fromAi) {
+      saveTeamLayout(team.id, { boxes: fromAi.boxes, path: fromAi.path, wallPhoto: saved?.wallPhoto, source: 'ai', tips: r.result.tips.length ? r.result.tips : undefined });
+    } else {
+      // 예시: 회차를 하나 돌린 규칙 배치로 바꿔 보여 준다
+      const plan = planLayout(area, members, team.round + (saved?.source === 'example' ? 2 : 1));
+      saveTeamLayout(team.id, { boxes: plan.boxes, path: plan.path, wallPhoto: saved?.wallPhoto, source: 'example' });
+    }
     setSel(null);
     setAsking(false);
   };
@@ -430,12 +497,12 @@ export function TeamLayoutTab({ team }: { team: Team }) {
             onPointerUp={() => { rot.current = null; }}
             onClickCapture={(e) => { if (rot.current?.moved) e.stopPropagation(); }}
           >
-            <Room3D W={W} H={H} boxes={boxes} angle={angle} wallPhoto={wallPhoto} colorOf={color} photoOf={photoOf} nameOf={nameOf} selected={sel} onPick={(id) => setSel(sel === id ? null : id)} />
+            <Room3D W={W} H={H} boxes={boxes} path={path} angle={angle} wallPhoto={wallPhoto} colorOf={color} photoOf={photoOf} nameOf={nameOf} selected={sel} onPick={(id) => setSel(sel === id ? null : id)} />
             <div className="absolute left-3 bottom-2 text-[11px] text-ink-500 pointer-events-none">옆으로 밀어 돌려 보기 · 행거를 눌러 바꾸기</div>
           </div>
         ) : (
           <div className="px-4 py-3">
-            <Plan2D W={W} H={H} boxes={boxes} colorOf={color} initialOf={initial} selected={sel}
+            <Plan2D W={W} H={H} boxes={boxes} path={path} colorOf={color} initialOf={initial} selected={sel}
               onPick={(id) => setSel(sel === id ? null : id)}
               onMove={(id, x, y, done) => {
                 const next = boxes.map((b) => (b.id === id ? { ...b, x, y } : b));
@@ -449,7 +516,7 @@ export function TeamLayoutTab({ team }: { team: Team }) {
       {selected ? (
         <div className="mt-3 rounded border border-ink-900 p-3">
           <div className="flex items-center justify-between">
-            <div className="text-sm font-bold">{selected.kind === 'hanger' ? '행거' : '진열대'} · {nameOf(selected.brandId) || '빈 자리'}</div>
+            <div className="text-sm font-bold">{selected.kind === 'hanger' ? '행거' : selected.kind === 'photo' ? '포토존' : '진열대'} · {nameOf(selected.brandId) || (selected.kind === 'photo' ? '공용' : '빈 자리')}</div>
             <button className="text-[12px] text-ink-500" onClick={() => setSel(null)}>닫기</button>
           </div>
           <div className="flex flex-wrap gap-1.5 mt-2">

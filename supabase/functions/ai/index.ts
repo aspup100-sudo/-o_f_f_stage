@@ -38,8 +38,12 @@ const TASKS: Record<Task, { ask: string; schema: Record<string, unknown> }> = {
     schema: obj({ keywords: strList, moods: strList, intro: str }),
   },
   layout: {
-    ask: '아래는 공동 팝업 공간 크기와 참여 브랜드야. 입구는 앞쪽 벽 가운데, 피팅룸은 뒤 벽 오른쪽 구석, 계산대는 입구 오른쪽에 고정이야. 각 브랜드를 어디에 둘지 정해 줘. zone은 back(입구 맞은편 벽, 들어오자마자 보이는 자리), left(왼쪽 벽), right(오른쪽 벽), center(가운데 진열대) 중 하나. 옷은 벽, 작은 소품은 가운데가 보통 좋고, 무드가 비슷한 브랜드는 이웃하게, 회차마다 back을 다른 브랜드가 쓰게 해. tips는 왜 이렇게 놓았는지 2~4문장.',
-    schema: obj({ zones: { type: 'array', items: obj({ brand: str, zone: { type: 'string', enum: ['back', 'left', 'right', 'center'] } }) }, tips: strList }),
+    ask: '아래는 공동 팝업 공간과 참여 브랜드야. 좌표는 미터, 왼쪽 위 모서리가 (0,0), x는 오른쪽, y는 아래(입구 쪽)로 커져. 입구는 아래 벽 가운데야. 고정물(피팅룸, 거울, 계산대)은 옮기지 말고 겹치지 않게 해. 놓을 수 있는 물건: hanger(행거, 1.2m×0.5m), table(진열대, 1.1m×0.9m), photo(포토존 배경벽, 2.0m×0.3m). rotate 90이면 가로세로가 바뀌어. x, y는 물건의 왼쪽 위 좌표. 브랜드마다 행거수만큼 hanger를 두되, 옷이 아닌 소품 브랜드는 table로. 포토존은 0~1개, brand는 비워도 돼. 손님이 입구에서 들어와 모든 브랜드를 지나 피팅룸과 계산대로 가도록 path(4~7개 점)를 짜. 통로는 1.2m 이상. 입구 맞은편은 가장 눈에 띄는 자리이니 회차마다 다른 브랜드에게. tips는 이 배치의 이유 2~4문장.',
+    schema: obj({
+      items: { type: 'array', items: obj({ kind: { type: 'string', enum: ['hanger', 'table', 'photo'] }, brand: str, x: { type: 'number' }, y: { type: 'number' }, rotate: { type: 'integer', enum: [0, 90] } }) },
+      path: { type: 'array', items: obj({ x: { type: 'number' }, y: { type: 'number' } }) },
+      tips: strList,
+    }),
   },
   report: {
     ask: '아래는 끝난 공동 팝업의 방문·후기 데이터야. 반응이 좋았던 점(good) 2~3개, 아쉬웠던 점(improve) 1~2개, 다음 회차 제안(next) 2~3개를 한 문장씩 써 줘. 데이터에 근거한 것만.',
