@@ -185,6 +185,28 @@ function shade(color: string, k: number) {
   return new THREE.Color(color).multiplyScalar(k);
 }
 
+// 바닥에 닿는 부분의 부드러운 그림자(가장자리로 갈수록 옅게)
+let contactTex: THREE.Texture | null = null;
+function contactShadow(w: number, d: number, strength: number) {
+  if (!contactTex) {
+    const c = document.createElement('canvas');
+    c.width = c.height = 128;
+    const g = c.getContext('2d')!;
+    const grd = g.createRadialGradient(64, 64, 8, 64, 64, 64);
+    grd.addColorStop(0, 'rgba(0,0,0,1)');
+    grd.addColorStop(0.55, 'rgba(0,0,0,0.45)');
+    grd.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = grd;
+    g.fillRect(0, 0, 128, 128);
+    contactTex = new THREE.CanvasTexture(c);
+  }
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshBasicMaterial({ map: contactTex, transparent: true, opacity: strength, depthWrite: false }));
+  m.rotation.x = -Math.PI / 2;
+  m.position.y = 0.004;
+  m.renderOrder = 1;
+  return m;
+}
+
 // 브랜드 무드마다 집기와 옷 모양을 다르게: 같은 매장 안에서도 브랜드 구역이 구분되게
 type Sleeve = 'long' | 'short' | 'none';
 type Look = { frame: string; top: string; cut: { len: number; sleeve: Sleeve; flare?: number; wide?: number; thick?: number }[]; twist: number };
@@ -348,6 +370,11 @@ function buildItem(b: LayoutBox, photo: string | undefined, color: string, mats:
     const ring = add(new THREE.TorusGeometry(0.22, 0.02, 10, 40), new THREE.MeshStandardMaterial({ color: '#fff', emissive: '#fff8ea', emissiveIntensity: 1.2 }), 0, 1.5, 1.1);
     ring.castShadow = false;
     add(new THREE.CylinderGeometry(0.012, 0.012, 1.5, 8), mats.metal, 0, 0.75, 1.1);
+  }
+  // 바닥 접지 그림자
+  if (b.kind === 'hanger' || b.kind === 'table' || b.kind === 'counter' || b.kind === 'photo') {
+    const sh = contactShadow(L + 0.35, D + 0.35, b.kind === 'hanger' ? 0.22 : 0.3);
+    inner.add(sh);
   }
   // 브랜드 간판: 행거는 봉 위에 매단 판, 진열대는 앞쪽 탁상 카드
   if (name && b.brandId && (b.kind === 'hanger' || b.kind === 'table')) {
