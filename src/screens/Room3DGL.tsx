@@ -154,13 +154,35 @@ function garmentShape(w: number, len: number, sleeve: 'long' | 'short' | 'none')
   return s;
 }
 
+// 브랜드 이름 간판(흰 판 + 검은 글자) 텍스처
+const signCache = new Map<string, THREE.Texture>();
+function signTexture(name: string) {
+  const hit = signCache.get(name);
+  if (hit) return hit;
+  const c = document.createElement('canvas');
+  c.width = 512; c.height = 128;
+  const g = c.getContext('2d')!;
+  g.fillStyle = '#fbfaf8'; g.fillRect(0, 0, 512, 128);
+  g.fillStyle = '#141414';
+  let size = 64;
+  g.font = `800 ${size}px Pretendard, sans-serif`;
+  while (g.measureText(name).width > 440 && size > 28) { size -= 4; g.font = `800 ${size}px Pretendard, sans-serif`; }
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText(name, 256, 68);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 4;
+  signCache.set(name, t);
+  return t;
+}
+
 // ───────── 물건 만들기 ─────────
 
 function shade(color: string, k: number) {
   return new THREE.Color(color).multiplyScalar(k);
 }
 
-function buildItem(b: LayoutBox, photo: string | undefined, color: string, mats: Record<string, THREE.Material>, cat?: string) {
+function buildItem(b: LayoutBox, photo: string | undefined, color: string, mats: Record<string, THREE.Material>, cat?: string, name?: string) {
   const g = new THREE.Group();
   const along = b.w >= b.h;
   const L = along ? b.w : b.h;
@@ -299,6 +321,20 @@ function buildItem(b: LayoutBox, photo: string | undefined, color: string, mats:
     const ring = add(new THREE.TorusGeometry(0.22, 0.02, 10, 40), new THREE.MeshStandardMaterial({ color: '#fff', emissive: '#fff8ea', emissiveIntensity: 1.2 }), 0, 1.5, 1.1);
     ring.castShadow = false;
     add(new THREE.CylinderGeometry(0.012, 0.012, 1.5, 8), mats.metal, 0, 0.75, 1.1);
+  }
+  // 브랜드 간판: 행거는 봉 위에 매단 판, 진열대는 앞쪽 탁상 카드
+  if (name && b.brandId && (b.kind === 'hanger' || b.kind === 'table')) {
+    const face = new THREE.MeshStandardMaterial({ map: signTexture(name), roughness: 0.6 });
+    const edge = new THREE.MeshStandardMaterial({ color: '#fbfaf8', roughness: 0.6 });
+    const mat = [edge, edge, edge, edge, face, face];
+    if (b.kind === 'hanger') {
+      const sw = Math.min(0.62, L * 0.55);
+      add(new THREE.BoxGeometry(sw, sw / 4, 0.012), mat as unknown as THREE.Material, 0, 1.62 + sw / 8, 0);
+      [-sw / 2 + 0.04, sw / 2 - 0.04].forEach((x) => add(new THREE.CylinderGeometry(0.002, 0.002, 0.1, 4), mats.metal, x, 1.57, 0));
+    } else {
+      const card = add(new THREE.BoxGeometry(0.26, 0.065, 0.006), mat as unknown as THREE.Material, 0, 0.82, D / 2 - 0.07);
+      card.rotation.x = -0.35;
+    }
   }
   return g;
 }
@@ -494,7 +530,7 @@ export default function Room3DGL(props: Room3DProps) {
 
     const buildItems = (p: Room3DProps) => {
       clear(items);
-      p.boxes.forEach((b) => items.add(buildItem(b, p.photoOf(b), p.colorOf(b.brandId), mats, p.catOf?.(b.brandId))));
+      p.boxes.forEach((b) => items.add(buildItem(b, p.photoOf(b), p.colorOf(b.brandId), mats, p.catOf?.(b.brandId), b.brandId ? p.nameOf(b.brandId) : undefined)));
       // 행거·진열대마다 천장 레일에서 비추는 핀 조명 (최대 8개)
       pins.forEach((o) => scene.remove(o));
       pins.length = 0;
@@ -780,7 +816,8 @@ export default function Room3DGL(props: Room3DProps) {
       const r = renderer.domElement.getBoundingClientRect();
       labels.forEach((l) => {
         v.copy(l.pos).project(camera);
-        const behind = v.z > 1;
+        // 걸어 볼 때는 매장 안 간판으로 충분하니 화면 이름표는 숨긴다
+        const behind = v.z > 1 || mode === 'walk';
         l.el.style.display = behind ? 'none' : 'flex';
         l.el.style.transform = `translate(${((v.x + 1) / 2) * r.width}px, ${((1 - v.y) / 2) * r.height}px) translate(-50%, -100%)`;
       });

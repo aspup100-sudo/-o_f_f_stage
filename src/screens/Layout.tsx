@@ -106,7 +106,72 @@ export function planLayout(area: number, members: Member[], round: number, zones
   if (free.length >= 2) boxes.push({ id: newId('lb'), kind: 'photo', x: 0, y: free[0].y - 0.8, w: 0.3, h: 2.0, label: '포토존' });
 
   const back = boxes.find((b) => b.kind === 'hanger' && b.y === 0);
-  return { W, H, boxes, overflow, facingBrandId: back?.brandId, wallFree: slots.filter((s) => !s.used).length, tableBrands, path: rulePath(W, H) };
+  return { W, H, boxes, overflow, facingBrandId: back?.brandId, wallFree: slots.filter((s) => !s.used).length, tableBrands, path: stopPath(W, H, boxes) };
+}
+
+/** 배치에 맞춘 동선: 입구에서 시작해 가까운 매대부터 앞을 지나가고, 피팅룸을 거쳐 계산대에서 끝난다 */
+export function stopPath(W: number, H: number, boxes: LayoutBox[]) {
+  const GAP = 0.5;
+  const M = 0.35;
+  const inside = (pt: { x: number; y: number }) => pt.x >= M && pt.x <= W - M && pt.y >= M && pt.y <= H - M;
+  const blocked = (pt: { x: number; y: number }) => boxes.some((b) => pt.x > b.x - 0.15 && pt.x < b.x + b.w + 0.15 && pt.y > b.y - 0.15 && pt.y < b.y + b.h + 0.15);
+  // 물건 네 변 앞의 서는 자리 중 방 안이고 막히지 않은 곳
+  const spots = (b: LayoutBox) => {
+    const cx = b.x + b.w / 2;
+    const cy = b.y + b.h / 2;
+    const c = [
+      { x: cx, y: b.y + b.h + GAP }, { x: cx, y: b.y - GAP }, { x: b.x + b.w + GAP, y: cy }, { x: b.x - GAP, y: cy },
+    ].filter((pt) => inside(pt) && !blocked(pt));
+    return c.length ? c : [{ x: Math.max(M, Math.min(W - M, cx)), y: Math.max(M, Math.min(H - M, cy)) }];
+  };
+  type P = { x: number; y: number };
+  const dist = (a: P, b: P) => Math.hypot(a.x - b.x, a.y - b.y);
+  const near = (pts: P[], to: P) => pts.reduce((a, c) => (dist(to, c) < dist(to, a) ? c : a));
+  const C = { x: W / 2, y: H / 2 };
+  const show = boxes.filter((b) => b.kind === 'hanger' || b.kind === 'table' || b.kind === 'photo');
+  // 가장 가까운 벽까지가 방 짧은 변의 30% 안이면 벽 쪽 매대로 본다
+  const onWall = (b: LayoutBox) => {
+    const cx = b.x + b.w / 2;
+    const cy = b.y + b.h / 2;
+    return Math.min(cx, cy, W - cx, H - cy) < Math.min(W, H) * 0.3;
+  };
+  let cur: P = { x: W / 2, y: H - 0.3 };
+  const stops: P[] = [cur];
+  const go = (pt: P) => { if (dist(cur, pt) > 0.7 || stops.length === 1) stops.push(pt); cur = pt; };
+  // 1) 가운데 진열대: 오른쪽에서 왼쪽으로 훑고 왼쪽 벽으로 이어진다
+  show.filter((b) => !onWall(b)).sort((a, b) => b.x + b.w / 2 - (a.x + a.w / 2)).forEach((b) => go(near(spots(b), cur)));
+  // 2) 벽 쪽 매대: 입구에서 왼쪽 벽 → 맞은편 벽 → 오른쪽 벽 순서로 한 바퀴
+  const turn = (b: LayoutBox) => ((Math.atan2(b.y + b.h / 2 - C.y, b.x + b.w / 2 - C.x) * 180) / Math.PI - 90 + 720) % 360;
+  show.filter(onWall).sort((a, b) => turn(a) - turn(b)).forEach((b) => go(near(spots(b), C)));
+  // 3) 피팅룸 → 계산대
+  ['fit', 'counter'].forEach((k) => {
+    const b = boxes.find((x) => x.kind === k);
+    if (b) go(near(spots(b), cur));
+  });
+  // 4) 물건을 뚫고 지나가는 구간은 모서리로 돌아간다
+  const hits = (a: P, b: P) => {
+    const n = Math.ceil(dist(a, b) / 0.05);
+    for (let i = 1; i < n; i++) {
+      const x = a.x + ((b.x - a.x) * i) / n;
+      const y = a.y + ((b.y - a.y) * i) / n;
+      if (boxes.some((r) => x > r.x - 0.1 && x < r.x + r.w + 0.1 && y > r.y - 0.1 && y < r.y + r.h + 0.1)) return true;
+    }
+    return false;
+  };
+  const corners = boxes.flatMap((r) => [
+    { x: r.x - 0.35, y: r.y - 0.35 }, { x: r.x + r.w + 0.35, y: r.y - 0.35 }, { x: r.x - 0.35, y: r.y + r.h + 0.35 }, { x: r.x + r.w + 0.35, y: r.y + r.h + 0.35 },
+  ]).filter((pt) => inside(pt) && !blocked(pt));
+  const path: P[] = [stops[0]];
+  for (let i = 1; i < stops.length; i++) {
+    const a = path[path.length - 1];
+    const b = stops[i];
+    if (hits(a, b)) {
+      const via = corners.filter((c) => !hits(a, c) && !hits(c, b)).sort((p, q) => dist(a, p) + dist(p, b) - dist(a, q) - dist(q, b))[0];
+      if (via) path.push(via);
+    }
+    path.push(b);
+  }
+  return path.map((pt) => ({ x: Math.round(pt.x * 100) / 100, y: Math.round(pt.y * 100) / 100 }));
 }
 
 /** 기본 동선: 입구 → 가운데 → 왼쪽 벽 → 맞은편 벽 → 피팅룸 → 계산대 */
@@ -408,7 +473,8 @@ export function TeamLayoutTab({ team }: { team: Team }) {
   const saved = team.layout;
   const [draft, setDraft] = useState<LayoutBox[] | null>(null); // 끄는 중인 배치
   const boxes = draft ?? saved?.boxes ?? auto.boxes;
-  const path = saved ? saved.path : auto.path;
+  // 끄는 중이면 동선도 따라 바뀐다
+  const path = draft ? stopPath(W, H, draft) : saved ? saved.path : auto.path;
   const [view, setView] = useState<'3d' | 'walk' | 'plan'>('3d');
   const [angle, setAngle] = useState(-24);
   const [sel, setSel] = useState<string | null>(null);
@@ -416,7 +482,8 @@ export function TeamLayoutTab({ team }: { team: Team }) {
   const rot = useRef<{ x: number; a: number; moved: boolean } | null>(null);
 
   const save = (next: Partial<TeamLayout>) => saveTeamLayout(team.id, { boxes, ...saved, ...next });
-  const setBoxes = (next: LayoutBox[]) => save({ boxes: next });
+  // 물건을 옮기거나 더하거나 빼면 동선을 다시 그린다
+  const setBoxes = (next: LayoutBox[]) => save({ boxes: next, path: stopPath(W, H, next) });
   const selected = boxes.find((b) => b.id === sel);
 
   const color = (id?: string) => {
