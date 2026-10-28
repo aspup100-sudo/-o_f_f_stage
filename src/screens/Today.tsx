@@ -38,7 +38,7 @@ export function TodayBrand() {
   const myApps = db.recruitApplications.filter((a) => a.brandId === brand.id && a.status === 'pending').length;
 
   const extra: { label: string; hint?: string; route: Route }[] = [];
-  if (proposals) extra.push({ label: `받은 같이 하자 제안 ${proposals}건`, hint: '답장 기다리는 중', route: { name: 'proposals' } });
+  if (proposals) extra.push({ label: `받은 같이 해요 제안 ${proposals}건`, hint: '답장 기다리는 중', route: { name: 'proposals' } });
   db.recruitments
     .filter((r) => brand.savedRecruits?.includes(r.id) && recruitUrgency(r))
     .forEach((r) => extra.push({ label: `찜한 모집글: ${r.title}`, hint: recruitUrgency(r), route: { name: 'recruit', id: r.id } }));
