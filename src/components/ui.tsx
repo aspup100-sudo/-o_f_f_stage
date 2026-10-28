@@ -123,6 +123,13 @@ export function Tag({ children, tone = 'gray' }: { children: ReactNode; tone?: '
   return <span className={cx('inline-flex items-center px-1.5 h-[22px] border bg-white text-[12px] font-semibold whitespace-nowrap', t)}>{children}</span>;
 }
 
+/** AI 결과 출처 표시. 키 연결 전에는 예시 문구라고 알려 준다 */
+export function AiSource({ source }: { source: 'ai' | 'example' }) {
+  return source === 'ai'
+    ? <span className="text-[11px] font-semibold text-brand-600">AI 초안 · 고쳐서 쓰세요</span>
+    : <span className="text-[11px] text-ink-500">예시 문구 · AI 연결 전</span>;
+}
+
 export function Demo({ children = '데모' }: { children?: ReactNode }) {
   return <span className="inline-flex items-center px-1 h-[18px] border border-ink-300 text-ink-500 text-[10px] font-semibold align-middle tracking-wide">{children}</span>;
 }

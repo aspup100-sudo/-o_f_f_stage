@@ -8,7 +8,7 @@ const URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
 export const remoteEnabled = !!(URL && KEY);
-const client: SupabaseClient | null = remoteEnabled ? createClient(URL!, KEY!) : null;
+export const client: SupabaseClient | null = remoteEnabled ? createClient(URL!, KEY!) : null;
 
 type Row = { collection: string; id: string; data: unknown };
 

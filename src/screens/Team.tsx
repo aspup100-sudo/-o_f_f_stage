@@ -2,6 +2,7 @@ import { lookbookSrc, brandCoverSrc } from '@/data/photos';
 import { RENTAL_ON } from '@/config';
 import { useState } from 'react';
 import { useMe } from '@/store/hooks';
+import { askAi, type AiResult, type PromoOut } from '@/store/ai';
 import { navigate, replace, toast } from '@/store/store';
 import {
   addCommonItem, addTeamTodo, agreeAgreement, nudgeMember, toggleTeamTodo, remindPayment, autoFillShifts, cycleShift, fillAgreementExamples, removeCommonItem, renameTeam, setMemberHangers, setMemberRole,
@@ -10,10 +11,11 @@ import {
 import { brandById, daysUntil, dday, manwon, md, period, spaceById, teamById, teamCost, teamPrep, teamsOfBrand, won, josa } from '@/store/logic';
 import { ProgressBar } from './Today';
 import { BrandLogo, LookbookGrid, ScreenTitle, ThemeTagList, TrustLine } from '@/components/common';
-import { Button, Card, cx, Demo, Empty, Icon, inputCls, Segmented, Sheet, StatusPill, SubHeader, Swatch, Tabs, Tag, textareaCls, Ic } from '@/components/ui';
-import { AGREEMENT_ITEMS, type AgreementKey, type Team } from '@/types';
+import { AiSource, Button, Card, cx, Demo, Empty, Icon, inputCls, Segmented, Sheet, StatusPill, SubHeader, Swatch, Tabs, Tag, textareaCls, Ic } from '@/components/ui';
+import { AGREEMENT_ITEMS, type AgreementKey, type BrandProfile, type Team } from '@/types';
 import type { DB } from '@/data/mock';
 import { TeamSpaceTab } from './TeamSpaceApply';
+import { TeamLayoutTab } from './Layout';
 import { TeamWrapUp } from './Completion';
 import { TeamRentalTab } from './Rental';
 
@@ -94,6 +96,7 @@ const SUBS = [
   { key: 'cost', label: '분담금' },
   { key: 'moodboard', label: '무드보드' },
   { key: 'space', label: '공간 지원' },
+  { key: 'layout', label: '배치' },
   { key: 'rental', label: '렌탈' },
   { key: 'shift', label: '근무표' },
   { key: 'promo', label: '홍보 키트' },
@@ -166,6 +169,7 @@ export function TeamScreen({ id, sub = 'members' }: { id: string; sub?: string }
         {sub === 'cost' && <CostTab team={team} myBrandId={brand!.id} isLeader={isLeader} />}
         {sub === 'moodboard' && <MoodboardTab team={team} myBrandId={brand!.id} />}
         {sub === 'space' && <TeamSpaceTab team={team} />}
+        {sub === 'layout' && <TeamLayoutTab team={team} />}
         {RENTAL_ON && sub === 'rental' && <TeamRentalTab team={team} />}
         {sub === 'shift' && <ShiftTab team={team} />}
         {sub === 'promo' && <PromoTab team={team} myBrandId={brand!.id} />}
@@ -623,6 +627,52 @@ function ShiftTab({ team }: { team: Team }) {
   );
 }
 
+/** AI 홍보 문구: 팝업 소개·인스타 캡션·포스터 카피 */
+function AiPromo({ team, brands, spaceName, hours, fallback }: { team: Team; brands: BrandProfile[]; spaceName?: string; hours?: string; fallback: PromoOut }) {
+  const { db } = useMe();
+  const [memo, setMemo] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [out, setOut] = useState<AiResult<PromoOut> | null>(null);
+  const run = async () => {
+    setBusy(true);
+    const mb = db.moodboards.find((m) => m.teamId === team.id);
+    setOut(await askAi<PromoOut>('promo', {
+      팀: team.name, 회차: team.round, 일정: period(team.period), 운영시간: hours, 장소: spaceName ?? team.region,
+      브랜드: brands.map((b) => ({ 이름: b.name, 소개: b.intro, 무드: b.tags.moods, 카테고리: b.tags.categories })),
+      무드보드: mb?.headline, 메모: memo,
+    }, () => fallback));
+    setBusy(false);
+  };
+  const copy = async (t: string) => {
+    try { await navigator.clipboard.writeText(t); toast('복사했어요'); } catch { toast('복사가 안 되는 환경이에요. 길게 눌러 복사해 주세요'); }
+  };
+  const rows: [string, keyof PromoOut][] = [['팝업 소개', 'intro'], ['인스타 캡션', 'caption'], ['포스터 카피', 'poster']];
+  return (
+    <div className="mt-6 border-t border-ink-100 pt-5">
+      <div className="font-bold">AI 홍보 문구</div>
+      <div className="text-[12px] text-ink-500 mt-0.5">참여 브랜드와 무드보드를 읽고 소개글, 인스타 캡션, 포스터 카피를 써요</div>
+      <div className="flex gap-2 mt-2.5">
+        <input className={cx(inputCls, 'flex-1 min-w-0')} value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="강조할 점 (예: 첫날 선착순 선물)" maxLength={100} />
+        <Button size="sm" className="shrink-0 h-11" disabled={busy} onClick={run}>{busy ? '쓰는 중' : out ? '다시 쓰기' : '쓰기'}</Button>
+      </div>
+      {out && (
+        <div className="mt-3 divide-y divide-ink-100 border-y border-ink-100">
+          {rows.map(([label, k]) => (
+            <div key={k} className="py-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[12px] font-bold text-ink-700">{label}</span>
+                <button className="text-[12px] text-ink-500 underline underline-offset-2" onClick={() => copy(out.result[k])}>복사</button>
+              </div>
+              <p className="whitespace-pre-wrap text-sm leading-relaxed mt-1 select-text">{out.result[k]}</p>
+            </div>
+          ))}
+          <div className="py-2"><AiSource source={out.source} /></div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function PromoTab({ team, myBrandId }: { team: Team; myBrandId: string }) {
   const { db } = useMe();
   const sp = spaceById(db, team.spaceId);
@@ -672,6 +722,7 @@ ${hashtags.join(' ')}`;
         </div>
       </div>
       <Button full variant="dark" onClick={copy}>문구 복사하기</Button>
+      <AiPromo team={team} brands={brands} spaceName={sp?.name} hours={pop?.hours} fallback={{ intro: `${brands.map((b) => b.name).join(', ')}, ${brands.length}개 브랜드가 ${period(team.period)} ${sp?.name ?? team.region}에서 함께 여는 팝업이에요. ${db.moodboards.find((m) => m.teamId === team.id)?.headline ?? ''}`.trim(), caption: `${period(team.period)} ${sp?.name ?? team.region}\n${brands.map((b) => b.name).join(' × ')}\n\n${hashtags.join(' ')}`, poster: `${team.name}\n${period(team.period)} · ${sp?.name ?? team.region}` }} />
       <div className="mt-5 font-bold mb-1">"각자 같은 날 게시" 체크리스트</div>
       <p className="text-[12px] text-ink-500 mb-2">약속서 8번 홍보 의무: {db.agreements.find((a) => a.teamId === team.id)?.items.promo || '아직 정하지 않았어요'}</p>
       {(() => {

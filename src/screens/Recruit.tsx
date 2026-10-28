@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { shareLink } from '@/store/share';
+import { askAi, type RecruitDraftOut } from '@/store/ai';
 import { useMe, guard } from '@/store/hooks';
 import { navigate } from '@/store/store';
 import { applyRecruitment, createRecruitment, decideApplication, simulateApplicants, toggleRecruitAlert, toggleSaveRecruit, type RecruitDraft } from '@/store/actions';
 import { brandById, manwon, matchPct, matchScore, period, recruitFit, recruitUrgency, slotShare, spaceById } from '@/store/logic';
 import { BrandLogo, ScreenTitle, ThemeTagList, TrustLine } from '@/components/common';
-import { Button, Card, Chip, cx, Demo, Empty, Field, inputCls, Segmented, Sheet, StatusPill, SubHeader, Tag, textareaCls, Ic, Icon } from '@/components/ui';
+import { AiSource, Button, Card, Chip, cx, Demo, Empty, Field, inputCls, Segmented, Sheet, StatusPill, SubHeader, Tag, textareaCls, Ic, Icon } from '@/components/ui';
 import { CATEGORIES, REGIONS, type Category, type Recruitment, type RecruitStatus, type Region, type SlotStatus } from '@/types';
 import type { DB } from '@/data/mock';
 import { ProposeSpaceButton } from './SpaceLandlord';
@@ -342,6 +343,9 @@ function Info({ label, value, accent }: { label: string; value: string; accent?:
 export function RecruitNew() {
   const { db, brand } = useMe();
   const myCat = (brand?.tags.categories[0] ?? '의류') as Category;
+  const [memo, setMemo] = useState('');
+  const [drafting, setDrafting] = useState(false);
+  const [draftSrc, setDraftSrc] = useState<'ai' | 'example' | null>(null);
   const [d, setD] = useState<RecruitDraft>({
     title: '', intro: '', region: '성동구', period: { start: '2026-12-11', end: '2026-12-13' }, totalBudget: 2400000,
     spaceConfirmed: false, spaceId: undefined, slotMode: 'category',
@@ -356,17 +360,22 @@ export function RecruitNew() {
   const days = Math.max(1, Math.round((new Date(d.period.end).getTime() - new Date(d.period.start).getTime()) / 86400000) + 1);
   const avgFee = regionSpaces.length ? regionSpaces.reduce((sum, x) => sum + x.dailyFee, 0) / regionSpaces.length : 0;
 
-  // 내 브랜드 태그로 제목·소개 초안을 만든다
-  const fillDraft = () => {
-    if (!brand) return;
+  // 내 브랜드 정보와 메모로 제목·소개 초안을 만든다. AI가 안 되면 정해진 틀로 채운다
+  const fillDraft = async () => {
+    if (!brand || drafting) return;
+    setDrafting(true);
     const mood = brand.tags.moods[0] ?? '감각적인';
     const want = d.categorySlots.map((c) => c.category).filter((c) => c !== myCat);
-    setD({
-      ...d,
+    const r = await askAi<RecruitDraftOut>('recruit', {
+      브랜드: brand.name, 소개: brand.intro, 무드: brand.tags.moods, 카테고리: brand.tags.categories, 가격대: brand.tags.price, 고객층: brand.tags.ages,
+      지역: d.region, 일정: `${d.period.start}~${d.period.end} (${days}일)`, 찾는카테고리: want, 메모: memo,
+    }, () => ({
       title: `${d.region} ${mood} 무드 공동 팝업, 같이 열 브랜드 찾아요`,
-      intro: `${brand.name}입니다. ${brand.intro}\n${mood} 무드로 ${d.region}에서 ${days}일 동안 함께 팝업을 열 ${want.join('·') || '다른 카테고리'} 브랜드를 찾아요. 고객층은 ${brand.tags.ages.join(', ') || '20~30대'}, 가격대는 ${brand.tags.price}예요.`,
-      totalBudget: avgFee ? Math.round((avgFee * days) / 10000) * 10000 : d.totalBudget,
-    });
+      intro: `${brand.name}입니다. ${brand.intro}\n${mood} 무드로 ${d.region}에서 ${days}일 동안 함께 팝업을 열 ${want.join('·') || '다른 카테고리'} 브랜드를 찾아요. 고객층은 ${brand.tags.ages.join(', ') || '20~30대'}, 가격대는 ${brand.tags.price}예요.${memo ? `\n${memo}` : ''}`,
+    }));
+    setD((cur) => ({ ...cur, title: r.result.title, intro: r.result.intro, totalBudget: avgFee ? Math.round((avgFee * days) / 10000) * 10000 : cur.totalBudget }));
+    setDraftSrc(r.source);
+    setDrafting(false);
   };
 
   return (
@@ -374,13 +383,15 @@ export function RecruitNew() {
       <SubHeader title="모집글 쓰기" />
       <div className="p-4">
         {brand && (
-          <button onClick={fillDraft} className="w-full mb-4 rounded border border-ink-300 px-4 py-3 text-left flex items-center gap-3">
-            <Icon name="pencil" className="w-6 h-6 shrink-0 text-brand-600" />
-            <span className="flex-1">
-              <span className="block text-sm font-bold">내 브랜드 정보로 초안 채우기</span>
-              <span className="block text-[12px] text-ink-500">무드·고객층 태그로 제목과 소개를 쓰고, {d.region} 평균 대관료로 예산을 잡아요</span>
-            </span>
-          </button>
+          <div className="mb-5 rounded border border-ink-300 p-3.5">
+            <div className="text-sm font-bold">AI로 초안 쓰기</div>
+            <div className="text-[12px] text-ink-500 mt-0.5">내 브랜드 정보와 메모로 제목·소개를 쓰고, {d.region} 평균 대관료로 예산을 잡아요</div>
+            <div className="flex gap-2 mt-2.5">
+              <input className={cx(inputCls, 'flex-1 min-w-0')} value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="메모 (예: 연말 선물 콘셉트, 니트 위주)" maxLength={100} />
+              <Button size="sm" className="shrink-0 h-11" disabled={drafting} onClick={fillDraft}>{drafting ? '쓰는 중' : '초안 쓰기'}</Button>
+            </div>
+            {draftSrc && <div className="mt-2"><AiSource source={draftSrc} /></div>}
+          </div>
         )}
         <Field label="제목" required>
           <input className={inputCls} value={d.title} onChange={(e) => setD({ ...d, title: e.target.value })} placeholder="예) 연말 성수 공동 팝업 같이 해요" />

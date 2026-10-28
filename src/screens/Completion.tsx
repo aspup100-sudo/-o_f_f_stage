@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useMe } from '@/store/hooks';
+import { askAi, type AiResult, type ReportOut } from '@/store/ai';
 import { navigate } from '@/store/store';
 import { confirmCompletion, setPopupStatus, simulateOthersConfirm, startNextRound, writeBizReview } from '@/store/actions';
 import { brandById, displayName, period, popupById, popupReport, spaceById, teamById, trustScore } from '@/store/logic';
-import { Button, Card, cx, Demo, Empty, Icon, Sheet, Stars, StatusPill, Tag, textareaCls, GradeBadge, Ic } from '@/components/ui';
+import { AiSource, Button, Card, cx, Demo, Empty, Icon, Sheet, Stars, StatusPill, Tag, textareaCls, GradeBadge, Ic } from '@/components/ui';
 import { REVIEW_CRITERIA, type Team } from '@/types';
 
 type BizKind = 'brand_to_brand' | 'brand_to_space' | 'space_to_team';
@@ -57,7 +58,66 @@ export function PopupReportCard({ popupId }: { popupId: string }) {
           <div className="font-bold mt-0.5"><Ic n="heart" className="text-red-500" />{brandById(db, r.bestPair[0])?.name} × {brandById(db, r.bestPair[1])?.name} <span className="text-[12px] text-ink-500 font-normal">· {r.bestPairCount}명</span></div>
         </div>
       )}
+      <ReportInsight popupId={popupId} />
       <p className="text-[12px] text-ink-500 mt-3">OFF STAGE 안에서 모인 기록만 보여요. 매출은 팝업자랑에 직접 공개할 수 있어요.</p>
+    </div>
+  );
+}
+
+/** 리뷰·방문 기록을 읽고 반응 좋았던 점, 아쉬운 점, 다음 회차 제안을 정리한다 */
+function ReportInsight({ popupId }: { popupId: string }) {
+  const { db } = useMe();
+  const [busy, setBusy] = useState(false);
+  const [out, setOut] = useState<AiResult<ReportOut> | null>(null);
+  const run = async () => {
+    const p = popupById(db, popupId)!;
+    const r = popupReport(db, popupId);
+    const combos = db.comboReviews.filter((c) => c.popupId === popupId);
+    const reviews = db.reviews.filter((x) => !x.hidden && x.popupId === popupId && x.kind.startsWith('visitor'));
+    const name = (id: string) => brandById(db, id)?.name ?? '';
+    setBusy(true);
+    setOut(await askAi<ReportOut>('report', {
+      팝업: p.title, 일정: period(p.period), 방문인증: r.visits, 평점: r.rating ? r.rating.toFixed(1) : '없음', 오픈알림신청: r.waiting,
+      조합리뷰: combos.map((c) => ({ 좋았음: c.good, 별점: c.rating, 조합: c.pairs.map(([a, b]) => `${name(a)}×${name(b)}`), 한줄: c.comment })),
+      방문객리뷰: reviews.map((x) => ({ 대상: x.kind === 'visitor_brand' ? name(x.targetId) : '팝업 전체', 점수: x.scores, 한줄: x.comment })),
+    }, () => {
+      const good = combos.filter((c) => c.good);
+      const bad = combos.filter((c) => !c.good);
+      return {
+        good: [
+          r.bestPair && `${name(r.bestPair[0])} × ${name(r.bestPair[1])} 조합을 ${r.bestPairCount}명이 좋다고 했어요.`,
+          r.rating >= 4 && `방문객 평점이 ★${r.rating.toFixed(1)}로 높았어요.`,
+          good[0]?.comment && `"${good[0].comment}"`,
+        ].filter(Boolean) as string[],
+        improve: [bad[0]?.comment ? `"${bad[0].comment}"` : r.visits < 5 ? '방문 인증이 적었어요. 입구에 인증 코드 안내를 크게 붙여 보세요.' : '아쉬웠다는 리뷰는 없었어요.'],
+        next: [
+          r.bestPair ? `${name(r.bestPair[0])}와 ${name(r.bestPair[1])}를 가까이 두는 배치를 유지해요.` : '다음엔 조합 리뷰를 남기면 스탬프를 주는 안내를 해 보세요.',
+          r.waiting > 0 ? `오픈 알림을 신청한 ${r.waiting}명에게 다음 회차 소식을 먼저 보내요.` : '오픈 3일 전 같은 날 동시 게시로 홍보해요.',
+        ],
+      };
+    }));
+    setBusy(false);
+  };
+  const sec = (title: string, list: string[]) => list.length > 0 && (
+    <div className="mt-3">
+      <div className="text-[12px] font-bold text-ink-700">{title}</div>
+      <ul className="mt-1 space-y-1">{list.map((t) => <li key={t} className="text-[13px] text-ink-700 flex"><span className="w-1 h-1 bg-ink-900 mt-[8px] mr-2 shrink-0" />{t}</li>)}</ul>
+    </div>
+  );
+  return (
+    <div className="mt-3 border-t border-ink-300 pt-3">
+      <div className="flex items-center justify-between">
+        <div className="text-[12px] text-ink-500">리뷰로 본 반응</div>
+        <button onClick={run} disabled={busy} className="text-[12px] font-semibold text-brand-600">{busy ? '정리하는 중' : out ? '다시 정리' : 'AI로 정리하기 ›'}</button>
+      </div>
+      {out && (
+        <>
+          {sec('반응 좋았던 점', out.result.good)}
+          {sec('아쉬웠던 점', out.result.improve)}
+          {sec('다음 회차 제안', out.result.next)}
+          <div className="mt-2"><AiSource source={out.source} /></div>
+        </>
+      )}
     </div>
   );
 }

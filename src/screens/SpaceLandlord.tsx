@@ -3,11 +3,12 @@ import { pickPhotos } from '@/components/photoPick';
 import { spaceSrc } from '@/data/photos';
 import { useEffect, useRef, useState } from 'react';
 import { useMe, guard } from '@/store/hooks';
+import { askAi, type SpaceOut } from '@/store/ai';
 import { back, navigate, replace, toast } from '@/store/store';
 import { setLastMinute, decideSpaceApplication, proposeSpaceToRecruitment, proposeSpaceToTeam, saveSpace, simulateTeamApplication, type SpaceDraft } from '@/store/actions';
 import { brandById, daysUntil, manwon, period, soonOpenDays, spaceById, teamById } from '@/store/logic';
 import { ScreenTitle, TrustLine } from '@/components/common';
-import { Button, Card, Chip, cx, Demo, Empty, Field, inputCls, Segmented, Sheet, StatusPill, SubHeader, Swatch, Tag, textareaCls, Ic , Icon } from '@/components/ui';
+import { AiSource, Button, Card, Chip, cx, Demo, Empty, Field, inputCls, Segmented, Sheet, StatusPill, SubHeader, Swatch, Tag, textareaCls, Ic , Icon } from '@/components/ui';
 import { FACILITIES, REGIONS, SPACE_KEYWORDS, SPACE_PROMOS, type Region } from '@/types';
 import { SpaceCard, AvailabilityCalendar } from './Space';
 import { TeamIntroPage } from './Team';
@@ -76,8 +77,52 @@ export function MySpacesTab() {
             </Card>
           );
         })()}
+        {current && <PriceAdvice spaceId={current} />}
       </div>
     </div>
+  );
+}
+
+/** 대관료·할인 제안: 같은 동네 시세, 요일별 빈 날, 공간 찾는 팀 수로 계산한다 */
+function PriceAdvice({ spaceId }: { spaceId: string }) {
+  const { db } = useMe();
+  const sp = spaceById(db, spaceId);
+  if (!sp) return null;
+  const peers = db.spaces.filter((x) => x.region === sp.region && x.id !== sp.id && x.areaM2 > 0);
+  const perM2 = peers.map((x) => x.dailyFee / x.areaM2).sort((a, b) => a - b);
+  const median = perM2.length ? perM2[Math.floor(perM2.length / 2)] : 0;
+  const fair = median ? Math.round((median * sp.areaM2) / 10000) * 10000 : 0;
+  const diff = fair ? Math.round(((sp.dailyFee - fair) / fair) * 100) : 0;
+  const days = db.availability.filter((a) => a.spaceId === sp.id && daysUntil(a.date) >= 0 && daysUntil(a.date) < 60);
+  const isWeekend = (iso: string) => { const d = new Date(iso + 'T00:00:00').getDay(); return d === 0 || d === 6; };
+  const rate = (list: typeof days) => (list.length ? list.filter((a) => a.status === 'booked').length / list.length : 0);
+  const wk = rate(days.filter((a) => !isWeekend(a.date)));
+  const we = rate(days.filter((a) => isWeekend(a.date)));
+  const seeking = db.recruitments.filter((r) => r.region === sp.region && r.status !== '마감' && !r.spaceConfirmed).length + db.teams.filter((t) => t.region === sp.region && !t.spaceId).length;
+  const tips: { text: string; action?: { label: string; on: () => void } }[] = [];
+  if (fair) tips.push({ text: `${sp.region} 비슷한 공간 시세로 보면 하루 ${manwon(fair)}이 적정해요. 지금 ${manwon(sp.dailyFee)}은 ${diff === 0 ? '시세와 같아요' : diff > 0 ? `${diff}% 높아요` : `${-diff}% 낮아요`}.` });
+  if (days.length && wk + 0.15 < we) {
+    const hasPromo = sp.promos?.includes('평일 특가');
+    tips.push({
+      text: `앞으로 60일 동안 주말은 ${Math.round(we * 100)}% 찼는데 평일은 ${Math.round(wk * 100)}%예요. 평일만 10~15% 낮추면 빈 날이 줄어요.`,
+      action: hasPromo ? undefined : { label: '평일 특가 표시하기', on: () => saveSpace(sp.landlordId, { ...sp, promos: [...(sp.promos ?? []), '평일 특가'], keywords: sp.keywords ?? [] }, sp.id) },
+    });
+  }
+  if (seeking > 0) tips.push({ text: `지금 ${sp.region}에서 공간을 찾는 팀·모집글이 ${seeking}곳 있어요. 먼저 제안하면 할인 없이도 채울 수 있어요.` });
+  if (!tips.length) return null;
+  return (
+    <Card className="p-4">
+      <div className="font-bold">대관료 제안</div>
+      <p className="text-[12px] text-ink-500 mt-0.5">같은 동네 공간 시세와 요일별 예약, 공간 찾는 팀 수로 계산했어요</p>
+      <ul className="mt-3 space-y-2.5">
+        {tips.map((t) => (
+          <li key={t.text} className="text-[13px] text-ink-700">
+            <div className="flex"><span className="w-1 h-1 bg-ink-900 mt-[8px] mr-2 shrink-0" />{t.text}</div>
+            {t.action && <button onClick={t.action.on} className="ml-3 mt-1 text-[12px] font-semibold text-brand-600">{t.action.label} ›</button>}
+          </li>
+        ))}
+      </ul>
+    </Card>
   );
 }
 
@@ -90,6 +135,8 @@ export function SpaceEdit({ id }: { id?: string }) {
       : { name: '', region: '마포구', address: '', intro: '', areaM2: 33, dailyFee: 500000, minDays: 2, facilities: ['행거', '조명'], electricKw: 5, teamRental: true, fashionOnly: true, photoHues: [], promos: [], keywords: [] },
   );
   const [addrOpen, setAddrOpen] = useState(false);
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiSrc, setAiSrc] = useState<'ai' | 'example' | null>(null);
   const [geo, setGeo] = useState<'idle' | 'ok' | 'fail'>(ex?.lat ? 'ok' : 'idle');
   const addrBox = useRef<HTMLDivElement>(null);
   const locate = async (address: string) => {
@@ -141,7 +188,28 @@ export function SpaceEdit({ id }: { id?: string }) {
         <Sheet open={addrOpen} onClose={() => setAddrOpen(false)} title="주소 검색">
           <div ref={addrBox} className="h-[460px] -mx-1" />
         </Sheet>
-        <Field label="소개"><textarea className={textareaCls} value={d.intro} onChange={(e) => setD({ ...d, intro: e.target.value })} /></Field>
+        <Field label="소개">
+          <textarea className={textareaCls} value={d.intro} onChange={(e) => setD({ ...d, intro: e.target.value })} placeholder="직접 쓰거나 아래 AI로 초안을 받아 고쳐 쓰세요" />
+          <div className="flex items-center gap-2 mt-2">
+            <Button size="sm" variant="secondary" disabled={aiBusy} onClick={async () => {
+              setAiBusy(true);
+              const photos = (d.photos ?? []).filter((x) => x?.startsWith('data:image/')).slice(0, 3);
+              const r = await askAi<SpaceOut>('space', {
+                이름: d.name, 지역: d.region, 주소: d.address, 면적: `${d.areaM2}㎡`, 설비: d.facilities, 팀단위대관: d.teamRental, 패션전용: d.fashionOnly, 메모: d.intro,
+                고를수있는키워드: SPACE_KEYWORDS,
+              }, () => ({
+                keywords: (d.keywords?.length ? d.keywords : SPACE_KEYWORDS.filter((k) => (k === '1층 코너' && /1층/.test(d.intro + d.address)) || (k === '역세권' && /역/.test(d.intro)))) as string[],
+                moods: [],
+                intro: `${d.region} ${d.name || '공간'}. ${d.areaM2}㎡(${Math.round(d.areaM2 / 3.3)}평) 규모에 ${d.facilities.join(', ')}이 갖춰져 있어요.${d.teamRental ? ' 여러 브랜드가 함께 쓰는 팀 대관도 받아요.' : ''}`,
+              }), photos);
+              const kw = r.result.keywords.filter((k): k is (typeof SPACE_KEYWORDS)[number] => (SPACE_KEYWORDS as readonly string[]).includes(k)).slice(0, 5);
+              setD((cur) => ({ ...cur, intro: r.result.intro, keywords: kw.length ? kw : cur.keywords }));
+              setAiSrc(r.source);
+              setAiBusy(false);
+            }}>{aiBusy ? '쓰는 중' : '사진 보고 소개·키워드 쓰기'}</Button>
+            {aiSrc && <AiSource source={aiSrc} />}
+          </div>
+        </Field>
         <div className="grid grid-cols-3 gap-2">
           <Field label="실측 면적(㎡)"><input type="number" className={inputCls} value={d.areaM2} onChange={(e) => setD({ ...d, areaM2: Number(e.target.value) })} /></Field>
           <Field label="1일 대관료(만원)"><input type="number" className={inputCls} value={d.dailyFee / 10000} onChange={(e) => setD({ ...d, dailyFee: Number(e.target.value) * 10000 })} /></Field>
