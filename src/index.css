@@ -28,3 +28,14 @@ button { -webkit-tap-highlight-color: transparent; }
 .band { margin-left: -16px; margin-right: -16px; padding: 24px 16px 0; border-top: 10px solid #f2f2f3; }
 .band-section + .band-section, main section + section { border-top: 10px solid #f2f2f3; }
 main section + section { margin-top: 20px; padding-top: 28px; }
+
+/* 카드 구분: 아래쪽 10px 연회색 띠를 화면 양끝(좌우 여백 16px)까지 */
+.card-band {
+  border-bottom: 10px solid #f2f2f3;
+  border-image: linear-gradient(#f2f2f3, #f2f2f3) 0 0 1 0 / 0 0 10px 0 / 0 16px 0 16px;
+}
+/* 묶음의 마지막 카드는 다음 구역 띠와 겹치지 않게 띠를 뺀다 */
+.card-band:last-child {
+  border-bottom: 0;
+  border-image: none;
+}

@@ -113,7 +113,7 @@ export function SortSelect<T extends string>({ value, onChange, options, label, 
 
 export function Card({ children, className, onClick }: { children: ReactNode; className?: string; onClick?: () => void }) {
   return (
-    <div onClick={onClick} className={cx('bg-white border-b border-ink-900', onClick && 'cursor-pointer active:bg-ink-100/40', className)}>
+    <div onClick={onClick} className={cx('bg-white card-band', onClick && 'cursor-pointer active:bg-ink-100/40', className)}>
       {children}
     </div>
   );

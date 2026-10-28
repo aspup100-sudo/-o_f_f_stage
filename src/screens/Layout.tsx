@@ -409,6 +409,8 @@ function Plan2D({ W, H, boxes, colorOf, initialOf, selected, onPick, onMove, pat
 }) {
   const svg = useRef<SVGSVGElement>(null);
   const drag = useRef<{ id: string; dx: number; dy: number; moved: boolean } | null>(null);
+  // 끄는 동안의 위치는 여기서만 들고 있다가, 놓을 때 한 번 저장한다(동선도 그때 다시 그림)
+  const [live, setLive] = useState<{ id: string; x: number; y: number } | null>(null);
   const scale = 330 / W;
   const toM = (e: React.PointerEvent) => {
     const pt = svg.current!.createSVGPoint();
@@ -417,6 +419,15 @@ function Plan2D({ W, H, boxes, colorOf, initialOf, selected, onPick, onMove, pat
     return { x: p.x / scale, y: p.y / scale };
   };
   const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
+  const shown = live ? boxes.map((b) => (b.id === live.id ? { ...b, x: live.x, y: live.y } : b)) : boxes;
+  const end = () => {
+    const d = drag.current;
+    drag.current = null;
+    if (!d) return;
+    if (d.moved && live) onMove(d.id, Math.round(live.x * 10) / 10, Math.round(live.y * 10) / 10, true);
+    else if (!d.moved) onPick(d.id);
+    setLive(null);
+  };
   return (
     <svg ref={svg} viewBox={`-6 -6 ${W * scale + 12} ${H * scale + 30}`} className="w-full bg-white touch-none select-none" role="img" aria-label="공간 배치 평면도"
       onPointerMove={(e) => {
@@ -424,27 +435,24 @@ function Plan2D({ W, H, boxes, colorOf, initialOf, selected, onPick, onMove, pat
         if (!d) return;
         const b = boxes.find((x) => x.id === d.id)!;
         const p = toM(e);
+        const x = clamp(p.x - d.dx, 0, W - b.w);
+        const y = clamp(p.y - d.dy, 0, H - b.h);
+        if (!d.moved && Math.hypot(x - b.x, y - b.y) < 0.05) return;
         d.moved = true;
-        onMove(d.id, clamp(Math.round((p.x - d.dx) * 10) / 10, 0, W - b.w), clamp(Math.round((p.y - d.dy) * 10) / 10, 0, H - b.h), false);
+        setLive({ id: d.id, x, y });
       }}
-      onPointerUp={() => {
-        const d = drag.current;
-        drag.current = null;
-        if (!d) return;
-        const b = boxes.find((x) => x.id === d.id)!;
-        if (d.moved) onMove(d.id, b.x, b.y, true);
-        else onPick(d.id);
-      }}
+      onPointerUp={end}
+      onPointerCancel={end}
     >
       <rect x={0} y={0} width={W * scale} height={H * scale} fill="#fafafa" stroke="#111" strokeWidth={2} />
       <line x1={(W / 2 - DOOR / 2) * scale} y1={H * scale} x2={(W / 2 + DOOR / 2) * scale} y2={H * scale} stroke="#fafafa" strokeWidth={4} />
       <text x={(W / 2) * scale} y={H * scale + 16} textAnchor="middle" fontSize={11} fill="#5d5d66">입구</text>
-      {path && <PathArrows path={path} scale={scale} />}
-      {boxes.map((b) => {
+      {path && !live && <PathArrows path={path} scale={scale} />}
+      {shown.map((b) => {
         const movable = b.kind === 'hanger' || b.kind === 'table' || b.kind === 'photo';
         return (
           <g key={b.id}
-            onPointerDown={movable ? (e) => { (e.target as Element).setPointerCapture?.(e.pointerId); const p = toM(e); drag.current = { id: b.id, dx: p.x - b.x, dy: p.y - b.y, moved: false }; } : undefined}
+            onPointerDown={movable ? (e) => { svg.current?.setPointerCapture?.(e.pointerId); const p = toM(e); drag.current = { id: b.id, dx: p.x - b.x, dy: p.y - b.y, moved: false }; } : undefined}
             style={{ cursor: movable ? 'grab' : undefined }}>
             <rect x={b.x * scale} y={b.y * scale} width={b.w * scale} height={b.h * scale}
               fill={b.kind === 'fit' ? '#fff' : b.kind === 'counter' ? '#e4e4e7' : b.kind === 'mirror' ? '#8e8e96' : b.kind === 'photo' && !b.brandId ? '#e8dfd2' : colorOf(b.brandId)}
@@ -475,7 +483,7 @@ export function TeamLayoutTab({ team }: { team: Team }) {
   const boxes = draft ?? saved?.boxes ?? auto.boxes;
   // 끄는 중이면 동선도 따라 바뀐다
   const path = draft ? stopPath(W, H, draft) : saved ? saved.path : auto.path;
-  const [view, setView] = useState<'3d' | 'walk' | 'plan'>('3d');
+  const [view, setView] = useState<'3d' | 'plan'>('3d');
   const [angle, setAngle] = useState(-24);
   const [sel, setSel] = useState<string | null>(null);
   const [asking, setAsking] = useState(false);
@@ -548,8 +556,8 @@ export function TeamLayoutTab({ team }: { team: Team }) {
           <div className="text-[12px] text-ink-500">{sp ? `${sp.name} · ${area}㎡` : `공간 확정 전 · ${area}㎡ 기준`}</div>
         </div>
         <div className="flex rounded border border-ink-300 overflow-hidden text-[13px] font-semibold">
-          {((hasWebGL ? ['3d', 'walk', 'plan'] : ['3d', 'plan']) as ('3d' | 'walk' | 'plan')[]).map((k) => (
-            <button key={k} onClick={() => setView(k)} className={cx('px-3 h-8', view === k ? 'bg-ink-100 text-ink-900' : 'text-ink-500')}>{k === '3d' ? '3D' : k === 'walk' ? '걸어 보기' : '평면'}</button>
+          {(['3d', 'plan'] as const).map((k) => (
+            <button key={k} onClick={() => setView(k)} className={cx('px-3 h-8', view === k ? 'bg-ink-100 text-ink-900' : 'text-ink-500')}>{k === '3d' ? '3D' : '평면'}</button>
           ))}
         </div>
       </div>
@@ -558,10 +566,10 @@ export function TeamLayoutTab({ team }: { team: Team }) {
         {view !== 'plan' && hasWebGL ? (
           <div className="relative h-[400px]" style={{ background: '#ebe8e3' }}>
             <Suspense fallback={<div className="absolute inset-0 flex items-center justify-center text-[13px] text-ink-500">3D 매장을 불러오는 중</div>}>
-              <Room3DGL W={W} H={H} boxes={boxes} path={path} wallPhoto={wallPhoto} mode={view === 'walk' ? 'walk' : 'orbit'} colorOf={color} photoOf={photoOf} nameOf={nameOf} catOf={(id) => brandById(db, id)?.tags.categories[0]} selected={sel} onPick={(id) => setSel(sel === id ? null : id)}
+              <Room3DGL W={W} H={H} boxes={boxes} path={path} wallPhoto={wallPhoto} mode="orbit" colorOf={color} photoOf={photoOf} nameOf={nameOf} catOf={(id) => brandById(db, id)?.tags.categories[0]} selected={sel} onPick={(id) => setSel(sel === id ? null : id)}
                 onMove={(id, x, y) => setBoxes(boxes.map((b) => (b.id === id ? { ...b, x, y } : b)))} />
             </Suspense>
-            <div className="absolute left-3 bottom-2 text-[11px] text-ink-700 pointer-events-none bg-white/70 px-1.5">{view === 'walk' ? '밀어서 둘러보기 · 바닥을 누르면 걸어가요' : sel ? '고른 물건을 끌어서 옮겨요' : '밀어서 돌리기 · 두 손가락으로 확대 · 물건을 눌러 고르기'}</div>
+            <div className="absolute left-3 bottom-2 text-[11px] text-ink-700 pointer-events-none bg-white/70 px-1.5">{sel ? '고른 물건을 끌어서 옮겨요' : '밀어서 돌리기 · 두 손가락으로 확대 · 물건을 눌러 고르기'}</div>
           </div>
         ) : view !== 'plan' ? (
           <div

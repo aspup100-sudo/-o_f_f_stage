@@ -13,7 +13,7 @@ export function RoleSwitcher({ row }: { row?: boolean }) {
   return (
     <>
       {row ? (
-        <button onClick={() => setOpen(true)} title="역할 전환(데모)" className="w-full flex items-center justify-between border-b border-ink-900 py-3 text-left">
+        <button onClick={() => setOpen(true)} title="역할 전환(데모)" className="w-full flex items-center justify-between border-b border-ink-200 py-3 text-left">
           <span className="text-[14px] font-bold">지금 {ROLE_LABEL[role]}로 보는 중 <Demo /></span>
           <span className="text-[13px] font-semibold text-ink-700 flex items-center gap-1"><Icon name="swap" className="w-3.5 h-3.5" />역할 바꾸기</span>
         </button>
