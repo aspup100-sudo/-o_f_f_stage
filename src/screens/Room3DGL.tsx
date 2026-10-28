@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+import { Reflector } from 'three/examples/jsm/objects/Reflector.js';
 import type { LayoutBox } from '@/types';
 
 export type ViewMode = 'orbit' | 'walk';
@@ -71,6 +72,24 @@ function fabricTexture(color: string) {
   }
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+function plasterTexture() {
+  const c = document.createElement('canvas');
+  c.width = c.height = 256;
+  const g = c.getContext('2d')!;
+  g.fillStyle = '#f1eee8';
+  g.fillRect(0, 0, 256, 256);
+  for (let i = 0; i < 2600; i++) {
+    const v = Math.random();
+    g.fillStyle = v > 0.5 ? 'rgba(255,255,255,.35)' : 'rgba(150,135,115,.08)';
+    g.fillRect(Math.random() * 256, Math.random() * 256, 1 + Math.random() * 2, 1 + Math.random() * 2);
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(4, 2);
   return t;
 }
 
@@ -154,8 +173,9 @@ function buildItem(b: LayoutBox, photo: string | undefined, color: string, mats:
         mat = new THREE.MeshStandardMaterial({ color: shade(color, 0.75 + ((i * 7) % 5) * 0.07), roughness: 0.9 });
       }
       const m = add(geo, mat, -L / 2 + 0.12 + (i * (L - 0.24)) / Math.max(1, n - 1), 1.47, 0);
-      m.rotation.y = Math.PI / 2;
-      m.position.x -= 0.0175;
+      // 옷마다 살짝 비틀리고 간격이 고르지 않게
+      m.rotation.y = Math.PI / 2 + Math.sin(i * 12.9898) * 0.12;
+      m.position.x -= 0.0175 - Math.sin(i * 78.233) * 0.012;
       // 옷걸이
       const hook = add(new THREE.TorusGeometry(0.025, 0.004, 6, 12, Math.PI * 1.4), mats.metal, m.position.x + 0.0175, 1.54, 0);
       hook.rotation.y = Math.PI / 2;
@@ -190,7 +210,12 @@ function buildItem(b: LayoutBox, photo: string | undefined, color: string, mats:
   } else if (b.kind === 'mirror') {
     inner.rotation.y = 0;
     add(new THREE.BoxGeometry(b.w + 0.02, 1.8, b.h + 0.06), mats.black, 0, 0.95, 0);
-    add(new THREE.BoxGeometry(b.w + 0.03, 1.7, b.h - 0.02), mats.mirror, 0, 0.95, 0);
+    // 진짜로 비치는 거울 (방 안쪽, -x 방향을 본다)
+    const glass = new Reflector(new THREE.PlaneGeometry(b.h - 0.08, 1.66), { textureWidth: 512, textureHeight: 1024, color: 0xd9dee2 });
+    glass.rotation.y = -Math.PI / 2;
+    glass.position.set(-b.w / 2 - 0.012, 0.95, 0);
+    glass.userData.boxId = b.id;
+    inner.add(glass);
   } else if (b.kind === 'counter') {
     inner.rotation.y = 0;
     add(new THREE.BoxGeometry(b.w, 0.92, b.h), mats.white, 0, 0.46, 0);
@@ -270,7 +295,7 @@ export default function Room3DGL(props: Room3DProps) {
       black: new THREE.MeshStandardMaterial({ color: '#1d1d1f', roughness: 0.5 }),
       mirror: new THREE.MeshStandardMaterial({ color: '#dfe6ea', metalness: 1, roughness: 0.04 }),
       curtain: new THREE.MeshStandardMaterial({ map: fabricTexture('#cfc3b2'), roughness: 0.95, side: THREE.DoubleSide }),
-      wall: new THREE.MeshStandardMaterial({ color: '#f2efea', roughness: 0.95 }),
+      wall: new THREE.MeshStandardMaterial({ map: plasterTexture(), roughness: 0.95 }),
       base: new THREE.MeshStandardMaterial({ color: '#d8d2c8', roughness: 0.7 }),
     };
     const wood = woodTexture();
@@ -293,7 +318,8 @@ export default function Room3DGL(props: Room3DProps) {
     sun.shadow.bias = -0.0004;
     sun.shadow.radius = 4;
     scene.add(sun, sun.target);
-    const spots: THREE.PointLight[] = [];
+    const spots: THREE.Light[] = [];
+    const pins: THREE.Object3D[] = [];
 
     const clear = (g: THREE.Group) => {
       g.traverse((o) => {
@@ -360,15 +386,18 @@ export default function Room3DGL(props: Room3DProps) {
       ceil.position.set(W / 2, WALL_H, H / 2);
       ceil.userData.ceiling = true;
       room.add(ceil);
-      for (let i = 0; i < 3; i++) {
-        const l = new THREE.PointLight('#ffe9cc', 4.5, 7, 1.6);
-        l.position.set(W * (0.2 + i * 0.3), WALL_H - 0.25, H * 0.42);
+      // 천장 레일 두 줄과 은은한 채움 조명
+      [H * 0.3, H * 0.7].forEach((z) => {
+        const rail = new THREE.Mesh(new THREE.BoxGeometry(W - 0.6, 0.03, 0.04), mats.black);
+        rail.position.set(W / 2, WALL_H - 0.02, z);
+        rail.userData.ceiling = true;
+        room.add(rail);
+      });
+      for (let i = 0; i < 2; i++) {
+        const l = new THREE.PointLight('#ffe9cc', 2.2, 8, 1.6);
+        l.position.set(W * (0.3 + i * 0.4), WALL_H - 0.3, H * 0.5);
         scene.add(l);
         spots.push(l);
-        const can = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 0.16, 16), mats.black);
-        can.position.copy(l.position).setY(WALL_H - 0.1);
-        can.userData.ceiling = true;
-        room.add(can);
       }
       room.add(buildPlant(0.4, H - 0.55, mats));
       sun.position.set(W * 0.2, 6, H * 1.2);
@@ -382,6 +411,24 @@ export default function Room3DGL(props: Room3DProps) {
     const buildItems = (p: Room3DProps) => {
       clear(items);
       p.boxes.forEach((b) => items.add(buildItem(b, p.photoOf(b), p.colorOf(b.brandId), mats)));
+      // 행거·진열대마다 천장 레일에서 비추는 핀 조명 (최대 8개)
+      pins.forEach((o) => scene.remove(o));
+      pins.length = 0;
+      p.boxes.filter((b) => b.kind === 'hanger' || b.kind === 'table' || b.kind === 'photo').slice(0, 8).forEach((b) => {
+        const cx = b.x + b.w / 2;
+        const cz = b.y + b.h / 2;
+        const railZ = Math.abs(cz - H * 0.3) < Math.abs(cz - H * 0.7) ? H * 0.3 : H * 0.7;
+        const sp = new THREE.SpotLight('#ffe4c2', 9, 6, 0.45, 0.65, 1.4);
+        sp.position.set(Math.max(0.4, Math.min(W - 0.4, cx)), WALL_H - 0.08, railZ);
+        sp.target.position.set(cx, b.kind === 'table' ? 0.8 : 1.0, cz);
+        const can = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.06, 0.16, 16), mats.black);
+        can.position.copy(sp.position).setY(WALL_H - 0.12);
+        can.lookAt(sp.target.position);
+        can.rotateX(Math.PI / 2);
+        can.userData.ceiling = true;
+        scene.add(sp, sp.target, can);
+        pins.push(sp, sp.target, can);
+      });
       // 고른 물건: 바닥 테두리
       if (selBox) { scene.remove(selBox); selBox = null; }
       const sel = p.boxes.find((b) => b.id === p.selected);
@@ -446,6 +493,7 @@ export default function Room3DGL(props: Room3DProps) {
     let yaw = 0;
     let pitch = -0.2;
     const walkPos = new THREE.Vector3();
+    const prevPos = new THREE.Vector3();
     let walkTarget: THREE.Vector3 | null = null;
     let moveDir = 0;
     const setMode = (m: ViewMode) => {
@@ -453,6 +501,7 @@ export default function Room3DGL(props: Room3DProps) {
       controls.enabled = m === 'orbit';
       if (m === 'walk') {
         walkPos.set(W / 2, EYE, H - 0.5);
+        prevPos.copy(walkPos);
         yaw = 0; pitch = -0.2; walkTarget = null;
       } else {
         camera.position.set(W / 2 + W * 0.2, Math.max(W, H) * 0.85, H + Math.max(W, H) * 0.8);
@@ -552,6 +601,10 @@ export default function Room3DGL(props: Room3DProps) {
         }
         walkPos.x = Math.max(0.3, Math.min(W - 0.3, walkPos.x));
         walkPos.z = Math.max(0.3, Math.min(H - 0.3, walkPos.z));
+        // 물건에 부딪히면 그 자리에서 멈춘다
+        const blocked = propsRef.current.boxes.some((b) => b.kind !== 'fit' && walkPos.x > b.x - 0.25 && walkPos.x < b.x + b.w + 0.25 && walkPos.z > b.y - 0.25 && walkPos.z < b.y + b.h + 0.25);
+        if (blocked) { walkPos.copy(prevPos); walkTarget = null; }
+        prevPos.copy(walkPos);
         camera.position.copy(walkPos);
         camera.rotation.set(pitch, yaw, 0, 'YXZ');
       }
@@ -562,6 +615,7 @@ export default function Room3DGL(props: Room3DProps) {
         w.mesh.visible = mode === 'walk' || toCam.dot(w.normal) > 0;
       });
       room.children.forEach((o) => { if (o.userData.ceiling) o.visible = mode === 'walk'; });
+      pins.forEach((o) => { if (o.userData.ceiling) o.visible = mode === 'walk'; });
       renderer.render(scene, camera);
       // 이름표 위치
       const r = renderer.domElement.getBoundingClientRect();
