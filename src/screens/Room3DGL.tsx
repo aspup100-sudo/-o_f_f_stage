@@ -13,7 +13,7 @@ type Pt = { x: number; y: number };
 
 export interface Room3DProps {
   W: number; H: number; boxes: LayoutBox[]; path?: Pt[]; wallPhoto: string; mode: ViewMode;
-  colorOf: (id?: string) => string; photoOf: (b: LayoutBox) => string | undefined; nameOf: (id?: string) => string;
+  colorOf: (id?: string) => string; photoOf: (b: LayoutBox) => string | undefined; nameOf: (id?: string) => string; moodOf?: (id?: string) => string | undefined;
   catOf?: (id?: string) => string | undefined; // 브랜드 대표 카테고리: 진열대 상품 모양을 정한다
   selected: string | null; onPick: (id: string) => void;
   onMove?: (id: string, x: number, y: number) => void; // 3D에서 고른 물건을 끌어 옮겼을 때
@@ -99,34 +99,37 @@ const loader = new THREE.TextureLoader();
 loader.setCrossOrigin('anonymous');
 // 사진은 다 받아진 뒤에만 입힌다. 못 받으면 브랜드 색으로 남는다(검게 나오지 않게)
 const photoCache = new Map<string, Promise<THREE.Texture>>();
+const photoReady = new Map<string, THREE.Texture>();
 let onTextureLoad = () => {};
 function loadPhoto(src: string) {
   let pr = photoCache.get(src);
   if (!pr) {
-    pr = new Promise((resolve, reject) => loader.load(src, (t) => { t.colorSpace = THREE.SRGBColorSpace; resolve(t); }, undefined, reject));
+    pr = new Promise((resolve, reject) => loader.load(src, (t) => { t.colorSpace = THREE.SRGBColorSpace; photoReady.set(src, t); resolve(t); }, undefined, reject));
     pr.catch(() => photoCache.delete(src));
     photoCache.set(src, pr);
   }
   return pr;
 }
-/** 색으로 먼저 그리고, 사진이 오면 바꿔 입힌다. tweak으로 사진의 일부만 쓸 수 있다 */
-function photoMat(src: string | undefined, fallback: THREE.ColorRepresentation, roughness: number, tweak?: (t: THREE.Texture) => void) {
+/** 색으로 먼저 그리고, 사진이 오면 바꿔 입힌다. 이미 받은 사진은 바로 입힌다(다시 그릴 때 깜빡이지 않게).
+ *  사진 한 장을 여러 물건이 같이 쓰고, 사진의 어느 부분을 쓸지는 모양의 UV(remapUV)로 정한다 */
+function photoMat(src: string | undefined, fallback: THREE.ColorRepresentation, roughness: number) {
   const mat = new THREE.MeshStandardMaterial({ color: fallback, roughness });
-  if (src) {
-    loadPhoto(src).then((base) => {
-      const t = tweak ? base.clone() : base;
-      if (tweak) { t.needsUpdate = true; tweak(t); }
-      mat.map = t;
-      mat.color.set('#ffffff');
-      mat.needsUpdate = true;
-      onTextureLoad();
-    }).catch(() => {});
-  }
+  if (!src) return mat;
+  const put = (t: THREE.Texture) => { mat.map = t; mat.color.set('#ffffff'); mat.needsUpdate = true; };
+  const ready = photoReady.get(src);
+  if (ready) put(ready);
+  else loadPhoto(src).then((t) => { put(t); onTextureLoad(); }).catch(() => {});
   return mat;
+}
+function remapUV(geo: THREE.BufferGeometry, rx: number, ry: number, ox: number, oy: number) {
+  const uv = geo.getAttribute('uv') as THREE.BufferAttribute;
+  for (let i = 0; i < uv.count; i++) uv.setXY(i, Math.min(1, Math.max(0, uv.getX(i) * rx + ox)), Math.min(1, Math.max(0, uv.getY(i) * ry + oy)));
+  uv.needsUpdate = true;
+  return geo;
 }
 
 // 옷 모양: 목선, 어깨, 소매(긴팔·반팔·민소매)가 있는 판
-function garmentShape(w: number, len: number, sleeve: 'long' | 'short' | 'none') {
+function garmentShape(w: number, len: number, sleeve: 'long' | 'short' | 'none', flare = 0) {
   const sw = w / 2; // 소매 바깥
   const bw = sleeve === 'none' ? w * 0.4 : w * 0.36; // 몸판 반폭
   const s = new THREE.Shape();
@@ -142,7 +145,7 @@ function garmentShape(w: number, len: number, sleeve: 'long' | 'short' | 'none')
       const cuff = -Math.min(len * 0.78, 0.66);
       pts.push([k * bw, -0.05], [k * sw, -0.11], [k * (sw - 0.005), cuff], [k * (sw - 0.075), cuff], [k * (bw + 0.004), -0.26]);
     }
-    pts.push([k * (bw + 0.012), -len]);
+    pts.push([k * (bw + 0.012 + flare), -len]);
     return pts;
   };
   side(1).forEach(([x, y]) => s.lineTo(x, y));
@@ -182,7 +185,25 @@ function shade(color: string, k: number) {
   return new THREE.Color(color).multiplyScalar(k);
 }
 
-function buildItem(b: LayoutBox, photo: string | undefined, color: string, mats: Record<string, THREE.Material>, cat?: string, name?: string) {
+// 브랜드 무드마다 집기와 옷 모양을 다르게: 같은 매장 안에서도 브랜드 구역이 구분되게
+type Sleeve = 'long' | 'short' | 'none';
+type Look = { frame: string; top: string; cut: { len: number; sleeve: Sleeve; flare?: number; wide?: number; thick?: number }[]; twist: number };
+const LOOKS: Record<string, Look> = {
+  미니멀: { frame: 'chrome', top: 'white', twist: 0.02, cut: [{ len: 0.8, sleeve: 'long' }, { len: 0.8, sleeve: 'short' }] },
+  빈티지: { frame: 'brass', top: 'woodDark', twist: 0.12, cut: [{ len: 1.1, sleeve: 'long', flare: 0.03 }, { len: 0.85, sleeve: 'long' }, { len: 1.15, sleeve: 'long', flare: 0.04 }] },
+  클래식: { frame: 'brass', top: 'woodDark', twist: 0.05, cut: [{ len: 1.05, sleeve: 'long' }, { len: 0.78, sleeve: 'long' }] },
+  스트릿: { frame: 'black', top: 'black', twist: 0.16, cut: [{ len: 0.72, sleeve: 'long', wide: 1.12, thick: 0.05 }, { len: 0.68, sleeve: 'short', wide: 1.1 }] },
+  페미닌: { frame: 'brass', top: 'white', twist: 0.08, cut: [{ len: 1.1, sleeve: 'none', flare: 0.09 }, { len: 0.95, sleeve: 'short', flare: 0.07 }, { len: 0.6, sleeve: 'short' }] },
+  아웃도어: { frame: 'black', top: 'wood', twist: 0.1, cut: [{ len: 0.78, sleeve: 'long', wide: 1.1, thick: 0.08 }, { len: 0.7, sleeve: 'long', thick: 0.06 }] },
+  Y2K: { frame: 'chrome', top: 'white', twist: 0.12, cut: [{ len: 0.5, sleeve: 'short' }, { len: 0.55, sleeve: 'none' }, { len: 0.85, sleeve: 'none', flare: 0.05 }] },
+  내추럴: { frame: 'wood', top: 'wood', twist: 0.1, cut: [{ len: 0.9, sleeve: 'long', flare: 0.02 }, { len: 0.75, sleeve: 'short' }, { len: 1.05, sleeve: 'none', flare: 0.05 }] },
+  아방가르드: { frame: 'black', top: 'concrete', twist: 0.2, cut: [{ len: 1.2, sleeve: 'long', flare: 0.06 }, { len: 0.6, sleeve: 'none', wide: 1.15 }, { len: 0.95, sleeve: 'short' }] },
+};
+const BASE_LOOK: Look = { frame: 'metal', top: 'wood', twist: 0.12, cut: [{ len: 0.85, sleeve: 'long' }, { len: 0.7, sleeve: 'short' }, { len: 1.05, sleeve: 'none' }, { len: 0.75, sleeve: 'long' }, { len: 0.95, sleeve: 'short' }, { len: 0.65, sleeve: 'short' }] };
+
+function buildItem(b: LayoutBox, photo: string | undefined, color: string, mats: Record<string, THREE.Material>, cat?: string, name?: string, mood?: string) {
+  const look = (mood && LOOKS[mood]) || BASE_LOOK;
+  const frame = mats[look.frame] ?? mats.metal;
   const g = new THREE.Group();
   const along = b.w >= b.h;
   const L = along ? b.w : b.h;
@@ -204,38 +225,44 @@ function buildItem(b: LayoutBox, photo: string | undefined, color: string, mats:
   };
 
   if (b.kind === 'hanger') {
-    const pole = new THREE.CylinderGeometry(0.014, 0.014, 1.55, 12);
+    const thickPole = look.frame === 'wood' ? 0.022 : 0.014;
+    const pole = new THREE.CylinderGeometry(thickPole, thickPole, 1.55, 12);
     [-L / 2 + 0.05, L / 2 - 0.05].forEach((x) => {
-      add(pole, mats.metal, x, 0.775, 0);
-      add(new THREE.BoxGeometry(0.03, 0.025, D - 0.05), mats.metal, x, 0.0125, 0);
+      add(pole, frame, x, 0.775, 0);
+      add(new THREE.BoxGeometry(0.03, 0.025, D - 0.05), frame, x, 0.0125, 0);
     });
-    const rail = add(new THREE.CylinderGeometry(0.012, 0.012, L - 0.1, 12), mats.metal, 0, 1.52, 0);
+    const rail = add(new THREE.CylinderGeometry(0.012, 0.012, L - 0.1, 12), frame, 0, 1.52, 0);
     rail.rotation.z = Math.PI / 2;
-    const n = Math.max(4, Math.round(L / 0.1));
+    const n = Math.max(4, Math.round(L / (look.cut[0].thick ? 0.13 : 0.1)));
     for (let i = 0; i < n; i++) {
-      const len = [0.85, 0.7, 1.05, 0.75, 0.95, 0.65][i % 6];
-      const geo = new THREE.ExtrudeGeometry(garmentShape(Math.min(D - 0.02, 0.6), len, (['long', 'short', 'none', 'long', 'short'] as const)[i % 5]), { depth: 0.035, bevelEnabled: true, bevelSize: 0.008, bevelThickness: 0.008, bevelSegments: 2 });
+      const c = look.cut[i % look.cut.length];
+      const len = c.len * (1 + Math.sin(i * 9.1) * 0.03);
+      const th = c.thick ?? 0.035;
+      const geo = new THREE.ExtrudeGeometry(garmentShape(Math.min(D - 0.02, 0.6) * (c.wide ?? 1), len, c.sleeve, c.flare ?? 0), { depth: th, bevelEnabled: true, bevelSize: 0.008, bevelThickness: th > 0.04 ? 0.02 : 0.008, bevelSegments: 2 });
       // ExtrudeGeometry UV는 미터 좌표(x: -D/2~D/2, y: -len~0)라 사진의 한 조각에 맞춘다
       const ox = (i * 0.37) % 0.7;
       const oy = 0.1 + ((i * 0.23) % 0.3);
-      const mat = photoMat(photo, shade(color, 0.75 + ((i * 7) % 5) * 0.07), 0.9, (t) => {
-        t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
-        t.repeat.set(0.22 / D, 0.5 / len);
-        t.offset.set(ox + 0.11, oy + 0.5);
-      });
+      const mat = photoMat(photo, shade(color, 0.75 + ((i * 7) % 5) * 0.07), th > 0.04 ? 0.7 : 0.9);
+      remapUV(geo, 0.22 / D, 0.5 / len, ox + 0.11, oy + 0.5);
       const m = add(geo, mat, -L / 2 + 0.12 + (i * (L - 0.24)) / Math.max(1, n - 1), 1.47, 0);
-      // 옷마다 살짝 비틀리고 간격이 고르지 않게
-      m.rotation.y = Math.PI / 2 + Math.sin(i * 12.9898) * 0.12;
-      m.position.x -= 0.0175 - Math.sin(i * 78.233) * 0.012;
+      // 옷마다 살짝 비틀리고 간격이 고르지 않게(미니멀은 반듯하게)
+      m.rotation.y = Math.PI / 2 + Math.sin(i * 12.9898) * look.twist;
+      m.position.x -= th / 2 - Math.sin(i * 78.233) * look.twist * 0.1;
       // 옷걸이
-      const hook = add(new THREE.TorusGeometry(0.025, 0.004, 6, 12, Math.PI * 1.4), mats.metal, m.position.x + 0.0175, 1.54, 0);
+      const hook = add(new THREE.TorusGeometry(0.025, 0.004, 6, 12, Math.PI * 1.4), look.frame === 'brass' ? frame : mats.metal, m.position.x + th / 2, 1.54, 0);
       hook.rotation.y = Math.PI / 2;
     }
   } else if (b.kind === 'table') {
-    const top = add(new THREE.BoxGeometry(L, 0.04, D), mats.wood, 0, 0.76, 0);
+    const top = add(new THREE.BoxGeometry(L, 0.04, D), mats[look.top] ?? mats.wood, 0, 0.76, 0);
     top.receiveShadow = true;
-    const leg = new THREE.CylinderGeometry(0.022, 0.018, 0.74, 10);
-    [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sz]) => add(leg, mats.woodDark, sx * (L / 2 - 0.06), 0.37, sz * (D / 2 - 0.06)));
+    if (look.top === 'concrete' || look.top === 'black') {
+      // 받침대형: 상판 아래 통짜 받침
+      add(new THREE.BoxGeometry(L * 0.7, 0.74, D * 0.6), mats[look.top], 0, 0.37, 0);
+    } else {
+      const leg = new THREE.CylinderGeometry(0.022, 0.018, 0.74, 10);
+      const legMat = look.frame === 'brass' || look.frame === 'chrome' ? frame : mats.woodDark;
+      [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sz]) => add(leg, legMat, sx * (L / 2 - 0.06), 0.37, sz * (D / 2 - 0.06)));
+    }
     // 위에 놓인 상품: 카테고리에 따라 모양을 달리한다
     const y0 = 0.78;
     if (cat === '주얼리' || cat === '기타 액세서리') {
@@ -280,8 +307,8 @@ function buildItem(b: LayoutBox, photo: string | undefined, color: string, mats:
       // 개어 놓은 옷 더미 두세 개
       [[-L / 3, -0.05, 4], [0, 0.08, 3], [L / 3, -0.02, 5]].forEach(([x, z, n], k) => {
         for (let i = 0; i < n; i++) {
-          const fold = photoMat(photo, shade(color, 0.72 + ((i + k) % 4) * 0.08), 0.95, (t) => { t.repeat.set(0.3, 0.3); t.offset.set(((i + k) * 0.21) % 0.7, ((i * 0.13) % 0.6)); });
-          const m = add(new THREE.BoxGeometry(0.3, 0.035, 0.24), fold, x + Math.sin(i * 3.1) * 0.01, y0 + 0.018 + i * 0.037, z + Math.cos(i * 2.3) * 0.01);
+          const fold = photoMat(photo, shade(color, 0.72 + ((i + k) % 4) * 0.08), 0.95);
+          const m = add(remapUV(new THREE.BoxGeometry(0.3, 0.035, 0.24), 0.3, 0.3, ((i + k) * 0.21) % 0.7, (i * 0.13) % 0.6), fold, x + Math.sin(i * 3.1) * 0.01, y0 + 0.018 + i * 0.037, z + Math.cos(i * 2.3) * 0.01);
           m.rotation.y = Math.sin(i * 5.7) * 0.05;
         }
       });
@@ -398,9 +425,12 @@ export default function Room3DGL(props: Room3DProps) {
     const mats: Record<string, THREE.Material> = {
       metal: new THREE.MeshStandardMaterial({ color: '#2a2a2d', metalness: 0.85, roughness: 0.35 }),
       wood: new THREE.MeshStandardMaterial({ color: '#c49a6c', roughness: 0.55 }),
-      woodDark: new THREE.MeshStandardMaterial({ color: '#9b7552', roughness: 0.6 }),
+      woodDark: new THREE.MeshStandardMaterial({ color: '#6f4e33', roughness: 0.55 }),
       white: new THREE.MeshStandardMaterial({ color: '#f3f1ec', roughness: 0.6 }),
       black: new THREE.MeshStandardMaterial({ color: '#1d1d1f', roughness: 0.5 }),
+      brass: new THREE.MeshStandardMaterial({ color: '#b8925a', metalness: 1, roughness: 0.3 }),
+      chrome: new THREE.MeshStandardMaterial({ color: '#d4d6d9', metalness: 1, roughness: 0.15 }),
+      concrete: new THREE.MeshStandardMaterial({ color: '#b9b6b1', roughness: 0.95 }),
       mirror: new THREE.MeshStandardMaterial({ color: '#dfe6ea', metalness: 1, roughness: 0.04 }),
       curtain: new THREE.MeshStandardMaterial({ map: fabricTexture('#cfc3b2'), roughness: 0.95, side: THREE.DoubleSide }),
       wall: new THREE.MeshStandardMaterial({ map: plasterTexture(), roughness: 0.95 }),
@@ -528,9 +558,28 @@ export default function Room3DGL(props: Room3DProps) {
       controls.target.set(W / 2, 0.6, H / 2);
     };
 
+    // 물건마다 만든 결과를 기억해 두고, 모양이 바뀐 것만 새로 만든다(옮기기만 했으면 위치만 바꾼다)
+    const built = new Map<string, { key: string; group: THREE.Group }>();
     const buildItems = (p: Room3DProps) => {
-      clear(items);
-      p.boxes.forEach((b) => items.add(buildItem(b, p.photoOf(b), p.colorOf(b.brandId), mats, p.catOf?.(b.brandId), b.brandId ? p.nameOf(b.brandId) : undefined)));
+      const keep = new Set<string>();
+      p.boxes.forEach((b) => {
+        const photo = p.photoOf(b);
+        const color = p.colorOf(b.brandId);
+        const cat = p.catOf?.(b.brandId);
+        const name = b.brandId ? p.nameOf(b.brandId) : undefined;
+        const mood = p.moodOf?.(b.brandId);
+        const key = JSON.stringify([b.kind, b.w, b.h, b.brandId, b.label, photo, color, cat, name, mood]);
+        let hit = built.get(b.id);
+        if (!hit || hit.key !== key) {
+          if (hit) { clear(hit.group); items.remove(hit.group); }
+          hit = { key, group: buildItem(b, photo, color, mats, cat, name, mood) };
+          built.set(b.id, hit);
+          items.add(hit.group);
+        }
+        hit.group.position.set(b.x + b.w / 2, 0, b.y + b.h / 2);
+        keep.add(b.id);
+      });
+      built.forEach((v, id) => { if (!keep.has(id)) { clear(v.group); items.remove(v.group); built.delete(id); } });
       // 행거·진열대마다 천장 레일에서 비추는 핀 조명 (최대 8개)
       pins.forEach((o) => scene.remove(o));
       pins.length = 0;
@@ -676,14 +725,15 @@ export default function Room3DGL(props: Room3DProps) {
     };
     const onDown = (e: PointerEvent) => {
       down = { x: e.clientX, y: e.clientY, yaw, pitch, moved: false };
-      const selId = propsRef.current.selected;
-      if (mode !== 'orbit' || !selId || !propsRef.current.onMove) return;
+      // 행거·진열대·포토존은 고르지 않고 바로 집어서 옮길 수 있다
+      if (mode !== 'orbit' || !propsRef.current.onMove) return;
       ray.setFromCamera(toNdc(e), camera);
       const hit = ray.intersectObjects(items.children, true).find((h) => shown(h.object));
       let o: THREE.Object3D | null = hit?.object ?? null;
       while (o && o.parent !== items) o = o.parent;
-      if (o && o.userData.boxId === selId) {
-        const b = propsRef.current.boxes.find((x) => x.id === selId)!;
+      const b = o && propsRef.current.boxes.find((x) => x.id === o!.userData.boxId);
+      if (o && b && (b.kind === 'hanger' || b.kind === 'table' || b.kind === 'photo')) {
+        const selId = b.id;
         const fp = floorPoint(e);
         if (!fp) return;
         drag = { id: selId, group: o, dx: fp.x - o.position.x, dz: fp.z - o.position.z, b };
@@ -720,6 +770,7 @@ export default function Room3DGL(props: Room3DProps) {
         drag = null;
         controls.enabled = mode === 'orbit';
         if (d?.moved) {
+          if (propsRef.current.selected !== g.id) propsRef.current.onPick(g.id);
           propsRef.current.onMove?.(g.id, Math.round((g.group.position.x - g.b.w / 2) * 10) / 10, Math.round((g.group.position.z - g.b.h / 2) * 10) / 10);
           return;
         }

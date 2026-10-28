@@ -566,10 +566,10 @@ export function TeamLayoutTab({ team }: { team: Team }) {
         {view !== 'plan' && hasWebGL ? (
           <div className="relative h-[400px]" style={{ background: '#ebe8e3' }}>
             <Suspense fallback={<div className="absolute inset-0 flex items-center justify-center text-[13px] text-ink-500">3D 매장을 불러오는 중</div>}>
-              <Room3DGL W={W} H={H} boxes={boxes} path={path} wallPhoto={wallPhoto} mode="orbit" colorOf={color} photoOf={photoOf} nameOf={nameOf} catOf={(id) => brandById(db, id)?.tags.categories[0]} selected={sel} onPick={(id) => setSel(sel === id ? null : id)}
+              <Room3DGL W={W} H={H} boxes={boxes} path={path} wallPhoto={wallPhoto} mode="orbit" colorOf={color} photoOf={photoOf} nameOf={nameOf} catOf={(id) => brandById(db, id)?.tags.categories[0]} moodOf={(id) => brandById(db, id)?.tags.moods[0]} selected={sel} onPick={(id) => setSel(sel === id ? null : id)}
                 onMove={(id, x, y) => setBoxes(boxes.map((b) => (b.id === id ? { ...b, x, y } : b)))} />
             </Suspense>
-            <div className="absolute left-3 bottom-2 text-[11px] text-ink-700 pointer-events-none bg-white/70 px-1.5">{sel ? '고른 물건을 끌어서 옮겨요' : '밀어서 돌리기 · 두 손가락으로 확대 · 물건을 눌러 고르기'}</div>
+            <div className="absolute left-3 bottom-2 text-[11px] text-ink-700 pointer-events-none bg-white/70 px-1.5">{'물건을 끌어서 옮기기 · 빈 곳을 밀어서 돌리기 · 두 손가락으로 확대'}</div>
           </div>
         ) : view !== 'plan' ? (
           <div
