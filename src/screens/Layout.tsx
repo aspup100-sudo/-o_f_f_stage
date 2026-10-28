@@ -1,7 +1,7 @@
 // 공간 배치. 면적과 브랜드별 행거 수로 자동 배치를 만들고, 3D 조감도로 보여 준다.
 // 팀이 직접 옮기고(평면), 브랜드를 바꾸고, 사진을 걸 수 있다. 고친 배치는 team.layout에 저장된다.
 // 자동 배치: 의류는 벽 행거, 소품은 가운데 진열대, 입구 맞은편 벽은 회차마다 다른 브랜드.
-import { useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { lazy, Suspense, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useMe } from '@/store/hooks';
 import { brandById, spaceById } from '@/store/logic';
 import { saveTeamLayout } from '@/store/actions';
@@ -11,6 +11,12 @@ import { brandCoverSrc, spaceSrc } from '@/data/photos';
 import { pickPhotos } from '@/components/photoPick';
 import { AiSource, Button, cx } from '@/components/ui';
 import type { BrandProfile, LayoutBox, LayoutKind, Team, TeamLayout } from '@/types';
+
+// 실사 3D(three.js)는 배치 탭을 열 때만 불러온다. WebGL이 없는 기기는 가벼운 3D로 보여 준다
+const Room3DGL = lazy(() => import('./Room3DGL'));
+const hasWebGL = (() => {
+  try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch { return false; }
+})();
 
 const HANGER = 1.2; // 행거 1개 폭(m)
 const DEPTH = 0.5; // 행거 깊이(m)
@@ -403,7 +409,7 @@ export function TeamLayoutTab({ team }: { team: Team }) {
   const [draft, setDraft] = useState<LayoutBox[] | null>(null); // 끄는 중인 배치
   const boxes = draft ?? saved?.boxes ?? auto.boxes;
   const path = saved ? saved.path : auto.path;
-  const [view, setView] = useState<'3d' | 'plan'>('3d');
+  const [view, setView] = useState<'3d' | 'walk' | 'plan'>('3d');
   const [angle, setAngle] = useState(-24);
   const [sel, setSel] = useState<string | null>(null);
   const [asking, setAsking] = useState(false);
@@ -475,14 +481,21 @@ export function TeamLayoutTab({ team }: { team: Team }) {
           <div className="text-[12px] text-ink-500">{sp ? `${sp.name} · ${area}㎡` : `공간 확정 전 · ${area}㎡ 기준`}</div>
         </div>
         <div className="flex rounded border border-ink-300 overflow-hidden text-[13px] font-semibold">
-          {(['3d', 'plan'] as const).map((k) => (
-            <button key={k} onClick={() => setView(k)} className={cx('px-3 h-8', view === k ? 'bg-ink-100 text-ink-900' : 'text-ink-500')}>{k === '3d' ? '3D' : '평면'}</button>
+          {((hasWebGL ? ['3d', 'walk', 'plan'] : ['3d', 'plan']) as ('3d' | 'walk' | 'plan')[]).map((k) => (
+            <button key={k} onClick={() => setView(k)} className={cx('px-3 h-8', view === k ? 'bg-ink-100 text-ink-900' : 'text-ink-500')}>{k === '3d' ? '3D' : k === 'walk' ? '걸어 보기' : '평면'}</button>
           ))}
         </div>
       </div>
 
       <div className="mt-3 -mx-4 bg-[#f6f5f3] border-y border-ink-100">
-        {view === '3d' ? (
+        {view !== 'plan' && hasWebGL ? (
+          <div className="relative h-[400px]" style={{ background: '#ebe8e3' }}>
+            <Suspense fallback={<div className="absolute inset-0 flex items-center justify-center text-[13px] text-ink-500">3D 매장을 불러오는 중</div>}>
+              <Room3DGL W={W} H={H} boxes={boxes} path={path} wallPhoto={wallPhoto} mode={view === 'walk' ? 'walk' : 'orbit'} colorOf={color} photoOf={photoOf} nameOf={nameOf} selected={sel} onPick={(id) => setSel(sel === id ? null : id)} />
+            </Suspense>
+            <div className="absolute left-3 bottom-2 text-[11px] text-ink-700 pointer-events-none bg-white/70 px-1.5">{view === 'walk' ? '밀어서 둘러보기 · 바닥을 누르면 걸어가요' : '밀어서 돌리기 · 두 손가락으로 확대 · 물건을 눌러 바꾸기'}</div>
+          </div>
+        ) : view !== 'plan' ? (
           <div
             className="relative h-[380px] overflow-hidden touch-none select-none"
             style={{ perspective: 1100, background: 'linear-gradient(#f7f6f4, #ebe9e5)' }}
