@@ -400,10 +400,22 @@ export default function Room3DGL(props: Room3DProps) {
         spots.push(l);
       }
       room.add(buildPlant(0.4, H - 0.55, mats));
-      sun.position.set(W * 0.2, 6, H * 1.2);
-      sun.target.position.set(W / 2, 0, H / 2);
+      // 왼쪽 벽 창문: 밝은 유리와 창틀, 햇빛은 창문 쪽에서 들어온다
+      const winZ = H * 0.55;
+      const glassMat = new THREE.MeshStandardMaterial({ color: '#eef4fa', emissive: '#f4f8ff', emissiveIntensity: 0.9, roughness: 0.1 });
+      const glass = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1.3), glassMat);
+      glass.rotation.y = Math.PI / 2;
+      glass.position.set(0.006, 1.65, winZ);
+      room.add(glass);
+      [[0, 0.65, 1.66, 0.05], [0, -0.65, 1.66, 0.05], [0.8, 0, 0.05, 1.36], [-0.8, 0, 0.05, 1.36], [0, 0, 0.03, 1.3]].forEach(([dz, dy, len, th]) => {
+        const f = new THREE.Mesh(new THREE.BoxGeometry(0.05, th === 0.05 && len > 1 ? th : len === 0.05 ? 1.36 : len === 0.03 ? 1.3 : th, len > 1 ? len : len === 0.05 ? 0.05 : 0.03), mats.black);
+        f.position.set(0.02, 1.65 + dy, winZ + dz);
+        room.add(f);
+      });
+      sun.position.set(-3.5, 4.2, winZ + 0.8);
+      sun.target.position.set(W * 0.45, 0, winZ);
       const r = Math.max(W, H);
-      Object.assign(sun.shadow.camera, { left: -r, right: r, top: r, bottom: -r, near: 0.5, far: 20 });
+      Object.assign(sun.shadow.camera, { left: -r, right: r, top: r, bottom: -r, near: 0.5, far: 25 });
       sun.shadow.camera.updateProjectionMatrix();
       controls.target.set(W / 2, 0.6, H / 2);
     };
