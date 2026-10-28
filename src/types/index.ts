@@ -258,6 +258,8 @@ export interface Recruitment {
   spaceConfirmed: boolean; // 임대인이 확인한 확정
   spaceCheck?: 'pending' | 'rejected'; // 모집자가 '확정됨'을 골랐을 때 임대인 확인 상태
   spaceId?: ID;
+  cancelBy?: ISODate; // 임대인이 확정할 때 정한 무료 취소 기한
+  invited?: ID[]; // 모집자가 빈 자리를 제안한 브랜드
   slotMode: 'category' | 'hanger';
   slots: Slot[];
   status: RecruitStatus;
@@ -339,6 +341,26 @@ export interface Team {
   promoChecked: ID[]; // 홍보 같은 날 게시 체크한 brandId
   todos?: { id: ID; text: string; byBrandId: ID; done: boolean }[]; // 팀원이 직접 적은 할 일
   confirmed: boolean; // 약속서 전원 동의로 팀 확정
+  layout?: TeamLayout; // 팀이 직접 고친 배치. 없으면 자동 배치
+}
+
+export type LayoutKind = 'hanger' | 'table' | 'fit' | 'counter' | 'mirror';
+export interface LayoutBox {
+  id: ID;
+  kind: LayoutKind;
+  x: number; // m, 왼쪽 위 기준
+  y: number;
+  w: number;
+  h: number; // 바닥에서 본 깊이(m)
+  brandId?: ID;
+  label?: string;
+  photo?: string; // 행거·진열대에 건 사진
+}
+export interface TeamLayout {
+  boxes: LayoutBox[];
+  wallPhoto?: string;
+  source?: 'ai' | 'example';
+  tips?: string[];
 }
 
 export interface SpaceApplication {

@@ -485,6 +485,14 @@ export function createTeamFromRecruitment(db: DB, r: import('@/types').Recruitme
 const teamMemberUsers = (db: DB, teamId: string) => db.teams.find((t) => t.id === teamId)!.members.map((m) => brandUser(db, m.brandId));
 const teamRoom = (db: DB, teamId: string) => db.chatRooms.find((r) => r.context?.type === 'team' && r.context.refId === teamId);
 
+/** 배치 저장. undefined면 자동 배치로 되돌린다 */
+export function saveTeamLayout(teamId: string, layout: import('@/types').TeamLayout | undefined) {
+  update((s) => {
+    const t = s.db.teams.find((x) => x.id === teamId);
+    if (t) t.layout = layout;
+  });
+}
+
 export function renameTeam(teamId: string, name: string) {
   update((s) => {
     s.db.teams.find((t) => t.id === teamId)!.name = name;
@@ -638,7 +646,7 @@ export interface SpaceDraft {
 }
 
 /** 임대인이 모집글의 '공간 확정'을 확인하거나 아니라고 답한다 */
-export function answerSpaceCheck(recruitId: string, ok: boolean) {
+export function answerSpaceCheck(recruitId: string, ok: boolean, freeCancelDays = 14) {
   update((s) => {
     const r = s.db.recruitments.find((x) => x.id === recruitId);
     if (!r || r.spaceCheck !== 'pending') return;
@@ -647,15 +655,30 @@ export function answerSpaceCheck(recruitId: string, ok: boolean) {
     if (ok) {
       r.spaceConfirmed = true;
       r.spaceCheck = undefined;
+      // 오픈 며칠 전까지는 위약금 없이 취소할 수 있다 (사람이 안 모일 때 대비)
+      const d = new Date(r.period.start);
+      d.setDate(d.getDate() - freeCancelDays);
+      r.cancelBy = d.toISOString().slice(0, 10);
       // 그 기간의 빈 날은 예약됨으로
       s.db.availability.forEach((a) => { if (a.spaceId === r.spaceId && a.date >= r.period.start && a.date <= r.period.end) a.status = 'booked'; });
     } else {
       r.spaceCheck = 'rejected';
       r.spaceId = undefined;
     }
-    if (host) notify(s.db, host.userId, 'application_result', ok ? `${sp?.name ?? '공간'} 임대인이 대관 확정을 확인했어요. 모집글에 '공간 확정'이 붙었어요` : `${sp?.name ?? '공간'} 임대인이 아직 확정된 대관이 아니라고 했어요. 모집글은 '공간 미정'으로 바뀌었어요`, { name: 'recruit', id: r.id });
+    if (host) notify(s.db, host.userId, 'application_result', ok ? `${sp?.name ?? '공간'} 임대인이 대관 확정을 확인했어요. ${r.cancelBy?.slice(5).replace('-', '/')}까지는 무료로 취소할 수 있어요` : `${sp?.name ?? '공간'} 임대인이 아직 확정된 대관이 아니라고 했어요. 모집글은 '공간 미정'으로 바뀌었어요`, { name: 'recruit', id: r.id });
   });
   toast(ok ? '확정을 확인했어요. 모집글에 공간 확정이 표시돼요' : '아니라고 답했어요. 모집글이 공간 미정으로 바뀌었어요');
+}
+
+/** 모집자가 빈 자리에 잘 맞는 브랜드에게 먼저 제안한다 */
+export function inviteToRecruit(recruitId: string, brandId: string) {
+  update((s) => {
+    const r = s.db.recruitments.find((x) => x.id === recruitId);
+    if (!r) return;
+    r.invited = [...new Set([...(r.invited ?? []), brandId])];
+    notify(s.db, brandUser(s.db, brandId), 'proposal', `${josa(brandName(s.db, r.hostBrandId), '이', '가')} '${r.title}' 빈 자리에 함께하자고 제안했어요`, { name: 'recruit', id: r.id });
+  });
+  toast('자리 제안을 보냈어요');
 }
 
 export function saveSpace(landlordId: string, d: SpaceDraft, id?: string) {

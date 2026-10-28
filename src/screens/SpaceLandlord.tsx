@@ -246,6 +246,37 @@ export function SpaceEdit({ id }: { id?: string }) {
   );
 }
 
+const CANCEL_DAYS = [7, 14, 21];
+
+/** 모집자가 '확정됨'이라고 적은 대관을 임대인이 확인한다. 확정하면서 무료 취소 기한도 정한다 */
+function SpaceCheckCard({ recruitId }: { recruitId: string }) {
+  const { db } = useMe();
+  const [days, setDays] = useState(14);
+  const r = db.recruitments.find((x) => x.id === recruitId);
+  if (!r) return null;
+  const host = brandById(db, r.hostBrandId);
+  const sp = spaceById(db, r.spaceId);
+  const by = new Date(r.period.start);
+  by.setDate(by.getDate() - days);
+  return (
+    <Card className="p-4">
+      <div className="text-[12px] text-ink-500">{host?.name} · {sp?.name}</div>
+      <div className="font-bold mt-0.5">{period(r.period)} 대관이 확정됐다고 적었어요</div>
+      <button className="text-[12px] text-ink-500 underline underline-offset-2 mt-1" onClick={() => navigate({ name: 'recruit', id: r.id })}>모집글 보기</button>
+      <div className="mt-3 text-[13px] font-semibold">무료 취소 기한</div>
+      <div className="text-[12px] text-ink-500">팀원이 다 안 모이면 이때까지는 위약금 없이 취소할 수 있어요</div>
+      <div className="flex gap-1.5 mt-2">
+        {CANCEL_DAYS.map((d) => <Chip key={d} active={days === d} onClick={() => setDays(d)}>오픈 {d}일 전</Chip>)}
+      </div>
+      <div className="text-[12px] text-ink-700 mt-1.5">{by.getMonth() + 1}/{by.getDate()}까지 무료 취소</div>
+      <div className="flex gap-2 mt-3">
+        <Button size="sm" variant="secondary" className="flex-1" onClick={() => answerSpaceCheck(r.id, false)}>아니에요</Button>
+        <Button size="sm" className="flex-1" onClick={() => answerSpaceCheck(r.id, true, days)}>맞아요, 확정</Button>
+      </div>
+    </Card>
+  );
+}
+
 export function InboxTab({ initial }: { initial?: 'offer' }) {
   const { db, landlord } = useMe();
   const [tab, setTab] = useState<'apps' | 'offer'>(initial ?? 'apps');
@@ -272,21 +303,7 @@ export function InboxTab({ initial }: { initial?: 'offer' }) {
             <div>
               <h3 className="text-[17px] font-extrabold tracking-tight mb-2">공간 확정 확인 요청</h3>
               <div className="space-y-2">
-                {checks.map((r) => {
-                  const host = brandById(db, r.hostBrandId);
-                  const sp = spaceById(db, r.spaceId);
-                  return (
-                    <Card key={r.id} className="p-4">
-                      <div className="text-[12px] text-ink-500">{host?.name} · {sp?.name}</div>
-                      <div className="font-bold mt-0.5">{period(r.period)} 대관이 확정됐다고 적었어요</div>
-                      <button className="text-[12px] text-ink-500 underline underline-offset-2 mt-1" onClick={() => navigate({ name: 'recruit', id: r.id })}>모집글 보기</button>
-                      <div className="flex gap-2 mt-3">
-                        <Button size="sm" variant="secondary" className="flex-1" onClick={() => answerSpaceCheck(r.id, false)}>아니에요</Button>
-                        <Button size="sm" className="flex-1" onClick={() => answerSpaceCheck(r.id, true)}>맞아요, 확정</Button>
-                      </div>
-                    </Card>
-                  );
-                })}
+                {checks.map((r) => <SpaceCheckCard key={r.id} recruitId={r.id} />)}
               </div>
             </div>
           )}

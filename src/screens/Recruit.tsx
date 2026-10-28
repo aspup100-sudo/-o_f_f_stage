@@ -3,8 +3,8 @@ import { shareLink } from '@/store/share';
 import { askAi, type RecruitDraftOut } from '@/store/ai';
 import { useMe, guard } from '@/store/hooks';
 import { navigate } from '@/store/store';
-import { applyRecruitment, createRecruitment, decideApplication, simulateApplicants, toggleRecruitAlert, toggleSaveRecruit, type RecruitDraft } from '@/store/actions';
-import { brandById, manwon, matchPct, matchScore, period, recruitFit, recruitUrgency, slotShare, spaceById } from '@/store/logic';
+import { applyRecruitment, inviteToRecruit, createRecruitment, decideApplication, simulateApplicants, toggleRecruitAlert, toggleSaveRecruit, type RecruitDraft } from '@/store/actions';
+import { brandById, daysUntil, manwon, matchPct, matchScore, period, recruitFit, recruitUrgency, slotShare, spaceById } from '@/store/logic';
 import { BrandLogo, ScreenTitle, ThemeTagList, TrustLine } from '@/components/common';
 import { AiSource, Button, Card, Chip, cx, Demo, Empty, Field, inputCls, Segmented, Sheet, StatusPill, SubHeader, Tag, textareaCls, Ic, Icon } from '@/components/ui';
 import { CATEGORIES, REGIONS, type Category, type Recruitment, type RecruitStatus, type Region, type SlotStatus } from '@/types';
@@ -182,7 +182,10 @@ export function RecruitDetail({ id }: { id: string }) {
         <div className="mt-3 rounded border border-ink-100 p-3 text-sm">
           <div className="text-[12px] text-ink-500 mb-0.5">공간</div>
           {r.spaceConfirmed && sp ? (
+            <>
             <button className="font-semibold underline underline-offset-2" onClick={() => navigate({ name: 'space', id: sp.id })}><Ic n="check" />확정: {sp.name} ›</button>
+            {r.cancelBy && <div className="text-[12px] text-ink-500 mt-0.5">{r.cancelBy.slice(5).replace('-', '/')}까지 무료 취소 가능 · 팀이 다 안 모이면 이때까지 정할 수 있어요</div>}
+            </>
           ) : r.spaceCheck === 'pending' && sp ? (
             <button className="font-semibold text-left" onClick={() => navigate({ name: 'space', id: sp.id })}>{sp.name} › <span className="block text-[12px] font-normal text-amber-700 mt-0.5">임대인이 확정을 확인하는 중이에요</span></button>
           ) : (
@@ -228,6 +231,8 @@ export function RecruitDetail({ id }: { id: string }) {
           })}
         </div>
         {r.slotMode === 'hanger' && <p className="text-[12px] text-ink-500 mt-2">분담금은 행거 수에 비례해요 (총 {totalHangers}개).</p>}
+
+        {isHost && empties.length > 0 && r.status !== '마감' && <FillSlots r={r} />}
 
         <h3 className="text-[17px] font-extrabold tracking-tight mt-9 mb-3">모집자</h3>
         <Card className="p-3 flex items-center gap-3" onClick={() => navigate({ name: 'brand', id: host.id })}>
@@ -330,6 +335,74 @@ export function RecruitDetail({ id }: { id: string }) {
         )}
         <Button full size="lg" disabled={!slotId || !msg.trim()} onClick={() => { applyRecruitment(r.id, brand!.id, slotId!, msg); setApplyOpen(false); setMsg(''); }}>지원서 보내기</Button>
       </Sheet>
+    </div>
+  );
+}
+
+/** 모집자용: 빈 자리를 어떻게 채울지. 취소 기한 경고, 지금 인원으로 열 때 비용, 잘 맞는 브랜드 추천 */
+function FillSlots({ r }: { r: Recruitment }) {
+  const { db } = useMe();
+  const empties = r.slots.filter((s) => s.status === '비어 있음');
+  const filled = r.slots.filter((s) => s.status !== '비어 있음');
+  const unit = r.slotMode === 'hanger' ? '행거 1개' : '1곳';
+  const units = (xs: typeof r.slots) => (r.slotMode === 'hanger' ? xs.reduce((n, x) => n + x.hangers, 0) : xs.length);
+  const full = r.totalBudget / Math.max(1, units(r.slots));
+  const now = r.totalBudget / Math.max(1, units(filled));
+  const left = r.cancelBy ? daysUntil(r.cancelBy) : undefined;
+  const toOpen = daysUntil(r.period.start);
+  const applied = new Set(db.recruitApplications.filter((a) => a.recruitmentId === r.id).map((a) => a.brandId));
+  const picks = db.brands
+    .filter((b) => !applied.has(b.id))
+    .map((b) => ({ b, fit: recruitFit(db, b, r) }))
+    .filter((x) => x.fit.score > 0)
+    .sort((a, b) => b.fit.score - a.fit.score)
+    .slice(0, 3);
+  const urgent = left !== undefined ? left <= 7 : toOpen <= 21;
+
+  return (
+    <div className="mt-6 rounded border border-ink-300 p-4">
+      <div className="font-bold">빈 자리 {empties.length}개 채우기</div>
+      {left !== undefined && (
+        <div className={cx('mt-2 text-[13px]', urgent ? 'text-amber-800 font-semibold' : 'text-ink-700')}>
+          {left >= 0 ? `무료 취소 기한까지 ${left}일 남았어요 (${r.cancelBy!.slice(5).replace('-', '/')})` : '무료 취소 기한이 지났어요'}
+          {urgent && left >= 0 && <span className="block font-normal text-[12px] mt-0.5">그 전에 자리가 안 차면 아래 비용으로 열지, 취소할지 정해 주세요</span>}
+        </div>
+      )}
+      {left === undefined && urgent && toOpen >= 0 && (
+        <div className="mt-2 text-[13px] text-amber-800 font-semibold">오픈까지 {toOpen}일이에요. 공간을 잡기 전에 인원을 먼저 채워 두는 게 안전해요</div>
+      )}
+
+      <div className="mt-3 grid grid-cols-2 gap-2 text-[13px]">
+        <div className="rounded bg-ink-100 p-2.5">
+          <div className="text-[12px] text-ink-500">다 채우면 {unit}</div>
+          <div className="font-bold mt-0.5">{manwon(full)}</div>
+        </div>
+        <div className="rounded bg-ink-100 p-2.5">
+          <div className="text-[12px] text-ink-500">지금 {filled.length}곳으로 열면 {unit}</div>
+          <div className="font-bold mt-0.5">{manwon(now)} <span className="text-[12px] font-normal text-amber-800">+{manwon(now - full)}</span></div>
+        </div>
+      </div>
+
+      {picks.length > 0 && (
+        <>
+          <div className="mt-4 text-[13px] font-semibold">잘 맞는 브랜드에게 먼저 제안하기</div>
+          <div className="mt-1.5 divide-y divide-ink-100">
+            {picks.map(({ b, fit }) => {
+              const sent = r.invited?.includes(b.id);
+              return (
+                <div key={b.id} className="flex items-center gap-2.5 py-2.5">
+                  <BrandLogo brand={b} size={36} />
+                  <button className="flex-1 min-w-0 text-left" onClick={() => navigate({ name: 'brand', id: b.id })}>
+                    <div className="text-sm font-bold truncate">{b.name}</div>
+                    <div className="text-[12px] text-ink-500 truncate">{fit.reasons.slice(0, 2).join(' · ')}</div>
+                  </button>
+                  <Button size="sm" variant={sent ? 'secondary' : 'primary'} disabled={sent} onClick={() => inviteToRecruit(r.id, b.id)}>{sent ? '제안함' : '제안'}</Button>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
     </div>
   );
 }

@@ -18,7 +18,7 @@ const SYSTEM = `너는 OFF STAGE의 글쓰기 도우미야. OFF STAGE는 작은 
 - 입력에 없는 사실(가격, 날짜, 주소, 수치)은 지어내지 마. 모르면 그 부분은 빼.
 - 29CM, 무신사 매거진처럼 짧은 문장과 구체적인 디테일을 좋아해.`;
 
-type Task = 'recruit' | 'promo' | 'space' | 'report';
+type Task = 'recruit' | 'promo' | 'space' | 'report' | 'layout';
 
 const str = { type: 'string' } as const;
 const strList = { type: 'array', items: { type: 'string' } } as const;
@@ -36,6 +36,10 @@ const TASKS: Record<Task, { ask: string; schema: Record<string, unknown> }> = {
   space: {
     ask: '아래 공간 정보와 사진을 보고 팝업 공간 소개를 써 줘. keywords는 공간 특징 키워드 4~6개(각 2~6자, 예: 통창, 높은 층고, 1층 코너), moods는 어울리는 무드 2~3개, intro는 3~4문장 소개글.',
     schema: obj({ keywords: strList, moods: strList, intro: str }),
+  },
+  layout: {
+    ask: '아래는 공동 팝업 공간 크기와 참여 브랜드야. 입구는 앞쪽 벽 가운데, 피팅룸은 뒤 벽 오른쪽 구석, 계산대는 입구 오른쪽에 고정이야. 각 브랜드를 어디에 둘지 정해 줘. zone은 back(입구 맞은편 벽, 들어오자마자 보이는 자리), left(왼쪽 벽), right(오른쪽 벽), center(가운데 진열대) 중 하나. 옷은 벽, 작은 소품은 가운데가 보통 좋고, 무드가 비슷한 브랜드는 이웃하게, 회차마다 back을 다른 브랜드가 쓰게 해. tips는 왜 이렇게 놓았는지 2~4문장.',
+    schema: obj({ zones: { type: 'array', items: obj({ brand: str, zone: { type: 'string', enum: ['back', 'left', 'right', 'center'] } }) }, tips: strList }),
   },
   report: {
     ask: '아래는 끝난 공동 팝업의 방문·후기 데이터야. 반응이 좋았던 점(good) 2~3개, 아쉬웠던 점(improve) 1~2개, 다음 회차 제안(next) 2~3개를 한 문장씩 써 줘. 데이터에 근거한 것만.',
