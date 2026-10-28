@@ -312,7 +312,7 @@ function buildPlant(x: number, z: number, mats: Record<string, THREE.Material>) 
 export default function Room3DGL(props: Room3DProps) {
   const host = useRef<HTMLDivElement>(null);
   const labelsHost = useRef<HTMLDivElement>(null);
-  const api = useRef<{ rebuild: (p: Room3DProps) => void; setMode: (m: ViewMode) => void; dispose: () => void; walk: (dir: number) => void; gyro: (on: boolean) => void } | null>(null);
+  const api = useRef<{ rebuild: (p: Room3DProps) => void; setMode: (m: ViewMode) => void; dispose: () => void; walk: (dir: number) => void; gyro: (on: boolean) => void; snap: () => string } | null>(null);
   const [gyroOn, setGyroOn] = useState(false);
   const propsRef = useRef(props);
   propsRef.current = props;
@@ -774,6 +774,30 @@ export default function Room3DGL(props: Room3DProps) {
       rebuild,
       setMode,
       walk: (dir) => { moveDir = dir; invalidate(); },
+      // 지금 보이는 장면을 사진으로 (이름표까지 함께 그린다)
+      snap: () => {
+        renderer.render(scene, camera);
+        const src = renderer.domElement;
+        const c = document.createElement('canvas');
+        c.width = src.width; c.height = src.height;
+        const g = c.getContext('2d')!;
+        g.drawImage(src, 0, 0);
+        const k = src.width / src.getBoundingClientRect().width;
+        g.font = `800 ${10 * k}px Pretendard, sans-serif`;
+        labels.forEach((l) => {
+          if (l.el.style.display === 'none') return;
+          const m = /translate\(([-\d.]+)px, ([-\d.]+)px\)/.exec(l.el.style.transform);
+          if (!m) return;
+          const text = l.el.textContent ?? '';
+          const w = g.measureText(text).width + 12 * k;
+          const x = Number(m[1]) * k - w / 2;
+          const y = Number(m[2]) * k - 18 * k;
+          g.fillStyle = '#fff'; g.fillRect(x, y, w, 18 * k);
+          g.strokeStyle = '#111'; g.lineWidth = k; g.strokeRect(x, y, w, 18 * k);
+          g.fillStyle = '#111'; g.fillText(text, x + 6 * k, y + 13 * k);
+        });
+        return c.toDataURL('image/png');
+      },
       gyro: (on) => {
         gyro.on = on;
         gyro.alpha0 = null;
@@ -835,6 +859,24 @@ export default function Room3DGL(props: Room3DProps) {
           {gyroOn ? '휴대폰으로 둘러보는 중' : '휴대폰 돌려서 보기'}
         </button>
       )}
+      <button
+        onClick={async () => {
+          const url = api.current?.snap();
+          if (!url) return;
+          // 휴대폰은 공유 창으로, 컴퓨터는 파일로 저장
+          try {
+            const blob = await (await fetch(url)).blob();
+            const file = new File([blob], 'offstage-배치.png', { type: 'image/png' });
+            const nav = navigator as Navigator & { canShare?: (d: { files: File[] }) => boolean };
+            if (nav.canShare?.({ files: [file] })) { await nav.share({ files: [file], title: 'OFF STAGE 배치' }); return; }
+          } catch { /* 공유 취소 등은 파일 저장으로 */ }
+          const a = document.createElement('a');
+          a.href = url; a.download = 'offstage-배치.png'; a.click();
+        }}
+        className="absolute right-3 top-3 h-9 px-3 border border-ink-900 bg-white/90 text-[12px] font-bold"
+      >
+        장면 저장
+      </button>
       {props.mode === 'walk' && (
         <div className="absolute right-3 bottom-3 flex flex-col gap-1.5">
           <button {...hold(1)} aria-label="앞으로" className="w-11 h-11 bg-white/90 border border-ink-900 text-[18px] font-bold select-none">↑</button>
