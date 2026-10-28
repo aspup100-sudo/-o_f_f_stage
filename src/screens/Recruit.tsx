@@ -61,6 +61,7 @@ export function RecruitCard({ db, r, reasons }: { db: DB; r: Recruitment; reason
       <div className="flex items-center gap-1.5 mt-2 text-[12px] font-bold">
         <StatusPill status={r.status} />
         {r.spaceConfirmed && <><span className="text-ink-300 font-normal">|</span><span className="text-emerald-700">공간 확정</span></>}
+        {r.spaceCheck === 'pending' && <><span className="text-ink-300 font-normal">|</span><span className="text-amber-700">공간 확인 중</span></>}
         {urgent && <><span className="text-ink-300 font-normal">|</span><span className="text-red-600">{urgent}</span></>}
       </div>
       <div className="flex items-end justify-between gap-4 mt-3 pt-3 border-t border-ink-100">
@@ -182,6 +183,8 @@ export function RecruitDetail({ id }: { id: string }) {
           <div className="text-[12px] text-ink-500 mb-0.5">공간</div>
           {r.spaceConfirmed && sp ? (
             <button className="font-semibold underline underline-offset-2" onClick={() => navigate({ name: 'space', id: sp.id })}><Ic n="check" />확정: {sp.name} ›</button>
+          ) : r.spaceCheck === 'pending' && sp ? (
+            <button className="font-semibold text-left" onClick={() => navigate({ name: 'space', id: sp.id })}>{sp.name} › <span className="block text-[12px] font-normal text-amber-700 mt-0.5">임대인이 확정을 확인하는 중이에요</span></button>
           ) : (
             <span className="font-semibold">아직 미정 · 팀이 꾸려지면 함께 찾아요</span>
           )}
@@ -422,7 +425,7 @@ export function RecruitNew() {
             </button>
           )}
         </Field>
-        <Field label="공간 확정 여부">
+        <Field label="공간 확정 여부" hint={d.spaceConfirmed ? '임대인과 이미 대관을 정했다면 골라 주세요. 임대인이 확인하면 모집글에 "공간 확정"이 붙어요' : undefined}>
           <Segmented items={[{ key: 'no', label: '아직 미정' }, { key: 'yes', label: '확정됨' }]} value={d.spaceConfirmed ? 'yes' : 'no'} onChange={(k) => setD({ ...d, spaceConfirmed: k === 'yes' })} />
           {d.spaceConfirmed && (
             <div className="mt-2 space-y-1.5">

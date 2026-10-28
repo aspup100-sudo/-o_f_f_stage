@@ -255,7 +255,8 @@ export interface Recruitment {
   region: Region;
   period: DateRange;
   totalBudget: number;
-  spaceConfirmed: boolean;
+  spaceConfirmed: boolean; // 임대인이 확인한 확정
+  spaceCheck?: 'pending' | 'rejected'; // 모집자가 '확정됨'을 골랐을 때 임대인 확인 상태
   spaceId?: ID;
   slotMode: 'category' | 'hanger';
   slots: Slot[];

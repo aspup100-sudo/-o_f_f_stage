@@ -363,13 +363,19 @@ export function createRecruitment(hostBrandId: string, d: RecruitDraft) {
     }
     s.db.recruitments.unshift({
       id, hostBrandId, title: d.title, intro: d.intro, region: d.region, period: d.period, totalBudget: d.totalBudget,
-      spaceConfirmed: d.spaceConfirmed, spaceId: d.spaceConfirmed ? d.spaceId : undefined, slotMode: d.slotMode, slots, status: '모집 중', createdAt: DEMO_TODAY,
+      // '확정됨'은 임대인이 확인해야 진짜 확정이 된다
+      spaceConfirmed: false, spaceId: d.spaceConfirmed ? d.spaceId : undefined, spaceCheck: d.spaceConfirmed && d.spaceId ? 'pending' : undefined, slotMode: d.slotMode, slots, status: '모집 중', createdAt: DEMO_TODAY,
     });
   });
   let alerted = 0;
   update((s) => {
     const host = s.db.brands.find((b) => b.id === hostBrandId);
     const fans = s.db.brands.filter((b) => b.id !== hostBrandId && b.recruitAlertRegions?.includes(d.region));
+    if (d.spaceConfirmed && d.spaceId) {
+      const sp = s.db.spaces.find((x) => x.id === d.spaceId);
+      const ll = sp && s.db.landlords.find((l) => l.id === sp.landlordId);
+      if (sp && ll) notify(s.db, ll.userId, 'space_application', `${host?.name ?? '브랜드'}가 ${sp.name} ${d.period.start.slice(5).replace('-', '.')}~${d.period.end.slice(5).replace('-', '.')} 대관이 확정됐다고 모집글에 적었어요. 맞는지 확인해 주세요`, { name: 'tab', tab: 'inbox' });
+    }
     fans.forEach((b) => notify(s.db, b.userId, 'new_recruit', `${d.region}에 새 모집글: ${d.title}${host ? ` (${host.name})` : ''}`, { name: 'recruit', id }));
     alerted = fans.length;
   });
@@ -629,6 +635,27 @@ export function togglePromo(teamId: string, brandId: string) {
 export interface SpaceDraft {
   name: string; region: import('@/types').Region; address: string; intro: string; areaM2: number; dailyFee: number; minDays: number;
   facilities: import('@/types').Facility[]; electricKw?: number; teamRental: boolean; fashionOnly: boolean; photoHues: number[]; photos?: string[]; lat?: number; lng?: number; promos?: string[]; keywords?: string[];
+}
+
+/** 임대인이 모집글의 '공간 확정'을 확인하거나 아니라고 답한다 */
+export function answerSpaceCheck(recruitId: string, ok: boolean) {
+  update((s) => {
+    const r = s.db.recruitments.find((x) => x.id === recruitId);
+    if (!r || r.spaceCheck !== 'pending') return;
+    const sp = s.db.spaces.find((x) => x.id === r.spaceId);
+    const host = s.db.brands.find((b) => b.id === r.hostBrandId);
+    if (ok) {
+      r.spaceConfirmed = true;
+      r.spaceCheck = undefined;
+      // 그 기간의 빈 날은 예약됨으로
+      s.db.availability.forEach((a) => { if (a.spaceId === r.spaceId && a.date >= r.period.start && a.date <= r.period.end) a.status = 'booked'; });
+    } else {
+      r.spaceCheck = 'rejected';
+      r.spaceId = undefined;
+    }
+    if (host) notify(s.db, host.userId, 'application_result', ok ? `${sp?.name ?? '공간'} 임대인이 대관 확정을 확인했어요. 모집글에 '공간 확정'이 붙었어요` : `${sp?.name ?? '공간'} 임대인이 아직 확정된 대관이 아니라고 했어요. 모집글은 '공간 미정'으로 바뀌었어요`, { name: 'recruit', id: r.id });
+  });
+  toast(ok ? '확정을 확인했어요. 모집글에 공간 확정이 표시돼요' : '아니라고 답했어요. 모집글이 공간 미정으로 바뀌었어요');
 }
 
 export function saveSpace(landlordId: string, d: SpaceDraft, id?: string) {

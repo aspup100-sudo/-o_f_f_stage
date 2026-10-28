@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useMe, guard } from '@/store/hooks';
 import { askAi, type SpaceOut } from '@/store/ai';
 import { back, navigate, replace, toast } from '@/store/store';
-import { setLastMinute, decideSpaceApplication, proposeSpaceToRecruitment, proposeSpaceToTeam, saveSpace, simulateTeamApplication, type SpaceDraft } from '@/store/actions';
+import { answerSpaceCheck, setLastMinute, decideSpaceApplication, proposeSpaceToRecruitment, proposeSpaceToTeam, saveSpace, simulateTeamApplication, type SpaceDraft } from '@/store/actions';
 import { brandById, daysUntil, manwon, period, soonOpenDays, spaceById, teamById } from '@/store/logic';
 import { ScreenTitle, TrustLine } from '@/components/common';
 import { AiSource, Button, Card, Chip, cx, Demo, Empty, Field, inputCls, Segmented, Sheet, StatusPill, SubHeader, Swatch, Tag, textareaCls, Ic , Icon } from '@/components/ui';
@@ -98,7 +98,7 @@ function PriceAdvice({ spaceId }: { spaceId: string }) {
   const rate = (list: typeof days) => (list.length ? list.filter((a) => a.status === 'booked').length / list.length : 0);
   const wk = rate(days.filter((a) => !isWeekend(a.date)));
   const we = rate(days.filter((a) => isWeekend(a.date)));
-  const seeking = db.recruitments.filter((r) => r.region === sp.region && r.status !== '마감' && !r.spaceConfirmed).length + db.teams.filter((t) => t.region === sp.region && !t.spaceId).length;
+  const seeking = db.recruitments.filter((r) => r.region === sp.region && r.status !== '마감' && !r.spaceConfirmed && r.spaceCheck !== 'pending').length + db.teams.filter((t) => t.region === sp.region && !t.spaceId).length;
   const tips: { text: string; action?: { label: string; on: () => void } }[] = [];
   if (fair) tips.push({ text: `${sp.region} 비슷한 공간 시세로 보면 하루 ${manwon(fair)}이 적정해요. 지금 ${manwon(sp.dailyFee)}은 ${diff === 0 ? '시세와 같아요' : diff > 0 ? `${diff}% 높아요` : `${-diff}% 낮아요`}.` });
   if (days.length && wk + 0.15 < we) {
@@ -255,7 +255,8 @@ export function InboxTab({ initial }: { initial?: 'offer' }) {
   const pending = apps.filter((a) => a.status === 'pending' && a.direction === 'team');
   const others = apps.filter((a) => !(a.status === 'pending' && a.direction === 'team'));
   const viewing = db.spaceApplications.find((a) => a.id === view);
-  const openRecruits = db.recruitments.filter((r) => r.status !== '마감' && !r.spaceConfirmed);
+  const openRecruits = db.recruitments.filter((r) => r.status !== '마감' && !r.spaceConfirmed && r.spaceCheck !== 'pending');
+  const checks = db.recruitments.filter((r) => r.spaceCheck === 'pending' && r.spaceId && landlord.spaceIds.includes(r.spaceId));
   const spacelessTeams = db.teams.filter((t) => t.confirmed && t.stage === '준비 중' && !t.spaceId);
 
   return (
@@ -267,6 +268,28 @@ export function InboxTab({ initial }: { initial?: 'offer' }) {
       {tab === 'apps' && (
         <div className="px-4 space-y-3">
           <LandlordCompletions />
+          {checks.length > 0 && (
+            <div>
+              <h3 className="text-[17px] font-extrabold tracking-tight mb-2">공간 확정 확인 요청</h3>
+              <div className="space-y-2">
+                {checks.map((r) => {
+                  const host = brandById(db, r.hostBrandId);
+                  const sp = spaceById(db, r.spaceId);
+                  return (
+                    <Card key={r.id} className="p-4">
+                      <div className="text-[12px] text-ink-500">{host?.name} · {sp?.name}</div>
+                      <div className="font-bold mt-0.5">{period(r.period)} 대관이 확정됐다고 적었어요</div>
+                      <button className="text-[12px] text-ink-500 underline underline-offset-2 mt-1" onClick={() => navigate({ name: 'recruit', id: r.id })}>모집글 보기</button>
+                      <div className="flex gap-2 mt-3">
+                        <Button size="sm" variant="secondary" className="flex-1" onClick={() => answerSpaceCheck(r.id, false)}>아니에요</Button>
+                        <Button size="sm" className="flex-1" onClick={() => answerSpaceCheck(r.id, true)}>맞아요, 확정</Button>
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           {pending.length > 0 && <h3 className="text-[17px] font-extrabold tracking-tight">대기 중인 팀 지원</h3>}
           {pending.length === 0 && (
             <Empty icon="inbox" action={openRecruits.length + spacelessTeams.length > 0 ? { label: `공간 찾는 팀 ${openRecruits.length + spacelessTeams.length}곳에 먼저 제안하기`, onClick: () => setTab('offer') } : undefined}>
