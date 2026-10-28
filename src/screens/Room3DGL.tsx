@@ -1,7 +1,7 @@
 // 실사에 가까운 3D 매장 보기 (three.js).
 // 조감도: 손가락으로 돌리고 두 손가락으로 확대. 걸어 보기: 눈높이 1.6m에서 밀어서 둘러보고, 바닥을 누르면 그쪽으로 걸어간다.
 // 좌표: 평면도의 x → 3D x, 평면도의 y → 3D z. 단위는 미터.
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
@@ -96,17 +96,32 @@ function plasterTexture() {
 
 const loader = new THREE.TextureLoader();
 loader.setCrossOrigin('anonymous');
-const photoCache = new Map<string, THREE.Texture>();
-// 사진이 늦게 도착하면 다시 그리도록 알린다
+// 사진은 다 받아진 뒤에만 입힌다. 못 받으면 브랜드 색으로 남는다(검게 나오지 않게)
+const photoCache = new Map<string, Promise<THREE.Texture>>();
 let onTextureLoad = () => {};
-function photoTexture(src: string) {
-  let t = photoCache.get(src);
-  if (!t) {
-    t = loader.load(src, () => onTextureLoad());
-    t.colorSpace = THREE.SRGBColorSpace;
-    photoCache.set(src, t);
+function loadPhoto(src: string) {
+  let pr = photoCache.get(src);
+  if (!pr) {
+    pr = new Promise((resolve, reject) => loader.load(src, (t) => { t.colorSpace = THREE.SRGBColorSpace; resolve(t); }, undefined, reject));
+    pr.catch(() => photoCache.delete(src));
+    photoCache.set(src, pr);
   }
-  return t;
+  return pr;
+}
+/** 색으로 먼저 그리고, 사진이 오면 바꿔 입힌다. tweak으로 사진의 일부만 쓸 수 있다 */
+function photoMat(src: string | undefined, fallback: THREE.ColorRepresentation, roughness: number, tweak?: (t: THREE.Texture) => void) {
+  const mat = new THREE.MeshStandardMaterial({ color: fallback, roughness });
+  if (src) {
+    loadPhoto(src).then((base) => {
+      const t = tweak ? base.clone() : base;
+      if (tweak) { t.needsUpdate = true; tweak(t); }
+      mat.map = t;
+      mat.color.set('#ffffff');
+      mat.needsUpdate = true;
+      onTextureLoad();
+    }).catch(() => {});
+  }
+  return mat;
 }
 
 // 옷 모양(어깨선이 있는 판)
@@ -158,24 +173,17 @@ function buildItem(b: LayoutBox, photo: string | undefined, color: string, mats:
     const rail = add(new THREE.CylinderGeometry(0.012, 0.012, L - 0.1, 12), mats.metal, 0, 1.52, 0);
     rail.rotation.z = Math.PI / 2;
     const n = Math.max(4, Math.round(L / 0.1));
-    const tex = photo ? photoTexture(photo) : null;
     for (let i = 0; i < n; i++) {
       const len = [0.85, 0.7, 1.05, 0.75, 0.95, 0.65][i % 6];
       const geo = new THREE.ExtrudeGeometry(garmentShape(D - 0.06, len), { depth: 0.035, bevelEnabled: true, bevelSize: 0.008, bevelThickness: 0.008, bevelSegments: 2 });
-      let mat: THREE.Material;
-      if (tex) {
-        const t = tex.clone();
-        t.needsUpdate = true;
+      // ExtrudeGeometry UV는 미터 좌표(x: -D/2~D/2, y: -len~0)라 사진의 한 조각에 맞춘다
+      const ox = (i * 0.37) % 0.7;
+      const oy = 0.1 + ((i * 0.23) % 0.3);
+      const mat = photoMat(photo, shade(color, 0.75 + ((i * 7) % 5) * 0.07), 0.9, (t) => {
         t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
-        // ExtrudeGeometry UV는 미터 좌표(x: -D/2~D/2, y: -len~0)라 사진의 한 조각에 맞춘다
-        const ox = (i * 0.37) % 0.7;
-        const oy = 0.1 + ((i * 0.23) % 0.3);
         t.repeat.set(0.22 / D, 0.5 / len);
         t.offset.set(ox + 0.11, oy + 0.5);
-        mat = new THREE.MeshStandardMaterial({ map: t, roughness: 0.9 });
-      } else {
-        mat = new THREE.MeshStandardMaterial({ color: shade(color, 0.75 + ((i * 7) % 5) * 0.07), roughness: 0.9 });
-      }
+      });
       const m = add(geo, mat, -L / 2 + 0.12 + (i * (L - 0.24)) / Math.max(1, n - 1), 1.47, 0);
       // 옷마다 살짝 비틀리고 간격이 고르지 않게
       m.rotation.y = Math.PI / 2 + Math.sin(i * 12.9898) * 0.12;
@@ -190,10 +198,9 @@ function buildItem(b: LayoutBox, photo: string | undefined, color: string, mats:
     const leg = new THREE.CylinderGeometry(0.022, 0.018, 0.74, 10);
     [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sz]) => add(leg, mats.woodDark, sx * (L / 2 - 0.06), 0.37, sz * (D / 2 - 0.06)));
     // 위에 놓인 상품: 개어 놓은 옷 더미와 작은 상자
-    const tex = photo ? photoTexture(photo) : null;
     const items: [number, number, number, number, number][] = [[-L / 2 + 0.22, -D / 2 + 0.22, 0.3, 0.06, 0.25], [-L / 2 + 0.22, -D / 2 + 0.22, 0.28, 0.06, 0.23], [0.05, 0.1, 0.22, 0.12, 0.16], [L / 2 - 0.25, D / 2 - 0.25, 0.26, 0.08, 0.2]];
     items.forEach(([x, z, w, h, d], i) => {
-      const mat = tex ? new THREE.MeshStandardMaterial({ map: tex, roughness: 0.8 }) : new THREE.MeshStandardMaterial({ color: shade(color, 0.8 + i * 0.06), roughness: 0.85 });
+      const mat = photoMat(photo, shade(color, 0.8 + i * 0.06), 0.85);
       add(new THREE.BoxGeometry(w, h, d), mat, x, 0.78 + h / 2 + (i === 1 ? 0.06 : 0), z);
     });
   } else if (b.kind === 'fit') {
@@ -226,8 +233,7 @@ function buildItem(b: LayoutBox, photo: string | undefined, color: string, mats:
     add(new THREE.BoxGeometry(b.w + 0.04, 0.04, b.h + 0.04), mats.wood, 0, 0.94, 0);
     add(new THREE.BoxGeometry(0.3, 0.12, 0.24), mats.black, b.w / 2 - 0.3, 1.02, 0);
   } else if (b.kind === 'photo') {
-    const tex = photo ? photoTexture(photo) : null;
-    add(new THREE.BoxGeometry(L, 2.2, 0.06), tex ? new THREE.MeshStandardMaterial({ map: tex, roughness: 0.6 }) : new THREE.MeshStandardMaterial({ color: '#e7ddd0', roughness: 0.9 }), 0, 1.1, 0);
+    add(new THREE.BoxGeometry(L, 2.2, 0.06), photoMat(photo, color === '#f4f4f5' ? '#e7ddd0' : color, 0.7), 0, 1.1, 0);
     // 링 조명
     const ring = add(new THREE.TorusGeometry(0.22, 0.02, 10, 40), new THREE.MeshStandardMaterial({ color: '#fff', emissive: '#fff8ea', emissiveIntensity: 1.2 }), 0, 1.5, 1.1);
     ring.castShadow = false;
@@ -261,7 +267,8 @@ function buildPlant(x: number, z: number, mats: Record<string, THREE.Material>) 
 export default function Room3DGL(props: Room3DProps) {
   const host = useRef<HTMLDivElement>(null);
   const labelsHost = useRef<HTMLDivElement>(null);
-  const api = useRef<{ rebuild: (p: Room3DProps) => void; setMode: (m: ViewMode) => void; dispose: () => void; walk: (dir: number) => void } | null>(null);
+  const api = useRef<{ rebuild: (p: Room3DProps) => void; setMode: (m: ViewMode) => void; dispose: () => void; walk: (dir: number) => void; gyro: (on: boolean) => void } | null>(null);
+  const [gyroOn, setGyroOn] = useState(false);
   const propsRef = useRef(props);
   propsRef.current = props;
 
@@ -380,7 +387,7 @@ export default function Room3DGL(props: Room3DProps) {
         const frame = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.0, 0.04), mats.black);
         frame.position.set(W * 0.42, 1.75, 0.03);
         room.add(frame);
-        const pic = new THREE.Mesh(new THREE.PlaneGeometry(1.42, 0.92), new THREE.MeshStandardMaterial({ map: photoTexture(p.wallPhoto), roughness: 0.4 }));
+        const pic = new THREE.Mesh(new THREE.PlaneGeometry(1.42, 0.92), photoMat(p.wallPhoto, '#d9d2c7', 0.4));
         pic.position.set(W * 0.42, 1.75, 0.052);
         room.add(pic);
       }
@@ -638,6 +645,15 @@ export default function Room3DGL(props: Room3DProps) {
     // 그리기
     const v = new THREE.Vector3();
     const camDir = new THREE.Vector3();
+    // 휴대폰을 돌리면 고개를 돌린 것처럼 (세로 화면 기준)
+    const gyro: { on: boolean; alpha0: number | null; yaw0: number; yaw: number | null; pitch: number } = { on: false, alpha0: null, yaw0: 0, yaw: null, pitch: 0 };
+    const onOrient = (e: DeviceOrientationEvent) => {
+      if (e.alpha == null || e.beta == null) return;
+      if (gyro.alpha0 === null) { gyro.alpha0 = e.alpha; gyro.yaw0 = yaw; }
+      gyro.yaw = gyro.yaw0 + THREE.MathUtils.degToRad(e.alpha - gyro.alpha0);
+      gyro.pitch = Math.max(-0.8, Math.min(0.7, THREE.MathUtils.degToRad(e.beta - 90)));
+      invalidate();
+    };
     let raf = 0;
     let last = performance.now();
     let frames = 5;
@@ -650,7 +666,7 @@ export default function Room3DGL(props: Room3DProps) {
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
       // 움직임이 없으면 그리지 않는다 (휴대폰 배터리·발열)
-      const moving = mode === 'orbit' ? controls.update() : !!moveDir || !!walkTarget;
+      const moving = mode === 'orbit' ? controls.update() : !!moveDir || !!walkTarget || gyro.on;
       if (!moving && frames <= 0) return;
       frames -= 1;
       if (mode === 'orbit') {
@@ -681,6 +697,9 @@ export default function Room3DGL(props: Room3DProps) {
         if (blocked) { walkPos.copy(prevPos); walkTarget = null; }
         prevPos.copy(walkPos);
         camera.position.copy(walkPos);
+        // 걸을 때 살짝 위아래로 흔들린다
+        if (moveDir || walkTarget) camera.position.y += Math.sin(now / 110) * 0.012;
+        if (gyro.on && gyro.yaw !== null) { yaw = gyro.yaw; pitch = gyro.pitch; }
         camera.rotation.set(pitch, yaw, 0, 'YXZ');
       }
       // 조감도에서는 카메라 쪽 벽과 천장을 숨겨 안이 보이게 한다
@@ -706,8 +725,15 @@ export default function Room3DGL(props: Room3DProps) {
       rebuild,
       setMode,
       walk: (dir) => { moveDir = dir; invalidate(); },
+      gyro: (on) => {
+        gyro.on = on;
+        gyro.alpha0 = null;
+        if (on) window.addEventListener('deviceorientation', onOrient);
+        else window.removeEventListener('deviceorientation', onOrient);
+      },
       dispose: () => {
         cancelAnimationFrame(raf);
+        window.removeEventListener('deviceorientation', onOrient);
         ro.disconnect();
         renderer.domElement.removeEventListener('pointerdown', onDown);
         window.removeEventListener('pointermove', onMove);
@@ -729,7 +755,10 @@ export default function Room3DGL(props: Room3DProps) {
 
   // 배치가 바뀌면 물건만 다시 만든다
   useEffect(() => { api.current?.rebuild(props); }, [props.W, props.H, props.boxes, props.path, props.selected, props.wallPhoto]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { api.current?.setMode(props.mode); }, [props.mode]);
+  useEffect(() => {
+    api.current?.setMode(props.mode);
+    if (props.mode !== 'walk') { api.current?.gyro(false); setGyroOn(false); }
+  }, [props.mode]);
 
   const hold = (dir: number) => ({
     onPointerDown: (e: React.PointerEvent) => { e.stopPropagation(); api.current?.walk(dir); },
@@ -741,6 +770,22 @@ export default function Room3DGL(props: Room3DProps) {
     <div className="relative w-full h-full">
       <div ref={host} className="absolute inset-0" />
       <div ref={labelsHost} className="absolute inset-0 overflow-hidden pointer-events-none" />
+      {props.mode === 'walk' && typeof DeviceOrientationEvent !== 'undefined' && 'ontouchstart' in window && (
+        <button
+          onClick={async () => {
+            const next = !gyroOn;
+            // 아이폰은 기울기 센서를 쓰려면 먼저 허락을 받아야 한다
+            const req = (DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> }).requestPermission;
+            const ios = /iPhone|iPad|iPod/.test(navigator.userAgent);
+            if (next && ios && req && (await req().catch(() => 'denied')) !== 'granted') return;
+            setGyroOn(next);
+            api.current?.gyro(next);
+          }}
+          className={`absolute left-3 top-3 h-9 px-3 border text-[12px] font-bold ${gyroOn ? 'bg-ink-900 text-white border-ink-900' : 'bg-white/90 border-ink-900'}`}
+        >
+          {gyroOn ? '휴대폰으로 둘러보는 중' : '휴대폰 돌려서 보기'}
+        </button>
+      )}
       {props.mode === 'walk' && (
         <div className="absolute right-3 bottom-3 flex flex-col gap-1.5">
           <button {...hold(1)} aria-label="앞으로" className="w-11 h-11 bg-white/90 border border-ink-900 text-[18px] font-bold select-none">↑</button>
