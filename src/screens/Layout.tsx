@@ -136,7 +136,7 @@ const METAL: CSSProperties = { background: '#2b2b2f' };
 const WOOD: CSSProperties = { background: 'linear-gradient(90deg, #c9a77f, #b8936a 40%, #c7a37a 70%, #b48c62)' };
 const WHITE: CSSProperties = { background: '#f7f6f3', border: '1px solid rgba(0,0,0,.12)' };
 // 옷걸이에 걸린 옷 모양(어깨선)
-const SHIRT = 'polygon(40% 0, 60% 0, 100% 14%, 100% 100%, 0 100%, 0 14%)';
+const SHIRT = 'polygon(43% 0, 57% 0, 100% 11%, 97% 100%, 3% 100%, 0 11%)';
 
 /** 사진 한 장을 여러 벌로 나눠 보이게: 옷마다 사진의 다른 부분을 쓴다 */
 function cloth(photo: string | undefined, color: string, i: number): CSSProperties {
@@ -164,6 +164,8 @@ function partsOf(b: LayoutBox, photo: string | undefined, color: string): Part[]
       const len = [0.85, 0.7, 1.0, 0.75, 0.9][i % 5];
       const t = 0.12 + (i * (L - 0.24)) / Math.max(1, n - 1) - 0.035;
       out.push({ ...at(t, 0.04, 0.07, D - 0.08), z: 1.47 - len, h: len, side: cloth(photo, color, i), top: { background: 'transparent' } });
+      // 옷걸이 어깨선
+      out.push({ ...at(t + 0.025, 0.08, 0.015, D - 0.16), z: 1.46, h: 0.015, side: { background: '#8a6d4f' } });
     }
   } else if (b.kind === 'table') {
     const leg = 0.05;
@@ -188,13 +190,21 @@ function partsOf(b: LayoutBox, photo: string | undefined, color: string): Part[]
   return out;
 }
 
-function Room3D({ W, H, boxes, angle, wallPhoto, colorOf, photoOf, selected, onPick }: {
+function Room3D({ W, H, boxes, angle, wallPhoto, colorOf, photoOf, nameOf, selected, onPick }: {
   W: number; H: number; boxes: LayoutBox[]; angle: number; wallPhoto: string;
-  colorOf: (id?: string) => string; photoOf: (b: LayoutBox) => string | undefined;
+  colorOf: (id?: string) => string; photoOf: (b: LayoutBox) => string | undefined; nameOf: (id?: string) => string;
   selected: string | null; onPick: (id: string) => void;
 }) {
-  const s = Math.min(300 / W, 230 / H);
-  const line = '1px solid rgba(17,17,17,.25)';
+  const s = Math.min(305 / W, 235 / H);
+  const line = '1px solid rgba(17,17,17,.18)';
+  // 카메라를 향하는 이름표 (방을 돌려도 똑바로 보이게 되돌려 세운다)
+  const labels = new Map<string, { x: number; y: number; n: number; z: number }>();
+  boxes.forEach((b) => {
+    if (!b.brandId || (b.kind !== 'hanger' && b.kind !== 'table')) return;
+    const l = labels.get(b.brandId) ?? { x: 0, y: 0, n: 0, z: 0 };
+    l.x += b.x + b.w / 2; l.y += b.y + b.h / 2; l.n += 1; l.z = Math.max(l.z, b.kind === 'hanger' ? 1.9 : 1.15);
+    labels.set(b.brandId, l);
+  });
   // 안쪽을 향한 벽. 바깥에서 보이는 벽은 그리지 않아 방 안이 들여다보인다
   const walls = [
     { k: 0, L: W, half: H / 2, photo: true },
@@ -204,15 +214,32 @@ function Room3D({ W, H, boxes, angle, wallPhoto, colorOf, photoOf, selected, onP
     <div key={w.k} style={{ position: 'absolute', left: '50%', top: '50%', transformStyle: 'preserve-3d', transform: `rotateZ(${w.k}deg) translateY(${-w.half * s}px)` }}>
       <div style={{
         position: 'absolute', left: (-w.L * s) / 2, top: -WALL * s, width: w.L * s, height: WALL * s, transformOrigin: 'bottom', transform: 'rotateX(-90deg)', backfaceVisibility: 'hidden',
-        background: `linear-gradient(to top, #e6e2db 0 5px, transparent 5px), ${w.photo && wallPhoto ? `linear-gradient(rgba(250,249,246,.6), rgba(250,249,246,.6)), url(${wallPhoto}) center/cover` : '#f4f2ee'}`,
+        background: `linear-gradient(to top, #d9d3c9 0 6px, transparent 6px), radial-gradient(ellipse at 50% 0%, rgba(255,244,226,.85), transparent 60%), ${w.photo && wallPhoto ? `linear-gradient(rgba(250,249,246,.55), rgba(250,249,246,.55)), url(${wallPhoto}) center/cover` : 'linear-gradient(#f7f5f1, #ece8e1)'}`,
         borderTop: line, borderLeft: line, borderRight: line,
       }} />
     </div>
   ));
   return (
-    <div style={{ position: 'absolute', left: '50%', top: '56%', width: W * s, height: H * s, transformStyle: 'preserve-3d', transform: `translate(-50%, -50%) rotateX(58deg) rotateZ(${angle}deg)` }}>
-      {/* 나무 바닥 */}
-      <div style={{ position: 'absolute', inset: 0, background: 'repeating-linear-gradient(90deg, #dcc8ad 0 22px, #d3bd9f 22px 23px, #e0cdb3 23px 45px, #d3bd9f 45px 46px)', border: '2px solid #4a4038' }} />
+    <div style={{ position: 'absolute', left: '50%', top: '61%', width: W * s, height: H * s, transformStyle: 'preserve-3d', transform: `translate(-50%, -50%) rotateX(55deg) rotateZ(${angle}deg)` }}>
+      {/* 나무 바닥 + 가운데가 밝은 조명 */}
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 45%, rgba(255,250,240,.55), rgba(120,90,60,.12) 75%), repeating-linear-gradient(90deg, #dcc8ad 0 22px, #cfb898 22px 23px, #e3d1b8 23px 45px, #cfb898 45px 46px)', border: '2px solid #4a4038' }} />
+      {/* 입구 매트 */}
+      <div style={{ position: 'absolute', left: (W / 2 - 0.6) * s, top: (H - 0.7) * s, width: 1.2 * s, height: 0.55 * s, background: '#5b5550', opacity: 0.85 }} />
+      {/* 물건 그림자 */}
+      {boxes.filter((b) => b.kind !== 'mirror').map((b) => (
+        <div key={'sh' + b.id} style={{ position: 'absolute', left: (b.x + 0.06) * s, top: (b.y + 0.08) * s, width: b.w * s, height: b.h * s, background: 'rgba(60,40,20,.28)', filter: 'blur(5px)' }} />
+      ))}
+      {/* 입구 옆 화분 */}
+      {[{ x: 0.35, y: H - 0.75 }].map((pl, i) => (
+        <div key={'pl' + i} style={{ position: 'absolute', inset: 0, transformStyle: 'preserve-3d', pointerEvents: 'none' }}>
+          <Cuboid p={{ x: pl.x, y: pl.y, z: 0, w: 0.35, d: 0.35, h: 0.4, side: { background: '#e9e4dc', border: '1px solid rgba(0,0,0,.1)' }, top: { background: '#6b5a48' } }} s={s} />
+          {[0, 90].map((r) => (
+            <div key={r} style={{ position: 'absolute', left: (pl.x + 0.175) * s, top: (pl.y + 0.175) * s, transformStyle: 'preserve-3d', transform: `translateZ(${0.4 * s}px) rotateZ(${r}deg)` }}>
+              <div style={{ position: 'absolute', left: -0.4 * s, top: -0.9 * s, width: 0.8 * s, height: 0.9 * s, transformOrigin: 'bottom', transform: 'rotateX(-90deg)', background: 'radial-gradient(ellipse at 50% 55%, #5f7d55 0 38%, #4d6a45 39% 48%, transparent 50%)' }} />
+            </div>
+          ))}
+        </div>
+      ))}
       {/* 입구 */}
       <div style={{ position: 'absolute', left: (W / 2 - DOOR / 2) * s, top: H * s - 3, width: DOOR * s, height: 6, background: '#f6f5f3' }} />
       <div style={{ position: 'absolute', left: (W / 2 - 1) * s, top: H * s + 6, width: 2 * s, textAlign: 'center', fontSize: 11, color: '#4a4a52' }}>입구</div>
@@ -229,6 +256,13 @@ function Room3D({ W, H, boxes, angle, wallPhoto, colorOf, photoOf, selected, onP
           </div>
         );
       })}
+      {[...labels.entries()].map(([id, l]) => (
+        <div key={'lb' + id} style={{ position: 'absolute', left: Math.min(W - 0.8, Math.max(0.8, l.x / l.n)) * s, top: Math.max(0.9, l.y / l.n) * s, transformStyle: 'preserve-3d', transform: `translateZ(${l.z * s}px) rotateZ(${-angle}deg) rotateX(-55deg)`, pointerEvents: 'none' }}>
+          <div style={{ position: 'absolute', transform: 'translate(-50%, -100%)', whiteSpace: 'nowrap', background: '#fff', border: '1px solid #111', padding: '2px 6px', fontSize: 10, fontWeight: 800, color: '#111', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{ width: 7, height: 7, background: colorOf(id), border: '1px solid rgba(0,0,0,.3)' }} />{nameOf(id)}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -383,8 +417,8 @@ export function TeamLayoutTab({ team }: { team: Team }) {
       <div className="mt-3 -mx-4 bg-[#f6f5f3] border-y border-ink-100">
         {view === '3d' ? (
           <div
-            className="relative h-[340px] overflow-hidden touch-none select-none"
-            style={{ perspective: 1100 }}
+            className="relative h-[380px] overflow-hidden touch-none select-none"
+            style={{ perspective: 1100, background: 'linear-gradient(#f7f6f4, #ebe9e5)' }}
             onPointerDown={(e) => { rot.current = { x: e.clientX, a: angle, moved: false }; }}
             onPointerMove={(e) => {
               const r = rot.current;
@@ -396,7 +430,7 @@ export function TeamLayoutTab({ team }: { team: Team }) {
             onPointerUp={() => { rot.current = null; }}
             onClickCapture={(e) => { if (rot.current?.moved) e.stopPropagation(); }}
           >
-            <Room3D W={W} H={H} boxes={boxes} angle={angle} wallPhoto={wallPhoto} colorOf={color} photoOf={photoOf} selected={sel} onPick={(id) => setSel(sel === id ? null : id)} />
+            <Room3D W={W} H={H} boxes={boxes} angle={angle} wallPhoto={wallPhoto} colorOf={color} photoOf={photoOf} nameOf={nameOf} selected={sel} onPick={(id) => setSel(sel === id ? null : id)} />
             <div className="absolute left-3 bottom-2 text-[11px] text-ink-500 pointer-events-none">옆으로 밀어 돌려 보기 · 행거를 눌러 바꾸기</div>
           </div>
         ) : (
