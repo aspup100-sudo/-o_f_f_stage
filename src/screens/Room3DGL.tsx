@@ -14,6 +14,7 @@ type Pt = { x: number; y: number };
 export interface Room3DProps {
   W: number; H: number; boxes: LayoutBox[]; path?: Pt[]; wallPhoto: string; mode: ViewMode;
   colorOf: (id?: string) => string; photoOf: (b: LayoutBox) => string | undefined; nameOf: (id?: string) => string;
+  catOf?: (id?: string) => string | undefined; // 브랜드 대표 카테고리: 진열대 상품 모양을 정한다
   selected: string | null; onPick: (id: string) => void;
   onMove?: (id: string, x: number, y: number) => void; // 3D에서 고른 물건을 끌어 옮겼을 때
 }
@@ -143,7 +144,7 @@ function shade(color: string, k: number) {
   return new THREE.Color(color).multiplyScalar(k);
 }
 
-function buildItem(b: LayoutBox, photo: string | undefined, color: string, mats: Record<string, THREE.Material>) {
+function buildItem(b: LayoutBox, photo: string | undefined, color: string, mats: Record<string, THREE.Material>, cat?: string) {
   const g = new THREE.Group();
   const along = b.w >= b.h;
   const L = along ? b.w : b.h;
@@ -197,12 +198,56 @@ function buildItem(b: LayoutBox, photo: string | undefined, color: string, mats:
     top.receiveShadow = true;
     const leg = new THREE.CylinderGeometry(0.022, 0.018, 0.74, 10);
     [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sz]) => add(leg, mats.woodDark, sx * (L / 2 - 0.06), 0.37, sz * (D / 2 - 0.06)));
-    // 위에 놓인 상품: 개어 놓은 옷 더미와 작은 상자
-    const items: [number, number, number, number, number][] = [[-L / 2 + 0.22, -D / 2 + 0.22, 0.3, 0.06, 0.25], [-L / 2 + 0.22, -D / 2 + 0.22, 0.28, 0.06, 0.23], [0.05, 0.1, 0.22, 0.12, 0.16], [L / 2 - 0.25, D / 2 - 0.25, 0.26, 0.08, 0.2]];
-    items.forEach(([x, z, w, h, d], i) => {
-      const mat = photoMat(photo, shade(color, 0.8 + i * 0.06), 0.85);
-      add(new THREE.BoxGeometry(w, h, d), mat, x, 0.78 + h / 2 + (i === 1 ? 0.06 : 0), z);
-    });
+    // 위에 놓인 상품: 카테고리에 따라 모양을 달리한다
+    const y0 = 0.78;
+    if (cat === '주얼리' || cat === '기타 액세서리') {
+      // 벨벳 트레이 위 반지·목걸이
+      const velvet = new THREE.MeshStandardMaterial({ color: '#2f2b2a', roughness: 1 });
+      const gold = new THREE.MeshStandardMaterial({ color: '#d9b26a', metalness: 1, roughness: 0.25 });
+      const silver = new THREE.MeshStandardMaterial({ color: '#d6d8db', metalness: 1, roughness: 0.2 });
+      [[-L / 4, 0], [L / 4, 0]].forEach(([tx, tz], k) => {
+        add(new THREE.BoxGeometry(L / 2 - 0.12, 0.03, D - 0.25), velvet, tx, y0 + 0.015, tz);
+        for (let i = 0; i < 6; i++) {
+          const ring = add(new THREE.TorusGeometry(0.018, 0.004, 8, 20), (i + k) % 2 ? gold : silver, tx - 0.15 + (i % 3) * 0.15, y0 + 0.04, tz - 0.08 + Math.floor(i / 3) * 0.16);
+          ring.rotation.x = Math.PI / 2.4;
+        }
+      });
+      // 목걸이 스탠드
+      add(new THREE.CylinderGeometry(0.008, 0.008, 0.3, 8), mats.black, 0, y0 + 0.15, -D / 2 + 0.1);
+      add(new THREE.BoxGeometry(0.16, 0.012, 0.012), mats.black, 0, y0 + 0.3, -D / 2 + 0.1);
+    } else if (cat === '가방') {
+      // 손잡이 달린 가방 세 개
+      [-L / 3, 0, L / 3].forEach((x, i) => {
+        const bagMat = photoMat(photo, shade(color, 0.7 + i * 0.1), 0.7);
+        add(new THREE.BoxGeometry(0.28, 0.22, 0.1), bagMat, x, y0 + 0.11, (i - 1) * 0.08);
+        const handle = add(new THREE.TorusGeometry(0.07, 0.008, 8, 24, Math.PI), new THREE.MeshStandardMaterial({ color: shade(color, 0.5), roughness: 0.6 }), x, y0 + 0.22, (i - 1) * 0.08);
+        handle.castShadow = true;
+      });
+    } else if (cat === '모자') {
+      [-L / 3, 0, L / 3].forEach((x, i) => {
+        const capMat = photoMat(photo, shade(color, 0.7 + i * 0.1), 0.85);
+        const crown = add(new THREE.SphereGeometry(0.1, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2), capMat, x, y0, 0);
+        crown.scale.set(1, 0.9, 1);
+        add(new THREE.CylinderGeometry(0.15, 0.15, 0.01, 24), capMat, x, y0 + 0.005, 0);
+      });
+    } else if (cat === '신발') {
+      [-L / 3, 0, L / 3].forEach((x, i) => {
+        const shoe = photoMat(photo, shade(color, 0.75 + i * 0.08), 0.6);
+        [-0.06, 0.06].forEach((dz) => {
+          add(new THREE.BoxGeometry(0.1, 0.07, 0.26), shoe, x + dz, y0 + 0.035, 0);
+          add(new THREE.BoxGeometry(0.1, 0.02, 0.27), mats.white, x + dz, y0 + 0.01, 0);
+        });
+      });
+    } else {
+      // 개어 놓은 옷 더미 두세 개
+      [[-L / 3, -0.05, 4], [0, 0.08, 3], [L / 3, -0.02, 5]].forEach(([x, z, n], k) => {
+        for (let i = 0; i < n; i++) {
+          const fold = photoMat(photo, shade(color, 0.72 + ((i + k) % 4) * 0.08), 0.95, (t) => { t.repeat.set(0.3, 0.3); t.offset.set(((i + k) * 0.21) % 0.7, ((i * 0.13) % 0.6)); });
+          const m = add(new THREE.BoxGeometry(0.3, 0.035, 0.24), fold, x + Math.sin(i * 3.1) * 0.01, y0 + 0.018 + i * 0.037, z + Math.cos(i * 2.3) * 0.01);
+          m.rotation.y = Math.sin(i * 5.7) * 0.05;
+        }
+      });
+    }
   } else if (b.kind === 'fit') {
     // 커튼 두 면과 위 봉
     const curtainGeo = (len: number) => {
@@ -433,7 +478,7 @@ export default function Room3DGL(props: Room3DProps) {
 
     const buildItems = (p: Room3DProps) => {
       clear(items);
-      p.boxes.forEach((b) => items.add(buildItem(b, p.photoOf(b), p.colorOf(b.brandId), mats)));
+      p.boxes.forEach((b) => items.add(buildItem(b, p.photoOf(b), p.colorOf(b.brandId), mats, p.catOf?.(b.brandId))));
       // 행거·진열대마다 천장 레일에서 비추는 핀 조명 (최대 8개)
       pins.forEach((o) => scene.remove(o));
       pins.length = 0;
@@ -517,6 +562,7 @@ export default function Room3DGL(props: Room3DProps) {
     let pitch = -0.2;
     const walkPos = new THREE.Vector3();
     const prevPos = new THREE.Vector3();
+    let entering = false;
     let walkTarget: THREE.Vector3 | null = null;
     let moveDir = 0;
     const setMode = (m: ViewMode) => {
@@ -524,9 +570,11 @@ export default function Room3DGL(props: Room3DProps) {
       mode = m;
       controls.enabled = m === 'orbit';
       if (m === 'walk') {
-        walkPos.set(W / 2, EYE, H - 0.5);
+        // 문밖에서 걸어 들어오는 것으로 시작
+        walkPos.set(W / 2, EYE, H + 1.2);
         prevPos.copy(walkPos);
-        yaw = 0; pitch = -0.2; walkTarget = null;
+        entering = true;
+        yaw = 0; pitch = -0.2; walkTarget = new THREE.Vector3(W / 2, EYE, H - 0.6);
       } else {
         camera.position.set(W / 2 + W * 0.2, Math.max(W, H) * 0.85, H + Math.max(W, H) * 0.8);
         controls.target.set(W / 2, 0.6, H / 2);
@@ -690,8 +738,9 @@ export default function Room3DGL(props: Room3DProps) {
             yaw += diff * Math.min(1, dt * 3);
           }
         }
+        if (entering && walkPos.z < H - 0.35) entering = false;
         walkPos.x = Math.max(0.3, Math.min(W - 0.3, walkPos.x));
-        walkPos.z = Math.max(0.3, Math.min(H - 0.3, walkPos.z));
+        if (!entering) walkPos.z = Math.max(0.3, Math.min(H - 0.3, walkPos.z));
         // 물건에 부딪히면 그 자리에서 멈춘다
         const blocked = propsRef.current.boxes.some((b) => b.kind !== 'fit' && walkPos.x > b.x - 0.25 && walkPos.x < b.x + b.w + 0.25 && walkPos.z > b.y - 0.25 && walkPos.z < b.y + b.h + 0.25);
         if (blocked) { walkPos.copy(prevPos); walkTarget = null; }
