@@ -4,7 +4,7 @@ import { useMe } from '@/store/hooks';
 import { shareLink } from '@/store/share';
 import { navigate } from '@/store/store';
 import { checkIn, claimStampReward, followAll, STAMP_GOAL, toggleWaitlist, writeComboReview, writeVisitorReview } from '@/store/actions';
-import { avg, brandById, dday, md, displayName, openNow, period, popupById, spaceById, spaceLatLng, teamById, waitCount } from '@/store/logic';
+import { avg, brandById, dday, md, displayName, openNow, period, periodLong, popupById, spaceById, spaceLatLng, teamById, waitCount } from '@/store/logic';
 import { KakaoMap, kakaoMapEnabled, type MapPin } from '@/components/KakaoMap';
 import { BrandLogo, PopupBannerCard, ScreenTitle, ThemeTagList } from '@/components/common';
 import { SortSelect, Button, Card, Chip, cx, Demo, Empty, inputCls, Segmented, Sheet, Stars, SubHeader, Swatch, Tabs, textareaCls, Ic, Icon } from '@/components/ui';
@@ -88,7 +88,7 @@ export function PopupDetail({ id }: { id: string }) {
         <h1 className="text-xl font-extrabold">{p.title}</h1>
         <div className="text-[13px] text-ink-500">팀 <button className="underline underline-offset-2" onClick={() => navigate({ name: 'team', id: team.id })}>{team.name}</button> · 방문 인증 {visitorsCount}명</div>
         <div className="mt-4 rounded border border-ink-100 divide-y divide-ink-100 text-sm">
-          <div className="flex px-3.5 py-2.5"><span className="w-20 text-ink-500">일정</span><span className="font-semibold">{p.period.start} ~ {p.period.end}</span></div>
+          <div className="flex px-3.5 py-2.5"><span className="w-20 text-ink-500">일정</span><span className="font-semibold">{periodLong(p.period)}</span></div>
           <div className="flex px-3.5 py-2.5"><span className="w-20 text-ink-500">운영 시간</span><span className="font-semibold">{p.hours}</span>{p.status === '진행 중' && (() => { const o = openNow(p.hours); return o ? <span className={cx('ml-auto text-[12px] font-bold', o.open ? 'text-emerald-700' : 'text-ink-500')}>{o.open && '● '}{o.text}</span> : null; })()}</div>
           <button className="flex px-3.5 py-2.5 w-full text-left" onClick={() => navigate({ name: 'space', id: sp.id })}><span className="w-20 text-ink-500 shrink-0">위치</span><span className="font-semibold">{sp.name} <span className="font-normal text-ink-500">· {sp.address}</span> ›</span></button>
         </div>

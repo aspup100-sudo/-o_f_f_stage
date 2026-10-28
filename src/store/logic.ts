@@ -15,6 +15,12 @@ export const md = (d: string) => {
   return `${Number(m)}/${Number(day)}`;
 };
 export const period = (p: { start: string; end: string }) => (p.start === p.end ? md(p.start) : `${md(p.start)}~${md(p.end)}`);
+// 상세 화면용: 10/22(목) ~ 10/28(수) · 7일
+export const periodLong = (p: { start: string; end: string }) => {
+  const wd = (d: string) => '일월화수목금토'[new Date(d + 'T00:00:00').getDay()];
+  const days = Math.round((Date.parse(p.end) - Date.parse(p.start)) / 86400000) + 1;
+  return p.start === p.end ? `${md(p.start)}(${wd(p.start)})` : `${md(p.start)}(${wd(p.start)}) ~ ${md(p.end)}(${wd(p.end)}) · ${days}일`;
+};
 export const avg = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
 export const reviewAvg = (r: Pick<Review, 'scores'>) => avg(Object.values(r.scores));
 

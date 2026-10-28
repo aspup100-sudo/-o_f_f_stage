@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { navigate, replace } from '@/store/store';
 import { createShowcase, toggleShowcaseHelpful } from '@/store/actions';
-import { brandById, displayName, period, spaceById, teamById, teamsOfBrand } from '@/store/logic';
+import { brandById, displayName, period, periodLong, spaceById, teamById, teamsOfBrand } from '@/store/logic';
 import { BrandLogo } from '@/components/common';
 import { Button, Card, cx, Demo, Empty, Field, Icon, inputCls, SubHeader, Swatch, Tag, textareaCls, Ic } from '@/components/ui';
 import { ComboReviewList } from './Popup';
@@ -65,7 +65,7 @@ export function ShowcaseDetail({ id }: { id: string }) {
         <div className="text-[13px] text-ink-500 mt-1">{displayName(db, s.authorId)} · {s.createdAt}</div>
         <div className="mt-4 rounded border border-ink-100 divide-y divide-ink-100 text-sm">
           <div className="flex px-3.5 py-2.5"><span className="w-20 text-ink-500">팀</span><span className="font-semibold">{team?.name}</span></div>
-          <div className="flex px-3.5 py-2.5"><span className="w-20 text-ink-500">기간</span><span className="font-semibold">{s.period.start} ~ {s.period.end}</span></div>
+          <div className="flex px-3.5 py-2.5"><span className="w-20 text-ink-500">기간</span><span className="font-semibold">{periodLong(s.period)}</span></div>
           {sp && <button className="flex px-3.5 py-2.5 w-full text-left" onClick={() => navigate({ name: 'space', id: sp.id })}><span className="w-20 text-ink-500">사용 공간</span><span className="font-semibold">{sp.name} ›</span></button>}
         </div>
         <h3 className="band text-[20px] font-extrabold tracking-tight mt-8 mb-3">참여 브랜드</h3>

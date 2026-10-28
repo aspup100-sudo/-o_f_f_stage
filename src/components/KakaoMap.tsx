@@ -116,7 +116,7 @@ export function KakaoMap({ pins, onSelect, className, fallback }: { pins: MapPin
     }
   }, [state, pins, onSelect]);
 
-  if (state === 'failed') return <>{fallback}{KEY && why && <p className="text-[12px] text-red-600 mt-1 text-center">지도 오류: {why} · 접속 주소 {location.origin}</p>}</>;
+  if (state === 'failed') return <>{fallback}{KEY && why && (/[?&]debug/.test(location.search) ? <p className="text-[12px] text-red-600 mt-1 text-center">지도 오류: {why} · 접속 주소 {location.origin}</p> : <p className="text-[12px] text-ink-400 mt-1 text-center">지도를 불러오지 못해 간략 지도로 보여드려요</p>)}</>;
   return (
     <div className={className} style={{ position: 'relative' }}>
       <div ref={box} className="absolute inset-0" />
