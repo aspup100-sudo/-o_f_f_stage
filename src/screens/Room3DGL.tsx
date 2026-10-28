@@ -121,6 +121,63 @@ function photoMat(src: string | undefined, fallback: THREE.ColorRepresentation, 
   else loadPhoto(src).then((t) => { put(t); onTextureLoad(); }).catch(() => {});
   return mat;
 }
+// 옷감: 회색 결 무늬(색은 재질 색으로 입힌다). UV가 미터 단위라 반복해서 쓴다
+let weaveTex: THREE.Texture | null = null;
+function weaveTexture() {
+  if (weaveTex) return weaveTex;
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const g = c.getContext('2d')!;
+  g.fillStyle = '#e9e9e9';
+  g.fillRect(0, 0, 128, 128);
+  for (let y = 0; y < 128; y += 2) { g.fillStyle = `rgba(0,0,0,${0.03 + Math.random() * 0.03})`; g.fillRect(0, y, 128, 1); }
+  for (let x = 0; x < 128; x += 2) { g.fillStyle = `rgba(255,255,255,${0.04 + Math.random() * 0.04})`; g.fillRect(x, 0, 1, 128); }
+  // 세로로 늘어진 주름
+  for (let i = 0; i < 6; i++) {
+    const x = Math.random() * 128;
+    const grd = g.createLinearGradient(x - 8, 0, x + 8, 0);
+    grd.addColorStop(0, 'rgba(0,0,0,0)'); grd.addColorStop(0.5, 'rgba(0,0,0,0.12)'); grd.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = grd; g.fillRect(x - 8, 0, 16, 128);
+  }
+  weaveTex = new THREE.CanvasTexture(c);
+  weaveTex.wrapS = weaveTex.wrapT = THREE.RepeatWrapping;
+  weaveTex.repeat.set(3, 3);
+  weaveTex.colorSpace = THREE.SRGBColorSpace;
+  return weaveTex;
+}
+
+// 브랜드 사진에서 대표 색 몇 개를 뽑는다(옷 색으로 씀)
+const paletteCache = new Map<string, Promise<THREE.Color[]>>();
+function photoPalette(src: string) {
+  let pr = paletteCache.get(src);
+  if (!pr) {
+    pr = loadPhoto(src).then((t) => {
+      const c = document.createElement('canvas');
+      c.width = c.height = 10;
+      const g = c.getContext('2d')!;
+      g.drawImage(t.image as CanvasImageSource, 0, 0, 10, 10);
+      const d = g.getImageData(0, 0, 10, 10).data;
+      const px: [number, number, number][] = [];
+      for (let i = 0; i < d.length; i += 4) px.push([d[i], d[i + 1], d[i + 2]]);
+      // 채도 높은 색부터 보고, 서로 비슷한 색은 하나만
+      const sat = (p: number[]) => Math.max(...p) - Math.min(...p);
+      px.sort((a, b) => sat(b) - sat(a));
+      const out: [number, number, number][] = [];
+      px.forEach((p) => { if (out.length < 6 && out.every((q) => Math.abs(p[0] - q[0]) + Math.abs(p[1] - q[1]) + Math.abs(p[2] - q[2]) > 70)) out.push(p); });
+      return out.map(([r, g2, b]) => new THREE.Color(`rgb(${r},${g2},${b})`));
+    });
+    pr.catch(() => paletteCache.delete(src));
+    paletteCache.set(src, pr);
+  }
+  return pr;
+}
+/** 옷 재질: 결 무늬 + 브랜드 사진에서 뽑은 색(사진을 못 받으면 브랜드 색) */
+function clothMat(src: string | undefined, fallback: THREE.Color, i: number, roughness: number) {
+  const mat = new THREE.MeshStandardMaterial({ color: fallback, map: weaveTexture(), roughness });
+  if (src) photoPalette(src).then((pal) => { if (pal.length) { mat.color.copy(pal[i % pal.length]).multiplyScalar(0.92 + ((i * 7) % 3) * 0.05); onTextureLoad(); } }).catch(() => {});
+  return mat;
+}
+
 function remapUV(geo: THREE.BufferGeometry, rx: number, ry: number, ox: number, oy: number) {
   const uv = geo.getAttribute('uv') as THREE.BufferAttribute;
   for (let i = 0; i < uv.count; i++) uv.setXY(i, Math.min(1, Math.max(0, uv.getX(i) * rx + ox)), Math.min(1, Math.max(0, uv.getY(i) * ry + oy)));
@@ -261,11 +318,7 @@ function buildItem(b: LayoutBox, photo: string | undefined, color: string, mats:
       const len = c.len * (1 + Math.sin(i * 9.1) * 0.03);
       const th = c.thick ?? 0.035;
       const geo = new THREE.ExtrudeGeometry(garmentShape(Math.min(D - 0.02, 0.6) * (c.wide ?? 1), len, c.sleeve, c.flare ?? 0), { depth: th, bevelEnabled: true, bevelSize: 0.008, bevelThickness: th > 0.04 ? 0.02 : 0.008, bevelSegments: 2 });
-      // ExtrudeGeometry UV는 미터 좌표(x: -D/2~D/2, y: -len~0)라 사진의 한 조각에 맞춘다
-      const ox = (i * 0.37) % 0.7;
-      const oy = 0.1 + ((i * 0.23) % 0.3);
-      const mat = photoMat(photo, shade(color, 0.75 + ((i * 7) % 5) * 0.07), th > 0.04 ? 0.7 : 0.9);
-      remapUV(geo, 0.22 / D, 0.5 / len, ox + 0.11, oy + 0.5);
+      const mat = clothMat(photo, shade(color, 0.75 + ((i * 7) % 5) * 0.07), i, th > 0.04 ? 0.7 : 0.92);
       const m = add(geo, mat, -L / 2 + 0.12 + (i * (L - 0.24)) / Math.max(1, n - 1), 1.47, 0);
       // 옷마다 살짝 비틀리고 간격이 고르지 않게(미니멀은 반듯하게)
       m.rotation.y = Math.PI / 2 + Math.sin(i * 12.9898) * look.twist;
@@ -329,8 +382,8 @@ function buildItem(b: LayoutBox, photo: string | undefined, color: string, mats:
       // 개어 놓은 옷 더미 두세 개
       [[-L / 3, -0.05, 4], [0, 0.08, 3], [L / 3, -0.02, 5]].forEach(([x, z, n], k) => {
         for (let i = 0; i < n; i++) {
-          const fold = photoMat(photo, shade(color, 0.72 + ((i + k) % 4) * 0.08), 0.95);
-          const m = add(remapUV(new THREE.BoxGeometry(0.3, 0.035, 0.24), 0.3, 0.3, ((i + k) * 0.21) % 0.7, (i * 0.13) % 0.6), fold, x + Math.sin(i * 3.1) * 0.01, y0 + 0.018 + i * 0.037, z + Math.cos(i * 2.3) * 0.01);
+          const fold = clothMat(photo, shade(color, 0.72 + ((i + k) % 4) * 0.08), i + k * 2, 0.95);
+          const m = add(new THREE.BoxGeometry(0.3, 0.035, 0.24), fold, x + Math.sin(i * 3.1) * 0.01, y0 + 0.018 + i * 0.037, z + Math.cos(i * 2.3) * 0.01);
           m.rotation.y = Math.sin(i * 5.7) * 0.05;
         }
       });
