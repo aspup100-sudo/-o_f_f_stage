@@ -15,6 +15,7 @@ export interface Room3DProps {
   W: number; H: number; boxes: LayoutBox[]; path?: Pt[]; wallPhoto: string; mode: ViewMode;
   colorOf: (id?: string) => string; photoOf: (b: LayoutBox) => string | undefined; nameOf: (id?: string) => string;
   selected: string | null; onPick: (id: string) => void;
+  onMove?: (id: string, x: number, y: number) => void; // 3D에서 고른 물건을 끌어 옮겼을 때
 }
 
 const WALL_H = 2.8;
@@ -96,10 +97,12 @@ function plasterTexture() {
 const loader = new THREE.TextureLoader();
 loader.setCrossOrigin('anonymous');
 const photoCache = new Map<string, THREE.Texture>();
+// 사진이 늦게 도착하면 다시 그리도록 알린다
+let onTextureLoad = () => {};
 function photoTexture(src: string) {
   let t = photoCache.get(src);
   if (!t) {
-    t = loader.load(src);
+    t = loader.load(src, () => onTextureLoad());
     t.colorSpace = THREE.SRGBColorSpace;
     photoCache.set(src, t);
   }
@@ -134,6 +137,7 @@ function buildItem(b: LayoutBox, photo: string | undefined, color: string, mats:
   const inner = new THREE.Group();
   g.add(inner);
   g.position.set(b.x + b.w / 2, 0, b.y + b.h / 2);
+  g.userData.boxId = b.id;
   if (!along) inner.rotation.y = Math.PI / 2;
   const add = (geo: THREE.BufferGeometry, mat: THREE.Material, x: number, y: number, z: number) => {
     const m = new THREE.Mesh(geo, mat);
@@ -509,6 +513,7 @@ export default function Room3DGL(props: Room3DProps) {
     let walkTarget: THREE.Vector3 | null = null;
     let moveDir = 0;
     const setMode = (m: ViewMode) => {
+      invalidate();
       mode = m;
       controls.enabled = m === 'orbit';
       if (m === 'walk') {
@@ -525,6 +530,7 @@ export default function Room3DGL(props: Room3DProps) {
     };
 
     const rebuild = (p: Room3DProps) => {
+      invalidate();
       const sizeChanged = p.W !== W || p.H !== H;
       if (sizeChanged) buildRoom(p);
       buildItems(p);
@@ -533,6 +539,7 @@ export default function Room3DGL(props: Room3DProps) {
 
     // 화면 크기
     const resize = () => {
+      invalidate();
       const w = el.clientWidth;
       const h = el.clientHeight;
       renderer.setSize(w, h, false);
@@ -547,25 +554,73 @@ export default function Room3DGL(props: Room3DProps) {
     // 누르기: 물건 고르기 / 걸어 보기에서는 바닥으로 걸어가기 / 밀어서 둘러보기
     const ray = new THREE.Raycaster();
     let down: { x: number; y: number; yaw: number; pitch: number; moved: boolean } | null = null;
-    const onDown = (e: PointerEvent) => { down = { x: e.clientX, y: e.clientY, yaw, pitch, moved: false }; };
+    // 고른 물건을 누른 채 끌면 바닥 위에서 옮긴다
+    let drag: { id: string; group: THREE.Object3D; dx: number; dz: number; b: LayoutBox } | null = null;
+    // 숨긴 벽(부모가 숨겨진 것 포함)은 누를 수 없게
+    const shown = (o: THREE.Object3D | null) => { for (; o; o = o.parent) if (!o.visible) return false; return true; };
+    const floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+    const toNdc = (e: PointerEvent) => {
+      const r = renderer.domElement.getBoundingClientRect();
+      return new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    };
+    const floorPoint = (e: PointerEvent) => {
+      ray.setFromCamera(toNdc(e), camera);
+      return ray.ray.intersectPlane(floorPlane, new THREE.Vector3());
+    };
+    const onDown = (e: PointerEvent) => {
+      down = { x: e.clientX, y: e.clientY, yaw, pitch, moved: false };
+      const selId = propsRef.current.selected;
+      if (mode !== 'orbit' || !selId || !propsRef.current.onMove) return;
+      ray.setFromCamera(toNdc(e), camera);
+      const hit = ray.intersectObjects(items.children, true).find((h) => shown(h.object));
+      let o: THREE.Object3D | null = hit?.object ?? null;
+      while (o && o.parent !== items) o = o.parent;
+      if (o && o.userData.boxId === selId) {
+        const b = propsRef.current.boxes.find((x) => x.id === selId)!;
+        const fp = floorPoint(e);
+        if (!fp) return;
+        drag = { id: selId, group: o, dx: fp.x - o.position.x, dz: fp.z - o.position.z, b };
+        controls.enabled = false;
+      }
+    };
     const onMove = (e: PointerEvent) => {
       if (!down) return;
       const dx = e.clientX - down.x;
       const dy = e.clientY - down.y;
       if (Math.abs(dx) + Math.abs(dy) > 6) down.moved = true;
+      if (drag && down.moved) {
+        const fp = floorPoint(e);
+        if (fp) {
+          const { b } = drag;
+          drag.group.position.x = Math.max(b.w / 2, Math.min(W - b.w / 2, fp.x - drag.dx));
+          drag.group.position.z = Math.max(b.h / 2, Math.min(H - b.h / 2, fp.z - drag.dz));
+          if (selBox) selBox.position.set(drag.group.position.x, 0.006, drag.group.position.z);
+          invalidate();
+        }
+        return;
+      }
       if (mode === 'walk' && down.moved) {
         yaw = down.yaw + dx * 0.006;
         pitch = Math.max(-0.7, Math.min(0.5, down.pitch + dy * 0.004));
+        invalidate();
       }
     };
     const onUp = (e: PointerEvent) => {
       const d = down;
       down = null;
+      if (drag) {
+        const g = drag;
+        drag = null;
+        controls.enabled = mode === 'orbit';
+        if (d?.moved) {
+          propsRef.current.onMove?.(g.id, Math.round((g.group.position.x - g.b.w / 2) * 10) / 10, Math.round((g.group.position.z - g.b.h / 2) * 10) / 10);
+          return;
+        }
+      }
       if (!d || d.moved) return;
-      const r = renderer.domElement.getBoundingClientRect();
-      ray.setFromCamera(new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), camera);
+      ray.setFromCamera(toNdc(e), camera);
       const hits = ray.intersectObjects([...items.children, ...room.children], true);
-      const hit = hits.find((h) => h.object.visible);
+      const hit = hits.find((h) => shown(h.object));
       if (!hit) return;
       let o: THREE.Object3D | null = hit.object;
       while (o && !o.userData.boxId && !o.userData.floor) o = o.parent;
@@ -585,13 +640,21 @@ export default function Room3DGL(props: Room3DProps) {
     const camDir = new THREE.Vector3();
     let raf = 0;
     let last = performance.now();
+    let frames = 5;
+    function invalidate() { frames = 3; }
+    onTextureLoad = invalidate;
+    controls.addEventListener('change', invalidate);
     const tick = () => {
       raf = requestAnimationFrame(tick);
       const now = performance.now();
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
+      // 움직임이 없으면 그리지 않는다 (휴대폰 배터리·발열)
+      const moving = mode === 'orbit' ? controls.update() : !!moveDir || !!walkTarget;
+      if (!moving && frames <= 0) return;
+      frames -= 1;
       if (mode === 'orbit') {
-        controls.update();
+        // controls.update()는 위에서 했다
       } else {
         if (moveDir) {
           const f = new THREE.Vector3(Math.sin(yaw) * -1, 0, -Math.cos(yaw));
@@ -642,7 +705,7 @@ export default function Room3DGL(props: Room3DProps) {
     api.current = {
       rebuild,
       setMode,
-      walk: (dir) => { moveDir = dir; },
+      walk: (dir) => { moveDir = dir; invalidate(); },
       dispose: () => {
         cancelAnimationFrame(raf);
         ro.disconnect();
