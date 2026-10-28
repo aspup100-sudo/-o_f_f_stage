@@ -125,15 +125,31 @@ function photoMat(src: string | undefined, fallback: THREE.ColorRepresentation, 
   return mat;
 }
 
-// 옷 모양(어깨선이 있는 판)
-function garmentShape(w: number, len: number) {
+// 옷 모양: 목선, 어깨, 소매(긴팔·반팔·민소매)가 있는 판
+function garmentShape(w: number, len: number, sleeve: 'long' | 'short' | 'none') {
+  const sw = w / 2; // 소매 바깥
+  const bw = sleeve === 'none' ? w * 0.4 : w * 0.36; // 몸판 반폭
   const s = new THREE.Shape();
-  s.moveTo(-0.06, 0);
-  s.lineTo(0.06, 0);
-  s.lineTo(w / 2, -0.07);
-  s.lineTo(w / 2 - 0.01, -len);
-  s.lineTo(-w / 2 + 0.01, -len);
-  s.lineTo(-w / 2, -0.07);
+  s.moveTo(-0.065, 0);
+  s.quadraticCurveTo(0, -0.06, 0.065, 0);
+  const side = (k: 1 | -1) => {
+    const pts: [number, number][] = [];
+    if (sleeve === 'none') {
+      pts.push([k * bw * 0.7, -0.03], [k * bw, -0.2]);
+    } else if (sleeve === 'short') {
+      pts.push([k * bw, -0.05], [k * sw, -0.12], [k * (sw - 0.03), -0.27], [k * bw, -0.24]);
+    } else {
+      const cuff = -Math.min(len * 0.78, 0.66);
+      pts.push([k * bw, -0.05], [k * sw, -0.11], [k * (sw - 0.005), cuff], [k * (sw - 0.075), cuff], [k * (bw + 0.004), -0.26]);
+    }
+    pts.push([k * (bw + 0.012), -len]);
+    return pts;
+  };
+  side(1).forEach(([x, y]) => s.lineTo(x, y));
+  // 밑단은 살짝 둥글게
+  const left = side(-1).reverse();
+  s.quadraticCurveTo(0, -len - 0.02, left[0][0], left[0][1]);
+  left.slice(1).forEach(([x, y]) => s.lineTo(x, y));
   s.closePath();
   return s;
 }
@@ -176,7 +192,7 @@ function buildItem(b: LayoutBox, photo: string | undefined, color: string, mats:
     const n = Math.max(4, Math.round(L / 0.1));
     for (let i = 0; i < n; i++) {
       const len = [0.85, 0.7, 1.05, 0.75, 0.95, 0.65][i % 6];
-      const geo = new THREE.ExtrudeGeometry(garmentShape(D - 0.06, len), { depth: 0.035, bevelEnabled: true, bevelSize: 0.008, bevelThickness: 0.008, bevelSegments: 2 });
+      const geo = new THREE.ExtrudeGeometry(garmentShape(Math.min(D - 0.02, 0.6), len, (['long', 'short', 'none', 'long', 'short'] as const)[i % 5]), { depth: 0.035, bevelEnabled: true, bevelSize: 0.008, bevelThickness: 0.008, bevelSegments: 2 });
       // ExtrudeGeometry UV는 미터 좌표(x: -D/2~D/2, y: -len~0)라 사진의 한 조각에 맞춘다
       const ox = (i * 0.37) % 0.7;
       const oy = 0.1 + ((i * 0.23) % 0.3);
