@@ -301,13 +301,13 @@ export function InboxTab({ initial }: { initial?: 'offer' }) {
           <LandlordCompletions />
           {checks.length > 0 && (
             <div>
-              <h3 className="text-[17px] font-extrabold tracking-tight mb-2">공간 확정 확인 요청</h3>
+              <h3 className="text-[20px] font-extrabold tracking-tight mb-2">공간 확정 확인 요청</h3>
               <div className="space-y-2">
                 {checks.map((r) => <SpaceCheckCard key={r.id} recruitId={r.id} />)}
               </div>
             </div>
           )}
-          {pending.length > 0 && <h3 className="text-[17px] font-extrabold tracking-tight">대기 중인 팀 지원</h3>}
+          {pending.length > 0 && <h3 className="text-[20px] font-extrabold tracking-tight">대기 중인 팀 지원</h3>}
           {pending.length === 0 && (
             <Empty icon="inbox" action={openRecruits.length + spacelessTeams.length > 0 ? { label: `공간 찾는 팀 ${openRecruits.length + spacelessTeams.length}곳에 먼저 제안하기`, onClick: () => setTab('offer') } : undefined}>
               대기 중인 지원이 없어요
@@ -319,14 +319,14 @@ export function InboxTab({ initial }: { initial?: 'offer' }) {
             </Button>
           )}
           {pending.map((a) => <AppCard key={a.id} appId={a.id} onOpen={() => setView(a.id)} />)}
-          {others.length > 0 && <h3 className="text-[17px] font-extrabold tracking-tight pt-3">지난 내역</h3>}
+          {others.length > 0 && <h3 className="text-[20px] font-extrabold tracking-tight pt-3">지난 내역</h3>}
           {others.map((a) => <AppCard key={a.id} appId={a.id} onOpen={() => setView(a.id)} />)}
         </div>
       )}
       {tab === 'offer' && (
         <div className="px-4">
           <p className="text-[13px] text-ink-500 mb-3">공간이 아직 없는 팀에게 우리 공간을 먼저 제안해 보세요.</p>
-          {spacelessTeams.length > 0 && <h3 className="text-[17px] font-extrabold tracking-tight mb-3">공간을 찾는 확정 팀</h3>}
+          {spacelessTeams.length > 0 && <h3 className="text-[20px] font-extrabold tracking-tight mb-3">공간을 찾는 확정 팀</h3>}
           <div className="space-y-2 mb-5">
             {spacelessTeams.map((t) => (
               <Card key={t.id} className="p-3.5">
@@ -336,7 +336,7 @@ export function InboxTab({ initial }: { initial?: 'offer' }) {
               </Card>
             ))}
           </div>
-          <h3 className="text-[17px] font-extrabold tracking-tight mb-3">모집 중인 팀</h3>
+          <h3 className="text-[20px] font-extrabold tracking-tight mb-3">모집 중인 팀</h3>
           <div className="space-y-3">
             {openRecruits.map((r) => (
               <div key={r.id}>

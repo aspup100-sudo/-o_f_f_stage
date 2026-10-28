@@ -40,7 +40,7 @@ export function TeamSpaceTab({ team }: { team: Team }) {
       )}
       {offers.length > 0 && (
         <div>
-          <h3 className="text-[17px] font-extrabold tracking-tight mb-3">임대인이 먼저 제안했어요</h3>
+          <h3 className="text-[20px] font-extrabold tracking-tight mb-3">임대인이 먼저 제안했어요</h3>
           {offers.map((a) => {
             const s = spaceById(db, a.spaceId)!;
             return (
@@ -58,7 +58,7 @@ export function TeamSpaceTab({ team }: { team: Team }) {
         </div>
       )}
       <div>
-        <h3 className="text-[17px] font-extrabold tracking-tight mb-3">지원 현황</h3>
+        <h3 className="text-[20px] font-extrabold tracking-tight mb-3">지원 현황</h3>
         {mine.length === 0 && <div className="text-sm text-ink-500">아직 지원한 공간이 없어요</div>}
         <div className="space-y-2">
           {mine.map((a) => {

@@ -90,7 +90,7 @@ export function QnaDetail({ id }: { id: string }) {
         <h1 className="text-xl font-extrabold mt-2">Q. {p.title}</h1>
         <div className="mt-2"><Author db={db} userId={p.authorId} /></div>
         <p className="text-[15px] leading-relaxed mt-3">{p.body}</p>
-        <h3 className="text-[17px] font-extrabold tracking-tight mt-9 mb-3">답변 {answers.length}</h3>
+        <h3 className="band text-[20px] font-extrabold tracking-tight mt-9 mb-3">답변 {answers.length}</h3>
         <div className="space-y-2">
           {answers.map((a) => (
             <Card key={a.id} className="p-3.5">

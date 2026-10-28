@@ -242,7 +242,7 @@ export function RentalPartnerScreen({ id, teamId }: { id: string; teamId?: strin
           <div><Ic n="truck" />배송 가능: {p.regions.join(', ')}</div>
           <div><Ic n="box" />왕복 배송·설치비 {won(p.deliveryFee)} · <b>{won(p.freeDeliveryOver)} 이상이면 무료</b></div>
         </div>
-        <h3 className="text-[17px] font-extrabold tracking-tight mt-8 mb-3">대여 장비 {items.length}</h3>
+        <h3 className="band text-[20px] font-extrabold tracking-tight mt-8 mb-3">대여 장비 {items.length}</h3>
         <div className="space-y-2">
           {items.map((it) => {
             const n = cart[it.id] ?? 0;
@@ -270,7 +270,7 @@ export function RentalPartnerScreen({ id, teamId }: { id: string; teamId?: strin
         </div>
         {reviews.length > 0 && (
           <>
-            <h3 className="text-[17px] font-extrabold tracking-tight mt-9 mb-3">브랜드 후기</h3>
+            <h3 className="band text-[20px] font-extrabold tracking-tight mt-9 mb-3">브랜드 후기</h3>
             <div className="space-y-2">
               {reviews.map((o) => (
                 <Card key={o.id} className="p-3">
@@ -410,7 +410,7 @@ export function TeamRentalTab({ team }: { team: Team }) {
           우리 팀은 렌탈 제휴로 <b>{won(spent)}</b>을 아꼈어요.
         </div>
       )}
-      <h3 className="text-[17px] font-extrabold tracking-tight mb-3">팀 렌탈 예약 {orders.length}</h3>
+      <h3 className="text-[20px] font-extrabold tracking-tight mb-3">팀 렌탈 예약 {orders.length}</h3>
       {orders.length === 0 && <p className="text-sm text-ink-500 mb-3">아직 빌린 장비가 없어요.</p>}
       <div className="space-y-2 mb-5">
         {orders.map((o) => {
@@ -432,7 +432,7 @@ export function TeamRentalTab({ team }: { team: Team }) {
           );
         })}
       </div>
-      <h3 className="text-[17px] font-extrabold tracking-tight mb-3">장비 빌리기</h3>
+      <h3 className="text-[20px] font-extrabold tracking-tight mb-3">장비 빌리기</h3>
       <RentalsBrowse teamId={team.id} embedded />
       <Sheet open={!!rating} onClose={() => setRating(null)} title="렌탈 업체 별점">
         <Stars value={stars} onChange={setStars} size="w-8 h-8" />

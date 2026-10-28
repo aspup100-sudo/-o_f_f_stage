@@ -11,20 +11,20 @@ import { CATEGORIES, MOODS, PRICE_RANGES, type BrandProfile, type Category, type
 import { BrandActions } from './BrandActions';
 import { ShowcaseList } from './Showcase';
 import { QnaList } from './Qna';
-import { MagazineList, MagazineThumb } from './Magazine';
+import { MagazineList } from './Magazine';
 import { RENTAL_ON } from '@/config';
 import { RentalDeals } from './Rental';
-import { InstaThumb, instaFeed } from './Insta';
 import { TodayBrand, TodayLandlord, TodayRental, TodayVisitor } from './Today';
 
-type View = 'brand' | 'magazine' | 'showcase' | 'rental' | 'qna';
+type View = 'brand' | 'brands' | 'magazine' | 'rental';
+type MagView = 'magazine' | 'showcase' | 'qna';
 
 export default function Explore() {
   const { role } = useMe();
   const [picked, setView] = useState<View>('brand');
   // 렌탈 탭은 공간을 빌리는 브랜드에게만 보인다
   const view: View = picked === 'rental' && !(RENTAL_ON && role === 'brand') ? 'brand' : picked;
-  const tabs = ([{ key: 'brand', label: '홈' }, { key: 'magazine', label: '매거진' }, { key: 'showcase', label: '팝업자랑' }, { key: 'rental', label: '렌탈' }, { key: 'qna', label: 'Q&A' }] as { key: View; label: string }[]).filter((it) => it.key !== 'rental' || (RENTAL_ON && role === 'brand'));
+  const tabs = ([{ key: 'brand', label: '홈' }, { key: 'brands', label: '브랜드' }, { key: 'magazine', label: '매거진' }, { key: 'rental', label: '렌탈' }] as { key: View; label: string }[]).filter((it) => it.key !== 'rental' || (RENTAL_ON && role === 'brand'));
   return (
     <div>
       <div className="sticky top-14 z-20 bg-white px-4 flex gap-5 border-b border-ink-100">
@@ -38,41 +38,36 @@ export default function Explore() {
           </button>
         ))}
       </div>
-      {view === 'brand' && <BrandFeed onMore={() => setView('magazine')} />}
-      {view === 'magazine' && <MagazineList />}
-      {view === 'showcase' && <ShowcaseList />}
+      {view === 'brand' && <HomeFeed onBrands={() => { setView('brands'); window.scrollTo?.(0, 0); }} />}
+      {view === 'brands' && <BrandFeed />}
+      {view === 'magazine' && <MagazineHub />}
       {view === 'rental' && <RentalDeals />}
-      {view === 'qna' && <QnaList />}
     </div>
   );
 }
 
-function BrandFeed({ onMore }: { onMore: () => void }) {
-  const { db, brand, role } = useMe();
-  const [moods, setMoods] = useState<Mood[]>([]);
-  const [cats, setCats] = useState<Category[]>([]);
-  const [price, setPrice] = useState<PriceRange | null>(null);
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [showAll, setShowAll] = useState(false);
-  const [sort, setSort] = useState<'base' | 'match' | 'exp' | 'fans' | 'live'>('base');
+/** 매거진 탭: 매거진 · 팝업자랑 · Q&A를 한곳에 */
+function MagazineHub() {
+  const [sub, setSub] = useState<MagView>('magazine');
+  return (
+    <div>
+      <div className="px-4 pt-4 flex gap-4 text-[14px]">
+        {([['magazine', '매거진'], ['showcase', '팝업자랑'], ['qna', 'Q&A']] as [MagView, string][]).map(([k, l]) => (
+          <button key={k} onClick={() => setSub(k)} className={cx(sub === k ? 'font-extrabold text-ink-900 underline underline-offset-4 decoration-2' : 'font-semibold text-ink-500')}>{l}</button>
+        ))}
+      </div>
+      {sub === 'magazine' && <MagazineList />}
+      {sub === 'showcase' && <ShowcaseList />}
+      {sub === 'qna' && <QnaList />}
+    </div>
+  );
+}
 
+/** 홈: 오늘 할 일, 궁합 브랜드, 진행 중 팝업 세 덩어리만 */
+function HomeFeed({ onBrands }: { onBrands: () => void }) {
+  const { db, brand, role } = useMe();
   const popups = db.popups.filter((p) => p.status !== '종료');
   const recs = brand ? recommendations(db, brand, 5) : [];
-  // 지금 진행 중인 공동 팝업에 참여한 브랜드인가
-  const isLive = (id: string) => db.popups.some((p) => p.status === '진행 중' && db.teams.find((t) => t.id === p.teamId)?.members.some((m) => m.brandId === id));
-  const list = db.brands
-    .filter((b) => isListedBrand(db, b) && b.id !== brand?.id)
-    .filter((b) => !moods.length || b.tags.moods.some((m) => moods.includes(m)))
-    .filter((b) => !cats.length || b.tags.categories.some((c) => cats.includes(c)))
-    .filter((b) => !price || b.tags.price === price)
-    .sort((a, b) =>
-      sort === 'match' && brand ? matchScore(db, brand, b).score - matchScore(db, brand, a).score
-      : sort === 'exp' ? trustScore(db, b.id).verifiedPopups - trustScore(db, a.id).verifiedPopups
-      : sort === 'fans' ? b.followers.length - a.followers.length
-      : sort === 'live' ? Number(isLive(b.id)) - Number(isLive(a.id))
-      : 0);
-  const filterCount = moods.length + cats.length + (price ? 1 : 0);
-
   return (
     <div>
       {role === 'brand' && <TodayBrand />}
@@ -82,7 +77,7 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
       {brand && recs.length > 0 && (
         <section className="pt-6">
           <div className="px-4 mb-2.5">
-            <h2 className="text-[17px] font-extrabold tracking-tight">
+            <h2 className="text-[20px] font-extrabold tracking-tight">
               궁합이 높은 브랜드
             </h2>
           </div>
@@ -110,7 +105,7 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
 
       <section className="pt-6">
         <div className="px-4 flex items-center justify-between mb-2.5">
-          <h2 className="text-[17px] font-extrabold tracking-tight">진행 중·예정 공동 팝업</h2>
+          <h2 className="text-[20px] font-extrabold tracking-tight">진행 중·예정 공동 팝업</h2>
           <span className="text-xs text-ink-500">{popups.length}곳</span>
         </div>
         <div className="flex gap-2.5 overflow-x-auto no-scrollbar px-4 pb-1">
@@ -120,21 +115,43 @@ function BrandFeed({ onMore }: { onMore: () => void }) {
         </div>
       </section>
 
-      <section className="pt-6">
-        <div className="px-4 flex items-center justify-between mb-2.5">
-          <h2 className="text-[17px] font-extrabold tracking-tight">매거진 · 팝업 트렌드</h2>
-          <button onClick={onMore} className="text-xs text-ink-500">전체 보기 ›</button>
-        </div>
-        <div className="flex gap-3 overflow-x-auto no-scrollbar px-4 pb-1">
-          {(() => { const f = instaFeed(db); return f.posts.slice(0, 6).map((p) => <InstaThumb key={p.id} post={p} demo={f.demo} />); })()}
-          {db.magazines.filter((m) => !m.hidden).slice(0, 4).map((m) => <MagazineThumb key={m.id} post={m} />)}
-        </div>
-      </section>
+      <div className="px-4 pt-6 pb-8">
+        <button onClick={onBrands} className="w-full h-12 border border-ink-900 text-[14px] font-bold">브랜드 전체 둘러보기 ›</button>
+      </div>
+    </div>
+  );
+}
 
-      <section className="pt-6 px-4">
+function BrandFeed() {
+  const { db, brand } = useMe();
+  const [moods, setMoods] = useState<Mood[]>([]);
+  const [cats, setCats] = useState<Category[]>([]);
+  const [price, setPrice] = useState<PriceRange | null>(null);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [showAll, setShowAll] = useState(false);
+  const [sort, setSort] = useState<'base' | 'match' | 'exp' | 'fans' | 'live'>('base');
+
+  // 지금 진행 중인 공동 팝업에 참여한 브랜드인가
+  const isLive = (id: string) => db.popups.some((p) => p.status === '진행 중' && db.teams.find((t) => t.id === p.teamId)?.members.some((m) => m.brandId === id));
+  const list = db.brands
+    .filter((b) => isListedBrand(db, b) && b.id !== brand?.id)
+    .filter((b) => !moods.length || b.tags.moods.some((m) => moods.includes(m)))
+    .filter((b) => !cats.length || b.tags.categories.some((c) => cats.includes(c)))
+    .filter((b) => !price || b.tags.price === price)
+    .sort((a, b) =>
+      sort === 'match' && brand ? matchScore(db, brand, b).score - matchScore(db, brand, a).score
+      : sort === 'exp' ? trustScore(db, b.id).verifiedPopups - trustScore(db, a.id).verifiedPopups
+      : sort === 'fans' ? b.followers.length - a.followers.length
+      : sort === 'live' ? Number(isLive(b.id)) - Number(isLive(a.id))
+      : 0);
+  const filterCount = moods.length + cats.length + (price ? 1 : 0);
+
+  return (
+    <div>
+      <section className="pt-5 px-4">
         <div className="flex items-center justify-between mb-2.5">
           <div className="flex items-center gap-2">
-            <h2 className="text-[17px] font-extrabold tracking-tight">브랜드 둘러보기</h2>
+            <h2 className="text-[20px] font-extrabold tracking-tight">브랜드 둘러보기</h2>
             <select value={sort} onChange={(e) => setSort(e.target.value as typeof sort)} className="text-[12px] text-ink-700 bg-transparent border border-ink-300 rounded h-7 px-2" aria-label="정렬">
               <option value="base">기본순</option>
               {brand && <option value="match">궁합 높은 순</option>}

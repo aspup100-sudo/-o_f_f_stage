@@ -17,7 +17,7 @@ export function VerifyTab() {
       <ScreenTitle>사업자 인증 승인</ScreenTitle>
       <p className="px-4 text-[13px] text-ink-500 -mt-1 mb-3">데모에서는 사업자등록번호 형식만 확인해요. 실제로는 국세청 조회 결과를 함께 봐요.</p>
       <div className="px-4 space-y-2">
-        <h3 className="text-[17px] font-extrabold tracking-tight">대기 {pending.length}</h3>
+        <h3 className="text-[20px] font-extrabold tracking-tight">대기 {pending.length}</h3>
         {pending.length === 0 && <Empty icon="shield">대기 중인 인증이 없어요</Empty>}
         {pending.map((u) => (
           <Card key={u.id} className="p-4">
@@ -33,7 +33,7 @@ export function VerifyTab() {
             </div>
           </Card>
         ))}
-        <h3 className="text-[17px] font-extrabold tracking-tight pt-4">최근 처리</h3>
+        <h3 className="text-[20px] font-extrabold tracking-tight pt-4">최근 처리</h3>
         <Card className="divide-y divide-ink-100">
           {done.map((u) => (
             <div key={u.id} className="flex items-center justify-between px-3.5 py-2.5 text-sm">
@@ -124,7 +124,7 @@ export function StatsTab() {
           </Card>
         )}
         <div>
-          <h3 className="text-[17px] font-extrabold tracking-tight mb-3">사람</h3>
+          <h3 className="text-[20px] font-extrabold tracking-tight mb-3">사람</h3>
           <div className="grid grid-cols-2 gap-2">
             {tile('브랜드', db.brands.length, `인증 ${db.users.filter((u) => u.role === 'brand' && u.verifyStatus === 'verified').length}곳`)}
             {tile('임대인 공간', db.spaces.length, `임대인 ${db.landlords.length}명`)}
@@ -133,7 +133,7 @@ export function StatsTab() {
           </div>
         </div>
         <div>
-          <h3 className="text-[17px] font-extrabold tracking-tight mb-3">공동 팝업</h3>
+          <h3 className="text-[20px] font-extrabold tracking-tight mb-3">공동 팝업</h3>
           <div className="grid grid-cols-2 gap-2">
             {tile('팀', db.teams.length, `준비 ${teams.준비} · 운영 ${teams.운영} · 종료 ${teams.종료}`)}
             {tile('인증 공동 팝업', verified)}
@@ -150,7 +150,7 @@ export function StatsTab() {
           const pct = (a: number, b: number) => (b ? `${Math.round((a / b) * 100)}%` : '-');
           return (
             <div>
-              <h3 className="text-[17px] font-extrabold tracking-tight mb-3">다시 쓰는 비율</h3>
+              <h3 className="text-[20px] font-extrabold tracking-tight mb-3">다시 쓰는 비율</h3>
               <div className="grid grid-cols-2 gap-2">
                 {tile('공동 팝업을 두 번 이상 연 브랜드', pct(repeatBrands, brandTeams.length), `${brandTeams.length}곳 중 ${repeatBrands}곳`)}
                 {tile('두 곳 이상 방문한 방문객', pct(repeatVisitors, perVisitor.length), `${perVisitor.length}명 중 ${repeatVisitors}명`)}
@@ -163,7 +163,7 @@ export function StatsTab() {
           const L = learnMatchWeights(db);
           return (
             <div>
-              <h3 className="text-[17px] font-extrabold tracking-tight mb-1">궁합 공식 자동 조정</h3>
+              <h3 className="text-[20px] font-extrabold tracking-tight mb-1">궁합 공식 자동 조정</h3>
               <p className="text-[12px] text-ink-500 mb-2">함께 팝업을 끝낸 브랜드 쌍이 서로 남긴 업무 후기와 재결합 여부를 보고, 결과가 좋았던 쌍에서 자주 보인 특징의 가중치를 올려요. 표본이 적을수록 기본값에 가깝게 둬요.</p>
               <Card className="p-3.5">
                 <div className="flex justify-between text-[12px] text-ink-500 mb-1.5"><span>학습한 팀 결과 {L.samples}쌍</span><span>반영 비율 {Math.round(L.trust * 100)}%</span></div>
@@ -192,7 +192,7 @@ export function StatsTab() {
           );
         })()}
         {RENTAL_ON && <div>
-          <h3 className="text-[17px] font-extrabold tracking-tight mb-3">렌탈 제휴</h3>
+          <h3 className="text-[20px] font-extrabold tracking-tight mb-3">렌탈 제휴</h3>
           <div className="grid grid-cols-2 gap-2">
             {tile('렌탈 거래액', won(rentalSum), `${db.rentalOrders.length}건 요청`)}
             {tile('브랜드가 아낀 금액', won(rentalSaved), '정가 대비')}

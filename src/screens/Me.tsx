@@ -1,3 +1,4 @@
+import { RoleSwitcher } from '@/components/RoleSwitcher';
 import { pickPhotos } from '@/components/photoPick';
 import { useState } from 'react';
 import { useMe } from '@/store/hooks';
@@ -19,6 +20,7 @@ export default function MeScreen({ initial }: { initial?: string } = {}) {
     <div>
       <ScreenTitle>내 정보</ScreenTitle>
       <div className="px-4 space-y-3">
+        <RoleSwitcher row />
         <Card className="p-4">
           <div className="flex items-center gap-3">
             {brand ? <BrandLogo brand={brand} size={52} /> : <Avatar name={user.name || '?'} size={52} hue={200} />}

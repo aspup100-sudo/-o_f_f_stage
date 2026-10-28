@@ -90,20 +90,17 @@ export function MyTeamTab() {
   );
 }
 
-const SUBS = [
-  { key: 'members', label: '멤버' },
-  { key: 'agreement', label: '약속서' },
-  { key: 'cost', label: '분담금' },
-  { key: 'moodboard', label: '무드보드' },
-  { key: 'space', label: '공간 지원' },
-  { key: 'layout', label: '배치' },
-  { key: 'rental', label: '렌탈' },
-  { key: 'shift', label: '근무표' },
-  { key: 'promo', label: '홍보 키트' },
-  { key: 'wrap', label: '마무리' },
-];
+// 팀 화면은 큰 탭 4개로 묶고, 그 안에서 작은 글자 탭으로 나눈다.
+// 주소의 sub는 예전처럼 안쪽 탭 이름(agreement, layout 등)을 그대로 쓴다.
+const GROUPS: { key: string; label: string; subs: { key: string; label: string }[] }[] = [
+  { key: 'prep', label: '준비', subs: [{ key: 'agreement', label: '약속서' }, { key: 'cost', label: '분담금' }, { key: 'shift', label: '근무표' }, { key: 'wrap', label: '오픈·마무리' }] },
+  { key: 'place', label: '공간', subs: [{ key: 'space', label: '공간 지원' }, { key: 'layout', label: '배치' }, { key: 'rental', label: '렌탈' }] },
+  { key: 'promo', label: '홍보', subs: [{ key: 'moodboard', label: '무드보드' }, { key: 'promo', label: '홍보 키트' }] },
+  { key: 'members', label: '멤버', subs: [{ key: 'members', label: '멤버' }] },
+].map((g) => ({ ...g, subs: g.subs.filter((x) => RENTAL_ON || x.key !== 'rental') }));
+const groupOf = (sub: string) => GROUPS.find((g) => g.subs.some((x) => x.key === sub)) ?? GROUPS[0];
 
-export function TeamScreen({ id, sub = 'members' }: { id: string; sub?: string }) {
+export function TeamScreen({ id, sub = 'agreement' }: { id: string; sub?: string }) {
   const { db, brand, role } = useMe();
   const team = teamById(db, id);
   const [renaming, setRenaming] = useState(false);
@@ -162,7 +159,14 @@ export function TeamScreen({ id, sub = 'members' }: { id: string; sub?: string }
           );
         })()}
       </div>
-      <Tabs className="sticky top-12 z-10" items={SUBS.filter((x) => RENTAL_ON || x.key !== 'rental')} value={sub} onChange={(k) => replace({ name: 'team', id, sub: k })} />
+      <Tabs className="sticky top-12 z-10" items={GROUPS} value={groupOf(sub).key} onChange={(k) => replace({ name: 'team', id, sub: GROUPS.find((g) => g.key === k)!.subs[0].key })} />
+      {groupOf(sub).subs.length > 1 && (
+        <div className="px-4 pt-4 flex gap-4 text-[14px]">
+          {groupOf(sub).subs.map((x) => (
+            <button key={x.key} onClick={() => replace({ name: 'team', id, sub: x.key })} className={cx(sub === x.key ? 'font-extrabold text-ink-900 underline underline-offset-4 decoration-2' : 'font-semibold text-ink-500')}>{x.label}</button>
+          ))}
+        </div>
+      )}
       <div className="p-4 pb-10">
         {sub === 'members' && <MembersTab team={team} isLeader={isLeader} />}
         {sub === 'agreement' && <AgreementTab team={team} myBrandId={brand!.id} />}
@@ -393,7 +397,7 @@ function CostTab({ team, myBrandId, isLeader }: { team: Team; myBrandId: string;
       )}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-[17px] font-extrabold tracking-tight">각자 분담금</h3>
+          <h3 className="text-[20px] font-extrabold tracking-tight">각자 분담금</h3>
           <span className="text-xs text-ink-500">납부 기한 {md(split.dueDate)}</span>
         </div>
         <div className="flex items-center gap-2 mb-2">

@@ -68,7 +68,7 @@ export function ShowcaseDetail({ id }: { id: string }) {
           <div className="flex px-3.5 py-2.5"><span className="w-20 text-ink-500">기간</span><span className="font-semibold">{s.period.start} ~ {s.period.end}</span></div>
           {sp && <button className="flex px-3.5 py-2.5 w-full text-left" onClick={() => navigate({ name: 'space', id: sp.id })}><span className="w-20 text-ink-500">사용 공간</span><span className="font-semibold">{sp.name} ›</span></button>}
         </div>
-        <h3 className="text-[17px] font-extrabold tracking-tight mt-8 mb-3">참여 브랜드</h3>
+        <h3 className="band text-[20px] font-extrabold tracking-tight mt-8 mb-3">참여 브랜드</h3>
         <div className="flex gap-2 flex-wrap">
           {s.brandIds.map((bid) => {
             const b = brandById(db, bid)!;
@@ -102,7 +102,7 @@ export function ShowcaseDetail({ id }: { id: string }) {
             <p className="text-[12px] text-ink-500 mt-2">팀이 직접 공개한 수치이며 OFF STAGE가 검증하지 않았어요.</p>
           </div>
         )}
-        <h3 className="text-[17px] font-extrabold tracking-tight mt-9 mb-3">방문객 조합 리뷰</h3>
+        <h3 className="band text-[20px] font-extrabold tracking-tight mt-9 mb-3">방문객 조합 리뷰</h3>
         <ComboReviewList db={db} popupIds={s.popupId ? [s.popupId] : teamPopups} />
       </div>
     </div>

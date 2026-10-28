@@ -189,7 +189,7 @@ export function MagazineDetail({ id }: { id: string }) {
           if (!more.length) return null;
           return (
             <>
-              <h3 className="text-[17px] font-extrabold tracking-tight mt-9 mb-3.5">다른 글도 읽어 보세요</h3>
+              <h3 className="band text-[20px] font-extrabold tracking-tight mt-9 mb-3.5">다른 글도 읽어 보세요</h3>
               <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
                 {more.map((x) => <MagazineThumb key={x.id} post={x} />)}
               </div>

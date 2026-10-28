@@ -110,7 +110,7 @@ export default function BrandProfileScreen({ id }: { id: string }) {
       {tab === 'history' && (
         <div className="px-4 py-4 space-y-6">
           <div>
-            <h3 className="text-[17px] font-extrabold tracking-tight mb-3">팝업 가능 일정</h3>
+            <h3 className="text-[20px] font-extrabold tracking-tight mb-3">팝업 가능 일정</h3>
             <div className="flex flex-wrap gap-x-3 gap-y-1">
               {brand.availability.map((a) => (
                 <span key={a.start} className="text-[13px] font-semibold text-ink-900">{a.start.slice(0, 4)}. {period(a)}</span>
@@ -118,7 +118,7 @@ export default function BrandProfileScreen({ id }: { id: string }) {
             </div>
           </div>
           <div>
-            <h3 className="text-[17px] font-extrabold tracking-tight mb-3">공동 팝업 이력</h3>
+            <h3 className="text-[20px] font-extrabold tracking-tight mb-3">공동 팝업 이력</h3>
             {teams.length === 0 && <Empty action={isMe ? { label: '같이 열 팀 찾기', onClick: () => navigate({ name: 'tab', tab: 'recruits' }) } : undefined}>아직 함께한 팝업이 없어요</Empty>}
             <div className="space-y-2">
               {teams.map((tm) => {
@@ -173,7 +173,7 @@ function ReviewsTab({ brandId }: { brandId: string }) {
     <div className="px-4 py-4 space-y-6">
       {fromBrands.length + fromSpaces.length + fromVisitors.length === 0 ? (
         <div>
-          <h3 className="text-[17px] font-extrabold tracking-tight mb-1">후기</h3>
+          <h3 className="text-[20px] font-extrabold tracking-tight mb-1">후기</h3>
           <p className="text-sm text-ink-500">아직 받은 후기가 없어요. 함께한 브랜드, 공간 운영자, 방문객이 남기면 여기에 보여요.</p>
         </div>
       ) : (
@@ -184,7 +184,7 @@ function ReviewsTab({ brandId }: { brandId: string }) {
         </>
       )}
       <div>
-        <h3 className="text-[17px] font-extrabold tracking-tight mb-1">신뢰 지수 내역</h3>
+        <h3 className="text-[20px] font-extrabold tracking-tight mb-1">신뢰 지수 내역</h3>
         <p className="text-xs text-ink-500 mb-2">50점에서 시작해요. 같은 상대와 반복된 후기는 두 번째부터 절반만 반영돼요.</p>
         <Card className="divide-y divide-ink-100">
           <div className="flex justify-between px-3.5 py-2.5 text-sm">
@@ -211,7 +211,7 @@ export function ReviewGroup({ title, reviews }: { title: string; reviews: Review
   const { db } = useMe();
   return (
     <div>
-      <h3 className="text-[17px] font-extrabold tracking-tight mb-3">
+      <h3 className="text-[20px] font-extrabold tracking-tight mb-3">
         {title} <span className="text-ink-500 font-normal text-sm">{reviews.length}</span>
       </h3>
       {reviews.length === 0 && <div className="text-sm text-ink-500 py-2">아직 없어요</div>}

@@ -23,3 +23,8 @@ button { -webkit-tap-highlight-color: transparent; }
 .dual-range input[type=range]::-moz-range-track { background: transparent; height: 28px; }
 .dual-range input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; pointer-events: auto; width: 26px; height: 26px; margin-top: 1px; border-radius: 9999px; background: #fff; border: 1px solid #d6d3d1; box-shadow: 0 1px 3px rgba(0,0,0,.18); cursor: pointer; }
 .dual-range input[type=range]::-moz-range-thumb { pointer-events: auto; width: 24px; height: 24px; border-radius: 9999px; background: #fff; border: 1px solid #d6d3d1; box-shadow: 0 1px 3px rgba(0,0,0,.18); cursor: pointer; }
+
+/* 구역 띠: 큰 제목 위에 굵은 연회색 띠를 넣어 덩어리를 나눈다 (부모가 좌우 16px 여백일 때) */
+.band { margin-left: -16px; margin-right: -16px; padding: 24px 16px 0; border-top: 10px solid #f2f2f3; }
+.band-section + .band-section, main section + section { border-top: 10px solid #f2f2f3; }
+main section + section { margin-top: 20px; padding-top: 28px; }

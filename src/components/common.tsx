@@ -202,7 +202,7 @@ export function LookbookGrid({ db, ids, onPick, picked }: { db: DB; ids: string[
 export function ScreenTitle({ children, right }: { children: React.ReactNode; right?: React.ReactNode }) {
   return (
     <div className="px-4 pt-5 pb-2 flex items-center justify-between">
-      <h1 className="text-xl font-extrabold">{children}</h1>
+      <h1 className="text-[22px] font-extrabold tracking-tight">{children}</h1>
       {right}
     </div>
   );

@@ -101,7 +101,7 @@ export function Button({
 
 export function Card({ children, className, onClick }: { children: ReactNode; className?: string; onClick?: () => void }) {
   return (
-    <div onClick={onClick} className={cx('bg-white rounded border border-ink-300', onClick && 'cursor-pointer active:bg-ink-100/40', className)}>
+    <div onClick={onClick} className={cx('bg-white border-b border-ink-900', onClick && 'cursor-pointer active:bg-ink-100/40', className)}>
       {children}
     </div>
   );
@@ -200,10 +200,10 @@ export function SubHeader({ title, right, onBack }: { title: ReactNode; right?: 
 
 export function Section({ title, right, children, className }: { title?: ReactNode; right?: ReactNode; children: ReactNode; className?: string }) {
   return (
-    <section className={cx('px-4 py-6', className)}>
+    <section className={cx('band-section px-4 py-6', className)}>
       {(title || right) && (
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-[17px] font-extrabold tracking-tight">{title}</h3>
+          <h3 className="text-[20px] font-extrabold tracking-tight">{title}</h3>
           {right}
         </div>
       )}

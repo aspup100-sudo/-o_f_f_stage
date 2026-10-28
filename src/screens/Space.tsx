@@ -361,7 +361,7 @@ export function SpaceDetail({ id }: { id: string }) {
           </div>
         )}
 
-        <h3 className="text-[17px] font-extrabold tracking-tight mt-9 mb-3">설비</h3>
+        <h3 className="band text-[20px] font-extrabold tracking-tight mt-9 mb-3">설비</h3>
         <div className="grid grid-cols-2 gap-1.5">
           {FACILITIES.map((f) => {
             const has = s.facilities.includes(f);
@@ -380,10 +380,10 @@ export function SpaceDetail({ id }: { id: string }) {
           </button>
         )}
 
-        <h3 className="text-[17px] font-extrabold tracking-tight mt-9 mb-3">비는 날</h3>
+        <h3 className="band text-[20px] font-extrabold tracking-tight mt-9 mb-3">비는 날</h3>
         <AvailabilityCalendar db={db} spaceId={s.id} editable={isOwner} />
 
-        <h3 className="text-[17px] font-extrabold tracking-tight mt-9 mb-3">과거 팝업 이력</h3>
+        <h3 className="band text-[20px] font-extrabold tracking-tight mt-9 mb-3">과거 팝업 이력</h3>
         {past.length === 0 && <div className="text-sm text-ink-500">아직 이력이 없어요</div>}
         <div className="space-y-1.5">
           {past.map((p) => (
@@ -394,7 +394,7 @@ export function SpaceDetail({ id }: { id: string }) {
           ))}
         </div>
 
-        <h3 className="text-[17px] font-extrabold tracking-tight mt-9 mb-3">임대인</h3>
+        <h3 className="band text-[20px] font-extrabold tracking-tight mt-9 mb-3">임대인</h3>
         <Card className="p-3.5 flex items-center gap-3">
           <Avatar name={ll.name} hue={150} size={44} src={spaceSrc(s, 1, 200)} />
           <div className="flex-1 min-w-0">
@@ -408,7 +408,7 @@ export function SpaceDetail({ id }: { id: string }) {
           <ReviewGroup title="브랜드가 남긴 공간 후기" reviews={reviews} />
         </div>
 
-        <h3 className="text-[17px] font-extrabold tracking-tight mt-9 mb-3">공간 Q&A <span className="text-ink-500 font-normal text-sm">{qnas.length}</span></h3>
+        <h3 className="band text-[20px] font-extrabold tracking-tight mt-9 mb-3">공간 Q&A <span className="text-ink-500 font-normal text-sm">{qnas.length}</span></h3>
         <div className="space-y-2">
           {qnas.map((x) => (
             <div key={x.id} className="rounded border border-ink-100 p-3 text-sm">
@@ -446,7 +446,7 @@ export function SpaceDetail({ id }: { id: string }) {
             .slice(0, 4);
           return similar.length ? (
             <div className="mt-6">
-              <h3 className="text-[17px] font-extrabold tracking-tight mb-3">비슷한 공간</h3>
+              <h3 className="text-[20px] font-extrabold tracking-tight mb-3">비슷한 공간</h3>
               <div className="flex gap-2.5 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
                 {similar.map((x) => (
                   <button key={x.id} onClick={() => navigate({ name: 'space', id: x.id })} className="w-[150px] shrink-0 text-left">
