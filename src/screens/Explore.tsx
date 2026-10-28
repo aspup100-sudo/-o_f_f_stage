@@ -3,7 +3,7 @@ import { useMe } from '@/store/hooks';
 import { isListedBrand, josa, matchPct, matchScore, recommendations, trustScore } from '@/store/logic';
 import { navigate } from '@/store/store';
 import { BrandCard, BrandLogo, PopupBannerCard } from '@/components/common';
-import { Chip, cx, Empty, Sheet, Button, Icon, Tag, Ic, Swatch } from '@/components/ui';
+import { SortSelect, Chip, cx, Empty, Sheet, Button, Icon, Tag, Ic, Swatch } from '@/components/ui';
 import { brandCoverSrc } from '@/data/photos';
 import { guard } from '@/store/hooks';
 import { toggleFollow, toggleHeart } from '@/store/actions';
@@ -152,16 +152,7 @@ function BrandFeed() {
         <div className="flex items-center justify-between mb-2.5">
           <h2 className="text-[20px] font-extrabold tracking-tight">브랜드 <span className="text-ink-400 font-bold">{list.length}</span></h2>
           <div className="flex items-center gap-4">
-            <label className="relative flex items-center text-sm font-semibold">
-              <select value={sort} onChange={(e) => setSort(e.target.value as typeof sort)} className="appearance-none bg-transparent pr-4 text-right" aria-label="정렬">
-                <option value="base">기본순</option>
-                {brand && <option value="match">궁합 높은 순</option>}
-                <option value="exp">공동 팝업 많은 순</option>
-                <option value="fans">팔로워 많은 순</option>
-                <option value="live">지금 팝업 중 먼저</option>
-              </select>
-              <svg viewBox="0 0 10 6" className="w-2.5 h-1.5 absolute right-0 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M1 1l4 4 4-4" /></svg>
-            </label>
+            <SortSelect label="정렬" value={sort} onChange={setSort} options={[{ key: 'base', label: '기본순' }, ...(brand ? [{ key: 'match' as const, label: '궁합 높은 순' }] : []), { key: 'exp', label: '공동 팝업 많은 순' }, { key: 'fans', label: '팔로워 많은 순' }, { key: 'live', label: '지금 팝업 중 먼저' }]} />
             <button onClick={() => setFilterOpen(true)} className="flex items-center gap-1 text-sm font-semibold">
               <Icon name="search" className="w-4 h-4" /> 필터{filterCount > 0 && <span className="text-brand-500">{filterCount}</span>}
             </button>

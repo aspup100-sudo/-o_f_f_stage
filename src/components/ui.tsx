@@ -99,6 +99,18 @@ export function Button({
   );
 }
 
+/** 정렬 고르기: 테두리 없는 글자 + 꺾쇠 */
+export function SortSelect<T extends string>({ value, onChange, options, label, className }: { value: T; onChange: (v: T) => void; options: { key: T; label: string }[]; label: string; className?: string }) {
+  return (
+    <label className={cx('relative flex items-center text-[13px] font-semibold shrink-0', className)}>
+      <select aria-label={label} value={value} onChange={(e) => onChange(e.target.value as T)} className="appearance-none bg-transparent pr-4 text-right">
+        {options.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
+      </select>
+      <svg viewBox="0 0 10 6" className="w-2.5 h-1.5 absolute right-0 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M1 1l4 4 4-4" /></svg>
+    </label>
+  );
+}
+
 export function Card({ children, className, onClick }: { children: ReactNode; className?: string; onClick?: () => void }) {
   return (
     <div onClick={onClick} className={cx('bg-white border-b border-ink-900', onClick && 'cursor-pointer active:bg-ink-100/40', className)}>

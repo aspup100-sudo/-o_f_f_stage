@@ -8,7 +8,7 @@ import { answerSpaceQuestion, applySpace, toggleSaveSpace, askSpaceQuestion, ope
 import { displayName, manwon, soonOpenDays, period, popupById, spaceById, teamById, teamsOfBrand, spaceLatLng, trustScore } from '@/store/logic';
 import { KakaoMap } from '@/components/KakaoMap';
 import { ScreenTitle, TrustLine } from '@/components/common';
-import { Avatar, Button, Card, Chip, Segmented, cx, Demo, Empty, Field, GradeBadge, Icon, inputCls, Sheet, StatusPill, SubHeader, Swatch, Tag, textareaCls, Ic } from '@/components/ui';
+import { SortSelect, Avatar, Button, Card, Chip, Segmented, cx, Demo, Empty, Field, GradeBadge, Icon, inputCls, Sheet, StatusPill, SubHeader, Swatch, Tag, textareaCls, Ic } from '@/components/ui';
 import { canSoloRental, FACILITIES, REGIONS, SPACE_KEYWORDS, type Region, type Space } from '@/types';
 import { DualRange } from '@/components/DualRange';
 import { SpaceMap } from '@/components/SpaceMap';
@@ -230,12 +230,7 @@ export function SpacesTab({ initial }: { initial?: '찜' }) {
       </Sheet>
       <div className="px-4 mb-2 flex items-center justify-between">
         <span className="text-[13px] text-ink-500">{region ? `${region} ` : ''}공간 <b className="text-ink-900">{list.length}</b>곳</span>
-        <select aria-label="공간 정렬" value={sort} onChange={(e) => setSort(e.target.value as typeof sort)} className="h-8 rounded-full border border-ink-300 bg-white px-2.5 text-[12px]">
-          <option value="base">기본순</option>
-          <option value="fee">대관료 낮은 순</option>
-          <option value="open">비는 날 많은 순</option>
-          <option value="deal">할인 중 먼저</option>
-        </select>
+        <SortSelect label="공간 정렬" value={sort} onChange={setSort} options={[{ key: 'base', label: '기본순' }, { key: 'fee', label: '대관료 낮은 순' }, { key: 'open', label: '비는 날 많은 순' }, { key: 'deal', label: '할인 중 먼저' }]} />
       </div>
       <div className="px-4 space-y-3">
         {list.map((s) => <SpaceCard key={s.id} db={db} s={s} />)}

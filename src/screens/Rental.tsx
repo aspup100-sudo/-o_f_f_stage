@@ -4,7 +4,7 @@ import { back, navigate, switchRole } from '@/store/store';
 import { advanceRental, decideRental, lowerPartnerPrice, openDirectChat, rateRental, requestRental, saveRentalItem, toggleRentalItem } from '@/store/actions';
 import { brandById, dday, discountPct, josa, missingForSpace, partnerRating, period, rentalDays, rentalQuote, spaceById, teamById, teamsOfBrand, won } from '@/store/logic';
 import { ScreenTitle } from '@/components/common';
-import { Avatar, Button, Card, Chip, cx, Demo, Empty, Field, inputCls, Segmented, Sheet, Stars, SubHeader, Swatch, Tag, textareaCls, Ic } from '@/components/ui';
+import { SortSelect, Avatar, Button, Card, Chip, cx, Demo, Empty, Field, inputCls, Segmented, Sheet, Stars, SubHeader, Swatch, Tag, textareaCls, Ic } from '@/components/ui';
 import { RENTAL_CATEGORIES, REGIONS, type RentalCategory, type RentalItem, type RentalOrder, type RentalOrderStatus, type Team } from '@/types';
 import { DEMO_TODAY, type DB } from '@/data/mock';
 
@@ -106,11 +106,7 @@ export function RentalDeals() {
       </div>
       <div className="flex items-center justify-between mt-3 mb-2">
         <span className="text-[13px] text-ink-500">제휴 업체 <b className="text-ink-900">{rows.length}</b>곳</span>
-        <select aria-label="렌탈 정렬" value={sort} onChange={(e) => setSort(e.target.value as typeof sort)} className="h-8 rounded-full border border-ink-300 bg-white px-2.5 text-[12px]">
-          <option value="off">할인 큰 순</option>
-          <option value="rating">별점 높은 순</option>
-          <option value="done">대여 많은 순</option>
-        </select>
+        <SortSelect label="렌탈 정렬" value={sort} onChange={setSort} options={[{ key: 'off', label: '할인 큰 순' }, { key: 'rating', label: '별점 높은 순' }, { key: 'done', label: '대여 많은 순' }]} />
       </div>
       <div className="space-y-3">
         {rows.map(({ p, items, r, maxOff }) => (

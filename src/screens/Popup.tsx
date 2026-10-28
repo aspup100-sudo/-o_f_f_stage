@@ -7,7 +7,7 @@ import { checkIn, claimStampReward, followAll, STAMP_GOAL, toggleWaitlist, write
 import { avg, brandById, dday, md, displayName, openNow, period, popupById, spaceById, spaceLatLng, teamById, waitCount } from '@/store/logic';
 import { KakaoMap, kakaoMapEnabled, type MapPin } from '@/components/KakaoMap';
 import { BrandLogo, PopupBannerCard, ScreenTitle, ThemeTagList } from '@/components/common';
-import { Button, Card, Chip, cx, Demo, Empty, inputCls, Segmented, Sheet, Stars, SubHeader, Swatch, Tabs, textareaCls, Ic, Icon } from '@/components/ui';
+import { SortSelect, Button, Card, Chip, cx, Demo, Empty, inputCls, Segmented, Sheet, Stars, SubHeader, Swatch, Tabs, textareaCls, Ic, Icon } from '@/components/ui';
 import type { DB } from '@/data/mock';
 import type { Popup } from '@/types';
 import { BrandActions } from './BrandActions';
@@ -173,9 +173,7 @@ export function PopupDetail({ id }: { id: string }) {
                   ))}
                 </>
               )}
-              <select aria-label="리뷰 정렬" value={sort} onChange={(e) => setSort(e.target.value as ReviewSort)} className="ml-auto shrink-0 h-8 rounded-full border border-ink-300 bg-white px-2.5 text-[12px]">
-                {REVIEW_SORTS.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
-              </select>
+              <SortSelect label="리뷰 정렬" className="ml-auto" value={sort} onChange={setSort} options={REVIEW_SORTS} />
             </div>
           )}
           {tab === 'combo' && <ComboReviewList db={db} popupIds={[p.id]} sort={sort} />}
