@@ -21,7 +21,7 @@ export function InstaThumb({ post, demo }: { post: InstaPost; demo?: boolean }) 
   const href = post.permalink || `https://www.instagram.com/${OFFICIAL_INSTAGRAM}/`;
   return (
     <a href={href} target="_blank" rel="noreferrer" className="block shrink-0 w-[200px] self-start text-left">
-      <div className="relative aspect-[4/5] bg-ink-100 overflow-hidden rounded">
+      <div className="relative aspect-square bg-ink-100 overflow-hidden rounded">
         <img src={post.imageUrl} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
         <span className="absolute top-2 left-2 bg-white text-ink-900 text-[11px] font-bold px-1.5 py-0.5">@{OFFICIAL_INSTAGRAM}</span>
         {post.mediaType === 'VIDEO' && <span className="absolute top-2 right-2 bg-white text-ink-900 text-[11px] font-bold px-1.5 py-0.5">영상</span>}
