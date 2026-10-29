@@ -593,7 +593,7 @@ export default function Room3DGL(props: Room3DProps) {
       W = p.W; H = p.H;
       // 바닥
       wood.repeat.set(W / 2.1, H / 4.2);
-      const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, H), new THREE.MeshStandardMaterial({ map: wood, roughness: 0.62 }));
+      const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, H), new THREE.MeshPhysicalMaterial({ map: wood, roughness: 0.5, clearcoat: 0.35, clearcoatRoughness: 0.35 }));
       floor.rotation.x = -Math.PI / 2;
       floor.position.set(W / 2, 0, H / 2);
       floor.receiveShadow = true;
@@ -753,14 +753,51 @@ export default function Room3DGL(props: Room3DProps) {
             dash.position.copy(a).addScaledVector(dir, 0.15 + k * 0.3);
             g.add(dash);
           }
+          // 화살촉은 긴 구간 가운데와 마지막 끝에만
+          const last = i === p.path.length - 2;
+          if (!last && len < 1.2) continue;
           const tri = new THREE.Shape();
           tri.moveTo(0.12, 0); tri.lineTo(-0.06, 0.08); tri.lineTo(-0.06, -0.08); tri.closePath();
           const arrow = new THREE.Mesh(new THREE.ShapeGeometry(tri), red);
           arrow.rotation.x = -Math.PI / 2;
           arrow.rotation.z = -Math.atan2(dir.z, dir.x);
-          arrow.position.copy(c).addScaledVector(dir, -0.1);
+          arrow.position.copy(last ? c.clone().addScaledVector(dir, -0.1) : a.clone().addScaledVector(dir, len / 2));
           g.add(arrow);
         }
+        // 크기를 가늠할 수 있게 동선 위에 손님 두 명(건축 모형처럼 무채색)
+        const body = new THREE.MeshStandardMaterial({ color: '#d8d4cd', roughness: 0.8 });
+        const person = (x: number, z: number, face: number, h: number) => {
+          const f = new THREE.Group();
+          const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.16, h - 0.62, 6, 12), body);
+          torso.scale.z = 0.62;
+          torso.position.y = (h - 0.62) / 2 + 0.16 + 0.05;
+          const head = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 12), body);
+          head.position.y = h - 0.11;
+          [torso, head].forEach((m) => { m.castShadow = true; f.add(m); });
+          f.position.set(x, 0, z);
+          f.rotation.y = face;
+          f.userData.person = true;
+          g.add(f);
+        };
+        const at = (t: number) => {
+          const pts = p.path!;
+          const segs = pts.slice(1).map((q, i) => Math.hypot(q.x - pts[i].x, q.y - pts[i].y));
+          let d = segs.reduce((x, y) => x + y, 0) * t;
+          for (let i = 0; i < segs.length; i++) {
+            if (d <= segs[i] || i === segs.length - 1) {
+              const k = Math.min(1, d / (segs[i] || 1));
+              const a = pts[i];
+              const b = pts[i + 1];
+              return { x: a.x + (b.x - a.x) * k, z: a.y + (b.y - a.y) * k, face: Math.atan2(b.x - a.x, b.y - a.y) };
+            }
+            d -= segs[i];
+          }
+          return { x: pts[0].x, z: pts[0].y, face: 0 };
+        };
+        const p1 = at(0.3);
+        const p2 = at(0.68);
+        person(p1.x, p1.z, p1.face, 1.68);
+        person(p2.x, p2.z, p2.face, 1.6);
         scene.add(g);
         pathObj = g;
       }
