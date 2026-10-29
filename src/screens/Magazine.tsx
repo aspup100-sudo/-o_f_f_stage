@@ -5,6 +5,7 @@ import { navigate, replace } from '@/store/store';
 import { markMagazineRead, publishMagazine, toggleMagazineHidden, toggleMagazineLike } from '@/store/actions';
 import { daysUntil } from '@/store/logic';
 import { ScreenTitle } from '@/components/common';
+import { InstaThumb, instaFeed } from './Insta';
 import { pickPhotos } from '@/components/photoPick';
 import { Button, Card, Chip, cx, Empty, Field, Icon, inputCls, SubHeader, Tag, textareaCls } from '@/components/ui';
 import { MAGAZINE_CATEGORIES, MAGAZINE_FOOTERS, MAGAZINE_HEADLINES, OFFICIAL_INSTAGRAM, REGIONS, normalizeInstagramUrl, type MagazineCard, type MagazineCategory, type MagazinePost, type Region } from '@/types';
@@ -118,6 +119,21 @@ export function MagazineList() {
       <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-3">
         {(['전체', ...MAGAZINE_CATEGORIES] as const).map((c) => <Chip key={c} active={cat === c} onClick={() => setCat(c)}>{c}</Chip>)}
       </div>
+      {cat === '전체' && (() => {
+        // 공식 인스타에 올린 글 (서버 함수가 15분마다 넣어 준다)
+        const f = instaFeed(db);
+        return (
+          <section className="pb-5">
+            <div className="flex items-center justify-between mb-2.5">
+              <h2 className="text-[17px] font-extrabold tracking-tight">공식 인스타그램</h2>
+              <a href={`https://www.instagram.com/${OFFICIAL_INSTAGRAM}/`} target="_blank" rel="noreferrer" className="text-xs text-ink-500">@{OFFICIAL_INSTAGRAM} ›</a>
+            </div>
+            <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
+              {f.posts.slice(0, 8).map((p) => <InstaThumb key={p.id} post={p} demo={f.demo} />)}
+            </div>
+          </section>
+        );
+      })()}
       <div className="grid grid-cols-2 gap-x-3 gap-y-5">
         {list.map((m) => <MagazineThumb key={m.id} post={m} wide />)}
       </div>
