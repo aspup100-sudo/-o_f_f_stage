@@ -9,7 +9,7 @@ import { askAi, type LayoutOut, type LayoutZone } from '@/store/ai';
 import { newId } from '@/store/store';
 import { brandCoverSrc, spaceSrc } from '@/data/photos';
 import { pickPhotos } from '@/components/photoPick';
-import { AiSource, Button, cx } from '@/components/ui';
+import { AiSource, Button, cx, Sheet } from '@/components/ui';
 import type { BrandProfile, LayoutBox, LayoutKind, Team, TeamLayout } from '@/types';
 
 // 실사 3D(three.js)는 배치 탭을 열 때만 불러온다. WebGL이 없는 기기는 가벼운 3D로 보여 준다
@@ -25,7 +25,17 @@ const COUNTER = { w: 1.6, d: 0.6 };
 const DOOR = 1.4;
 const TABLE = { w: 1.1, d: 0.9 };
 // 3D에서 물건 높이(m)
-const HEIGHT: Record<LayoutKind, number> = { hanger: 1.5, table: 0.8, fit: 2.1, counter: 1.0, mirror: 1.8, photo: 2.2 };
+const HEIGHT: Record<LayoutKind, number> = { hanger: 1.5, table: 0.8, fit: 2.1, counter: 1.0, mirror: 1.8, photo: 2.2, mannequin: 1.65, shelf: 1.8, standmirror: 1.75, plant: 1.1, bench: 0.45 };
+// 더 놓을 수 있는 집기(크기 m, 회전 0일 때)
+const EXTRA: { kind: LayoutKind; label: string; w: number; h: number; brand: boolean }[] = [
+  { kind: 'mannequin', label: '마네킹', w: 0.5, h: 0.5, brand: true },
+  { kind: 'shelf', label: '벽 선반', w: 1.2, h: 0.35, brand: true },
+  { kind: 'standmirror', label: '전신 거울', w: 0.6, h: 0.45, brand: false },
+  { kind: 'plant', label: '화분', w: 0.5, h: 0.5, brand: false },
+  { kind: 'bench', label: '벤치', w: 1.2, h: 0.45, brand: false },
+];
+/** 브랜드를 정해 둘 수 있는 물건 */
+export const BRAND_KINDS: LayoutKind[] = ['hanger', 'table', 'photo', 'mannequin', 'shelf'];
 // AI가 놓을 수 있는 물건 크기(m, 회전 0일 때)
 const SIZE = { hanger: { w: HANGER, h: DEPTH }, table: { w: TABLE.w, h: TABLE.d }, photo: { w: 2.0, h: 0.3 } } as const;
 const WALL = 2.4;
@@ -128,7 +138,7 @@ export function stopPath(W: number, H: number, boxes: LayoutBox[]) {
   const dist = (a: P, b: P) => Math.hypot(a.x - b.x, a.y - b.y);
   const near = (pts: P[], to: P) => pts.reduce((a, c) => (dist(to, c) < dist(to, a) ? c : a));
   const C = { x: W / 2, y: H / 2 };
-  const show = boxes.filter((b) => b.kind === 'hanger' || b.kind === 'table' || b.kind === 'photo');
+  const show = boxes.filter((b) => BRAND_KINDS.includes(b.kind));
   const start: P = { x: W / 2, y: H - 0.3 };
   const counter = boxes.find((x) => x.kind === 'counter');
   const fit = boxes.find((x) => x.kind === 'fit');
@@ -365,6 +375,9 @@ function partsOf(b: LayoutBox, photo: string | undefined, color: string): Part[]
   } else if (b.kind === 'counter') {
     out.push({ ...b, d: b.h, z: 0, h: 0.95, side: WHITE, top: WOOD });
     out.push({ x: b.x + b.w - 0.45, y: b.y + 0.15, z: 0.95, w: 0.3, d: 0.25, h: 0.12, side: { background: '#3a3a3f' } });
+  } else {
+    // 나머지 집기는 단순한 상자로
+    out.push({ ...b, d: b.h, z: 0, h: HEIGHT[b.kind], side: BRAND_KINDS.includes(b.kind) ? { background: color } : b.kind === 'plant' ? { background: '#6f8a62' } : WOOD });
   }
   return out;
 }
@@ -475,8 +488,8 @@ function Room3D({ W, H, boxes, angle, wallPhoto, colorOf, photoOf, nameOf, selec
 
 // ───────── 평면(끌어서 옮기기) ─────────
 
-function Plan2D({ W, H, boxes, colorOf, initialOf, selected, onPick, onMove, path }: {
-  W: number; H: number; boxes: LayoutBox[]; path?: { x: number; y: number }[]; colorOf: (id?: string) => string; initialOf: (id?: string) => string;
+function Plan2D({ W, H, boxes, colorOf, initialOf, selected, onPick, onMove, path, bad }: {
+  W: number; H: number; boxes: LayoutBox[]; bad?: Set<string>; path?: { x: number; y: number }[]; colorOf: (id?: string) => string; initialOf: (id?: string) => string;
   selected: string | null; onPick: (id: string) => void; onMove: (id: string, x: number, y: number, done: boolean) => void;
 }) {
   const svg = useRef<SVGSVGElement>(null);
@@ -523,14 +536,14 @@ function Plan2D({ W, H, boxes, colorOf, initialOf, selected, onPick, onMove, pat
       {shown.map((b) => {
         // 계산대·피팅룸·거울도 옮길 수 있다
         const movable = true;
-        const brandItem = b.kind === 'hanger' || b.kind === 'table' || b.kind === 'photo';
+        const brandItem = BRAND_KINDS.includes(b.kind);
         return (
           <g key={b.id}
             onPointerDown={movable ? (e) => { svg.current?.setPointerCapture?.(e.pointerId); const p = toM(e); drag.current = { id: b.id, dx: p.x - b.x, dy: p.y - b.y, moved: false }; } : undefined}
             style={{ cursor: movable ? 'grab' : undefined }}>
             <rect x={b.x * scale} y={b.y * scale} width={b.w * scale} height={b.h * scale}
-              fill={b.kind === 'fit' ? '#fff' : b.kind === 'counter' ? '#e4e4e7' : b.kind === 'mirror' ? '#8e8e96' : b.kind === 'photo' && !b.brandId ? '#e8dfd2' : colorOf(b.brandId)}
-              stroke={selected === b.id ? '#111' : b.kind === 'mirror' ? 'none' : '#33333a'} strokeWidth={selected === b.id ? 2.5 : 1} strokeDasharray={b.kind === 'fit' ? '4 3' : undefined} />
+              fill={b.kind === 'fit' ? '#fff' : b.kind === 'counter' ? '#e4e4e7' : b.kind === 'mirror' || b.kind === 'standmirror' ? '#8e8e96' : b.kind === 'plant' ? '#b9cdb0' : b.kind === 'bench' ? '#e3d3bd' : b.kind === 'photo' && !b.brandId ? '#e8dfd2' : colorOf(b.brandId)}
+              stroke={bad?.has(b.id) && !live ? '#dc2626' : selected === b.id ? '#111' : b.kind === 'mirror' ? 'none' : '#33333a'} strokeWidth={selected === b.id || (bad?.has(b.id) && !live) ? 2.5 : 1} strokeDasharray={b.kind === 'fit' ? '4 3' : undefined} />
             {b.label && <text x={(b.x + b.w / 2) * scale} y={(b.y + b.h / 2) * scale + 4} textAnchor="middle" fontSize={10} fill="#33333a" pointerEvents="none">{b.label}</text>}
             {brandItem && <text x={(b.x + b.w / 2) * scale} y={(b.y + b.h / 2) * scale + 4} textAnchor="middle" fontSize={10} fontWeight={700} fill="#33333a" pointerEvents="none">{initialOf(b.brandId)}</text>}
           </g>
@@ -541,7 +554,8 @@ function Plan2D({ W, H, boxes, colorOf, initialOf, selected, onPick, onMove, pat
   );
 }
 
-const FIXTURE_NAME: Partial<Record<LayoutBox['kind'], string>> = { fit: '피팅룸', counter: '계산대', mirror: '거울' };
+const FIXTURE_NAME: Partial<Record<LayoutBox['kind'], string>> = { fit: '피팅룸', counter: '계산대', mirror: '거울', standmirror: '전신 거울', plant: '화분', bench: '벤치' };
+const KIND_NAME: Partial<Record<LayoutBox['kind'], string>> = { hanger: '행거', table: '진열대', photo: '포토존', mannequin: '마네킹', shelf: '벽 선반' };
 
 function ToolButton({ children, onClick, disabled }: { children: ReactNode; onClick: () => void; disabled?: boolean }) {
   return <button disabled={disabled} onClick={onClick} className="h-9 px-3 rounded border border-ink-300 text-[13px] font-semibold text-ink-900 whitespace-nowrap disabled:opacity-40">{children}</button>;
@@ -565,7 +579,19 @@ export function TeamLayoutTab({ team }: { team: Team }) {
   const [asking, setAsking] = useState(false);
   const rot = useRef<{ x: number; a: number; moved: boolean } | null>(null);
 
-  const save = (next: Partial<TeamLayout>) => saveTeamLayout(team.id, { boxes, ...saved, ...next });
+  // 되돌리기: 저장하기 직전 배치를 쌓아 둔다(이 화면에 있는 동안만, 최대 30번)
+  const [history, setHistory] = useState<(TeamLayout | undefined)[]>([]);
+  const commit = (next: TeamLayout | undefined) => {
+    setHistory((h) => [...h.slice(-29), saved]);
+    saveTeamLayout(team.id, next);
+  };
+  const undo = () => {
+    if (!history.length) return;
+    saveTeamLayout(team.id, history[history.length - 1]);
+    setHistory((h) => h.slice(0, -1));
+    setSel(null);
+  };
+  const save = (next: Partial<TeamLayout>) => commit({ boxes, ...saved, ...next });
   // 물건을 옮기거나 더하거나 빼면 동선을 다시 그린다
   const setBoxes = (next: LayoutBox[]) => save({ boxes: next, path: stopPath(W, H, next) });
   const selected = boxes.find((b) => b.id === sel);
@@ -579,7 +605,7 @@ export function TeamLayoutTab({ team }: { team: Team }) {
   const photoOf = (b: LayoutBox) => {
     if (b.photo) return b.photo;
     const br = brandById(db, b.brandId);
-    return br && (b.kind === 'hanger' || b.kind === 'table') ? brandCoverSrc(br) : undefined;
+    return br && (b.kind === 'hanger' || b.kind === 'table' || b.kind === 'mannequin' || b.kind === 'shelf') ? brandCoverSrc(br) : undefined;
   };
   const wallPhoto = saved?.wallPhoto ?? (sp ? spaceSrc(sp, 0, 800) : '');
 
@@ -591,6 +617,32 @@ export function TeamLayoutTab({ team }: { team: Team }) {
     setBoxes([...boxes, b]);
     setSel(b.id);
     setView('plan');
+  };
+  const [extraOpen, setExtraOpen] = useState(false);
+  // 비어 있는 자리를 찾아 놓는다(가운데부터 바깥으로)
+  const addExtra = (e: (typeof EXTRA)[number]) => {
+    const free = (x: number, y: number) => x >= 0 && y >= 0 && x + e.w <= W && y + e.h <= H && !boxes.some((o) => x < o.x + o.w + 0.1 && o.x < x + e.w + 0.1 && y < o.y + o.h + 0.1 && o.y < y + e.h + 0.1);
+    let spot = { x: W / 2 - e.w / 2, y: H / 2 - e.h / 2 };
+    let size = { w: e.w, h: e.h };
+    // 벽 선반은 벽에 붙인다: 맞은편 벽 → 왼쪽 벽(뒤판이 벽 쪽을 보게)
+    const wallSpots = e.kind === 'shelf' ? [
+      ...Array.from({ length: Math.floor((W - e.w) / 0.3) }, (_, i) => ({ x: 0.3 + i * 0.3, y: 0, w: e.w, h: e.h })),
+      ...Array.from({ length: Math.floor((H - e.w - 1) / 0.3) }, (_, i) => ({ x: 0, y: 0.3 + i * 0.3, w: e.h, h: e.w })),
+    ] : [];
+    const freeAt = (c: { x: number; y: number; w: number; h: number }) => c.x >= 0 && c.y >= 0 && c.x + c.w <= W && c.y + c.h <= H && !boxes.some((o) => c.x < o.x + o.w + 0.1 && o.x < c.x + c.w + 0.1 && c.y < o.y + o.h + 0.1 && o.y < c.y + c.h + 0.1);
+    const onWallSpot = wallSpots.find(freeAt);
+    if (onWallSpot) { spot = { x: Math.round(onWallSpot.x * 10) / 10, y: Math.round(onWallSpot.y * 10) / 10 }; size = { w: onWallSpot.w, h: onWallSpot.h }; }
+    else search: for (let r = 0; r < Math.max(W, H); r += 0.3) {
+      for (let a = 0; a < 16; a++) {
+        const x = Math.round((W / 2 - e.w / 2 + Math.cos((a / 16) * Math.PI * 2) * r) * 10) / 10;
+        const y = Math.round((H / 2 - e.h / 2 + Math.sin((a / 16) * Math.PI * 2) * r) * 10) / 10;
+        if (free(x, y)) { spot = { x, y }; break search; }
+      }
+    }
+    const b: LayoutBox = { id: newId('lb'), kind: e.kind, ...spot, ...size, brandId: e.brand ? selected?.brandId ?? members[0]?.brand.id : undefined };
+    setBoxes([...boxes, b]);
+    setSel(b.id);
+    setExtraOpen(false);
   };
   // AI가 물건 개수·위치·포토존·동선까지 정한다. 키가 없거나 결과가 맞지 않으면 규칙 배치로
   const askLayout = async () => {
@@ -604,23 +656,39 @@ export function TeamLayoutTab({ team }: { team: Team }) {
     }, () => ({ items: [], path: [], tips: [] }));
     const fromAi = r.source === 'ai' ? fromAiItems(W, H, fixed, members, r.result) : null;
     if (fromAi) {
-      saveTeamLayout(team.id, { boxes: fromAi.boxes, path: fromAi.path, wallPhoto: saved?.wallPhoto, source: 'ai', tips: r.result.tips.length ? r.result.tips : undefined });
+      commit({ boxes: fromAi.boxes, path: fromAi.path, wallPhoto: saved?.wallPhoto, source: 'ai', tips: r.result.tips.length ? r.result.tips : undefined });
     } else {
       // 예시: 회차를 하나 돌린 규칙 배치로 바꿔 보여 준다
       const plan = planLayout(area, members, team.round + (saved?.source === 'example' ? 2 : 1));
-      saveTeamLayout(team.id, { boxes: plan.boxes, path: plan.path, wallPhoto: saved?.wallPhoto, source: 'example' });
+      commit({ boxes: plan.boxes, path: plan.path, wallPhoto: saved?.wallPhoto, source: 'example' });
     }
     setSel(null);
     setAsking(false);
   };
 
   const aisle = path ? aisleWidth(W, H, boxes, path) : 0;
-  const hangerCount = (id: string) => boxes.filter((b) => b.kind === 'hanger' && b.brandId === id).length;
+  // 겹친 물건(10cm² 넘게 겹치면)
+  const overlaps = new Set<string>();
+  boxes.forEach((a, i) => boxes.slice(i + 1).forEach((b) => { if (overlap(a, b) > 0.01) { overlaps.add(a.id); overlaps.add(b.id); } }));
+  // 브랜드별 차지 면적과 입구에서 거리(공정하게 나눴는지 한눈에)
+  const door = { x: W / 2, y: H };
+  const share = members.map((m) => {
+    const mine = boxes.filter((b) => b.brandId === m.brand.id && BRAND_KINDS.includes(b.kind));
+    const areaM = mine.reduce((t, b) => t + b.w * b.h, 0);
+    const what = [...new Set(mine.map((b) => KIND_NAME[b.kind]))].map((k) => `${k} ${mine.filter((b) => KIND_NAME[b.kind] === k).length}`).join(' · ');
+    const d = mine.length ? Math.min(...mine.map((b) => Math.hypot(b.x + b.w / 2 - door.x, b.y + b.h / 2 - door.y))) : 0;
+    return { id: m.brand.id, name: m.brand.name, what: what || '자리 없음', area: Math.round(areaM * 10) / 10, door: Math.round(d * 10) / 10, raw: areaM };
+  });
+  const totalShare = share.reduce((t, r) => t + r.raw, 0) || 1;
+  share.forEach((r) => Object.assign(r, { pct: Math.round((r.raw / totalShare) * 100) }));
+  const shareMax = Math.max(...share.map((r) => r.raw));
+  const shareMin = Math.min(...share.map((r) => r.raw));
   const tables = boxes.filter((b) => b.kind === 'table');
   const facing = boxes.find((b) => b.kind === 'hanger' && b.y < 0.3);
   const tips = saved?.tips ?? ([
     facing && `입구 맞은편 벽은 들어오자마자 보이는 자리예요. 지금은 ${nameOf(facing.brandId)} 자리예요.`,
     tables.length > 0 && `${[...new Set(tables.map((t) => nameOf(t.brandId)))].join(', ')}는 가운데 진열대에 두어 손님이 만져 보기 쉬워요.`,
+    share.length > 1 && shareMin > 0 && shareMax / shareMin >= 2 && `브랜드끼리 차지한 면적이 2배 넘게 차이 나요. 분담금을 면적에 맞추거나 매대를 옮겨 보세요.`,
     aisle > 0 && `동선에서 가장 좁은 곳이 약 ${Math.min(aisle, 3)}m${aisle > 3 ? ' 넘어요' : '예요'}. ${aisle < 1.2 ? '1.2m보다 좁아 두 사람이 엇갈리기 어려워요.' : '두 사람이 엇갈려 지나갈 수 있어요.'}`,
   ].filter(Boolean) as string[]);
 
@@ -667,7 +735,7 @@ export function TeamLayoutTab({ team }: { team: Team }) {
           </div>
         ) : (
           <div className="px-4 py-3">
-            <Plan2D W={W} H={H} boxes={boxes} path={path} colorOf={color} initialOf={initial} selected={sel}
+            <Plan2D W={W} H={H} boxes={boxes} path={path} bad={overlaps} colorOf={color} initialOf={initial} selected={sel}
               onPick={(id) => setSel(sel === id ? null : id)}
               onMove={(id, x, y, done) => {
                 const next = boxes.map((b) => (b.id === id ? { ...b, x, y } : b));
@@ -681,7 +749,7 @@ export function TeamLayoutTab({ team }: { team: Team }) {
       {selected ? (
         <div className="mt-3 rounded border border-ink-900 p-3">
           <div className="flex items-center justify-between">
-            <div className="text-sm font-bold">{FIXTURE_NAME[selected.kind] ?? `${selected.kind === 'hanger' ? '행거' : selected.kind === 'photo' ? '포토존' : '진열대'} · ${nameOf(selected.brandId) || (selected.kind === 'photo' ? '공용' : '빈 자리')}`}</div>
+            <div className="text-sm font-bold">{FIXTURE_NAME[selected.kind] ?? `${KIND_NAME[selected.kind] ?? '진열대'} · ${nameOf(selected.brandId) || (selected.kind === 'photo' ? '공용' : '빈 자리')}`}</div>
             <button className="text-[12px] text-ink-500" onClick={() => setSel(null)}>닫기</button>
           </div>
           {!FIXTURE_NAME[selected.kind] && (
@@ -698,6 +766,7 @@ export function TeamLayoutTab({ team }: { team: Team }) {
             {!FIXTURE_NAME[selected.kind] && <ToolButton onClick={async () => { const [p] = await pickPhotos(1, 600); if (p) setBoxes(boxes.map((b) => (b.id === selected.id ? { ...b, photo: p } : b))); }}>사진 넣기</ToolButton>}
             <ToolButton onClick={() => setBoxes(boxes.map((b) => (b.id === selected.id ? { ...b, w: b.h, h: b.w, x: Math.min(b.x, W - b.h), y: Math.min(b.y, H - b.w) } : b)))}>돌리기</ToolButton>
             {selected.kind !== 'counter' && <ToolButton onClick={() => { setBoxes(boxes.filter((b) => b.id !== selected.id)); setSel(null); }}>빼기</ToolButton>}
+            <ToolButton onClick={undo} disabled={!history.length}>되돌리기</ToolButton>
           </div>
         </div>
       ) : (
@@ -705,18 +774,39 @@ export function TeamLayoutTab({ team }: { team: Team }) {
           <ToolButton onClick={askLayout} disabled={asking}>{asking ? '배치 받는 중' : 'AI 배치 받기'}</ToolButton>
           <ToolButton onClick={() => add('hanger')}>+ 행거</ToolButton>
           <ToolButton onClick={() => add('table')}>+ 진열대</ToolButton>
+          <ToolButton onClick={() => setExtraOpen(true)}>+ 더 놓기</ToolButton>
+          <ToolButton onClick={undo} disabled={!history.length}>되돌리기</ToolButton>
           <ToolButton onClick={async () => { const [p] = await pickPhotos(1, 900); if (p) save({ wallPhoto: p }); }}>벽 사진</ToolButton>
-          {saved && <ToolButton onClick={() => { saveTeamLayout(team.id, undefined); setSel(null); }}>처음으로</ToolButton>}
+          {saved && <ToolButton onClick={() => { commit(undefined); setSel(null); }}>처음으로</ToolButton>}
         </div>
       )}
       {saved?.source && <div className="mt-2"><AiSource source={saved.source} /></div>}
 
-      <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1.5 text-[12px]">
-        {members.map((m) => (
-          <span key={m.brand.id} className="flex items-center gap-1.5">
-            <span className="w-3 h-3 border border-ink-700" style={{ background: color(m.brand.id) }} />
-            {m.brand.name} <span className="text-ink-500">{hangerCount(m.brand.id) ? `행거 ${hangerCount(m.brand.id)}` : '진열대'}</span>
-          </span>
+      <Sheet open={extraOpen} onClose={() => setExtraOpen(false)} title="더 놓기">
+        <div className="grid grid-cols-2 gap-2 pb-2">
+          {EXTRA.map((e) => (
+            <button key={e.kind} onClick={() => addExtra(e)} className="h-14 rounded border border-ink-300 text-left px-3">
+              <div className="text-[14px] font-bold">{e.label}</div>
+              <div className="text-[11px] text-ink-500">{e.w}×{e.h}m{e.brand ? ' · 브랜드 지정' : ''}</div>
+            </button>
+          ))}
+        </div>
+      </Sheet>
+
+      {overlaps.size > 0 && (
+        <div className="mt-3 text-[13px] font-semibold text-red-600">겹친 물건이 {overlaps.size}개 있어요. 평면에서 빨간 테두리를 옮겨 주세요.</div>
+      )}
+
+      {/* 브랜드별: 차지한 바닥 면적, 입구에서 가장 가까운 매대까지 거리 */}
+      <div className="mt-3 border-t border-ink-200">
+        {share.map((r) => (
+          <div key={r.id} className="flex items-center text-[12px] py-1.5 border-b border-ink-100">
+            <span className="w-3 h-3 border border-ink-700 mr-1.5 shrink-0" style={{ background: color(r.id) }} />
+            <span className="font-semibold w-20 truncate">{r.name}</span>
+            <span className="text-ink-500 flex-1 truncate">{r.what}</span>
+            <span className="w-16 text-right">{r.area}㎡ <span className="text-ink-400">{(r as typeof r & { pct: number }).pct}%</span></span>
+            <span className="w-20 text-right text-ink-500">입구 {r.door}m</span>
+          </div>
         ))}
       </div>
 

@@ -344,7 +344,7 @@ export interface Team {
   layout?: TeamLayout; // 팀이 직접 고친 배치. 없으면 자동 배치
 }
 
-export type LayoutKind = 'hanger' | 'table' | 'fit' | 'counter' | 'mirror' | 'photo';
+export type LayoutKind = 'hanger' | 'table' | 'fit' | 'counter' | 'mirror' | 'photo' | 'mannequin' | 'shelf' | 'standmirror' | 'plant' | 'bench';
 export interface LayoutBox {
   id: ID;
   kind: LayoutKind;

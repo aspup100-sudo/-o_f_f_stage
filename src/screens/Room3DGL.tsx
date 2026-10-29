@@ -260,6 +260,9 @@ function aoMat() {
   return new THREE.MeshBasicMaterial({ map: aoTex, transparent: true, opacity: 0.22, depthWrite: false });
 }
 
+// 브랜드를 정해 둘 수 있는 물건(이름표·조명·동선 대상)
+const BRAND_KINDS: LayoutBox['kind'][] = ['hanger', 'table', 'photo', 'mannequin', 'shelf'];
+
 // 바닥에 닿는 부분의 부드러운 그림자(가장자리로 갈수록 옅게)
 let contactTex: THREE.Texture | null = null;
 function contactShadow(w: number, d: number, strength: number) {
@@ -455,6 +458,49 @@ function buildItem(b: LayoutBox, photo: string | undefined, color: string, mats:
       const st = add(new THREE.CylinderGeometry(0.003, 0.003, 0.32, 5), stem, vx + o, 1.24, vz);
       st.rotation.z = o * 3 + (i - 1) * 0.08;
     });
+  } else if (b.kind === 'mannequin') {
+    // 받침 + 몸통(브랜드 옷을 입힌다) + 머리 없는 목
+    add(new THREE.CylinderGeometry(0.16, 0.18, 0.02, 24), frame, 0, 0.01, 0);
+    add(new THREE.CylinderGeometry(0.012, 0.012, 0.75, 8), frame, 0, 0.4, 0);
+    const skin = new THREE.MeshStandardMaterial({ color: '#efe9e1', roughness: 0.45 });
+    const legs = add(new THREE.CylinderGeometry(0.1, 0.07, 0.12, 16), skin, 0, 0.82, 0);
+    legs.scale.z = 0.7;
+    const cloth = clothMat(photo, shade(color, 0.85), 1, 0.9);
+    const torso = add(new THREE.CylinderGeometry(0.17, 0.14, 0.62, 20), cloth, 0, 1.18, 0);
+    torso.scale.z = 0.62;
+    const shoulder = add(new THREE.SphereGeometry(0.17, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), cloth, 0, 1.49, 0);
+    shoulder.scale.set(1.25, 0.45, 0.62);
+    add(new THREE.CylinderGeometry(0.035, 0.04, 0.12, 12), skin, 0, 1.6, 0);
+  } else if (b.kind === 'shelf') {
+    // 벽에 붙이는 3단 선반: 개어 놓은 옷과 상자
+    const plank = mats[look.top] ?? mats.wood;
+    [0.9, 1.3, 1.7].forEach((y, k) => {
+      add(new THREE.BoxGeometry(L, 0.03, D), plank, 0, y, 0);
+      for (let i = 0; i < Math.max(2, Math.round(L / 0.35)); i++) {
+        const x = -L / 2 + 0.2 + i * 0.35;
+        if (x > L / 2 - 0.15) break;
+        if ((i + k) % 3 === 2) add(new THREE.BoxGeometry(0.2, 0.14, D * 0.7), new THREE.MeshStandardMaterial({ color: shade(color, 0.95 + (i % 2) * 0.05), roughness: 0.7 }), x, y + 0.085, 0);
+        else for (let j = 0; j < 3; j++) add(new THREE.BoxGeometry(0.26, 0.035, D * 0.75), clothMat(photo, shade(color, 0.8), i + j + k, 0.95), x, y + 0.033 + j * 0.036, 0);
+      }
+    });
+    // 뒤판과 양옆 기둥(벽에서 떼어 놓아도 서 있게)
+    add(new THREE.BoxGeometry(L, 1.9, 0.02), mats.white, 0, 0.95, -D / 2 + 0.01);
+    [-L / 2 + 0.015, L / 2 - 0.015].forEach((x) => add(new THREE.BoxGeometry(0.03, 1.9, D), frame, x, 0.95, 0));
+  } else if (b.kind === 'standmirror') {
+    // 세워 두는 전신 거울(반사는 주변 빛으로만)
+    inner.rotation.y = b.w >= b.h ? 0 : Math.PI / 2;
+    add(new THREE.BoxGeometry(L, 1.7, 0.04), mats.woodDark, 0, 0.9, 0);
+    const glass = add(new THREE.BoxGeometry(L - 0.06, 1.62, 0.01), new THREE.MeshStandardMaterial({ color: '#e7ecef', metalness: 1, roughness: 0.04 }), 0, 0.9, 0.022);
+    glass.castShadow = false;
+    const leg = add(new THREE.BoxGeometry(0.03, 1.2, 0.03), mats.woodDark, 0, 0.6, -0.25);
+    leg.rotation.x = 0.35;
+  } else if (b.kind === 'plant') {
+    const pl = buildPlant(0, 0, mats);
+    pl.traverse((o) => { o.userData.boxId = b.id; });
+    inner.add(pl);
+  } else if (b.kind === 'bench') {
+    add(new THREE.BoxGeometry(L, 0.06, D), mats.wood, 0, 0.44, 0);
+    [-L / 2 + 0.08, L / 2 - 0.08].forEach((x) => add(new THREE.BoxGeometry(0.05, 0.42, D - 0.06), mats.woodDark, x, 0.21, 0));
   } else if (b.kind === 'photo') {
     add(new THREE.BoxGeometry(L, 2.2, 0.06), photoMat(photo, color === '#f4f4f5' ? '#e7ddd0' : color, 0.7), 0, 1.1, 0);
     // 링 조명
@@ -463,7 +509,7 @@ function buildItem(b: LayoutBox, photo: string | undefined, color: string, mats:
     add(new THREE.CylinderGeometry(0.012, 0.012, 1.5, 8), mats.metal, 0, 0.75, 1.1);
   }
   // 바닥 접지 그림자
-  if (b.kind === 'hanger' || b.kind === 'table' || b.kind === 'counter' || b.kind === 'photo') {
+  if (b.kind !== 'fit' && b.kind !== 'mirror') {
     const sh = contactShadow(L + 0.35, D + 0.35, b.kind === 'hanger' ? 0.22 : 0.3);
     inner.add(sh);
   }
@@ -710,7 +756,7 @@ export default function Room3DGL(props: Room3DProps) {
       // 행거·진열대마다 천장 레일에서 비추는 핀 조명 (최대 8개)
       pins.forEach((o) => scene.remove(o));
       pins.length = 0;
-      p.boxes.filter((b) => b.kind === 'hanger' || b.kind === 'table' || b.kind === 'photo').slice(0, 8).forEach((b) => {
+      p.boxes.filter((b) => BRAND_KINDS.includes(b.kind)).slice(0, 8).forEach((b) => {
         const cx = b.x + b.w / 2;
         const cz = b.y + b.h / 2;
         const railZ = Math.abs(cz - H * 0.3) < Math.abs(cz - H * 0.7) ? H * 0.3 : H * 0.7;
@@ -764,16 +810,53 @@ export default function Room3DGL(props: Room3DProps) {
           arrow.position.copy(last ? c.clone().addScaledVector(dir, -0.1) : a.clone().addScaledVector(dir, len / 2));
           g.add(arrow);
         }
-        // 크기를 가늠할 수 있게 동선 위에 손님 두 명(건축 모형처럼 무채색)
-        const body = new THREE.MeshStandardMaterial({ color: '#d8d4cd', roughness: 0.8 });
-        const person = (x: number, z: number, face: number, h: number) => {
+        // 크기를 가늠할 수 있게 동선 위에 손님 두 명(다리·팔·머리가 있는 사람 모양, 옷 색은 사람마다)
+        const mat = (c: string, r = 0.8) => new THREE.MeshStandardMaterial({ color: c, roughness: r });
+        const skin = mat('#e0bfa2', 0.6);
+        const hairM = mat('#2a221d', 0.7);
+        const shoeM = mat('#26262a', 0.5);
+        const person = (x: number, z: number, face: number, h: number, look: { top: string; bottom: string; long?: boolean; skirt?: boolean }) => {
           const f = new THREE.Group();
-          const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.16, h - 0.62, 6, 12), body);
-          torso.scale.z = 0.62;
-          torso.position.y = (h - 0.62) / 2 + 0.16 + 0.05;
-          const head = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 12), body);
-          head.position.y = h - 0.11;
-          [torso, head].forEach((m) => { m.castShadow = true; f.add(m); });
+          const k = h / 1.7;
+          const put = (geo: THREE.BufferGeometry, m: THREE.Material, px: number, py: number, pz: number, rx = 0, rz = 0) => {
+            const o = new THREE.Mesh(geo, m);
+            o.position.set(px * k, py * k, pz * k);
+            o.rotation.set(rx, 0, rz);
+            o.scale.setScalar(k);
+            o.castShadow = true;
+            f.add(o);
+            return o;
+          };
+          const top = mat(look.top, 0.9);
+          const bottom = mat(look.bottom, 0.85);
+          // 다리(한 발 살짝 앞으로)와 신발
+          [[-0.075, 0.08], [0.075, -0.06]].forEach(([lx, st]) => {
+            put(new THREE.CylinderGeometry(0.065, 0.05, 0.82, 12), bottom, lx, 0.47, st * 0.5, -st * 0.5);
+            put(new THREE.BoxGeometry(0.09, 0.06, 0.24), shoeM, lx, 0.03, st + 0.04);
+          });
+          if (look.skirt) put(new THREE.CylinderGeometry(0.17, 0.26, 0.42, 20), bottom, 0, 0.7, 0);
+          // 골반·몸통·어깨
+          const hip = put(new THREE.CylinderGeometry(0.16, 0.15, 0.16, 18), bottom, 0, 0.9, 0);
+          hip.scale.z = 0.62 * k;
+          const torso = put(new THREE.CylinderGeometry(0.19, 0.16, 0.5, 20), top, 0, 1.2, 0);
+          torso.scale.z = 0.6 * k;
+          const sh = put(new THREE.SphereGeometry(0.19, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), top, 0, 1.43, 0);
+          sh.scale.set(1.1 * k, 0.42 * k, 0.6 * k);
+          // 팔(살짝 벌려 내린 모양)과 손
+          [-1, 1].forEach((sd) => {
+            put(new THREE.CylinderGeometry(0.05, 0.042, 0.6, 10), top, sd * 0.235, 1.15, 0, 0, sd * 0.08);
+            put(new THREE.SphereGeometry(0.045, 10, 8), skin, sd * 0.26, 0.82, 0);
+          });
+          // 목·머리·머리카락
+          put(new THREE.CylinderGeometry(0.045, 0.05, 0.1, 10), skin, 0, 1.5, 0);
+          const head = put(new THREE.SphereGeometry(0.1, 20, 16), skin, 0, 1.61, 0.005);
+          head.scale.y = 1.15 * k;
+          const hair = put(new THREE.SphereGeometry(0.106, 20, 12, 0, Math.PI * 2, 0, Math.PI / 1.8), hairM, 0, 1.63, -0.008);
+          hair.scale.y = 1.1 * k;
+          if (look.long) {
+            const back = put(new THREE.CylinderGeometry(0.1, 0.12, 0.3, 14, 1, true, Math.PI * 0.6, Math.PI * 0.8), hairM, 0, 1.47, -0.005);
+            back.rotation.y = Math.PI;
+          }
           f.position.set(x, 0, z);
           f.rotation.y = face;
           f.userData.person = true;
@@ -796,8 +879,8 @@ export default function Room3DGL(props: Room3DProps) {
         };
         const p1 = at(0.3);
         const p2 = at(0.68);
-        person(p1.x, p1.z, p1.face, 1.68);
-        person(p2.x, p2.z, p2.face, 1.6);
+        person(p1.x, p1.z, p1.face, 1.74, { top: '#e8e2d6', bottom: '#3d434c' });
+        person(p2.x, p2.z, p2.face, 1.63, { top: '#7d8a99', bottom: '#cdbfa6', long: true, skirt: true });
         scene.add(g);
         pathObj = g;
       }
@@ -806,7 +889,7 @@ export default function Room3DGL(props: Room3DProps) {
       lh.innerHTML = '';
       const byBrand = new Map<string, { x: number; z: number; n: number; y: number }>();
       p.boxes.forEach((b) => {
-        if (!b.brandId || (b.kind !== 'hanger' && b.kind !== 'table' && b.kind !== 'photo')) return;
+        if (!b.brandId || !BRAND_KINDS.includes(b.kind)) return;
         const l = byBrand.get(b.brandId) ?? { x: 0, z: 0, n: 0, y: 0 };
         l.x += b.x + b.w / 2; l.z += b.y + b.h / 2; l.n += 1; l.y = Math.max(l.y, b.kind === 'table' ? 1.15 : 1.9);
         byBrand.set(b.brandId, l);
