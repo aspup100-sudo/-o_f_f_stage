@@ -129,12 +129,6 @@ export function stopPath(W: number, H: number, boxes: LayoutBox[]) {
   const near = (pts: P[], to: P) => pts.reduce((a, c) => (dist(to, c) < dist(to, a) ? c : a));
   const C = { x: W / 2, y: H / 2 };
   const show = boxes.filter((b) => b.kind === 'hanger' || b.kind === 'table' || b.kind === 'photo');
-  // 가장 가까운 벽까지가 방 짧은 변의 30% 안이면 벽 쪽 매대로 본다
-  const onWall = (b: LayoutBox) => {
-    const cx = b.x + b.w / 2;
-    const cy = b.y + b.h / 2;
-    return Math.min(cx, cy, W - cx, H - cy) < Math.min(W, H) * 0.3;
-  };
   const start: P = { x: W / 2, y: H - 0.3 };
   const counter = boxes.find((x) => x.kind === 'counter');
   const fit = boxes.find((x) => x.kind === 'fit');
@@ -155,8 +149,9 @@ export function stopPath(W: number, H: number, boxes: LayoutBox[]) {
     }
     return pts;
   };
-  const through = (a: P, b: P) => {
-    const n = Math.ceil(dist(a, b) / 0.1);
+  // 물건을 뚫고 가는 구간은 물건 모서리 하나를 돌아서 간다
+  const hits = (a: P, b: P) => {
+    const n = Math.ceil(dist(a, b) / 0.08);
     for (let i = 1; i < n; i++) {
       const x = a.x + ((b.x - a.x) * i) / n;
       const y = a.y + ((b.y - a.y) * i) / n;
@@ -164,52 +159,73 @@ export function stopPath(W: number, H: number, boxes: LayoutBox[]) {
     }
     return false;
   };
-  // 길이 + 물건을 뚫는 구간 벌점이 가장 작은 순서(2-opt: 엇갈리는 구간을 뒤집어 푼다)
+  const corners = boxes.flatMap((r) => [
+    { x: r.x - 0.35, y: r.y - 0.35 }, { x: r.x + r.w + 0.35, y: r.y - 0.35 }, { x: r.x - 0.35, y: r.y + r.h + 0.35 }, { x: r.x + r.w + 0.35, y: r.y + r.h + 0.35 },
+  ]).filter((pt) => inside(pt) && !blocked(pt));
+  const viaMemo = new Map<string, P | null>();
+  const viaOf = (a: P, b: P) => {
+    const k = `${a.x},${a.y},${b.x},${b.y}`;
+    if (!viaMemo.has(k)) {
+      viaMemo.set(k, hits(a, b)
+        ? corners.filter((c) => !hits(a, c) && !hits(c, b)).sort((p, q) => dist(a, p) + dist(p, b) - dist(a, q) - dist(q, b))[0] ?? null
+        : null);
+    }
+    return viaMemo.get(k)!;
+  };
+  const expand = (stops: P[]) => {
+    const out: P[] = [stops[0]];
+    for (let i = 1; i < stops.length; i++) {
+      const v = viaOf(out[out.length - 1], stops[i]);
+      if (v) out.push(v);
+      out.push(stops[i]);
+    }
+    return out;
+  };
+  const merge = (pts: P[]) => pts.reduce<P[]>((acc, pt) => (acc.length && dist(acc[acc.length - 1], pt) <= 0.5 ? acc : [...acc, pt]), []);
+  const side = (a: P, b: P, c: P) => Math.sign((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x));
+  const cross = (a: P, b: P, c: P, d: P) => side(a, b, c) * side(a, b, d) < 0 && side(c, d, a) * side(c, d, b) < 0;
+  const route = (ord: LayoutBox[]) => expand(merge([start, ...place(ord), ...(endPt ? [endPt] : [])]));
+  // 점수: 길이 + 물건 관통·뒤로 홱 꺾기·동선 엇갈림 벌점(모서리로 돌아가는 길까지 넣어서 잰다)
   const cost = (ord: LayoutBox[]) => {
-    const pts = [start, ...place(ord), ...(endPt ? [endPt] : [])];
+    const pts = route(ord);
     let c = 0;
-    for (let i = 1; i < pts.length; i++) c += dist(pts[i - 1], pts[i]) + (through(pts[i - 1], pts[i]) ? 1.5 : 0);
+    for (let i = 1; i < pts.length; i++) c += dist(pts[i - 1], pts[i]) + (hits(pts[i - 1], pts[i]) ? 3 : 0);
+    for (let i = 1; i < pts.length - 1; i++) {
+      const ax = pts[i].x - pts[i - 1].x, ay = pts[i].y - pts[i - 1].y, bx = pts[i + 1].x - pts[i].x, by = pts[i + 1].y - pts[i].y;
+      const cos = (ax * bx + ay * by) / ((Math.hypot(ax, ay) * Math.hypot(bx, by)) || 1);
+      if (cos < -0.5) c += 0.6;
+    }
+    for (let i = 1; i < pts.length; i++) for (let j = i + 2; j < pts.length; j++) if (cross(pts[i - 1], pts[i], pts[j - 1], pts[j])) c += 8;
     // 피팅룸은 끝쪽(계산대 전)에 들르는 게 자연스럽다
     if (fit) c += (ord.length - 1 - ord.indexOf(fit)) * 0.6;
     return c;
   };
-  let best = cost(order);
-  for (let improved = true, guard = 0; improved && guard < 30; guard++) {
-    improved = false;
-    for (let i = 0; i < order.length - 1; i++) {
-      for (let k = i + 1; k < order.length; k++) {
-        const next = [...order.slice(0, i), ...order.slice(i, k + 1).reverse(), ...order.slice(k + 1)];
-        const c = cost(next);
-        if (c < best - 0.01) { order = next; best = c; improved = true; }
+  if (order.length <= 7) {
+    // 들를 곳이 적으면 모든 순서를 다 따져 본다(최대 5040가지)
+    let bestC = Infinity;
+    let bestOrd = order;
+    const perm = (rest: LayoutBox[], acc: LayoutBox[]) => {
+      if (!rest.length) { const c = cost(acc); if (c < bestC) { bestC = c; bestOrd = acc; } return; }
+      rest.forEach((b, i) => perm([...rest.slice(0, i), ...rest.slice(i + 1)], [...acc, b]));
+    };
+    perm(order, []);
+    order = bestOrd;
+  } else {
+    // 많으면 엇갈린 구간 뒤집기(2-opt)와 하나 옮기기(or-opt)를 더 나아지지 않을 때까지
+    let bestC = cost(order);
+    for (let improved = true, guard = 0; improved && guard < 40; guard++) {
+      improved = false;
+      const tryOrd = (next: LayoutBox[]) => { const c = cost(next); if (c < bestC - 0.01) { order = next; bestC = c; improved = true; } };
+      const ord = order;
+      for (let i = 0; i < ord.length - 1; i++) for (let k = i + 1; k < ord.length; k++) tryOrd([...ord.slice(0, i), ...ord.slice(i, k + 1).reverse(), ...ord.slice(k + 1)]);
+      for (let i = 0; i < ord.length; i++) for (let k = 0; k < ord.length; k++) {
+        if (k === i) continue;
+        const rest = ord.filter((_, j) => j !== i);
+        tryOrd([...rest.slice(0, k), ord[i], ...rest.slice(k)]);
       }
     }
   }
-  const stops: P[] = [start];
-  [...place(order), ...(endPt ? [endPt] : [])].forEach((pt) => { if (dist(stops[stops.length - 1], pt) > 0.5) stops.push(pt); });
-  // 4) 물건을 뚫고 지나가는 구간은 모서리로 돌아간다
-  const hits = (a: P, b: P) => {
-    const n = Math.ceil(dist(a, b) / 0.05);
-    for (let i = 1; i < n; i++) {
-      const x = a.x + ((b.x - a.x) * i) / n;
-      const y = a.y + ((b.y - a.y) * i) / n;
-      if (boxes.some((r) => x > r.x - 0.1 && x < r.x + r.w + 0.1 && y > r.y - 0.1 && y < r.y + r.h + 0.1)) return true;
-    }
-    return false;
-  };
-  const corners = boxes.flatMap((r) => [
-    { x: r.x - 0.35, y: r.y - 0.35 }, { x: r.x + r.w + 0.35, y: r.y - 0.35 }, { x: r.x - 0.35, y: r.y + r.h + 0.35 }, { x: r.x + r.w + 0.35, y: r.y + r.h + 0.35 },
-  ]).filter((pt) => inside(pt) && !blocked(pt));
-  const path: P[] = [stops[0]];
-  for (let i = 1; i < stops.length; i++) {
-    const a = path[path.length - 1];
-    const b = stops[i];
-    if (hits(a, b)) {
-      const via = corners.filter((c) => !hits(a, c) && !hits(c, b)).sort((p, q) => dist(a, p) + dist(p, b) - dist(a, q) - dist(q, b))[0];
-      if (via) path.push(via);
-    }
-    path.push(b);
-  }
-  return path.map((pt) => ({ x: Math.round(pt.x * 100) / 100, y: Math.round(pt.y * 100) / 100 }));
+  return route(order).map((pt) => ({ x: Math.round(pt.x * 100) / 100, y: Math.round(pt.y * 100) / 100 }));
 }
 
 /** 기본 동선: 입구 → 가운데 → 왼쪽 벽 → 맞은편 벽 → 피팅룸 → 계산대 */
