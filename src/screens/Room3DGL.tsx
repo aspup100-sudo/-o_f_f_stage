@@ -242,6 +242,24 @@ function shade(color: string, k: number) {
   return new THREE.Color(color).multiplyScalar(k);
 }
 
+// 벽과 바닥이 만나는 구석의 은은한 어두움(구석 그림자 흉내)
+let aoTex: THREE.Texture | null = null;
+function aoMat() {
+  if (!aoTex) {
+    const c = document.createElement('canvas');
+    c.width = 4; c.height = 64;
+    const g = c.getContext('2d')!;
+    const grd = g.createLinearGradient(0, 64, 0, 0);
+    grd.addColorStop(0, 'rgba(0,0,0,1)');
+    grd.addColorStop(0.35, 'rgba(0,0,0,0.35)');
+    grd.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = grd;
+    g.fillRect(0, 0, 4, 64);
+    aoTex = new THREE.CanvasTexture(c);
+  }
+  return new THREE.MeshBasicMaterial({ map: aoTex, transparent: true, opacity: 0.22, depthWrite: false });
+}
+
 // 바닥에 닿는 부분의 부드러운 그림자(가장자리로 갈수록 옅게)
 let contactTex: THREE.Texture | null = null;
 function contactShadow(w: number, d: number, strength: number) {
@@ -577,6 +595,15 @@ export default function Room3DGL(props: Room3DProps) {
         const base = new THREE.Mesh(new THREE.BoxGeometry(len, 0.08, 0.02), mats.base);
         base.position.set(0, 0.04, 0.06);
         g.add(base);
+        // 구석 그림자: 벽 아래쪽과 벽 앞 바닥
+        const aoWall = new THREE.Mesh(new THREE.PlaneGeometry(len, 0.45), aoMat());
+        aoWall.position.set(0, 0.225, 0.072);
+        g.add(aoWall);
+        const aoFloor = new THREE.Mesh(new THREE.PlaneGeometry(len, 0.4), aoMat());
+        aoFloor.rotation.x = -Math.PI / 2;
+        aoFloor.rotation.z = Math.PI;
+        aoFloor.position.set(0, 0.003, 0.25);
+        g.add(aoFloor);
         g.position.set(x, 0, z);
         g.rotation.y = rotY;
         room.add(g);
