@@ -25,14 +25,14 @@ button { -webkit-tap-highlight-color: transparent; }
 .dual-range input[type=range]::-moz-range-thumb { pointer-events: auto; width: 24px; height: 24px; border-radius: 9999px; background: #fff; border: 1px solid #d6d3d1; box-shadow: 0 1px 3px rgba(0,0,0,.18); cursor: pointer; }
 
 /* 구역 띠: 큰 제목 위에 굵은 연회색 띠를 넣어 덩어리를 나눈다 (부모가 좌우 16px 여백일 때) */
-.band { margin-left: -16px; margin-right: -16px; padding: 24px 16px 0; border-top: 10px solid #f2f2f3; }
-.band-section + .band-section, main section + section { border-top: 10px solid #f2f2f3; }
+.band { margin-left: -16px; margin-right: -16px; padding: 24px 16px 0; border-top: 10px solid #e4e4e4; }
+.band-section + .band-section, main section + section { border-top: 10px solid #e4e4e4; }
 main section + section { margin-top: 20px; padding-top: 28px; }
 
 /* 카드 구분: 아래쪽 10px 연회색 띠를 화면 양끝(좌우 여백 16px)까지 */
 .card-band {
-  border-bottom: 10px solid #f2f2f3;
-  border-image: linear-gradient(#f2f2f3, #f2f2f3) 0 0 1 0 / 0 0 10px 0 / 0 16px 0 16px;
+  border-bottom: 10px solid #e4e4e4;
+  border-image: linear-gradient(#e4e4e4, #e4e4e4) 0 0 1 0 / 0 0 10px 0 / 0 16px 0 16px;
 }
 /* 묶음의 마지막 카드는 다음 구역 띠와 겹치지 않게 띠를 뺀다 */
 .card-band:last-child {

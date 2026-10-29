@@ -127,7 +127,7 @@ export function RecruitsTab({ initial }: { initial?: '찜' }) {
               <div key={x.r.id} className={picks.length === 1 ? 'w-full' : 'w-[300px] shrink-0'}><RecruitCard db={db} r={x.r} reasons={x.reasons} /></div>
             ))}
           </div>
-          <h2 className="px-4 pt-6 border-t-[10px] border-[#f2f2f3] text-[20px] font-extrabold tracking-tight mt-8">전체 모집글</h2>
+          <h2 className="px-4 pt-6 border-t-[10px] border-[#e4e4e4] text-[20px] font-extrabold tracking-tight mt-8">전체 모집글</h2>
         </section>
       )}
       <div className="px-4 space-y-3 mt-2">
