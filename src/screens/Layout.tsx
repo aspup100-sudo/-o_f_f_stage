@@ -135,25 +135,57 @@ export function stopPath(W: number, H: number, boxes: LayoutBox[]) {
     const cy = b.y + b.h / 2;
     return Math.min(cx, cy, W - cx, H - cy) < Math.min(W, H) * 0.3;
   };
-  let cur: P = { x: W / 2, y: H - 0.3 };
-  const stops: P[] = [cur];
-  const go = (pt: P) => { if (dist(cur, pt) > 0.7 || stops.length === 1) stops.push(pt); cur = pt; };
-  // 1) 가운데 진열대: 지금 자리에서 가까운 것부터
-  const mid = show.filter((b) => !onWall(b));
-  while (mid.length) {
-    let best = { i: 0, pt: cur, d: Infinity };
-    mid.forEach((b, i) => spots(b).forEach((pt) => { const d = dist(cur, pt); if (d < best.d) best = { i, pt, d }; }));
-    mid.splice(best.i, 1);
-    go(best.pt);
-  }
-  // 2) 벽 쪽 매대: 입구에서 왼쪽 벽 → 맞은편 벽 → 오른쪽 벽 순서로 한 바퀴
+  const start: P = { x: W / 2, y: H - 0.3 };
+  const counter = boxes.find((x) => x.kind === 'counter');
+  const fit = boxes.find((x) => x.kind === 'fit');
+  // 들를 곳: 매대 + 피팅룸. 처음 순서는 입구에서 왼쪽 벽 → 맞은편 → 오른쪽으로 한 바퀴
   const turn = (b: LayoutBox) => ((Math.atan2(b.y + b.h / 2 - C.y, b.x + b.w / 2 - C.x) * 180) / Math.PI - 90 + 720) % 360;
-  show.filter(onWall).sort((a, b) => turn(a) - turn(b)).forEach((b) => go(near(spots(b), C)));
-  // 3) 피팅룸 → 계산대
-  ['fit', 'counter'].forEach((k) => {
-    const b = boxes.find((x) => x.kind === k);
-    if (b) go(near(spots(b), cur));
-  });
+  let order = [...show, ...(fit ? [fit] : [])].sort((a, b) => turn(a) - turn(b));
+  const cand = new Map(order.map((b) => [b.id, spots(b)]));
+  const endPt = counter ? near(spots(counter), C) : null;
+  // 각 물건 앞 서는 자리는 앞뒤 자리와 가까운 쪽으로
+  const place = (ord: LayoutBox[]) => {
+    const pts: P[] = ord.map((b) => near(cand.get(b.id)!, C));
+    for (let pass = 0; pass < 2; pass++) {
+      ord.forEach((b, i) => {
+        const prev = i === 0 ? start : pts[i - 1];
+        const next = i === ord.length - 1 ? endPt ?? prev : pts[i + 1];
+        pts[i] = cand.get(b.id)!.reduce((x, c) => (dist(prev, c) + dist(c, next) < dist(prev, x) + dist(x, next) ? c : x));
+      });
+    }
+    return pts;
+  };
+  const through = (a: P, b: P) => {
+    const n = Math.ceil(dist(a, b) / 0.1);
+    for (let i = 1; i < n; i++) {
+      const x = a.x + ((b.x - a.x) * i) / n;
+      const y = a.y + ((b.y - a.y) * i) / n;
+      if (boxes.some((r) => x > r.x && x < r.x + r.w && y > r.y && y < r.y + r.h)) return true;
+    }
+    return false;
+  };
+  // 길이 + 물건을 뚫는 구간 벌점이 가장 작은 순서(2-opt: 엇갈리는 구간을 뒤집어 푼다)
+  const cost = (ord: LayoutBox[]) => {
+    const pts = [start, ...place(ord), ...(endPt ? [endPt] : [])];
+    let c = 0;
+    for (let i = 1; i < pts.length; i++) c += dist(pts[i - 1], pts[i]) + (through(pts[i - 1], pts[i]) ? 1.5 : 0);
+    // 피팅룸은 끝쪽(계산대 전)에 들르는 게 자연스럽다
+    if (fit) c += (ord.length - 1 - ord.indexOf(fit)) * 0.6;
+    return c;
+  };
+  let best = cost(order);
+  for (let improved = true, guard = 0; improved && guard < 30; guard++) {
+    improved = false;
+    for (let i = 0; i < order.length - 1; i++) {
+      for (let k = i + 1; k < order.length; k++) {
+        const next = [...order.slice(0, i), ...order.slice(i, k + 1).reverse(), ...order.slice(k + 1)];
+        const c = cost(next);
+        if (c < best - 0.01) { order = next; best = c; improved = true; }
+      }
+    }
+  }
+  const stops: P[] = [start];
+  [...place(order), ...(endPt ? [endPt] : [])].forEach((pt) => { if (dist(stops[stops.length - 1], pt) > 0.5) stops.push(pt); });
   // 4) 물건을 뚫고 지나가는 구간은 모서리로 돌아간다
   const hits = (a: P, b: P) => {
     const n = Math.ceil(dist(a, b) / 0.05);
@@ -214,12 +246,21 @@ export function fromAiItems(W: number, H: number, fixed: LayoutBox[], members: M
 }
 
 /** 가운데 통로에서 가장 좁은 폭(대략). 벽 행거 안쪽 선과 진열대 사이 */
-function aisleWidth(W: number, boxes: LayoutBox[]) {
-  const tables = boxes.filter((b) => b.kind === 'table');
-  if (!tables.length) return Math.round((W - 2 * DEPTH) * 10) / 10;
-  const minX = Math.min(...tables.map((t) => t.x));
-  const maxX = Math.max(...tables.map((t) => t.x + t.w));
-  return Math.round(Math.min(minX - DEPTH, W - DEPTH - maxX) * 10) / 10;
+/** 동선에서 가장 좁은 곳의 폭: 동선 위 점마다 가장 가까운 물건·벽까지 거리의 두 배 */
+function aisleWidth(W: number, H: number, boxes: LayoutBox[], path: { x: number; y: number }[]) {
+  const gap = (x: number, y: number) => Math.min(
+    x, y, W - x, H - y,
+    ...boxes.map((r) => Math.hypot(Math.max(r.x - x, 0, x - r.x - r.w), Math.max(r.y - y, 0, y - r.y - r.h))),
+  );
+  let min = Infinity;
+  for (let i = 1; i < path.length; i++) {
+    const a = path[i - 1];
+    const b = path[i];
+    const n = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 0.1));
+    // 출발·도착 지점 근처(매대 앞에 서는 곳)는 빼고 지나가는 구간만 본다
+    for (let j = 2; j < n - 1; j++) min = Math.min(min, gap(a.x + ((b.x - a.x) * j) / n, a.y + ((b.y - a.y) * j) / n));
+  }
+  return Number.isFinite(min) ? Math.round(min * 2 * 10) / 10 : 0;
 }
 
 // ───────── 3D ─────────
@@ -316,14 +357,23 @@ function partsOf(b: LayoutBox, photo: string | undefined, color: string): Part[]
 function PathArrows({ path, scale }: { path: { x: number; y: number }[]; scale: number }) {
   if (path.length < 2) return null;
   const pts = path.map((p) => `${p.x * scale},${p.y * scale}`).join(' ');
+  // 화살촉은 긴 구간 가운데와 끝에만(꺾이는 곳마다 달면 어지럽다)
+  const heads = path.slice(1).map((b, i) => {
+    const a = path[i];
+    const len = Math.hypot(b.x - a.x, b.y - a.y);
+    const last = i === path.length - 2;
+    if (!last && len < 1.2) return null;
+    const t = last ? 1 : 0.5;
+    const x = (a.x + (b.x - a.x) * t) * scale;
+    const y = (a.y + (b.y - a.y) * t) * scale;
+    const deg = (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
+    return <path key={i} d="M-5,-4.5 L4,0 L-5,4.5 z" fill="#e0482a" transform={`translate(${x},${y}) rotate(${deg})`} />;
+  });
   return (
     <>
-      <defs>
-        <marker id="ah" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-          <path d="M0,0 L10,5 L0,10 z" fill="#e0482a" />
-        </marker>
-      </defs>
-      <polyline points={pts} fill="none" stroke="#e0482a" strokeWidth={2.5} strokeDasharray="7 5" strokeLinejoin="round" markerMid="url(#ah)" markerEnd="url(#ah)" />
+      <polyline points={pts} fill="none" stroke="#e0482a" strokeWidth={2} strokeDasharray="6 5" strokeLinejoin="round" strokeLinecap="round" opacity={0.85} />
+      <circle cx={path[0].x * scale} cy={path[0].y * scale} r={3.5} fill="#e0482a" />
+      {heads}
     </>
   );
 }
@@ -548,14 +598,14 @@ export function TeamLayoutTab({ team }: { team: Team }) {
     setAsking(false);
   };
 
-  const aisle = aisleWidth(W, boxes);
+  const aisle = path ? aisleWidth(W, H, boxes, path) : 0;
   const hangerCount = (id: string) => boxes.filter((b) => b.kind === 'hanger' && b.brandId === id).length;
   const tables = boxes.filter((b) => b.kind === 'table');
   const facing = boxes.find((b) => b.kind === 'hanger' && b.y < 0.3);
   const tips = saved?.tips ?? ([
     facing && `입구 맞은편 벽은 들어오자마자 보이는 자리예요. 지금은 ${nameOf(facing.brandId)} 자리예요.`,
     tables.length > 0 && `${[...new Set(tables.map((t) => nameOf(t.brandId)))].join(', ')}는 가운데 진열대에 두어 손님이 만져 보기 쉬워요.`,
-    `통로 폭은 약 ${aisle}m예요. ${aisle < 1.2 ? '1.2m보다 좁아 두 사람이 지나가기 어려워요.' : '두 사람이 엇갈려 지나갈 수 있어요.'}`,
+    aisle > 0 && `동선에서 가장 좁은 곳이 약 ${Math.min(aisle, 3)}m${aisle > 3 ? ' 넘어요' : '예요'}. ${aisle < 1.2 ? '1.2m보다 좁아 두 사람이 엇갈리기 어려워요.' : '두 사람이 엇갈려 지나갈 수 있어요.'}`,
   ].filter(Boolean) as string[]);
 
   return (

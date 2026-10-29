@@ -434,7 +434,27 @@ function buildItem(b: LayoutBox, photo: string | undefined, color: string, mats:
     inner.rotation.y = 0;
     add(new THREE.BoxGeometry(b.w, 0.92, b.h), mats.white, 0, 0.46, 0);
     add(new THREE.BoxGeometry(b.w + 0.04, 0.04, b.h + 0.04), mats.wood, 0, 0.94, 0);
-    add(new THREE.BoxGeometry(0.3, 0.12, 0.24), mats.black, b.w / 2 - 0.3, 1.02, 0);
+    // 위에 올린 것들: 긴 쪽을 따라 결제 단말기, 쇼핑백 더미, 작은 화병
+    const along = (t: number) => (b.w >= b.h ? [b.w * t, 0] : [0, b.h * t]) as [number, number];
+    const tilt = b.w >= b.h ? 0 : Math.PI / 2;
+    const [px, pz] = along(0.32);
+    const pos = add(new THREE.BoxGeometry(0.2, 0.05, 0.26), mats.black, px, 0.985, pz);
+    pos.rotation.y = tilt;
+    const screen = add(new THREE.BoxGeometry(0.18, 0.13, 0.012), new THREE.MeshStandardMaterial({ color: '#20242a', emissive: '#3a4a5c', emissiveIntensity: 0.35, roughness: 0.2 }), px, 1.06, pz);
+    screen.rotation.set(-0.35, tilt, 0);
+    const kraft = new THREE.MeshStandardMaterial({ color: '#c8a77c', roughness: 0.9 });
+    const [bx, bz] = along(-0.3);
+    for (let i = 0; i < 4; i++) {
+      const bag = add(new THREE.BoxGeometry(0.28, 0.008, 0.36), kraft, bx + Math.sin(i * 2.1) * 0.01, 0.964 + i * 0.009, bz + Math.cos(i * 1.7) * 0.01);
+      bag.rotation.y = tilt + Math.sin(i * 4.3) * 0.06;
+    }
+    const [vx, vz] = along(-0.05);
+    add(new THREE.CylinderGeometry(0.04, 0.05, 0.16, 16), new THREE.MeshStandardMaterial({ color: '#e9e4dc', roughness: 0.35 }), vx, 1.04, vz);
+    const stem = new THREE.MeshStandardMaterial({ color: '#6f7d5a', roughness: 0.8 });
+    [-0.02, 0.015, 0.03].forEach((o, i) => {
+      const st = add(new THREE.CylinderGeometry(0.003, 0.003, 0.32, 5), stem, vx + o, 1.24, vz);
+      st.rotation.z = o * 3 + (i - 1) * 0.08;
+    });
   } else if (b.kind === 'photo') {
     add(new THREE.BoxGeometry(L, 2.2, 0.06), photoMat(photo, color === '#f4f4f5' ? '#e7ddd0' : color, 0.7), 0, 1.1, 0);
     // 링 조명
