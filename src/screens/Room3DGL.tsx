@@ -805,14 +805,14 @@ export default function Room3DGL(props: Room3DProps) {
     };
     const onDown = (e: PointerEvent) => {
       down = { x: e.clientX, y: e.clientY, yaw, pitch, moved: false };
-      // 행거·진열대·포토존은 고르지 않고 바로 집어서 옮길 수 있다
+      // 물건(계산대·피팅룸 포함)은 고르지 않고 바로 집어서 옮길 수 있다
       if (mode !== 'orbit' || !propsRef.current.onMove) return;
       ray.setFromCamera(toNdc(e), camera);
       const hit = ray.intersectObjects(items.children, true).find((h) => shown(h.object));
       let o: THREE.Object3D | null = hit?.object ?? null;
       while (o && o.parent !== items) o = o.parent;
       const b = o && propsRef.current.boxes.find((x) => x.id === o!.userData.boxId);
-      if (o && b && (b.kind === 'hanger' || b.kind === 'table' || b.kind === 'photo')) {
+      if (o && b) {
         const selId = b.id;
         const fp = floorPoint(e);
         if (!fp) return;
@@ -864,7 +864,7 @@ export default function Room3DGL(props: Room3DProps) {
       while (o && !o.userData.boxId && !o.userData.floor) o = o.parent;
       if (o?.userData.boxId) {
         const b = propsRef.current.boxes.find((x) => x.id === o!.userData.boxId);
-        if (b && (b.kind === 'hanger' || b.kind === 'table' || b.kind === 'photo')) propsRef.current.onPick(b.id);
+        if (b) propsRef.current.onPick(b.id);
       } else if (o?.userData.floor && mode === 'walk') {
         walkTarget = new THREE.Vector3(Math.max(0.35, Math.min(W - 0.35, hit.point.x)), EYE, Math.max(0.35, Math.min(H - 0.35, hit.point.z)));
       }

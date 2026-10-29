@@ -138,8 +138,14 @@ export function stopPath(W: number, H: number, boxes: LayoutBox[]) {
   let cur: P = { x: W / 2, y: H - 0.3 };
   const stops: P[] = [cur];
   const go = (pt: P) => { if (dist(cur, pt) > 0.7 || stops.length === 1) stops.push(pt); cur = pt; };
-  // 1) 가운데 진열대: 오른쪽에서 왼쪽으로 훑고 왼쪽 벽으로 이어진다
-  show.filter((b) => !onWall(b)).sort((a, b) => b.x + b.w / 2 - (a.x + a.w / 2)).forEach((b) => go(near(spots(b), cur)));
+  // 1) 가운데 진열대: 지금 자리에서 가까운 것부터
+  const mid = show.filter((b) => !onWall(b));
+  while (mid.length) {
+    let best = { i: 0, pt: cur, d: Infinity };
+    mid.forEach((b, i) => spots(b).forEach((pt) => { const d = dist(cur, pt); if (d < best.d) best = { i, pt, d }; }));
+    mid.splice(best.i, 1);
+    go(best.pt);
+  }
   // 2) 벽 쪽 매대: 입구에서 왼쪽 벽 → 맞은편 벽 → 오른쪽 벽 순서로 한 바퀴
   const turn = (b: LayoutBox) => ((Math.atan2(b.y + b.h / 2 - C.y, b.x + b.w / 2 - C.x) * 180) / Math.PI - 90 + 720) % 360;
   show.filter(onWall).sort((a, b) => turn(a) - turn(b)).forEach((b) => go(near(spots(b), C)));
@@ -379,7 +385,7 @@ function Room3D({ W, H, boxes, angle, wallPhoto, colorOf, photoOf, nameOf, selec
       <div style={{ position: 'absolute', left: (W / 2 - 1) * s, top: H * s + 6, width: 2 * s, textAlign: 'center', fontSize: 11, color: '#4a4a52' }}>입구</div>
       {walls}
       {boxes.map((b) => {
-        const pick = b.kind === 'hanger' || b.kind === 'table' || b.kind === 'photo';
+        const pick = true;
         return (
           <div key={b.id} onClick={pick ? () => onPick(b.id) : undefined} style={{ position: 'absolute', inset: 0, transformStyle: 'preserve-3d', pointerEvents: 'none' }}>
             {/* 고른 물건은 바닥에 테두리 */}
@@ -449,7 +455,9 @@ function Plan2D({ W, H, boxes, colorOf, initialOf, selected, onPick, onMove, pat
       <text x={(W / 2) * scale} y={H * scale + 16} textAnchor="middle" fontSize={11} fill="#5d5d66">입구</text>
       {path && !live && <PathArrows path={path} scale={scale} />}
       {shown.map((b) => {
-        const movable = b.kind === 'hanger' || b.kind === 'table' || b.kind === 'photo';
+        // 계산대·피팅룸·거울도 옮길 수 있다
+        const movable = true;
+        const brandItem = b.kind === 'hanger' || b.kind === 'table' || b.kind === 'photo';
         return (
           <g key={b.id}
             onPointerDown={movable ? (e) => { svg.current?.setPointerCapture?.(e.pointerId); const p = toM(e); drag.current = { id: b.id, dx: p.x - b.x, dy: p.y - b.y, moved: false }; } : undefined}
@@ -458,7 +466,7 @@ function Plan2D({ W, H, boxes, colorOf, initialOf, selected, onPick, onMove, pat
               fill={b.kind === 'fit' ? '#fff' : b.kind === 'counter' ? '#e4e4e7' : b.kind === 'mirror' ? '#8e8e96' : b.kind === 'photo' && !b.brandId ? '#e8dfd2' : colorOf(b.brandId)}
               stroke={selected === b.id ? '#111' : b.kind === 'mirror' ? 'none' : '#33333a'} strokeWidth={selected === b.id ? 2.5 : 1} strokeDasharray={b.kind === 'fit' ? '4 3' : undefined} />
             {b.label && <text x={(b.x + b.w / 2) * scale} y={(b.y + b.h / 2) * scale + 4} textAnchor="middle" fontSize={10} fill="#33333a" pointerEvents="none">{b.label}</text>}
-            {movable && <text x={(b.x + b.w / 2) * scale} y={(b.y + b.h / 2) * scale + 4} textAnchor="middle" fontSize={10} fontWeight={700} fill="#33333a" pointerEvents="none">{initialOf(b.brandId)}</text>}
+            {brandItem && <text x={(b.x + b.w / 2) * scale} y={(b.y + b.h / 2) * scale + 4} textAnchor="middle" fontSize={10} fontWeight={700} fill="#33333a" pointerEvents="none">{initialOf(b.brandId)}</text>}
           </g>
         );
       })}
@@ -466,6 +474,8 @@ function Plan2D({ W, H, boxes, colorOf, initialOf, selected, onPick, onMove, pat
     </svg>
   );
 }
+
+const FIXTURE_NAME: Partial<Record<LayoutBox['kind'], string>> = { fit: '피팅룸', counter: '계산대', mirror: '거울' };
 
 function ToolButton({ children, onClick, disabled }: { children: ReactNode; onClick: () => void; disabled?: boolean }) {
   return <button disabled={disabled} onClick={onClick} className="h-9 px-3 rounded border border-ink-300 text-[13px] font-semibold text-ink-900 whitespace-nowrap disabled:opacity-40">{children}</button>;
@@ -597,7 +607,7 @@ export function TeamLayoutTab({ team }: { team: Team }) {
                 const next = boxes.map((b) => (b.id === id ? { ...b, x, y } : b));
                 if (done) { setDraft(null); setBoxes(next); } else setDraft(next);
               }} />
-            <div className="text-[11px] text-ink-500 mt-1">행거·진열대를 끌어서 옮겨요</div>
+            <div className="text-[11px] text-ink-500 mt-1">물건을 끌어서 옮겨요 · 계산대·피팅룸·거울도 옮길 수 있어요</div>
           </div>
         )}
       </div>
@@ -605,21 +615,23 @@ export function TeamLayoutTab({ team }: { team: Team }) {
       {selected ? (
         <div className="mt-3 rounded border border-ink-900 p-3">
           <div className="flex items-center justify-between">
-            <div className="text-sm font-bold">{selected.kind === 'hanger' ? '행거' : selected.kind === 'photo' ? '포토존' : '진열대'} · {nameOf(selected.brandId) || (selected.kind === 'photo' ? '공용' : '빈 자리')}</div>
+            <div className="text-sm font-bold">{FIXTURE_NAME[selected.kind] ?? `${selected.kind === 'hanger' ? '행거' : selected.kind === 'photo' ? '포토존' : '진열대'} · ${nameOf(selected.brandId) || (selected.kind === 'photo' ? '공용' : '빈 자리')}`}</div>
             <button className="text-[12px] text-ink-500" onClick={() => setSel(null)}>닫기</button>
           </div>
-          <div className="flex flex-wrap gap-1.5 mt-2">
-            {members.map((m) => (
-              <button key={m.brand.id} onClick={() => setBoxes(boxes.map((b) => (b.id === selected.id ? { ...b, brandId: m.brand.id, photo: undefined } : b)))}
-                className={cx('h-8 px-2.5 rounded border text-[12px] flex items-center gap-1.5', selected.brandId === m.brand.id ? 'border-ink-900 font-bold' : 'border-ink-300')}>
-                <span className="w-2.5 h-2.5" style={{ background: color(m.brand.id) }} />{m.brand.name}
-              </button>
-            ))}
-          </div>
+          {!FIXTURE_NAME[selected.kind] && (
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {members.map((m) => (
+                <button key={m.brand.id} onClick={() => setBoxes(boxes.map((b) => (b.id === selected.id ? { ...b, brandId: m.brand.id, photo: undefined } : b)))}
+                  className={cx('h-8 px-2.5 rounded border text-[12px] flex items-center gap-1.5', selected.brandId === m.brand.id ? 'border-ink-900 font-bold' : 'border-ink-300')}>
+                  <span className="w-2.5 h-2.5" style={{ background: color(m.brand.id) }} />{m.brand.name}
+                </button>
+              ))}
+            </div>
+          )}
           <div className="flex gap-1.5 mt-2.5 overflow-x-auto">
-            <ToolButton onClick={async () => { const [p] = await pickPhotos(1, 600); if (p) setBoxes(boxes.map((b) => (b.id === selected.id ? { ...b, photo: p } : b))); }}>사진 넣기</ToolButton>
-            <ToolButton onClick={() => setBoxes(boxes.map((b) => (b.id === selected.id ? { ...b, w: b.h, h: b.w } : b)))}>돌리기</ToolButton>
-            <ToolButton onClick={() => { setBoxes(boxes.filter((b) => b.id !== selected.id)); setSel(null); }}>빼기</ToolButton>
+            {!FIXTURE_NAME[selected.kind] && <ToolButton onClick={async () => { const [p] = await pickPhotos(1, 600); if (p) setBoxes(boxes.map((b) => (b.id === selected.id ? { ...b, photo: p } : b))); }}>사진 넣기</ToolButton>}
+            <ToolButton onClick={() => setBoxes(boxes.map((b) => (b.id === selected.id ? { ...b, w: b.h, h: b.w, x: Math.min(b.x, W - b.h), y: Math.min(b.y, H - b.w) } : b)))}>돌리기</ToolButton>
+            {selected.kind !== 'counter' && <ToolButton onClick={() => { setBoxes(boxes.filter((b) => b.id !== selected.id)); setSel(null); }}>빼기</ToolButton>}
           </div>
         </div>
       ) : (
