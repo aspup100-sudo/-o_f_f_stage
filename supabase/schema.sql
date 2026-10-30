@@ -1,4 +1,4 @@
--- OFF STAGE 1단계 서버 테이블
+-- OFFSTAGE 1단계 서버 테이블
 -- Supabase 대시보드 → SQL Editor → New query 에 통째로 붙여 넣고 Run 을 누르세요.
 
 create table if not exists public.records (

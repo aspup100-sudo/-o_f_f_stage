@@ -1219,7 +1219,7 @@ export default function Room3DGL(props: Room3DProps) {
             const blob = await (await fetch(url)).blob();
             const file = new File([blob], 'offstage-배치.png', { type: 'image/png' });
             const nav = navigator as Navigator & { canShare?: (d: { files: File[] }) => boolean };
-            if (nav.canShare?.({ files: [file] })) { await nav.share({ files: [file], title: 'OFF STAGE 배치' }); return; }
+            if (nav.canShare?.({ files: [file] })) { await nav.share({ files: [file], title: 'OFFSTAGE 배치' }); return; }
           } catch { /* 공유 취소 등은 파일 저장으로 */ }
           const a = document.createElement('a');
           a.href = url; a.download = 'offstage-배치.png'; a.click();

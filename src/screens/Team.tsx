@@ -435,7 +435,7 @@ function CostTab({ team, myBrandId, isLeader }: { team: Team; myBrandId: string;
         {isLeader && split.paid.length < team.members.length && (
           <Button full variant="secondary" className="mt-3" onClick={() => remindPayment(team.id)}>미납 {team.members.length - split.paid.length}곳에 납부 알림 보내기</Button>
         )}
-        <p className="text-[12px] text-ink-500 mt-2">모인 금액 {won(paidSum)} / {won(total)} · 실제 결제는 이뤄지지 않아요. OFF STAGE는 거래 수수료를 받지 않아요.</p>
+        <p className="text-[12px] text-ink-500 mt-2">모인 금액 {won(paidSum)} / {won(total)} · 실제 결제는 이뤄지지 않아요. OFFSTAGE는 거래 수수료를 받지 않아요.</p>
       </div>
     </div>
   );
@@ -548,7 +548,7 @@ function downloadShiftIcs(teamName: string, place: string, keys: string[]) {
     const [s0, e0] = t.split('-');
     return ['BEGIN:VEVENT', `UID:offstage-${encodeURIComponent(teamName)}-${i}@offstage`, `DTSTART:${stamp(d, s0)}`, `DTEND:${stamp(d, e0)}`, `SUMMARY:${teamName} 팝업 근무`, `LOCATION:${place}`, 'END:VEVENT'].join('\r\n');
   });
-  const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//OFF STAGE//KO', ...events, 'END:VCALENDAR'].join('\r\n');
+  const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//OFFSTAGE//KO', ...events, 'END:VCALENDAR'].join('\r\n');
   try {
     const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
     const a = document.createElement('a');
@@ -713,7 +713,7 @@ ${hashtags.join(' ')}`;
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/10" />
           <div className="absolute left-4 right-4 bottom-3 text-white">
-            <div className="text-[11px] font-bold tracking-[0.2em] opacity-80">OFF STAGE · 공동 팝업</div>
+            <div className="text-[11px] font-bold tracking-[0.2em] opacity-80">OFFSTAGE · 공동 팝업</div>
             <div className="text-xl font-extrabold leading-tight mt-0.5">{team.name}</div>
             <div className="text-[12px] opacity-90 mt-0.5">{period(team.period)} · {sp?.name ?? team.region}</div>
             <div className="text-[12px] opacity-80 mt-0.5 truncate">{brands.map((b) => b.name).join(' × ')}</div>

@@ -40,7 +40,7 @@ function Login() {
   const popups = db.popups.filter((p) => p.status !== '종료').length;
   return (
     <div className="flex flex-col h-full pt-16">
-      <img src="./logo.png" alt="OFF STAGE" className="w-16 h-16 rounded mb-6" />
+      <img src="./logo.png" alt="OFFSTAGE" className="w-16 h-16 rounded mb-6" />
       <h1 className="text-[26px] font-extrabold leading-snug">
         혼자 열기 버거운 팝업,
         <br />

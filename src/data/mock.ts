@@ -638,7 +638,7 @@ const magazines: MagazinePost[] = [
   {
     id: 'mg1', issue: 4, category: '팝업 동향', title: '10월 팝업 동향: 혼자보다 팀으로', subtitle: '공동 팝업이 늘어난 이유를 숫자로 봤어요', hue: 18, authorId: 'u_admin', likes: ['u_v1', 'u_b2'], createdAt: '2026-10-24',
     cards: [
-      { heading: '10월 팝업 동향', body: 'OFF STAGE에 올라온 팝업을 정리했어요. (데모 데이터)' },
+      { heading: '10월 팝업 동향', body: 'OFFSTAGE에 올라온 팝업을 정리했어요. (데모 데이터)' },
       { heading: '공동 팝업 비중', stat: '62%', body: '이번 달 열린 팝업 10곳 중 6곳은 2개 이상 브랜드가 함께 열었어요.' },
       { heading: '평균 팀 규모', stat: '3.4팀', body: '3~4개 브랜드가 한 공간을 나눠 쓰는 구성이 가장 많았어요. 카테고리가 겹치지 않는 조합이 대부분이에요.' },
       { heading: '1자리 평균 분담금', stat: '72만원', body: '혼자 빌렸다면 평균 240만원. 대관료를 나누면 부담이 3분의 1로 줄어요.' },
@@ -648,7 +648,7 @@ const magazines: MagazinePost[] = [
   {
     id: 'mg2', issue: 3, category: '뜨는 지역', title: '지금 뜨는 팝업 지역 TOP 4', subtitle: '성수만 있는 게 아니에요', hue: 150, authorId: 'u_admin', likes: ['u_b1'], createdAt: '2026-10-20', region: '용산구', link: { name: 'tab', tab: 'spaces' },
     cards: [
-      { heading: '지금 뜨는 팝업 지역', body: 'OFF STAGE 공간 지원 수와 방문 인증 수로 골랐어요. (데모 데이터)' },
+      { heading: '지금 뜨는 팝업 지역', body: 'OFFSTAGE 공간 지원 수와 방문 인증 수로 골랐어요. (데모 데이터)' },
       { heading: '1. 해방촌 계단길 (용산구)', stat: '+48%', body: '지원 수가 한 달 새 크게 늘었어요. 1일 30만원대 작은 공간이 많아 3~4팀 공동 팝업에 딱이에요.' },
       { heading: '2. 서울숲 뒤편 (성동구)', stat: '+31%', body: '성수 메인 거리보다 대관료가 낮고, 주말 산책 인파가 그대로 들어와요.' },
       { heading: '3. 연남 골목 (마포구)', stat: '+22%', body: '10대·20대 초반 고객층 브랜드에게 인기. 입간판 하나가 유입을 크게 바꿔요.' },

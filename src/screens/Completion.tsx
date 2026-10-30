@@ -59,7 +59,7 @@ export function PopupReportCard({ popupId }: { popupId: string }) {
         </div>
       )}
       <ReportInsight popupId={popupId} />
-      <p className="text-[12px] text-ink-500 mt-3">OFF STAGE 안에서 모인 기록만 보여요. 매출은 팝업자랑에 직접 공개할 수 있어요.</p>
+      <p className="text-[12px] text-ink-500 mt-3">OFFSTAGE 안에서 모인 기록만 보여요. 매출은 팝업자랑에 직접 공개할 수 있어요.</p>
     </div>
   );
 }

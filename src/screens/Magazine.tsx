@@ -189,7 +189,7 @@ export function MagazineDetail({ id }: { id: string }) {
         </div>
       </div>
       <div className="p-4">
-        <div className="flex items-center gap-1.5"><Tag tone="orange">{m.category}</Tag>{m.region && <Tag>{m.region}</Tag>}<span className="text-[12px] text-ink-500">{m.createdAt} · OFF STAGE 운영팀</span></div>
+        <div className="flex items-center gap-1.5"><Tag tone="orange">{m.category}</Tag>{m.region && <Tag>{m.region}</Tag>}<span className="text-[12px] text-ink-500">{m.createdAt} · OFFSTAGE 운영팀</span></div>
         <h1 className="text-xl font-extrabold mt-2">{m.title}</h1>
         <p className="text-sm text-ink-500 mt-0.5">{m.subtitle}</p>
         <div className="flex gap-2 mt-4">
@@ -326,5 +326,5 @@ export function MagazineNew() {
 
 /** 휴대폰이면 공유 시트를, 아니면 링크 복사를 쓴다. */
 function shareMagazine(m: MagazinePost) {
-  return shareLink(m.title, `${m.title} · OFF STAGE 매거진`, { name: 'magazine', id: m.id });
+  return shareLink(m.title, `${m.title} · OFFSTAGE 매거진`, { name: 'magazine', id: m.id });
 }

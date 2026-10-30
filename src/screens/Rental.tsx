@@ -24,7 +24,7 @@ function Price({ it, big }: { it: RentalItem; big?: boolean }) {
         <span className="text-[12px] mr-0.5 text-red-500">{discountPct(it)}%</span>
         {won(it.partnerPrice)}
       </div>
-      <div className="text-[11px] text-ink-500">1일 · OFF STAGE 제휴가</div>
+      <div className="text-[11px] text-ink-500">1일 · OFFSTAGE 제휴가</div>
     </div>
   );
 }
@@ -44,7 +44,7 @@ function WinWinBanner() {
           <div className="text-ink-500 mt-0.5">놀고 있는 행거·조명이 매주 팝업에서 다시 돌아가요</div>
         </div>
       </div>
-      <p className="text-[12px] text-ink-500 mt-2">OFF STAGE는 렌탈 거래에서도 수수료를 받지 않아요.</p>
+      <p className="text-[12px] text-ink-500 mt-2">OFFSTAGE는 렌탈 거래에서도 수수료를 받지 않아요.</p>
     </div>
   );
 }
@@ -96,7 +96,7 @@ export function RentalDeals() {
   return (
     <div className="px-4 pt-4 pb-6">
       <div className="rounded bg-brand-600 text-white p-4">
-        <div className="text-[12px] opacity-80">OFF STAGE 제휴 렌탈</div>
+        <div className="text-[12px] opacity-80">OFFSTAGE 제휴 렌탈</div>
         <div className="text-[22px] font-black leading-tight mt-1">최대 {topOff}% 할인</div>
         <div className="text-[13px] opacity-90 mt-1">행거·조명·진열대는 사지 말고 제휴가로 빌려요</div>
       </div>
@@ -350,7 +350,7 @@ function OrderSheet({ open, onClose, partnerId, lines, defaultTeamId, onDone }: 
       <textarea className={textareaCls} value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="설치 시간, 출입 방법 등 (선택)" />
       <div className="rounded bg-ink-100/60 p-3.5 mt-3 text-sm space-y-1 tabular-nums">
         <div className="flex justify-between text-ink-500"><span>일반 대여가 ({q.days}일)</span><span className="line-through">{won(q.list)}</span></div>
-        <div className="flex justify-between"><span>OFF STAGE 제휴가</span><span>{won(q.partnerSum)}</span></div>
+        <div className="flex justify-between"><span>OFFSTAGE 제휴가</span><span>{won(q.partnerSum)}</span></div>
         <div className="flex justify-between"><span>배송·설치비</span><span>{q.deliveryFee ? won(q.deliveryFee) : '무료'}</span></div>
         <div className="flex justify-between font-extrabold text-base pt-1 border-t border-ink-300/60"><span>합계</span><span>{won(q.total)}</span></div>
         <div className="text-right text-[12px] font-bold text-red-500">{won(q.list - q.partnerSum)} 절약</div>

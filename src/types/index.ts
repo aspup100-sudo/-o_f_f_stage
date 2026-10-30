@@ -1,4 +1,4 @@
-// OFF STAGE 데이터 모델
+// OFFSTAGE 데이터 모델
 // 백엔드 없이 동작하지만, 실제 DB 테이블로 옮기기 쉽도록 엔티티별로 분리하고 id로만 참조한다.
 
 export type ID = string;
@@ -154,7 +154,7 @@ export interface SpaceQna {
 }
 
 // ───────── 렌탈 제휴 ─────────
-// 렌탈 업체는 비는 장비를 팝업에 빌려주고, 소규모 브랜드는 OFF STAGE 제휴가로 싸게 빌린다.
+// 렌탈 업체는 비는 장비를 팝업에 빌려주고, 소규모 브랜드는 OFFSTAGE 제휴가로 싸게 빌린다.
 export const RENTAL_CATEGORIES = ['행거', '전신거울', '마네킹', '조명', '진열대', '피팅룸 텐트', '사이니지', 'POS·결제'] as const;
 export type RentalCategory = (typeof RENTAL_CATEGORIES)[number];
 
@@ -177,7 +177,7 @@ export interface RentalItem {
   category: RentalCategory;
   desc: string;
   dailyPrice: number; // 일반 대여가 (1일)
-  partnerPrice: number; // OFF STAGE 제휴가 (1일)
+  partnerPrice: number; // OFFSTAGE 제휴가 (1일)
   stock: number;
   hue: number;
   active: boolean;

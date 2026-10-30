@@ -27,7 +27,7 @@ export default function BrandProfileScreen({ id }: { id: string }) {
         title={brand.name}
         right={
           <div className="flex items-center gap-3">
-            <button className="text-[13px] font-semibold text-ink-700" onClick={() => shareLink(brand.name, isMe ? `OFF STAGE에서 ${brand.name}${josa(brand.name, '과', '와').slice(brand.name.length)} 같이 팝업 열 브랜드를 찾아요` : `${brand.name} · OFF STAGE 브랜드`, { name: 'brand', id: brand.id })}>공유</button>
+            <button className="text-[13px] font-semibold text-ink-700" onClick={() => shareLink(brand.name, isMe ? `OFFSTAGE에서 ${brand.name}${josa(brand.name, '과', '와').slice(brand.name.length)} 같이 팝업 열 브랜드를 찾아요` : `${brand.name} · OFFSTAGE 브랜드`, { name: 'brand', id: brand.id })}>공유</button>
             {!isMe && <ReportButton targetType="profile" targetId={brand.id} targetLabel={`브랜드: ${brand.name}`} />}
           </div>
         }
@@ -61,7 +61,7 @@ export default function BrandProfileScreen({ id }: { id: string }) {
             <div className="text-[12px] text-ink-500">팔로워</div>
           </div>
         </div>
-        {t.grade === '새싹' && <p className="text-[12px] text-ink-700 mt-2"><Ic n="leaf" />OFF STAGE에서 첫 공동 팝업을 준비 중인 새싹 브랜드예요.</p>}
+        {t.grade === '새싹' && <p className="text-[12px] text-ink-700 mt-2"><Ic n="leaf" />OFFSTAGE에서 첫 공동 팝업을 준비 중인 새싹 브랜드예요.</p>}
         <p className="text-sm text-ink-700 leading-relaxed mt-4">{brand.intro}</p>
         <div className="mt-3">
           <ThemeTagList tags={brand.tags} />

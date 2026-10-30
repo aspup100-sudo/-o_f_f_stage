@@ -16,8 +16,8 @@ function TopBar() {
   return (
     <header className="sticky top-0 z-30 bg-white border-b border-ink-100 h-14 flex items-center px-4">
       <button onClick={() => navigate({ name: 'tab', tab: role === 'admin' ? 'stats' : 'explore' })} className="flex items-center gap-1.5 shrink-0">
-        <img src="./logo.png" alt="OFF STAGE 로고" className="w-7 h-7 rounded object-cover" />
-        <span className="font-black text-[16px] tracking-tight whitespace-nowrap">OFF STAGE</span>
+        <img src="./logo.png" alt="OFFSTAGE 로고" className="w-7 h-7 rounded object-cover" />
+        <span className="font-black text-[16px] tracking-tight whitespace-nowrap">OFFSTAGE</span>
       </button>
       <div className="flex-1" />
       <SyncDot />
