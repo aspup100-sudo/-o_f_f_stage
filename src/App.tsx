@@ -8,6 +8,9 @@ import { renderRoute } from '@/screens';
 import { startMatchChat } from '@/store/actions';
 import { TABS, ROLE_LABEL, roleOn } from '@/config';
 import { RoleSwitcher } from '@/components/RoleSwitcher';
+import { LIVE } from '@/edition';
+import { settleAccount } from '@/store/store';
+import Auth, { RecoverySheet } from '@/screens/Auth';
 
 function TopBar() {
   const { db, userId, role } = useMe();
@@ -21,7 +24,7 @@ function TopBar() {
       </button>
       <div className="flex-1" />
       <SyncDot />
-      {role === 'admin' && <RoleSwitcher />}
+      {role === 'admin' && !LIVE && <RoleSwitcher />}
       <button onClick={() => navigate({ name: 'search' })} className="w-9 h-10 flex items-center justify-center" aria-label="검색">
         <Icon name="search" className="w-6 h-6" />
       </button>
@@ -119,7 +122,49 @@ function MatchModal() {
   );
 }
 
+/** 정식판: 로그인 확인 → 서버 데이터 받기 → 내 계정 맞추기가 끝날 때까지 */
+function LiveGate({ children }: { children: React.ReactNode }) {
+  const auth = useApp((s) => s.session.auth);
+  const sync = useApp((s) => s.session.sync);
+  const me = useApp((s) => (s.session.auth ? s.db.users.find((u) => u.id === s.session.auth!.uid) : undefined));
+  const onboarding = useApp((s) => !!s.session.onboarding);
+  const role = useApp((s) => s.session.role);
+  useEffect(() => { settleAccount(); }, [auth?.uid, sync, me?.profileId, me?.role, onboarding, role]);
+  if (auth === undefined) return <Splash />;
+  if (!auth) return <Auth />;
+  if (sync === 'error' && !me) return <Splash error />;
+  if (sync !== 'online' && !me) return <Splash />;
+  if (!onboarding && (!me?.profileId || me.role !== role)) return <Splash />;
+  return <>{children}</>;
+}
+
+function Splash({ error }: { error?: boolean }) {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-8 text-center">
+      <img src="./logo.png" alt="OFFSTAGE" className="w-14 h-14 rounded" />
+      {error ? (
+        <>
+          <p className="text-sm text-ink-700">서버에 연결하지 못했어요. 인터넷 연결을 확인하고 다시 열어 주세요.</p>
+          <Button variant="secondary" onClick={() => location.reload()}>다시 열기</Button>
+        </>
+      ) : <div className="w-6 h-6 rounded-full border-2 border-ink-200 border-t-ink-900 animate-spin" />}
+    </div>
+  );
+}
+
 export default function App() {
+  if (!LIVE) return <Main />;
+  return (
+    <div className="min-h-screen flex justify-center">
+      <div className="relative w-full max-w-[430px] min-h-screen bg-white shadow-xl">
+        <LiveGate><Main bare /></LiveGate>
+        <RecoverySheet />
+      </div>
+    </div>
+  );
+}
+
+function Main({ bare }: { bare?: boolean }) {
   const stack = useApp((s) => s.session.stack);
   const role = useApp((s) => s.session.role);
   // 숨긴 역할로 저장돼 있던 화면이면 브랜드로 돌려놓는다
@@ -127,16 +172,20 @@ export default function App() {
   const route: Route = stack[stack.length - 1] ?? { name: 'tab', tab: 'explore' };
   const isTab = route.name === 'tab';
   const isOnboarding = route.name === 'onboarding';
+  const body = (
+    <>
+      {isTab && <TopBar />}
+      <main className={cx((isTab || !isOnboarding) && 'main-safe')}>{renderRoute(route)}</main>
+      {isTab && <BottomTabs current={route.name === 'tab' ? route.tab : undefined} />}
+      <Toast />
+      <VerifyGate />
+      <MatchModal />
+    </>
+  );
+  if (bare) return body;
   return (
     <div className="min-h-screen flex justify-center">
-      <div className="relative w-full max-w-[430px] min-h-screen bg-white shadow-xl">
-        {isTab && <TopBar />}
-        <main className={cx((isTab || !isOnboarding) && 'main-safe')}>{renderRoute(route)}</main>
-        {isTab && <BottomTabs current={route.name === 'tab' ? route.tab : undefined} />}
-        <Toast />
-        <VerifyGate />
-        <MatchModal />
-      </div>
+      <div className="relative w-full max-w-[430px] min-h-screen bg-white shadow-xl">{body}</div>
     </div>
   );
 }

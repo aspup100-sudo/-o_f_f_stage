@@ -39,7 +39,9 @@ import type {
   MagazinePost, InstaPost,
 } from '@/types';
 
-export const DEMO_TODAY = '2026-10-25';
+import { LIVE, todayKST } from '@/edition';
+/** 기준일. 데모는 고정 날짜, 정식판은 실제 오늘 */
+export const DEMO_TODAY = LIVE ? todayKST() : '2026-10-25';
 
 const PATTERNS: LookbookImage['pattern'][] = ['stripe', 'dot', 'grid', 'wave', 'solid', 'circle'];
 
@@ -676,7 +678,7 @@ const magazines: MagazinePost[] = [
 ];
 
 export function createSeed() {
-  return structuredClone({
+  const seed = structuredClone({
     users, brands, landlords, visitors, lookbookImages, spaces, availability, spaceQnas,
     proposals, interests, recruitments, recruitApplications, teams, agreements, costSplits, shifts, moodboards,
     spaceApplications, popups, visits, stamps, completions, reviews, comboReviews, trustEvents: trustSeedEvents,
@@ -684,5 +686,8 @@ export function createSeed() {
     rentalPartners, rentalItems, rentalOrders, magazines,
     instaPosts: [] as InstaPost[], // 서버 함수가 채운다. 비어 있으면 화면은 데모 글을 보여 준다
   });
+  // 정식판은 빈 데이터로 시작한다 (모양만 같고 내용은 실제 사용자가 채운다)
+  if (LIVE) (Object.keys(seed) as (keyof typeof seed)[]).forEach((k) => { (seed[k] as unknown[]) = []; });
+  return seed;
 }
 export type DB = ReturnType<typeof createSeed>;

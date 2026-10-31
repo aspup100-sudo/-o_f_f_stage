@@ -2,7 +2,10 @@ import { RoleSwitcher } from '@/components/RoleSwitcher';
 import { pickPhotos } from '@/components/photoPick';
 import { useState } from 'react';
 import { useMe } from '@/store/hooks';
-import { navigate, update } from '@/store/store';
+import { navigate, update, useApp } from '@/store/store';
+import { LIVE } from '@/edition';
+import { signOut } from '@/store/auth';
+import { PolicySheet } from './Auth';
 import { STAMP_LEVELS } from './Popup';
 import { addLookbookPhotos, importInstagram, isValidBizNumber, requestVerification, sendFollowerNews, toggleVisitorRegion, updateBrandProfile } from '@/store/actions';
 import { brandById, dday, manwon, period, popupById, teamsOfBrand, trustScore } from '@/store/logic';
@@ -16,17 +19,19 @@ import { InstallApp } from '@/components/InstallApp';
 
 export default function MeScreen({ initial }: { initial?: string } = {}) {
   const { db, user, role, brand, landlord, visitor } = useMe();
+  const email = useApp((s) => s.session.auth?.email);
+  const [policy, setPolicy] = useState(false);
   return (
     <div>
       <ScreenTitle>내 정보</ScreenTitle>
       <div className="px-4 space-y-3">
-        <RoleSwitcher row />
+        {!LIVE && <RoleSwitcher row />}
         <Card className="p-4">
           <div className="flex items-center gap-3">
             {brand ? <BrandLogo brand={brand} size={52} /> : <Avatar name={user.name || '?'} size={52} hue={200} />}
             <div className="flex-1 min-w-0">
               <div className="font-extrabold text-lg truncate">{user.name}</div>
-              <div className="text-[12px] text-ink-500 mt-0.5">{ROLE_LABEL[role]} · {user.provider === 'kakao' ? '카카오' : '네이버'} 로그인</div>
+              <div className="text-[12px] text-ink-500 mt-0.5">{ROLE_LABEL[role]} · {LIVE ? (email ?? '이메일 로그인') : `${user.provider === 'kakao' ? '카카오' : '네이버'} 로그인`}</div>
             </div>
           </div>
           {(brand || landlord) && (
@@ -60,7 +65,7 @@ export default function MeScreen({ initial }: { initial?: string } = {}) {
           )}
         </Card>
 
-        {(role === 'brand' || role === 'landlord') && <VerifyCard />}
+        {(role === 'brand' || role === 'landlord') && (LIVE ? <VerifySoon /> : <VerifyCard />)}
 
         {brand && <BrandSection openEdit={initial === 'edit'} />}
         {landlord && (
@@ -97,10 +102,18 @@ export default function MeScreen({ initial }: { initial?: string } = {}) {
           <MenuRow icon="bell" label="알림" onClick={() => navigate({ name: 'notifications' })} />
           <MenuRow icon="chat" label="채팅" onClick={() => navigate({ name: 'chatList' })} />
           <MenuRow icon="star" label="신뢰 지수와 등급 안내" onClick={() => setRulesOpen(true)} />
-          <MenuRow icon="swap" label="로그아웃 (새 계정으로 가입해 보기)" onClick={() => update((s) => { s.session.stack = [{ name: 'onboarding' }]; s.session.onboarding = { step: 0 }; })} />
+          {LIVE ? (
+            <>
+              <MenuRow icon="shield" label="개인정보 수집·이용 안내" onClick={() => setPolicy(true)} />
+              <MenuRow icon="swap" label="로그아웃" onClick={() => { if (confirm('로그아웃할까요?')) signOut(); }} />
+            </>
+          ) : (
+            <MenuRow icon="swap" label="로그아웃 (새 계정으로 가입해 보기)" onClick={() => update((s) => { s.session.stack = [{ name: 'onboarding' }]; s.session.onboarding = { step: 0 }; })} />
+          )}
         </Card>
       </div>
       <TrustRulesSheet />
+      {LIVE && <PolicySheet open={policy} onClose={() => setPolicy(false)} />}
     </div>
   );
 }
@@ -135,6 +148,19 @@ function MenuRow({ icon, label, onClick }: { icon: string; label: string; onClic
       <span className="flex-1">{label}</span>
       <span className="text-ink-400">›</span>
     </button>
+  );
+}
+
+/** 정식판: 사업자 인증은 아직 준비 중 */
+function VerifySoon() {
+  return (
+    <Card className="p-4">
+      <div className="flex items-center justify-between">
+        <div className="font-bold">사업자 인증</div>
+        <span className="text-[12px] font-semibold text-ink-500">준비 중</span>
+      </div>
+      <p className="text-sm text-ink-500 mt-1">국세청 조회로 확인하는 인증을 준비하고 있어요. 그동안은 인증 없이 모든 기능을 쓸 수 있어요.</p>
+    </Card>
   );
 }
 
@@ -239,12 +265,18 @@ function BrandSection({ openEdit }: { openEdit?: boolean }) {
         <Field label="룩북 사진" hint="제품·착용컷·작업실 사진을 올리면 룩북 맨 앞에 보여요">
           <Button full variant="secondary" onClick={async () => { const urls = await pickPhotos(9); if (urls.length) addLookbookPhotos(b.id, urls); }}><Icon name="camera" className="w-4 h-4" />휴대폰에서 사진 올리기</Button>
         </Field>
+        {LIVE ? (
+          <Field label="인스타그램 아이디" hint="프로필에 인스타그램 링크로 보여요">
+            <input className={inputCls} value={ig} onChange={(e) => setIg(e.target.value.replace(/\s/g, ''))} placeholder="instagram_id" />
+          </Field>
+        ) : (
         <Field label={<>인스타그램 연동 <Demo /></>} hint="아이디를 입력하면 예시 사진 9장을 룩북 앞쪽에 추가해요">
           <div className="flex gap-2">
             <input className={inputCls} value={ig} onChange={(e) => setIg(e.target.value.replace(/\s/g, ''))} placeholder="instagram_id" />
             <Button variant="dark" disabled={!ig} onClick={() => importInstagram(b.id, ig)}>가져오기</Button>
           </div>
         </Field>
+        )}
         <Field label="팝업 가능 기간">
           {avail.map((a, i) => (
             <div key={i} className="flex items-center gap-2 mb-2">
@@ -256,7 +288,7 @@ function BrandSection({ openEdit }: { openEdit?: boolean }) {
           ))}
           <button type="button" className="text-sm text-brand-600 font-semibold" onClick={() => setAvail([...avail, { start: '2027-01-01', end: '2027-01-31' }])}>+ 기간 추가</button>
         </Field>
-        <Button full disabled={!tags.moods.length || !tags.categories.length} onClick={() => { updateBrandProfile(b.id, { intro, tags, availability: avail }); setEdit(false); }}>저장</Button>
+        <Button full disabled={!tags.moods.length || !tags.categories.length} onClick={() => { updateBrandProfile(b.id, LIVE ? { intro, tags, availability: avail, instagram: ig } : { intro, tags, availability: avail }); setEdit(false); }}>저장</Button>
       </Sheet>
     </>
   );

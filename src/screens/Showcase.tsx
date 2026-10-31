@@ -1,4 +1,6 @@
 import { spaceSrc } from '@/data/photos';
+import { LIVE } from '@/edition';
+import { pickPhotos } from '@/components/photoPick';
 import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { navigate, replace } from '@/store/store';
@@ -31,7 +33,7 @@ export function ShowcaseList() {
         return (
           <Card key={s.id} className="overflow-hidden" onClick={() => navigate({ name: 'showcase', id: s.id })}>
             <div className="flex h-28 gap-0.5">
-              {s.photoHues.slice(0, 3).map((h, i) => <Swatch key={i} src={spaceSrc({ id: s.spaceId ?? s.id }, i)} hue={h} pattern={(['solid', 'dot', 'grid'] as const)[i]} rounded="" className="flex-1" />)}
+              {s.photoHues.slice(0, 3).map((h, i) => <Swatch key={i} src={spaceSrc({ id: s.spaceId ?? s.id, photos: s.photos }, i)} hue={h} pattern={(['solid', 'dot', 'grid'] as const)[i]} rounded="" className="flex-1" />)}
             </div>
             <div className="p-3.5">
               <div className="font-bold">{s.title}</div>
@@ -58,7 +60,7 @@ export function ShowcaseDetail({ id }: { id: string }) {
     <div className="bg-white min-h-screen">
       <SubHeader title="팝업자랑" right={<ReportButton targetType="post" targetId={s.id} targetLabel={`팝업자랑: ${s.title}`} />} />
       <div className="flex gap-0.5 overflow-x-auto no-scrollbar">
-        {s.photoHues.map((h, i) => <Swatch key={i} src={spaceSrc({ id: s.spaceId ?? s.id }, i, 900)} hue={h} pattern={(['solid', 'dot', 'grid', 'stripe'] as const)[i % 4]} rounded="" className="w-72 h-56 shrink-0" label={`현장 사진 ${i + 1}`} />)}
+        {s.photoHues.map((h, i) => <Swatch key={i} src={spaceSrc({ id: s.spaceId ?? s.id, photos: s.photos }, i, 900)} hue={h} pattern={(['solid', 'dot', 'grid', 'stripe'] as const)[i % 4]} rounded="" className="w-72 h-56 shrink-0" label={`현장 사진 ${i + 1}`} />)}
       </div>
       <div className="p-4">
         <h1 className="text-xl font-extrabold">{s.title}</h1>
@@ -118,7 +120,8 @@ export function ShowcaseNew({ teamId }: { teamId: string }) {
   const [tips, setTips] = useState('');
   const [sales, setSales] = useState('');
   const [visitors, setVisitors] = useState('');
-  const [hues, setHues] = useState<number[]>(team ? team.members.map((m) => brandById(db, m.brandId)!.logoHue) : []);
+  const [hues, setHues] = useState<number[]>(team && !LIVE ? team.members.map((m) => brandById(db, m.brandId)!.logoHue) : []);
+  const [photos, setPhotos] = useState<string[]>([]);
   if (!team || !pop) return <Empty>팀 정보를 찾을 수 없어요</Empty>;
   return (
     <div className="bg-white min-h-screen">
@@ -128,12 +131,28 @@ export function ShowcaseNew({ teamId }: { teamId: string }) {
           <b>{team.name}</b> · {period(pop.period)} · {spaceById(db, pop.spaceId)?.name}
           <div className="text-[12px] font-semibold text-ink-700 mt-1.5">{team.members.map((m) => `@${brandById(db, m.brandId)!.name}`).join('  ')}</div>
         </div>
+        {LIVE ? (
+          <Field label="현장 사진" hint="최대 8장">
+            <div className="flex gap-1.5 flex-wrap">
+              {photos.map((p, i) => (
+                <button key={i} type="button" onClick={() => { setPhotos(photos.filter((_, j) => j !== i)); setHues(hues.filter((_, j) => j !== i)); }} className="relative" aria-label="사진 빼기">
+                  <Swatch src={p} hue={hues[i] ?? 30} className="w-16 h-16" />
+                  <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-white/90 text-[11px] leading-4 rounded">×</span>
+                </button>
+              ))}
+              {photos.length < 8 && (
+                <button type="button" onClick={async () => { const u = await pickPhotos(8 - photos.length); if (u.length) { setPhotos([...photos, ...u]); setHues([...hues, ...u.map(() => Math.floor(Math.random() * 360))]); } }} className="w-16 h-16 rounded border-2 border-dashed border-ink-300 text-ink-500 text-xs">+ 사진</button>
+              )}
+            </div>
+          </Field>
+        ) : (
         <Field label="사진" hint="데모에서는 예시 사진이 추가돼요">
           <div className="flex gap-1.5 flex-wrap">
             {hues.map((h, i) => <Swatch key={i} hue={h} className="w-16 h-16" />)}
             <button type="button" onClick={() => setHues([...hues, Math.floor(Math.random() * 360)])} className="w-16 h-16 rounded border-2 border-dashed border-ink-300 text-ink-500 text-xs">+ <Demo /></button>
           </div>
         </Field>
+        )}
         <Field label="제목" required><input className={inputCls} value={title} onChange={(e) => setTitle(e.target.value)} /></Field>
         <Field label="이야기" required><textarea className={textareaCls + ' min-h-[120px]'} value={body} onChange={(e) => setBody(e.target.value)} placeholder="함께 열어 보니 어땠나요?" /></Field>
         <Field label="운영 팁" required><textarea className={textareaCls} value={tips} onChange={(e) => setTips(e.target.value)} placeholder="다음 팀에게 알려 주고 싶은 것" /></Field>
@@ -143,7 +162,7 @@ export function ShowcaseNew({ teamId }: { teamId: string }) {
           <input className={inputCls} type="number" value={visitors} onChange={(e) => setVisitors(e.target.value)} placeholder="방문자 수" />
         </div>
         <Button full size="lg" disabled={!title.trim() || !body.trim() || !tips.trim()} onClick={() => {
-          const id = createShowcase({ teamId, popupId: pop.id, title, period: pop.period, spaceId: pop.spaceId, brandIds: team.members.map((m) => m.brandId), photoHues: hues, tips, body, sales: sales || undefined, visitors: visitors ? Number(visitors) : undefined, authorId: userId });
+          const id = createShowcase({ teamId, popupId: pop.id, title, period: pop.period, spaceId: pop.spaceId, brandIds: team.members.map((m) => m.brandId), photoHues: hues, ...(LIVE ? { photos } : {}), tips, body, sales: sales || undefined, visitors: visitors ? Number(visitors) : undefined, authorId: userId });
           replace({ name: 'showcase', id });
         }}>올리기</Button>
       </div>

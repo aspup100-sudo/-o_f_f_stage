@@ -1,3 +1,4 @@
+import { LIVE } from '@/edition';
 import { geocode, kakaoMapEnabled, openPostcode } from '@/components/KakaoMap';
 import { pickPhotos } from '@/components/photoPick';
 import { spaceSrc } from '@/data/photos';
@@ -313,7 +314,7 @@ export function InboxTab({ initial }: { initial?: 'offer' }) {
               대기 중인 지원이 없어요
             </Empty>
           )}
-          {pending.length === 0 && landlord.spaceIds[0] && db.recruitments.some((r) => !r.teamId && r.status !== '마감') && (
+          {!LIVE && pending.length === 0 && landlord.spaceIds[0] && db.recruitments.some((r) => !r.teamId && r.status !== '마감') && (
             <Button full variant="secondary" onClick={() => simulateTeamApplication(landlord.spaceIds[0])}>
               {spaceById(db, landlord.spaceIds[0])?.name}에 팀 지원 받아 보기 <Demo />
             </Button>

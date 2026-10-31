@@ -1,3 +1,4 @@
+import { LIVE } from '@/edition';
 // 둘러보기 맨 위 '오늘' 영역: 내 팝업까지 남은 날과 지금 해야 할 일을 모아 보여 준다.
 import type { LookbookImage } from '@/types';
 import { lookbookSrc } from '@/data/photos';
@@ -385,7 +386,7 @@ export function ProfileProgress() {
     { label: '룩북 3장 이상 올리기', done: brand.lookbook.length >= 3 },
     { label: '인스타그램 연결', done: !!brand.instagram },
     { label: '팝업 가능 기간 정하기', done: brand.availability.length > 0 },
-    { label: '사업자 인증', done: user?.verifyStatus === 'verified' },
+    ...(LIVE ? [] : [{ label: '사업자 인증', done: user?.verifyStatus === 'verified' }]),
   ];
   const done = steps.filter((x) => x.done).length;
   if (done === steps.length) return null;
@@ -397,7 +398,7 @@ export function ProfileProgress() {
         <span className="text-[12px] text-brand-600 font-semibold">채우러 가기 ›</span>
       </div>
       <ProgressBar pct={(done / steps.length) * 100} className="mt-2" />
-      <div className="text-[12px] text-ink-500 mt-2">다음: <b className="text-ink-900">{next.label}</b> · {user?.verifyStatus === 'verified' ? '태그와 룩북을 채울수록 궁합 추천이 정확해져요' : '사업자 인증이 끝나면 다른 브랜드 목록에 내 브랜드가 보여요'}</div>
+      <div className="text-[12px] text-ink-500 mt-2">다음: <b className="text-ink-900">{next.label}</b> · {LIVE || user?.verifyStatus === 'verified' ? '태그와 룩북을 채울수록 궁합 추천이 정확해져요' : '사업자 인증이 끝나면 다른 브랜드 목록에 내 브랜드가 보여요'}</div>
     </button>
   );
 }

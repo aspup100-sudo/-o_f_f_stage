@@ -3,6 +3,7 @@
 // 나중에 컬렉션마다 정식 테이블로 옮기기 쉽도록 키 규칙을 한곳(keyOf)에 모아 둔다.
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { DB } from '@/data/mock';
+import { LIVE } from '@/edition';
 
 const URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
@@ -10,7 +11,19 @@ const KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 export const remoteEnabled = !!(URL && KEY);
 export const client: SupabaseClient | null = remoteEnabled ? createClient(URL!, KEY!) : null;
 
-type Row = { collection: string; id: string; data: unknown };
+type Row = { collection: string; id: string; data: unknown; readers?: string[] | null };
+
+/** 데모는 records, 정식판은 live_records 표를 쓴다 (서로 섞이지 않게) */
+const TABLE = LIVE ? 'live_records' : 'records';
+
+/** 정식판에서 당사자만 읽을 수 있는 문서의 읽기 허용 목록 (나머지는 null = 로그인한 모두) */
+function readersOf(db: DB, collection: string, doc: Record<string, unknown>): string[] | null {
+  if (!LIVE) return null;
+  if (collection === 'messages') return db.chatRooms.find((r) => r.id === doc.roomId)?.memberIds ?? null;
+  if (collection === 'chatRooms') return (doc.memberIds as string[]) ?? null;
+  if (collection === 'notifications') return [String(doc.userId)];
+  return null;
+}
 
 /** 문서마다 고유 키. id가 없는 컬렉션은 묶음 키를 쓴다. */
 function keyOf(collection: string, doc: Record<string, unknown>): string {
@@ -25,7 +38,9 @@ function toRows(db: DB): Map<string, Row> {
   (Object.keys(db) as (keyof DB)[]).forEach((c) => {
     (db[c] as unknown as Record<string, unknown>[]).forEach((doc) => {
       const id = keyOf(c, doc);
-      out.set(`${c}/${id}`, { collection: c, id, data: doc });
+      const row: Row = { collection: c, id, data: doc };
+      if (LIVE) row.readers = readersOf(db, c, doc);
+      out.set(`${c}/${id}`, row);
     });
   });
   return out;
@@ -53,10 +68,16 @@ export async function pullAll(seed: DB): Promise<DB | null> {
   if (!client) return null;
   const rows: Row[] = [];
   for (let from = 0; ; from += 1000) {
-    const { data, error } = await client.from('records').select('collection,id,data').range(from, from + 999);
+    const { data, error } = await client.from(TABLE).select('collection,id,data').range(from, from + 999);
     if (error) throw error;
     rows.push(...(data as Row[]));
     if (!data || data.length < 1000) break;
+  }
+  if (LIVE) {
+    // 공식 인스타 글은 서버 함수가 데모 표(records)에 넣는다. 정식판도 같은 글을 읽어 온다
+    const { data } = await client.from('records').select('collection,id,data').eq('collection', 'instaPosts');
+    if (data) rows.push(...(data as Row[]));
+    return fromRows(rows, seed);
   }
   if (!rows.length) {
     await pushDiff(null, seed);
@@ -74,19 +95,20 @@ export async function pushDiff(prev: DB | null, next: DB) {
   const prevRows = prev ? toRows(prev) : new Map<string, Row>();
   const upserts: Row[] = [];
   nextRows.forEach((r, k) => {
+    if (LIVE && r.collection === 'instaPosts') return; // 읽기 전용
     const s = JSON.stringify(r.data);
     const before = prevRows.get(k);
     if (!before || JSON.stringify(before.data) !== s) upserts.push(r);
     lastSent.set(k, s);
   });
-  const deletes = [...prevRows.keys()].filter((k) => !nextRows.has(k)).map((k) => prevRows.get(k)!);
+  const deletes = [...prevRows.keys()].filter((k) => !nextRows.has(k) && !(LIVE && k.startsWith('instaPosts/'))).map((k) => prevRows.get(k)!);
   for (let i = 0; i < upserts.length; i += 500) {
-    const { error } = await client.from('records').upsert(upserts.slice(i, i + 500), { onConflict: 'collection,id' });
+    const { error } = await client.from(TABLE).upsert(upserts.slice(i, i + 500), { onConflict: 'collection,id' });
     if (error) throw error;
   }
   for (const d of deletes) {
     lastSent.delete(`${d.collection}/${d.id}`);
-    await client.from('records').delete().eq('collection', d.collection).eq('id', d.id);
+    await client.from(TABLE).delete().eq('collection', d.collection).eq('id', d.id);
   }
 }
 
@@ -94,8 +116,8 @@ export async function pushDiff(prev: DB | null, next: DB) {
 export function listen(onChange: (r: Row, deleted: boolean) => void) {
   if (!client) return () => {};
   const ch = client
-    .channel('records')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'records' }, (p) => {
+    .channel(TABLE)
+    .on('postgres_changes', { event: '*', schema: 'public', table: TABLE }, (p) => {
       const deleted = p.eventType === 'DELETE';
       const r = (deleted ? p.old : p.new) as Row;
       if (!r?.collection) return;

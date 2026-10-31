@@ -1,6 +1,31 @@
-// 휴대폰 사진을 골라 작게 줄인 JPEG(data URL)로 돌려준다.
-// 프로토타입이라 사진을 데이터에 바로 넣는다. 정식 서비스에서는 파일 저장소(Supabase Storage)로 옮긴다.
-export function pickPhotos(max = 6, size = 900): Promise<string[]> {
+// 휴대폰 사진을 골라 작게 줄인 JPEG로 돌려준다.
+// 데모는 data URL을 데이터에 바로 넣고, 정식판은 파일 저장소(Supabase Storage 'photos')에 올려 주소만 넣는다.
+import { LIVE } from '@/edition';
+import { client } from '@/store/remote';
+
+export async function pickPhotos(max = 6, size = 900): Promise<string[]> {
+  const urls = await pickRaw(max, size);
+  if (!LIVE || !client || !urls.length) return urls;
+  return Promise.all(urls.map(upload));
+}
+
+/** 저장소에 올리고 공개 주소를 돌려준다. 실패하면 원래 data URL을 그대로 쓴다 */
+async function upload(dataUrl: string): Promise<string> {
+  try {
+    const { data } = await client!.auth.getSession();
+    const uid = data.session?.user.id;
+    if (!uid) return dataUrl;
+    const blob = await (await fetch(dataUrl)).blob();
+    const path = `${uid}/${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}.jpg`;
+    const { error } = await client!.storage.from('photos').upload(path, blob, { contentType: 'image/jpeg', cacheControl: '31536000' });
+    if (error) return dataUrl;
+    return client!.storage.from('photos').getPublicUrl(path).data.publicUrl;
+  } catch {
+    return dataUrl;
+  }
+}
+
+function pickRaw(max: number, size: number): Promise<string[]> {
   return new Promise((resolve) => {
     const input = document.createElement('input');
     input.type = 'file';

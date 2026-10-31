@@ -122,6 +122,7 @@ export function MagazineList() {
       {cat === '전체' && (() => {
         // 공식 인스타에 올린 글 (서버 함수가 15분마다 넣어 준다)
         const f = instaFeed(db);
+        if (!f.posts.length) return null;
         return (
           <section className="pb-5">
             <div className="flex items-center justify-between mb-2.5">

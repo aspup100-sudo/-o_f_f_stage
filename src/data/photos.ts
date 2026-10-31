@@ -1,6 +1,7 @@
 // 데모용 예시 사진 (Unsplash 무료 사진). 실제 사용자가 올린 사진이 있으면 그걸 먼저 쓴다.
 // 데이터에 저장하지 않고 id로 계산해서, 서버에 이미 올라간 데모 데이터에도 바로 적용된다.
 import type { LookbookImage, Space } from '@/types';
+import { LIVE } from '@/edition';
 
 const u = (id: string, w = 600) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=70`;
 
@@ -28,6 +29,7 @@ function hash(s: string) {
 /** 룩북 사진 주소. 올린 사진이 없으면 브랜드 카테고리에 맞는 예시 사진 */
 export function lookbookSrc(im: Pick<LookbookImage, 'id' | 'brandId'> & { photo?: string }): string {
   if (im.photo) return im.photo;
+  if (LIVE) return ''; // 정식판은 예시 사진 없이 색 바탕으로
   const pool = POOL[BRAND_CAT[im.brandId] ?? '의류'];
   const n = Number(im.id.match(/(\d+)$/)?.[1] ?? hash(im.id));
   return u(pool[(n - 1 + hash(im.brandId)) % pool.length]);
@@ -36,6 +38,7 @@ export function lookbookSrc(im: Pick<LookbookImage, 'id' | 'brandId'> & { photo?
 /** 공간 사진 주소 (i번째). 올린 사진이 없으면 예시 매장 사진 */
 export function spaceSrc(s: Pick<Space, 'id'> & { photos?: string[] }, i: number, w?: number): string {
   if (s.photos?.[i]) return s.photos[i];
+  if (LIVE) return '';
   return u(SPACE[(hash(s.id) + i * 5) % SPACE.length], w);
 }
 

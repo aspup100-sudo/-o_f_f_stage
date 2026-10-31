@@ -1,3 +1,4 @@
+import { LIVE } from '@/edition';
 import { useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import type { Grade, LookbookImage } from '@/types';
@@ -139,10 +140,11 @@ export function Tag({ children, tone = 'gray' }: { children: ReactNode; tone?: '
 export function AiSource({ source }: { source: 'ai' | 'example' }) {
   return source === 'ai'
     ? <span className="text-[11px] font-semibold text-brand-600">AI 초안 · 고쳐서 쓰세요</span>
-    : <span className="text-[11px] text-ink-500">예시 문구 · AI 연결 전</span>;
+    : <span className="text-[11px] text-ink-500">{LIVE ? '기본 틀 문구 · AI 준비 중' : '예시 문구 · AI 연결 전'}</span>;
 }
 
 export function Demo({ children = '데모' }: { children?: ReactNode }) {
+  if (LIVE) return null; // 정식판에는 데모 표시가 없다 (시연용 버튼은 각 화면에서 숨긴다)
   return <span className="inline-flex items-center px-1 h-[18px] border border-ink-300 text-ink-500 text-[10px] font-semibold align-middle tracking-wide">{children}</span>;
 }
 
