@@ -18,7 +18,7 @@ const SYSTEM = `너는 OFFSTAGE의 글쓰기 도우미야. OFFSTAGE는 작은 �
 - 입력에 없는 사실(가격, 날짜, 주소, 수치)은 지어내지 마. 모르면 그 부분은 빼.
 - 29CM, 무신사 매거진처럼 짧은 문장과 구체적인 디테일을 좋아해.`;
 
-type Task = 'recruit' | 'promo' | 'space' | 'report' | 'layout' | 'brand';
+type Task = 'recruit' | 'promo' | 'space' | 'report' | 'layout';
 
 const str = { type: 'string' } as const;
 const strList = { type: 'array', items: { type: 'string' } } as const;
@@ -44,10 +44,6 @@ const TASKS: Record<Task, { ask: string; schema: Record<string, unknown> }> = {
       path: { type: 'array', items: obj({ x: { type: 'number' }, y: { type: 'number' } }) },
       tips: strList,
     }),
-  },
-  brand: {
-    ask: '아래는 소규모 패션 브랜드 담당자가 대충 적은 키워드와 메모, 그리고 고른 태그야. 이걸로 브랜드 프로필에 들어갈 소개글(intro)을 써 줘. 브랜드가 직접 쓴 것처럼 1인칭(저희, 우리)으로, 어떤 물건을 어떤 마음으로 만드는지와 누구를 위한 브랜드인지가 드러나게. 최대글자수를 절대 넘기지 마(120자 이하면 1~2문장, 그보다 길면 3~4문장). 키워드에 없는 소재, 수상 이력, 매장 위치 같은 사실은 지어내지 마.',
-    schema: obj({ intro: str }),
   },
   report: {
     ask: '아래는 끝난 공동 팝업의 방문·후기 데이터야. 반응이 좋았던 점(good) 2~3개, 아쉬웠던 점(improve) 1~2개, 다음 회차 제안(next) 2~3개를 한 문장씩 써 줘. 데이터에 근거한 것만.',
