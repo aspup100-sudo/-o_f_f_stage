@@ -2,7 +2,7 @@
 // source가 'example'이면 화면에 "예시" 표시를 붙여 진짜 AI 결과와 구분한다.
 import { client } from './remote';
 
-export type AiTask = 'recruit' | 'promo' | 'space' | 'report' | 'layout';
+export type AiTask = 'recruit' | 'promo' | 'space' | 'report' | 'layout' | 'brand';
 
 export interface AiResult<T> {
   result: T;
@@ -15,6 +15,7 @@ export type SpaceOut = { keywords: string[]; moods: string[]; intro: string };
 export type LayoutZone = 'back' | 'left' | 'right' | 'center';
 export type LayoutItemOut = { kind: 'hanger' | 'table' | 'photo'; brand: string; x: number; y: number; rotate: 0 | 90 };
 export type LayoutOut = { items: LayoutItemOut[]; path: { x: number; y: number }[]; tips: string[] };
+export type BrandIntroOut = { intro: string };
 export type ReportOut = { good: string[]; improve: string[]; next: string[] };
 
 // 서버에 키가 없다는 걸 한 번 알면 그 뒤로는 바로 예시로 간다

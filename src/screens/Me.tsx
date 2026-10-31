@@ -13,6 +13,7 @@ import { ROLE_LABEL } from '@/config';
 import { RentalMeCard } from './Rental';
 import { OfficialInsta } from './Magazine';
 import { InstallApp } from '@/components/InstallApp';
+import { BrandIntroField } from '@/components/AiIntro';
 
 export default function MeScreen({ initial }: { initial?: string } = {}) {
   const { db, user, role, brand, landlord, visitor } = useMe();
@@ -232,9 +233,7 @@ function BrandSection({ openEdit }: { openEdit?: boolean }) {
         <Button full size="lg" className="mt-3" disabled={!news.trim()} onClick={() => { sendFollowerNews(b.id, news.trim()); setNews(''); setNewsOpen(false); }}>보내기</Button>
       </Sheet>
       <Sheet open={edit} onClose={() => setEdit(false)} title="브랜드 프로필 수정">
-        <Field label="소개">
-          <textarea className={textareaCls} value={intro} onChange={(e) => setIntro(e.target.value)} />
-        </Field>
+        <BrandIntroField label="소개" maxLength={300} value={intro} onChange={setIntro} brand={{ name: b.name, tags }} />
         <TagPicker value={tags} onChange={setTags} />
         <Field label="룩북 사진" hint="제품·착용컷·작업실 사진을 올리면 룩북 맨 앞에 보여요">
           <Button full variant="secondary" onClick={async () => { const urls = await pickPhotos(9); if (urls.length) addLookbookPhotos(b.id, urls); }}><Icon name="camera" className="w-4 h-4" />휴대폰에서 사진 올리기</Button>

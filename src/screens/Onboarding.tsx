@@ -4,6 +4,7 @@ import { useApp, switchRole } from '@/store/store';
 import { chooseRole, finishOnboarding, goOnboardingStep, isValidBizNumber, socialLogin, submitBizNumber, type BrandDraft } from '@/store/actions';
 import { Button, Demo, Field, Icon, inputCls, textareaCls, cx, Swatch } from '@/components/ui';
 import { TagPicker } from '@/components/common';
+import { BrandIntroField } from '@/components/AiIntro';
 import { INSTAGRAM_SAMPLE_LABELS } from '@/data/mock';
 import type { BrandProfile, Role, ThemeTags } from '@/types';
 import { lookbookSrc } from '@/data/photos';
@@ -181,9 +182,7 @@ function BrandForm() {
       <Field label="브랜드 이름" required>
         <input className={inputCls} value={d.name} onChange={(e) => setD({ ...d, name: e.target.value })} placeholder="예) 바람결상점" />
       </Field>
-      <Field label="한 줄 소개">
-        <textarea className={textareaCls} maxLength={120} value={d.intro} onChange={(e) => setD({ ...d, intro: e.target.value })} placeholder="어떤 물건을 어떤 마음으로 만드나요?" />
-      </Field>
+      <BrandIntroField label="한 줄 소개" maxLength={120} value={d.intro} onChange={(intro) => setD((cur) => ({ ...cur, intro }))} brand={{ name: d.name, tags: d.tags }} placeholder="어떤 물건을 어떤 마음으로 만드나요? 막막하면 AI 텍스트 생성을 눌러 보세요" />
       <div className="text-[13px] font-semibold mb-2 text-ink-700">테마 태그 <span className="text-brand-500">*</span></div>
       <TagPicker value={d.tags} onChange={(tags) => setD({ ...d, tags })} />
       <MatchPreview tags={d.tags} />
