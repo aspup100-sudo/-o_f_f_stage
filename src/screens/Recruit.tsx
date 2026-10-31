@@ -1,3 +1,4 @@
+import { LIVE } from '@/edition';
 import { useState } from 'react';
 import { shareLink } from '@/store/share';
 import { askAi, type RecruitDraftOut } from '@/store/ai';
@@ -248,7 +249,7 @@ export function RecruitDetail({ id }: { id: string }) {
           <>
             <div className="flex items-center justify-between mt-6 mb-2">
               <h3 className="text-[20px] font-extrabold tracking-tight">지원자 {apps.length}</h3>
-              {empties.length > 0 && (
+              {!LIVE && empties.length > 0 && (
                 <Button size="sm" variant="secondary" onClick={() => simulateApplicants(r.id)}>지원자 불러오기 <Demo /></Button>
               )}
             </div>

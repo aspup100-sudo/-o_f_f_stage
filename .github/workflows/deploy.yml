@@ -1,4 +1,5 @@
 # main에 올라오면 빌드해서 gh-pages 브랜치에 올린다 (GitHub Pages가 이 브랜치를 보여 줌).
+# 데모(프로토타입)는 주소 맨 앞(/), 정식판은 /app/ 에 올라간다.
 name: Deploy to GitHub Pages
 
 on:
@@ -24,6 +25,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - run: npm run build:live
+      - run: mkdir -p dist/app && cp -r dist-live/. dist/app/
       - run: touch dist/.nojekyll
       - uses: peaceiris/actions-gh-pages@v4
         with:

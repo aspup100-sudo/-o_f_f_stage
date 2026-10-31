@@ -1,3 +1,4 @@
+import { LIVE } from '@/edition';
 import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { askAi, type AiResult, type ReportOut } from '@/store/ai';
@@ -161,7 +162,7 @@ function CompletionStatus({ popupId }: { popupId: string }) {
       {!c.verified && (
         <div className="space-y-2">
           <Button full disabled={mine} onClick={() => confirmCompletion(popupId, userId)}>{mine ? '확인 완료 · 다른 참여자를 기다려요' : '네, 팝업을 무사히 마쳤어요 (성사 확인)'}</Button>
-          <Button full variant="secondary" onClick={() => simulateOthersConfirm(popupId, userId)}>다른 참여자 확인 받기 <Demo /></Button>
+          {!LIVE && <Button full variant="secondary" onClick={() => simulateOthersConfirm(popupId, userId)}>다른 참여자 확인 받기 <Demo /></Button>}
         </div>
       )}
     </Card>
@@ -192,7 +193,7 @@ export function TeamWrapUp({ team }: { team: Team }) {
         <div className="text-[13px] text-ink-500 mt-0.5">{period(current.period)} · {sp.name}</div>
         {current.status !== '종료' && (
           <div className="mt-3 space-y-2">
-            <p className="text-[12px] text-ink-500">데모에서는 날짜를 기다리지 않고 팝업을 진행시킬 수 있어요.</p>
+            <p className="text-[12px] text-ink-500">{LIVE ? '팝업을 시작하고 마칠 때 눌러 주세요. 마치면 성사 확인과 후기를 남길 수 있어요.' : '데모에서는 날짜를 기다리지 않고 팝업을 진행시킬 수 있어요.'}</p>
             {current.status === '예정' && <Button full variant="dark" onClick={() => setPopupStatus(current.id, '진행 중')}>팝업 시작하기 <Demo /></Button>}
             {current.status === '진행 중' && <Button full variant="dark" onClick={() => setPopupStatus(current.id, '종료')}>팝업 종료하기 <Demo /></Button>}
           </div>

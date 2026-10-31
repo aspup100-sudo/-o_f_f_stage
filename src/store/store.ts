@@ -3,6 +3,7 @@ import { useSyncExternalStore } from 'react';
 import { createSeed, type DB } from '@/data/mock';
 import type { Role, Route } from '@/types';
 import { keyOf, listen, pullAll, pushDiff, remoteEnabled } from './remote';
+import { LIVE } from '@/edition';
 
 export const ROLE_HOME: Record<Role, string> = { brand: 'explore', landlord: 'explore', visitor: 'explore', admin: 'stats', rental: 'explore' };
 
@@ -15,6 +16,9 @@ export interface Session {
   gate?: boolean; // 사업자 인증 안내 시트
   match?: string; // 서로 관심 매칭된 brandId (채팅 제안 팝업)
   sync?: 'local' | 'loading' | 'online' | 'error'; // 서버 동기화 상태
+  /** 정식판: 로그인한 계정 (없으면 로그인 화면) */
+  auth?: { uid: string; email?: string } | null;
+  recovery?: boolean; // 비밀번호 재설정 메일로 들어온 경우
 }
 
 export interface AppState {
@@ -22,7 +26,7 @@ export interface AppState {
   session: Session;
 }
 
-const STORAGE_KEY = 'offstage-demo-v10';
+const STORAGE_KEY = LIVE ? 'offstage-live-v1' : 'offstage-demo-v10';
 
 function initialSession(): Session {
   return {
@@ -131,8 +135,14 @@ function schedulePush() {
   }, 400);
 }
 
-if (remoteEnabled) {
+let stopListen: (() => void) | undefined;
+/** 서버에서 데이터를 받아 오고 실시간 변경을 듣기 시작한다. 정식판은 로그인한 뒤에 부른다 */
+export function startSync() {
+  if (!remoteEnabled) return;
+  stopListen?.();
+  synced = null;
   state = { ...state, session: { ...state.session, sync: 'loading' } };
+  listeners.forEach((l) => l());
   pullAll(createSeed())
     .then((pulled) => {
       if (!pulled) return;
@@ -141,7 +151,7 @@ if (remoteEnabled) {
       synced = db;
       persist();
       listeners.forEach((l) => l());
-      listen((row, deleted) => {
+      stopListen = listen((row, deleted) => {
         const col = state.db[row.collection as keyof AppState['db']] as unknown as Record<string, unknown>[] | undefined;
         if (!col) return;
         const next = structuredClone(state.db);
@@ -159,6 +169,47 @@ if (remoteEnabled) {
       });
     })
     .catch(() => setSync('error'));
+}
+if (!LIVE) startSync();
+
+/** 정식판: 로그인 상태가 바뀌면 부른다. 계정이 바뀌면 이 기기의 데이터를 비우고 새로 받는다 */
+let authKnown = false;
+export function setAuth(auth: Session['auth']) {
+  const prevUid = state.session.auth?.uid ?? '';
+  const uid = auth?.uid ?? '';
+  if (authKnown && prevUid === uid) return;
+  authKnown = true;
+  const changed = prevUid !== uid;
+  state = {
+    db: changed ? createSeed() : state.db,
+    session: {
+      ...state.session,
+      auth,
+      userByRole: { brand: uid, landlord: uid, visitor: uid, admin: uid, rental: uid },
+      stack: changed ? [{ name: 'tab', tab: 'explore' }] : state.session.stack,
+      onboarding: undefined,
+    },
+  };
+  persist();
+  listeners.forEach((l) => l());
+  if (auth) startSync();
+  else { stopListen?.(); synced = null; }
+}
+
+/** 정식판: 서버 데이터를 받은 뒤 내 계정 문서로 역할을 맞추고, 없으면 가입 절차를 연다 */
+export function settleAccount() {
+  const { auth, sync, role, onboarding } = state.session;
+  if (!LIVE || !auth || sync !== 'online') return;
+  const me = state.db.users.find((u) => u.id === auth.uid);
+  if (!me) {
+    if (!onboarding) update((s) => { s.session.onboarding = { step: 1, userId: auth.uid }; s.session.stack = [{ name: 'onboarding' }]; });
+    return;
+  }
+  if (!me.profileId) {
+    if (!onboarding) update((s) => { s.session.onboarding = { step: 3, userId: auth.uid }; s.session.stack = [{ name: 'onboarding' }]; });
+    return;
+  }
+  if (me.role !== role) switchRole(me.role, auth.uid);
 }
 
 export function subscribe(l: () => void) {

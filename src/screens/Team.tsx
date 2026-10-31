@@ -1,3 +1,4 @@
+import { LIVE } from '@/edition';
 import { lookbookSrc, brandCoverSrc } from '@/data/photos';
 import { RENTAL_ON } from '@/config';
 import { useState } from 'react';
@@ -339,7 +340,7 @@ function AgreementTab({ team, myBrandId }: { team: Team; myBrandId: string }) {
           <Button full size="lg" disabled={filled < 9 || iAgreed} onClick={() => agreeAgreement(team.id, myBrandId)}>
             {iAgreed ? '동의 완료 · 다른 팀원을 기다리는 중' : filled < 9 ? `${9 - filled}개 항목을 더 채워야 해요` : '약속서 내용에 동의합니다'}
           </Button>
-          {filled === 9 && ag.agreedBy.length < team.members.length && (
+          {!LIVE && filled === 9 && ag.agreedBy.length < team.members.length && (
             <Button full variant="secondary" onClick={() => simulateOthersAgree(team.id, myBrandId)}>다른 팀원 동의 받기 <Demo /></Button>
           )}
         </div>

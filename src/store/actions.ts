@@ -3,6 +3,7 @@ import { update, getState, newId, nowISO, toast, navigate, switchRole } from './
 import { INSTAGRAM_SAMPLE_LABELS, makeLookbook, DEMO_TODAY } from '@/data/mock';
 import type { DB } from '@/data/mock';
 import { josa } from './logic';
+import { LIVE } from '@/edition';
 import type { DateRange, LoginProvider, NotificationType, Region, Role, Route, ThemeTags } from '@/types';
 
 export function notify(db: DB, userId: string, type: NotificationType, text: string, link?: Route) {
@@ -26,9 +27,15 @@ export function socialLogin(provider: LoginProvider) {
 export function chooseRole(role: Role) {
   update((s) => {
     const o = s.session.onboarding!;
-    const u = s.db.users.find((x) => x.id === o.userId)!;
+    let u = s.db.users.find((x) => x.id === o.userId);
+    if (!u) {
+      // 정식판: 로그인 계정 id로 사용자 문서를 처음 만든다
+      u = { id: o.userId!, name: '', role, provider: 'email', verifyStatus: 'none', createdAt: DEMO_TODAY };
+      s.db.users.push(u);
+    }
     u.role = role;
-    o.step = role === 'visitor' ? 3 : 2;
+    // 정식판은 사업자 인증(국세청 조회)이 준비 중이라 건너뛴다
+    o.step = role === 'visitor' || LIVE ? 3 : 2;
   });
 }
 
@@ -125,9 +132,15 @@ export function importInstagram(brandId: string, account: string) {
   toast('인스타그램 사진 9장을 룩북으로 가져왔어요 (데모)');
 }
 
-export function updateBrandProfile(brandId: string, patch: Partial<{ intro: string; tags: ThemeTags; availability: DateRange[] }>) {
+export function updateBrandProfile(brandId: string, patch: Partial<{ intro: string; tags: ThemeTags; availability: DateRange[]; instagram: string }>) {
   update((s) => {
-    Object.assign(s.db.brands.find((b) => b.id === brandId)!, patch);
+    const b = s.db.brands.find((x) => x.id === brandId)!;
+    Object.assign(b, patch);
+    if (patch.instagram !== undefined) {
+      const id = patch.instagram.replace(/^@/, '').trim();
+      b.instagram = id || undefined;
+      b.channels = [...b.channels.filter((c) => c.label !== '인스타그램'), ...(id ? [{ label: '인스타그램', url: `https://instagram.com/${id}` }] : [])];
+    }
   });
   toast('프로필을 저장했어요');
 }
@@ -409,7 +422,7 @@ export function simulateApplicants(recruitmentId: string) {
   const r = db.recruitments.find((x) => x.id === recruitmentId)!;
   const taken = new Set(r.slots.map((x) => x.brandId).filter(Boolean));
   db.recruitApplications.filter((a) => a.recruitmentId === recruitmentId).forEach((a) => taken.add(a.brandId));
-  const candidates = db.brands.filter((b) => !taken.has(b.id) && db.users.find((u) => u.id === b.userId)?.verifyStatus === 'verified');
+  const candidates = db.brands.filter((b) => !taken.has(b.id) && (LIVE || db.users.find((u) => u.id === b.userId)?.verifyStatus === 'verified'));
   const empties = r.slots.filter((x) => x.status === '비어 있음');
   const msgs = ['프로필 보고 무드가 잘 맞을 것 같아 지원해요!', '저희 고객층이랑 겹쳐서 시너지가 날 것 같아요.', '이 일정 비어 있어요. 함께하고 싶습니다!'];
   empties.forEach((slot, i) => {

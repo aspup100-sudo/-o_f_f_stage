@@ -1,3 +1,4 @@
+import { LIVE } from '@/edition';
 import { useMe } from '@/store/hooks';
 import { navigate, replace, switchRole } from '@/store/store';
 import { decideSpaceApplication } from '@/store/actions';
@@ -76,7 +77,7 @@ export function TeamSpaceTab({ team }: { team: Team }) {
             );
           })}
         </div>
-        {mine.filter((a) => a.status === 'pending').map((a) => {
+        {!LIVE && mine.filter((a) => a.status === 'pending').map((a) => {
           const s = spaceById(db, a.spaceId)!;
           const ll = db.landlords.find((l) => l.id === s.landlordId)!;
           return (

@@ -8,7 +8,7 @@ export type ISODateTime = string;
 // ───────── 공통 / 사용자 ─────────
 export type Role = 'brand' | 'landlord' | 'visitor' | 'admin' | 'rental';
 export type VerifyStatus = 'none' | 'pending' | 'verified' | 'rejected';
-export type LoginProvider = 'kakao' | 'naver';
+export type LoginProvider = 'kakao' | 'naver' | 'email';
 
 export interface User {
   id: ID;
@@ -480,6 +480,7 @@ export interface ShowcasePost {
   spaceId: ID;
   brandIds: ID[];
   photoHues: number[];
+  photos?: string[]; // 올린 현장 사진 (정식판)
   tips: string;
   body: string;
   sales?: string; // 본인 공개 정보

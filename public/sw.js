@@ -1,5 +1,7 @@
 // 앱 껍데기를 캐시해 두고, 새 버전이 있으면 받아서 다음 실행 때 쓴다.
-const CACHE = 'offstage-v5';
+// 데모(/)와 정식판(/app/)이 같은 주소 아래 있어서, 캐시 이름에 범위를 붙여 서로 지우지 않게 한다
+const SCOPE = self.registration.scope;
+const CACHE = 'offstage-v6|' + SCOPE;
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './logo.png'];
 
 self.addEventListener('install', (e) => {
@@ -8,7 +10,7 @@ self.addEventListener('install', (e) => {
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim()),
+    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE && (k.endsWith('|' + SCOPE) || !k.includes('|'))).map((k) => caches.delete(k)))).then(() => self.clients.claim()),
   );
 });
 

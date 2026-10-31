@@ -4,6 +4,7 @@ import type { DB } from '@/data/mock';
 import { lookbookSrc } from '@/data/photos';
 import { OFFICIAL_INSTAGRAM, type InstaPost } from '@/types';
 import { Demo } from '@/components/ui';
+import { LIVE } from '@/edition';
 
 const DEMO_POSTS: InstaPost[] = [
   { id: 'ig_demo1', imageUrl: lookbookSrc({ id: 'b1_img2', brandId: 'b1' }), caption: '가을 산책단 3팀이 11/7 성수에서 만나요. 오브제먼트 × 소금상점 × 낮은달', permalink: '', mediaType: 'IMAGE', postedAt: '2026-10-25T10:00:00' },
@@ -14,7 +15,8 @@ const DEMO_POSTS: InstaPost[] = [
 /** 최신순 인스타 글. 서버에서 받은 게 없으면 데모 글 */
 export function instaFeed(db: DB): { posts: InstaPost[]; demo: boolean } {
   const real = [...(db.instaPosts ?? [])].sort((a, b) => b.postedAt.localeCompare(a.postedAt));
-  return real.length ? { posts: real, demo: false } : { posts: DEMO_POSTS, demo: true };
+  // 정식판은 진짜 글만 (없으면 칸을 숨긴다)
+  return real.length || LIVE ? { posts: real, demo: false } : { posts: DEMO_POSTS, demo: true };
 }
 
 export function InstaThumb({ post, demo }: { post: InstaPost; demo?: boolean }) {

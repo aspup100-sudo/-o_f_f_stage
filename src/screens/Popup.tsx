@@ -1,3 +1,4 @@
+import { LIVE } from '@/edition';
 import { brandCoverSrc } from '@/data/photos';
 import { useCallback, useMemo, useState } from 'react';
 import { useMe } from '@/store/hooks';
@@ -347,7 +348,7 @@ export function MapTab() {
           </div>
           <p className="text-[12px] text-ink-500 mt-1.5 text-center">카카오맵 연결 전이라 간략한 지도로 보여요 <Demo /></p>
           </>} />
-          {kakaoMapEnabled && <p className="text-[12px] text-ink-500 mt-1.5 text-center">공간 위치는 예시 주소 기준이에요 <Demo /></p>}
+          {kakaoMapEnabled && !LIVE && <p className="text-[12px] text-ink-500 mt-1.5 text-center">공간 위치는 예시 주소 기준이에요 <Demo /></p>}
           {selected && <div className="mt-3"><PopupBannerCard db={db} popup={selected} wide /></div>}
         </div>
       )}

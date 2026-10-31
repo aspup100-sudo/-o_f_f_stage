@@ -1,4 +1,6 @@
 import { RENTAL_ON, roleOn } from '@/config';
+import { LIVE, todayKST } from '@/edition';
+import { signOut } from '@/store/auth';
 import { useState } from 'react';
 import { useApp, switchRole } from '@/store/store';
 import { chooseRole, finishOnboarding, goOnboardingStep, isValidBizNumber, socialLogin, submitBizNumber, type BrandDraft } from '@/store/actions';
@@ -17,10 +19,12 @@ export default function Onboarding() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <div className="h-12 flex items-center px-4 justify-between">
-        <button onClick={() => switchRole('brand')} className="text-sm text-ink-500">데모로 돌아가기</button>
+        {LIVE
+          ? <button onClick={() => signOut()} className="text-sm text-ink-500">로그아웃</button>
+          : <button onClick={() => switchRole('brand')} className="text-sm text-ink-500">데모로 돌아가기</button>}
         <div className="flex gap-1">
-          {STEPS.map((s, i) => (
-            <span key={s} className={cx('h-1.5 rounded-full', i <= ob.step ? 'bg-brand-500 w-6' : 'bg-ink-300 w-3')} />
+          {(LIVE ? STEPS.filter((x) => x !== '인증') : STEPS).map((s, i, arr) => (
+            <span key={s} className={cx('h-1.5 rounded-full', i <= (LIVE && ob.step >= 2 ? ob.step - 1 : ob.step) && arr.length ? 'bg-brand-500 w-6' : 'bg-ink-300 w-3')} />
           ))}
         </div>
       </div>
@@ -71,8 +75,8 @@ function Login() {
 
 function RolePick() {
   const options = ([
-    { role: 'brand', title: '브랜드', desc: '다른 브랜드와 팀을 짜서 팝업을 열어요. 사업자 인증 필요', emoji: 'shirt' },
-    { role: 'landlord', title: '임대인 (공간 운영자)', desc: '비는 날 공간을 팀에게 빌려줘요. 사업자 인증 필요', emoji: 'building' },
+    { role: 'brand', title: '브랜드', desc: LIVE ? '다른 브랜드와 팀을 짜서 팝업을 열어요' : '다른 브랜드와 팀을 짜서 팝업을 열어요. 사업자 인증 필요', emoji: 'shirt' },
+    { role: 'landlord', title: '임대인 (공간 운영자)', desc: LIVE ? '비는 날 공간을 팀에게 빌려줘요' : '비는 날 공간을 팀에게 빌려줘요. 사업자 인증 필요', emoji: 'building' },
     { role: 'visitor', title: '방문객', desc: '공동 팝업을 구경하고 스탬프를 모아요. 인증 없이 가입', emoji: 'bag' },
   ] as { role: Role; title: string; desc: string; emoji: string }[]).filter((o) => roleOn(o.role));
   return (
@@ -148,7 +152,9 @@ function MatchPreview({ tags }: { tags: ThemeTags }) {
   const db = useApp((s) => s.db);
   if (!tags.moods.length || !tags.categories.length) return null;
   const me = { id: '_new', userId: '_new', name: '나', intro: '', tags, channels: [], availability: [], lookbook: [], followers: [], hearts: [], logoHue: 0 } as BrandProfile;
-  const top = db.brands.filter((b) => isListedBrand(db, b)).map((b) => ({ b, pct: matchPct(matchScore(db, me, b).score) })).sort((x, y) => y.pct - x.pct).slice(0, 3);
+  const top0 = db.brands.filter((b) => isListedBrand(db, b)).map((b) => ({ b, pct: matchPct(matchScore(db, me, b).score) })).sort((x, y) => y.pct - x.pct).slice(0, 3);
+  const top = top0;
+  if (!top.length) return null;
   return (
     <div className="mb-5 -mt-1 border border-ink-300 p-3.5">
       <div className="text-[13px] font-bold text-brand-700">이 태그라면 이런 브랜드와 잘 맞아요</div>
@@ -169,7 +175,7 @@ function MatchPreview({ tags }: { tags: ThemeTags }) {
 function BrandForm() {
   const [d, setD] = useState<BrandDraft>({
     name: '', intro: '', tags: { moods: [], categories: [], price: '3~7만원', ages: [] }, instagram: '', igImported: false,
-    availability: [{ start: '2026-11-15', end: '2026-12-31' }],
+    availability: [LIVE ? { start: todayKST(), end: `${todayKST().slice(0, 4)}-12-31` } : { start: '2026-11-15', end: '2026-12-31' }],
   });
   const [ig, setIg] = useState('');
   const ok = d.name.trim() && d.tags.categories.length > 0 && d.tags.moods.length > 0;
@@ -187,6 +193,12 @@ function BrandForm() {
       <div className="text-[13px] font-semibold mb-2 text-ink-700">테마 태그 <span className="text-brand-500">*</span></div>
       <TagPicker value={d.tags} onChange={(tags) => setD({ ...d, tags })} />
       <MatchPreview tags={d.tags} />
+      {LIVE ? (
+        <Field label="인스타그램 아이디" hint="프로필에 인스타그램 링크로 보여요. 룩북 사진은 가입 후 내 정보에서 올릴 수 있어요">
+          <input className={inputCls} value={d.instagram ?? ''} onChange={(e) => setD({ ...d, instagram: e.target.value.replace(/\s|@/g, '') })} placeholder="instagram_id" />
+        </Field>
+      ) : (
+      <>
       <Field label={<>인스타그램 연동 <Demo /></>} hint="계정 아이디를 입력하면 예시 사진 9장을 룩북으로 가져와요">
         <div className="flex gap-2">
           <input className={inputCls} value={ig} onChange={(e) => setIg(e.target.value.replace(/\s/g, ''))} placeholder="instagram_id" />
@@ -199,6 +211,8 @@ function BrandForm() {
             <Swatch key={l} hue={(i * 40) % 360} pattern={(['stripe', 'dot', 'grid', 'wave', 'solid', 'circle'] as const)[i % 6]} label={l} className="aspect-square" rounded="rounded" />
           ))}
         </div>
+      )}
+      </>
       )}
       <Field label="팝업 가능 기간">
         {d.availability.map((a, i) => (

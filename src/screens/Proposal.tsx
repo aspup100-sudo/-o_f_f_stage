@@ -1,3 +1,4 @@
+import { LIVE } from '@/edition';
 import { useState } from 'react';
 import { useMe } from '@/store/hooks';
 import { back, navigate } from '@/store/store';
@@ -99,7 +100,7 @@ export function ProposalsScreen() {
                     <Button onClick={() => respondProposal(p.id, true)}>관심 있어요</Button>
                   </div>
                 )}
-                {p.status === 'sent' && tab === 'sent' && (
+                {!LIVE && p.status === 'sent' && tab === 'sent' && (
                   <Button variant="secondary" size="sm" className="mt-3" onClick={() => respondProposal(p.id, true)}>
                     상대가 "관심 있어요" 누르기 <Demo />
                   </Button>

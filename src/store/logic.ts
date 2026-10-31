@@ -3,6 +3,7 @@ import type { DB } from '@/data/mock';
 import type { BrandProfile, Grade, Recruitment, Review, Team, TrustEvent, TrustScore } from '@/types';
 import { PRICE_RANGES } from '@/types';
 import { DEMO_TODAY } from '@/data/mock';
+import { LIVE } from '@/edition';
 
 // ───────── 포맷 ─────────
 export const won = (n: number) => `${Math.round(n).toLocaleString('ko-KR')}원`;
@@ -214,7 +215,7 @@ export function recommendations(db: DB, me: BrandProfile, limit = 5) {
 
 export function isListedBrand(db: DB, b: BrandProfile) {
   const u = db.users.find((x) => x.id === b.userId);
-  return !!u && u.verifyStatus === 'verified' && !u.hidden;
+  return !!u && (LIVE || u.verifyStatus === 'verified') && !u.hidden;
 }
 
 // ───────── 분담금 ─────────
